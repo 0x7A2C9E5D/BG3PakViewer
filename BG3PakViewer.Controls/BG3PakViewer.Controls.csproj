@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Platforms>x64</Platforms>
+        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <DebugType>embedded</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+        <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
+        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
+        <PackageReference Include="Serilog" Version="4.3.1" />
+        <PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\BG3PakViewer.Extensions\BG3PakViewer.Extensions.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="LSLib">
+            <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>

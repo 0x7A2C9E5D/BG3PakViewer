@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <!-- 
+      Microsoft ResX Schema 
+      
+      Version 2.0
+      
+      The primary goals of this format is to allow a simple XML format 
+      that is mostly human readable. The generation and parsing of the 
+      various data types are done through the TypeConverter classes 
+      associated with the data types.
+      
+      Example:
+      
+      ... ado.net/XML headers & schema ...
+      <resheader name="resmimetype">text/microsoft-resx</resheader>
+      <resheader name="version">2.0</resheader>
+      <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+      <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+      <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+      <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+      <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+          <value>[base64 mime encoded serialized .NET Framework object]</value>
+      </data>
+      <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+          <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+          <comment>This is a comment</comment>
+      </data>
+                  
+      There are any number of "resheader" rows that contain simple 
+      name/value pairs.
+      
+      Each data row contains a name, and value. The row also contains a 
+      type or mimetype. Type corresponds to a .NET class that support 
+      text/value conversion through the TypeConverter architecture. 
+      Classes that don't support this are serialized and stored with the 
+      mimetype set.
+      
+      The mimetype is used for serialized objects, and tells the 
+      ResXResourceReader how to depersist the object. This is currently not 
+      extensible. For a given mimetype the value must be set accordingly:
+      
+      Note - application/x-microsoft.net.object.binary.base64 is the format 
+      that the ResXResourceWriter will generate, however the reader can 
+      read any of the formats listed below.
+      
+      mimetype: application/x-microsoft.net.object.binary.base64
+      value   : The object must be serialized with 
+              : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+              : and then encoded with base64 encoding.
+      
+      mimetype: application/x-microsoft.net.object.soap.base64
+      value   : The object must be serialized with 
+              : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+              : and then encoded with base64 encoding.
+  
+      mimetype: application/x-microsoft.net.object.bytearray.base64
+      value   : The object must be serialized into a byte array 
+              : using a System.ComponentModel.TypeConverter
+              : and then encoded with base64 encoding.
+      -->
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="AppTitle" xml:space="preserve">
+    <value>Baldur's Gate 3 Package Viewer (Non ufficiale)</value>
+  </data>
+    <data name="OpenPakBtnLabel" xml:space="preserve">
+    <value>Apri pacchetto</value>
+  </data>
+    <data name="ExportPakBtnLabel" xml:space="preserve">
+    <value>Esporta pacchetto</value>
+  </data>
+    <data name="Recent" xml:space="preserve">
+    <value>Recenti</value>
+  </data>
+    <data name="Log" xml:space="preserve">
+    <value>Registro</value>
+  </data>
+    <data name="About" xml:space="preserve">
+    <value>Informazioni</value>
+  </data>
+    <data name="Search" xml:space="preserve">
+    <value>Cerca</value>
+  </data>
+    <data name="Meshes" xml:space="preserve">
+    <value>Mesh</value>
+  </data>
+    <data name="Preview" xml:space="preserve">
+    <value>Anteprima</value>
+  </data>
+    <data name="Zoom" xml:space="preserve">
+    <value>Zoom</value>
+  </data>
+    <data name="Dependencies" xml:space="preserve">
+    <value>Dipendenze</value>
+  </data>
+    <data name="Version" xml:space="preserve">
+    <value>Versione</value>
+  </data>
+    <data name="LogTime" xml:space="preserve">
+    <value>Ora registro</value>
+  </data>
+    <data name="LogLevel" xml:space="preserve">
+    <value>Livello registro</value>
+  </data>
+    <data name="LogMessage" xml:space="preserve">
+    <value>Messaggio registro</value>
+  </data>
+    <data name="Path" xml:space="preserve">
+    <value>Percorso</value>
+  </data>
+    <data name="OpenedTime" xml:space="preserve">
+    <value>Ora apertura</value>
+  </data>
+    <data name="Mark" xml:space="preserve">
+    <value>Contrassegna</value>
+  </data>
+    <data name="Open" xml:space="preserve">
+    <value>Apri</value>
+  </data>
+    <data name="AboutDialogVersion" xml:space="preserve">
+    <value>Versione:</value>
+  </data>
+    <data name="AboutDialogOS" xml:space="preserve">
+    <value>Sistema operativo:</value>
+  </data>
+    <data name="AboutDialogBuildTime" xml:space="preserve">
+    <value>Data compilazione:</value>
+  </data>
+    <data name="AboutDialogRuntime" xml:space="preserve">
+    <value>Runtime:</value>
+  </data>
+    <data name="PakFile" xml:space="preserve">
+    <value>File Pak</value>
+  </data>
+    <data name="SelectPak" xml:space="preserve">
+    <value>Seleziona un file Pak</value>
+  </data>
+    <data name="SaveFile" xml:space="preserve">
+    <value>Salva file</value>
+  </data>
+    <data name="AllFiles" xml:space="preserve">
+    <value>Tutti i file</value>
+  </data>
+    <data name="LarianResourceFile" xml:space="preserve">
+    <value>File risorsa Larian</value>
+  </data>
+    <data name="PNGImage" xml:space="preserve">
+    <value>Immagine PNG</value>
+  </data>
+    <data name="XmlFile" xml:space="preserve">
+    <value>File XML</value>
+  </data>
+    <data name="JPEGImage" xml:space="preserve">
+    <value>Immagine JPEG</value>
+  </data>
+    <data name="GIFImage" xml:space="preserve">
+    <value>Immagine GIF</value>
+  </data>
+    <data name="BMPImage" xml:space="preserve">
+    <value>Immagine BMP</value>
+  </data>
+    <data name="TIFFImage" xml:space="preserve">
+    <value>Immagine TIFF</value>
+  </data>
+    <data name="DDSImage" xml:space="preserve">
+    <value>Immagine DDS</value>
+  </data>
+    <data name="Granny3DFile" xml:space="preserve">
+    <value>File Granny 3D</value>
+  </data>
+    <data name="GLTransmissionFormat" xml:space="preserve">
+    <value>Formato GL Transmission</value>
+  </data>
+    <data name="WwiseAudioFile" xml:space="preserve">
+    <value>File audio Wwise</value>
+  </data>
+    <data name="VorbisAudioFile" xml:space="preserve">
+    <value>File audio Vorbis</value>
+  </data>
+    <data name="LowTexDDSNotSupportedMessage" xml:space="preserve">
+    <value>File DDS Low Tech non supportato per l’anteprima.</value>
+  </data>
+    <data name="FileNotSupportedPreviewMessage" xml:space="preserve">
+    <value>Il file non è supportato per l’anteprima.</value>
+  </data>
+    <data name="ExportCompleted" xml:space="preserve">
+    <value>Esportazione completata</value>
+  </data>
+    <data name="ReOpenFileCaption" xml:space="preserve">
+    <value>Apri nuovo file</value>
+  </data>
+    <data name="ReOpenFileMessage" xml:space="preserve">
+    <value>Stai attualmente esplorando il file pak. Confermi di chiudere quello corrente e aprirne uno nuovo?</value>
+  </data>
+    <data name="FileOpenedNoFoundMessage" xml:space="preserve">
+    <value>Il file aperto non esiste. Vuoi eliminare il record associato?</value>
+  </data>
+    <data name="FileOpenedNoFoundCaption" xml:space="preserve">
+    <value>File aperto non trovato</value>
+  </data>
+    <data name="Settings" xml:space="preserve">
+    <value>Impostazioni</value>
+  </data>
+    <data name="HomePage" xml:space="preserve">
+    <value>Pagina iniziale</value>
+  </data>
+    <data name="UserInterfaceSettingsHeader" xml:space="preserve">
+    <value>Impostazioni interfaccia utente</value>
+  </data>
+    <data name="LanguageDescription" xml:space="preserve">
+    <value>Seleziona la lingua per l’interfaccia dell’applicazione</value>
+  </data>
+    <data name="LanguageHelpText" xml:space="preserve">
+    <value>Lingua</value>
+  </data>
+    <data name="MultipleInstanceMessage" xml:space="preserve">
+    <value>Più istanze possono causare la sovrascrittura errata dei dati. È supportata solo un’istanza. Vuoi portare in primo piano la finestra già aperta?</value>
+  </data>
+    <data name="MultipleInstanceCaption" xml:space="preserve">
+    <value>Il software è già in esecuzione</value>
+  </data>
+    <data name="IsExporting" xml:space="preserve">
+    <value>Esportazione in corso</value>
+  </data>
+    <data name="WhenIsExportingExitMessage" xml:space="preserve">
+    <value>Esportazione in corso. Sei sicuro di voler uscire?</value>
+  </data>
+    <data name="CancelExportOperationMessage" xml:space="preserve">
+    <value>Confermi di annullare l’attività di esportazione corrente?</value>
+  </data>
+    <data name="CancelExportOperationCaption" xml:space="preserve">
+    <value>Annulla esportazione</value>
+  </data>
+    <data name="UpdateAvailable" xml:space="preserve">
+    <value>Aggiornamento disponibile</value>
+  </data>
+    <data name="UpdateBtnContent" xml:space="preserve">
+    <value>Aggiorna</value>
+  </data>
+    <data name="OpenFileFailedMessage" xml:space="preserve">
+    <value>Impossibile aprire il file. Il file potrebbe essere corrotto o non essere un pacchetto valido.</value>
+  </data>
+    <data name="OpenFileFailedCaption" xml:space="preserve">
+    <value>Apertura file non riuscita</value>
+  </data>
+    <data name="ExportFailedMessage" xml:space="preserve">
+    <value>Impossibile esportare il file. Controlla il registro per maggiori dettagli.</value>
+  </data>
+    <data name="ExportFailedCaption" xml:space="preserve">
+    <value>Esportazione non riuscita</value>
+  </data>
+    <data name="PreviewSettingHeader" xml:space="preserve">
+      <value>Impostazioni di anteprima</value>
+    </data>
+    <data name="MaxPreviewLinesHeader" xml:space="preserve">
+      <value>Numero massimo di righe anteprima</value>
+    </data>
+    <data name="MaxPreviewLinesDescription" xml:space="preserve">
+      <value>Imposta il numero massimo di righe da visualizzare nell'anteprima del testo</value>
+    </data>
+    <data name="DirectorySettingsHeader" xml:space="preserve">
+      <value>Impostazioni Directory</value>
+    </data>
+    <data name="DefaultOpenDirectoryHeader" xml:space="preserve">
+      <value>Directory di apertura predefinita</value>
+    </data>
+    <data name="DefaultOpenDirectoryDescription" xml:space="preserve">
+      <value>Imposta il percorso predefinito per OpenFileDialog</value>
+    </data>
+    <data name="DefaultExportDirectoryHeader" xml:space="preserve">
+      <value>Directory esportazione predefinita</value>
+    </data>
+    <data name="DefaultExportDirectoryDescription" xml:space="preserve">
+      <value>Imposta il percorso predefinito per SaveFileDialog e SaveFolderDialog</value>
+    </data>
+    <data name="ModelMissingMeshes" xml:space="preserve">
+      <value>L'anteprima di modelli senza mesh non è supportata</value>
+    </data>
+    <data name="LoadResourceFailed" xml:space="preserve">
+      <value>Caricamento risorsa non riuscito</value>
+    </data>
+    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
+      <value>Caricamento file in corso, non ripetere l'operazione</value>
+    </data>
+    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
+      <value>Caricamento</value>
+    </data>
+</root>

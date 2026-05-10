@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:element name="root" msdata:IsDataSet="true">
+
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="AppTitle" xml:space="preserve">
+        <value>Baldur's Gate 3 Package Viewer (Unofficial)</value>
+    </data>
+    <data name="OpenPakBtnLabel" xml:space="preserve">
+        <value>Open Package</value>
+    </data>
+    <data name="ExportPakBtnLabel" xml:space="preserve">
+        <value>Export Package</value>
+    </data>
+    <data name="Recent" xml:space="preserve">
+        <value>Recent</value>
+    </data>
+    <data name="Log" xml:space="preserve">
+        <value>Log</value>
+    </data>
+    <data name="About" xml:space="preserve">
+        <value>About</value>
+    </data>
+    <data name="Search" xml:space="preserve">
+        <value>Search</value>
+    </data>
+    <data name="Meshes" xml:space="preserve">
+        <value>Meshes</value>
+    </data>
+    <data name="Preview" xml:space="preserve">
+        <value>Preview</value>
+    </data>
+    <data name="Zoom" xml:space="preserve">
+        <value>Zoom</value>
+    </data>
+    <data name="Dependencies" xml:space="preserve">
+        <value>Dependencies</value>
+    </data>
+    <data name="Version" xml:space="preserve">
+        <value>Version</value>
+    </data>
+    <data name="LogTime" xml:space="preserve">
+        <value>Log Time</value>
+    </data>
+    <data name="LogLevel" xml:space="preserve">
+        <value>Log Level</value>
+    </data>
+    <data name="LogMessage" xml:space="preserve">
+        <value>Log Message</value>
+    </data>
+    <data name="Path" xml:space="preserve">
+        <value>Path</value>
+    </data>
+    <data name="OpenedTime" xml:space="preserve">
+        <value>Opened Time</value>
+    </data>
+    <data name="Mark" xml:space="preserve">
+        <value>Mark</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>Open</value>
+    </data>
+    <data name="AboutDialogVersion" xml:space="preserve">
+        <value>Version:</value>
+    </data>
+    <data name="AboutDialogOS" xml:space="preserve">
+        <value>OS:</value>
+    </data>
+    <data name="AboutDialogBuildTime" xml:space="preserve">
+        <value>Build Time:</value>
+    </data>
+    <data name="AboutDialogRuntime" xml:space="preserve">
+        <value>Runtime:</value>
+    </data>
+    <data name="PakFile" xml:space="preserve">
+        <value>Pak File</value>
+    </data>
+    <data name="SelectPak" xml:space="preserve">
+        <value>Select a Pak file</value>
+    </data>
+    <data name="SaveFile" xml:space="preserve">
+        <value>Save file</value>
+    </data>
+    <data name="AllFiles" xml:space="preserve">
+        <value>All Files</value>
+    </data>
+    <data name="LarianResourceFile" xml:space="preserve">
+        <value>Larian Resource File</value>
+    </data>
+    <data name="PNGImage" xml:space="preserve">
+        <value>PNG Image</value>
+    </data>
+    <data name="XmlFile" xml:space="preserve">
+        <value>XML File</value>
+    </data>
+    <data name="JPEGImage" xml:space="preserve">
+        <value>JPEG Image</value>
+    </data>
+    <data name="GIFImage" xml:space="preserve">
+        <value>GIF Image</value>
+    </data>
+    <data name="BMPImage" xml:space="preserve">
+        <value>BMP Image</value>
+    </data>
+    <data name="TIFFImage" xml:space="preserve">
+        <value>TIFF Image</value>
+    </data>
+    <data name="DDSImage" xml:space="preserve">
+        <value>DDS Image</value>
+    </data>
+    <data name="Granny3DFile" xml:space="preserve">
+        <value>Granny 3D File</value>
+    </data>
+    <data name="GLTransmissionFormat" xml:space="preserve">
+        <value>GL Transmission Format</value>
+    </data>
+    <data name="WwiseAudioFile" xml:space="preserve">
+        <value>Wwise Audio File</value>
+    </data>
+    <data name="VorbisAudioFile" xml:space="preserve">
+        <value>Vorbis Audio File</value>
+    </data>
+    <data name="LowTexDDSNotSupportedMessage" xml:space="preserve">
+        <value>Low Tech DDS File is Not Supported To Preview.</value>
+    </data>
+    <data name="FileNotSupportedPreviewMessage" xml:space="preserve">
+        <value>File is Not Supported To Preview.</value>
+    </data>
+    <data name="ExportCompleted" xml:space="preserve">
+        <value>Export Completed</value>
+    </data>
+    <data name="ReOpenFileCaption" xml:space="preserve">
+        <value>Open New File</value>
+    </data>
+    <data name="ReOpenFileMessage" xml:space="preserve">
+        <value>You are currently browsing the pak file. Confirm to close the current one and open a new file?</value>
+    </data>
+    <data name="FileOpenedNoFoundMessage" xml:space="preserve">
+        <value>The opened file does not exist. Do you want to delete the associated record?</value>
+    </data>
+    <data name="FileOpenedNoFoundCaption" xml:space="preserve">
+        <value>Opened File Not Found</value>
+    </data>
+    <data name="Settings" xml:space="preserve">
+        <value>Settings</value>
+    </data>
+    <data name="HomePage" xml:space="preserve">
+        <value>Home Page</value>
+    </data>
+    <data name="UserInterfaceSettingsHeader" xml:space="preserve">
+        <value>User Interface Settings</value>
+    </data>
+    <data name="LanguageDescription" xml:space="preserve">
+        <value>Select the language for the application interface display</value>
+    </data>
+    <data name="LanguageHelpText" xml:space="preserve">
+        <value>Language</value>
+    </data>
+    <data name="MultipleInstanceMessage" xml:space="preserve">
+        <value>Multiple instances may cause data to be overwritten incorrectly. Only single-instance operation is supported. Do you want to bring up the already open window?</value>
+    </data>
+    <data name="MultipleInstanceCaption" xml:space="preserve">
+        <value>Software is already running</value>
+    </data>
+    <data name="IsExporting" xml:space="preserve">
+        <value>Is Exporting</value>
+    </data>
+    <data name="WhenIsExportingExitMessage" xml:space="preserve">
+        <value>Is Exporting.Are You Sure To Exit?</value>
+    </data>
+    <data name="CancelExportOperationMessage" xml:space="preserve">
+        <value>Confirm to cancel the current export task?</value>
+    </data>
+    <data name="CancelExportOperationCaption" xml:space="preserve">
+        <value>Cancel Export</value>
+    </data>
+    <data name="UpdateAvailable" xml:space="preserve">
+        <value>UpdateAvailable</value>
+    </data>
+    <data name="UpdateBtnContent" xml:space="preserve">
+        <value>Update</value>
+    </data>
+    <data name="OpenFileFailedMessage" xml:space="preserve">
+        <value>Failed to open the file. The file may be corrupted or not a valid package.</value>
+    </data>
+    <data name="OpenFileFailedCaption" xml:space="preserve">
+        <value>Open File Failed</value>
+    </data>
+    <data name="ExportFailedMessage" xml:space="preserve">
+        <value>Failed to export the file. Please check the log for more details.</value>
+    </data>
+    <data name="ExportFailedCaption" xml:space="preserve">
+        <value>Export Failed</value>
+    </data>
+    <data name="PreviewSettingHeader" xml:space="preserve">
+        <value>Preview Settings</value>
+    </data>
+    <data name="MaxPreviewLinesHeader" xml:space="preserve">
+        <value>Maximum Preview Lines</value>
+    </data>
+    <data name="MaxPreviewLinesDescription" xml:space="preserve">
+        <value>Set the maximum number of lines to display in text preview</value>
+    </data>
+    <data name="DirectorySettingsHeader" xml:space="preserve">
+        <value>Directory Settings</value>
+    </data>
+    <data name="DefaultOpenDirectoryHeader" xml:space="preserve">
+        <value>Default open directory</value>
+    </data>
+    <data name="DefaultOpenDirectoryDescription" xml:space="preserve">
+        <value>Set default path for OpenFileDialog</value>
+    </data>
+    <data name="DefaultExportDirectoryHeader" xml:space="preserve">
+        <value>Default Export Directory</value>
+    </data>
+    <data name="DefaultExportDirectoryDescription" xml:space="preserve">
+        <value>Set default path for SaveFileDialog and SaveFolderDialog</value>
+    </data>
+    <data name="ModelMissingMeshes" xml:space="preserve">
+        <value>Previewing models without meshes is not supported</value>
+    </data>
+    <data name="LoadResourceFailed" xml:space="preserve">
+        <value>Failed to load resource</value>
+    </data>
+    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
+        <value>File loading, please do not repeat the operation</value>
+    </data>
+    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
+        <value>Loading</value>
+    </data>
+</root>

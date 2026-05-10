@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dt="clr-namespace:BG3PakViewer.Controls.DataTemplateSelectors">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/FolderNodeDataTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/ImageFilePreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/PlainTextFilePreviewTemplate.xaml" />
+        <ResourceDictionary
+            Source="/BG3PakViewer.Controls;component/DataTemplates/ModelPreviewDataTemplateTemplate.xaml" />
+        <ResourceDictionary
+            Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewFileDataTemplate.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
+                                FolderTemplate="{StaticResource FolderNodeDataTemplate}"
+                                PlainTextFilePreviewTemplate="{StaticResource PlainTextFilePreviewTemplate}"
+                                ImageFilePreviewTemplate="{StaticResource ImageFilePreviewTemplate}"
+                                ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"
+                                NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}" />
+</ResourceDictionary>

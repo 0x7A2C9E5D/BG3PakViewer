@@ -1,0 +1,201 @@
+﻿<Window x:Class="BG3PakViewer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:vm="clr-namespace:BG3PakViewer.ViewModels"
+        xmlns:b="clr-namespace:BG3PakViewer.Behaviors"
+        xmlns:c="clr-namespace:BG3PakViewer.Controls.Views;assembly=BG3PakViewer.Controls"
+        xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
+        xmlns:dd="clr-namespace:iNKORE.UI.WPF.DragDrop;assembly=iNKORE.UI.WPF"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
+        mc:Ignorable="d"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        WindowChrome.IsHitTestVisibleInChrome="True"
+        Title="{I18N {x:Static l:LangKeys.AppTitle}}" Height="450" Width="800" WindowState="Maximized">
+    <i:Interaction.Behaviors>
+        <b:MainWindowBehavior />
+    </i:Interaction.Behaviors>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid
+            Height="48">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition x:Name="RightPaddingColumn" Width="0" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="0"
+                Margin="20,0,0,0"
+                VerticalAlignment="Center"
+                Text="{I18N {x:Static l:LangKeys.AppTitle}}" />
+            <Button
+                Grid.Column="2"
+                Background="Transparent"
+                BorderThickness="0"
+                Width="48"
+                Height="48"
+                Click="ThemeSwitchBtn_OnClick">
+                <ui:FontIcon>
+                    <ui:FontIcon.Style>
+                        <Style TargetType="ui:FontIcon">
+                            <Style.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding Source={x:Static ui:ThemeManager.Current}, Path=ActualApplicationTheme}"
+                                    Value="{x:Static ui:ApplicationTheme.Light}">
+                                    <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                    <Setter Property="ui:FontIcon.Glyph" Value="&#xF0CE;" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding Source={x:Static ui:ThemeManager.Current}, Path=ActualApplicationTheme}"
+                                    Value="{x:Static ui:ApplicationTheme.Dark}">
+                                    <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                    <Setter Property="ui:FontIcon.Glyph" Value="&#xE706;" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ui:FontIcon.Style>
+                </ui:FontIcon>
+            </Button>
+        </Grid>
+        <Grid Margin="16,0,16,16" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="300" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ui:CommandBar HorizontalAlignment="Left" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.OpenPakBtnLabel}}"
+                                 Command="{Binding OpenPakCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.Recent}}"
+                                 Command="{Binding ShowRecentDialogCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.ExportPakBtnLabel}}"
+                                 Command="{Binding ExportCommand}"
+                                 CommandParameter="{Binding ElementName=TreeView,Path=SelectedItem}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" />
+                    </ui:AppBarButton.Icon>
+                    <ui:AppBarButton.Style>
+                        <Style TargetType="ui:AppBarButton">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedItem, ElementName=TreeView, Mode=OneWay}"
+                                             Value="{x:Null}">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ui:AppBarButton.Style>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.Log}}" Command="{Binding ShowLogDialogCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KnowledgeArticle}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.Settings}}"
+                                 Command="{Binding ShowSettingsDialogCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.HomePage}}" Command="{Binding OpenNexusModsCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.About}}" Command="{Binding ShowAboutCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+            </ui:CommandBar>
+            <ui:AutoSuggestBox x:Name="AutoSuggestBox" Grid.Row="1" Grid.Column="0"
+                               PlaceholderText="{I18N {x:Static l:LangKeys.Search}}"
+                               Margin="0,10">
+                <ui:AutoSuggestBox.QueryIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
+                </ui:AutoSuggestBox.QueryIcon>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="QuerySubmitted">
+                        <i:InvokeCommandAction Command="{Binding SearchCommand}"
+                                               CommandParameter="{Binding Text, ElementName=AutoSuggestBox}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:InvokeCommandAction Command="{Binding ClearSearchCommand}"
+                                               CommandParameter="{Binding Text, ElementName=AutoSuggestBox}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ui:AutoSuggestBox>
+            <TreeView x:Name="TreeView" Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1"
+                      ItemsSource="{Binding PackageTree}" Padding="10" VirtualizingPanel.IsVirtualizing="True"
+                      dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <ui:IconAndText Content="{Binding Name}">
+                            <ui:IconAndText.Style>
+                                <Style TargetType="ui:IconAndText">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFolder}" Value="True">
+                                            <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                            <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Folder}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsFolder}" Value="False">
+                                            <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                            <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Document}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:IconAndText.Style>
+                        </ui:IconAndText>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectedItemChanged">
+                        <i:InvokeCommandAction Command="{Binding PreviewCommand, Mode=OneWay}"
+                                               CommandParameter="{Binding SelectedItem, ElementName=TreeView, Mode=OneWay}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TreeView>
+            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Margin="10,0,0,0"
+                         DataContext="{Binding PreviewVm}" />
+            <ui:InfoBar
+                Grid.Row="2" Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="0,0,0,100"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                IsOpen="{Binding IsUpdateAvailable}"
+                Message="{I18N {x:Static l:LangKeys.UpdateAvailable}}">
+                <ui:InfoBar.ActionButton>
+                    <Button Command="{Binding OpenNexusModsCommand}"
+                            Content="{I18N {x:Static l:LangKeys.UpdateBtnContent}}" />
+                </ui:InfoBar.ActionButton>
+            </ui:InfoBar>
+        </Grid>
+    </Grid>
+</Window>

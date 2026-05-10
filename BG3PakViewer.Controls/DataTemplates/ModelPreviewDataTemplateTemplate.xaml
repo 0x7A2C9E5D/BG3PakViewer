@@ -1,0 +1,54 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
+                    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+                    xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
+                    xmlns:dx="clr-namespace:HelixToolkit.SharpDX;assembly=HelixToolkit.SharpDX"
+                    xmlns:iwk="http://schemas.inkore.net/lib/ui/wpf"
+                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
+    <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:Model3DFileViewModel}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ComboBox ui:ControlHelper.Header="{I18N {x:Static l:LangKeys.Meshes}}" ItemsSource="{Binding Meshes}"
+                      SelectedIndex="{Binding SelectedModelIndex}" />
+            <iwk:SimpleStackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                                  Spacing="10">
+                <Button Command="{Binding PreviewCommand}">
+                    <ui:IconAndText Icon="{x:Static ui:SegoeFluentIcons.Preview}"
+                                    Content="{I18N {x:Static l:LangKeys.Preview}}" />
+                </Button>
+                <Button Command="{Binding ZoomCommand}">
+                    <ui:IconAndText Icon="{x:Static ui:SegoeFluentIcons.Zoom}"
+                                    Content="{I18N {x:Static l:LangKeys.Zoom}}" />
+                </Button>
+            </iwk:SimpleStackPanel>
+            <hx:Viewport3DX Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,10,0,0"
+                            ShowCoordinateSystem="True">
+                <i:Interaction.Behaviors>
+                    <b:Viewport3DxBehavior />
+                </i:Interaction.Behaviors>
+                <hx:Viewport3DX.Camera>
+                    <hx:PerspectiveCamera />
+                </hx:Viewport3DX.Camera>
+                <hx:Viewport3DX.EffectsManager>
+                    <dx:DefaultEffectsManager />
+                </hx:Viewport3DX.EffectsManager>
+                <hx:DirectionalLight3D Color="White" />
+                <hx:ItemsModel3D ItemsSource="{Binding Models}">
+                    <i:Interaction.Behaviors>
+                        <b:ItemsModel3DBehavior />
+                    </i:Interaction.Behaviors>
+                </hx:ItemsModel3D>
+            </hx:Viewport3DX>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

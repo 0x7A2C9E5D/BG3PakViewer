@@ -1,0 +1,3 @@
+﻿ShowWindow
+SetForegroundWindow
+GetWindowPlacement
