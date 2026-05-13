@@ -14,7 +14,7 @@ public static class FileExtensions
 
     private static readonly ImmutableHashSet<string> Model3DFormats = ImmutableHashSet.Create(".gr2", ".glb", ".gltf");
 
-    private static readonly ImmutableHashSet<string> TextureFormats = ImmutableHashSet.Create(".dds", ".tga");
+    private static readonly ImmutableHashSet<string> TextureFormats = ImmutableHashSet.Create(".dds");
 
     private static readonly ImmutableHashSet<string> BitmapImageFormats =
         ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff");
