@@ -6,8 +6,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Pfim;
 using Serilog;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Tga;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 using PixelFormat = System.Windows.Media.PixelFormat;
 
@@ -31,8 +29,7 @@ public static class ImageLoader
         try
         {
             using var ms = new MemoryStream();
-            using var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
-            await image.SaveAsync(ms, new PngEncoder());
+            await stream.CopyToAsync(ms);
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
@@ -138,8 +135,8 @@ public static class ImageLoader
         try
         {
             await using var fs = File.OpenWrite(path);
-            using var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
-            await image.SaveAsync(fs,new TgaEncoder(), CancellationToken.None);
+            using var image = Pfimage.FromStream(stream);
+            await fs.WriteAsync(image.Data);
             Log.Information("Saved TGA image to {Path}", path);
             return true;
         }
