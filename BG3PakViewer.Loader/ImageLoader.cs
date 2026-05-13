@@ -83,7 +83,7 @@ public static class ImageLoader
     {
         return extension.ToLowerInvariant() switch
         {
-            ".dds" => await ExportDdsTextureAsync(stream, path),
+            ".dds" => await ExportTextureImageAsync(stream, path),
             ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif"
                 => await ExportStandardImageAsync(stream, path),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
@@ -110,7 +110,7 @@ public static class ImageLoader
         }
     }
 
-    private static async Task<bool> ExportDdsTextureAsync(Stream stream, string path)
+    private static async Task<bool> ExportTextureImageAsync(Stream stream, string path)
     {
         try
         {
