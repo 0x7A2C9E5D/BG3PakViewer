@@ -18,9 +18,12 @@ internal class ExportService(
 
     public FileFilter[] GetExportFilters(string fileExtension)
     {
-        return _exportStrategies.TryGetValue(fileExtension, out var strategy)
-            ? strategy.Filters
-            : _defaultStrategy.Filters;
+        if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
+            return _defaultStrategy.Filters;
+
+        var baseFilters = strategy.Filters;
+
+        return strategy is not ImageExportStrategy ? baseFilters : FilterImageFilters(baseFilters, fileExtension);
     }
 
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
@@ -134,6 +137,33 @@ internal class ExportService(
         {
             Log.Error(ex, "Error exporting file to folder: {Path}", file.Name);
         }
+    }
+
+    private static FileFilter[] FilterImageFilters(FileFilter[] baseFilters, string sourceExtension)
+    {
+        var sourceExt = sourceExtension.ToLowerInvariant();
+        var filtered = new List<FileFilter>();
+
+        foreach (var filter in baseFilters)
+        {
+            if (filter.Extensions == null || filter.Extensions.Count == 0)
+                continue;
+
+            var shouldSkip = filter.Extensions.Select(ext => ext.ToLowerInvariant()).Any(extLower =>
+                (sourceExt == ".dds" && extLower == ".tga") || (sourceExt == ".tga" && extLower == ".dds") ||
+                (!IsTextureFormat(sourceExt) && IsTextureFormat(extLower)));
+
+            if (!shouldSkip)
+                filtered.Add(filter);
+        }
+
+        return filtered.ToArray();
+    }
+
+    private static bool IsTextureFormat(string extension)
+    {
+        return extension.Equals(".dds", StringComparison.OrdinalIgnoreCase)
+               || extension.Equals(".tga", StringComparison.OrdinalIgnoreCase);
     }
 
     private static Dictionary<string, IExportStrategy> BuildStrategyDictionary(IEnumerable<IExportStrategy> strategies)

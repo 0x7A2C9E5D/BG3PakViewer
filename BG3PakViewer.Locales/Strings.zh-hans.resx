@@ -240,4 +240,7 @@
     <data name="FileLoadingDuplicateCaption" xml:space="preserve">
         <value>正在加载</value>
     </data>
+    <data name="TGAImage" xml:space="preserve">
+        <value>TGA图像</value>
+    </data>
 </root>

@@ -6,30 +6,41 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-internal class ImageExportStrategy(bool isLowTex = false) : IExportStrategy
+internal class ImageExportStrategy : IExportStrategy
 {
-    public FileFilter[] Filters => GetFilters();
+    public FileFilter[] Filters => GetBaseFilters();
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
-        if (ShouldPreserveOriginalFormat(sourceExtension, targetPath))
-            return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+        var sourceExt = sourceExtension.ToLowerInvariant();
+        var targetExt = Path.GetExtension(targetPath).ToLowerInvariant();
+
+        if (IsTextureFormat(sourceExt) && IsTextureFormat(targetExt))
+        {
+            if (sourceExt == targetExt)
+                return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+
+            return false;
+        }
+
+        if (!IsTextureFormat(sourceExt) && IsTextureFormat(targetExt))
+            return false;
+
         return await ImageLoader.ExportAsync(sourceStream, targetPath, sourceExtension);
     }
 
-    private static bool ShouldPreserveOriginalFormat(string sourceExtension, string targetPath)
+    private static bool IsTextureFormat(string extension)
     {
-        var targetExtension = Path.GetExtension(targetPath);
-        return sourceExtension.Equals(".dds", StringComparison.OrdinalIgnoreCase)
-               && targetExtension.Equals(".dds", StringComparison.OrdinalIgnoreCase);
+        return extension.Equals(".dds", StringComparison.OrdinalIgnoreCase)
+               || extension.Equals(".tga", StringComparison.OrdinalIgnoreCase);
     }
 
-    private FileFilter[] GetFilters()
+    private static FileFilter[] GetBaseFilters()
     {
-        if (isLowTex) return [new FileFilter(Strings.DDSImage, ".dds")];
         return
         [
             new FileFilter(Strings.DDSImage, ".dds"),
+            new FileFilter(Strings.TGAImage, ".tga"),
             new FileFilter(Strings.PNGImage, ".png"),
             new FileFilter(Strings.JPEGImage, [".jpg", ".jpeg"]),
             new FileFilter(Strings.GIFImage, ".gif"),

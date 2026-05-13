@@ -249,4 +249,7 @@
     <data name="FileLoadingDuplicateCaption" xml:space="preserve">
         <value>Loading</value>
     </data>
+    <data name="TGAImage" xml:space="preserve">
+        <value>TGA Image</value>
+    </data>
 </root>

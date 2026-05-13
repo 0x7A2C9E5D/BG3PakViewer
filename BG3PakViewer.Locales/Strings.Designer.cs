@@ -645,6 +645,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to TGA Image.
+        /// </summary>
+        public static string TGAImage {
+            get {
+                return ResourceManager.GetString("TGAImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to TIFF Image.
         /// </summary>
         public static string TIFFImage {
