@@ -79,8 +79,7 @@ public static class ImageLoader
     {
         return extension.ToLowerInvariant() switch
         {
-            ".dds" => await ExportTextureImageAsync(stream, path),
-            ".tga" => await ExportTargaImageAsync(stream, path),
+            ".dds" or ".tga" => await ExportTextureImageAsync(stream, path),
             ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif"
                 => await ExportStandardImageAsync(stream, path),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
@@ -130,24 +129,6 @@ public static class ImageLoader
         }
     }
     
-    private static async Task<bool> ExportTargaImageAsync(Stream stream, string path)
-    {
-        try
-        {
-            await using var fs = File.OpenWrite(path);
-            using var image = Pfimage.FromStream(stream);
-            await fs.WriteAsync(image.Data);
-            Log.Information("Saved TGA image to {Path}", path);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to export TGA image.");
-            return false;
-        }
-    } 
-    
-
     private static async Task<Bitmap?> ConvertDdsToBitmapAsync(Stream stream)
     {
         try
