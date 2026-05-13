@@ -1,5 +1,3 @@
-// BG3PakViewer.Loader/ImageLoader.cs
-
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -9,6 +7,7 @@ using System.Windows.Media.Imaging;
 using Pfim;
 using Serilog;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Tga;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 using PixelFormat = System.Windows.Media.PixelFormat;
 
@@ -84,12 +83,13 @@ public static class ImageLoader
         return extension.ToLowerInvariant() switch
         {
             ".dds" => await ExportTextureImageAsync(stream, path),
+            ".tga" => await ExportTargaImageAsync(stream, path),
             ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif"
                 => await ExportStandardImageAsync(stream, path),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
     }
-
+    
     private static async Task<bool> ExportStandardImageAsync(Stream stream, string path)
     {
         try
@@ -132,6 +132,24 @@ public static class ImageLoader
             return false;
         }
     }
+    
+    private static async Task<bool> ExportTargaImageAsync(Stream stream, string path)
+    {
+        try
+        {
+            await using var fs = File.OpenWrite(path);
+            using var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+            await image.SaveAsync(fs,new TgaEncoder(), CancellationToken.None);
+            Log.Information("Saved TGA image to {Path}", path);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Failed to export TGA image.");
+            return false;
+        }
+    } 
+    
 
     private static async Task<Bitmap?> ConvertDdsToBitmapAsync(Stream stream)
     {
