@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Pfim;
 using Serilog;
+using SixLabors.ImageSharp.Formats.Png;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 using PixelFormat = System.Windows.Media.PixelFormat;
 
@@ -20,7 +21,7 @@ public static class ImageLoader
         return extension.ToLowerInvariant() switch
         {
             ".dds" => await LoadTextureImageAsync(stream),
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif"
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
                 => await LoadStandardImageAsync(stream),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
@@ -31,8 +32,8 @@ public static class ImageLoader
         try
         {
             using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-
+            using var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+            await image.SaveAsync(ms, new PngEncoder());
             var bitmap = new BitmapImage();
             bitmap.BeginInit();
             bitmap.CacheOption = BitmapCacheOption.OnLoad;
