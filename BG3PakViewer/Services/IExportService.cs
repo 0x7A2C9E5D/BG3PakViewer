@@ -9,5 +9,5 @@ internal interface IExportService
 
     Task<bool> ExportFolderAsync(PackageEntry folderNode, string targetFolder, CancellationToken ct = default);
 
-    FileFilter[] GetExportFilters(string fileExtension);
+    FileFilter[] GetExportFilters(string fileName, string fileExtension);
 }

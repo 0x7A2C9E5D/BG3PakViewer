@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BG3PakViewer.Locales;
 using BG3PakViewer.Services.ExportStrategies;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
@@ -16,14 +17,17 @@ internal class ExportService(
     private readonly RawFileExportStrategy _defaultStrategy = new();
     private readonly Dictionary<string, IExportStrategy> _exportStrategies = BuildStrategyDictionary(strategies);
 
-    public FileFilter[] GetExportFilters(string fileExtension)
+    public FileFilter[] GetExportFilters(string fileName, string fileExtension)
     {
         if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
             return _defaultStrategy.Filters;
 
         var baseFilters = strategy.Filters;
 
-        return strategy is not ImageExportStrategy ? baseFilters : FilterImageFilters(baseFilters, fileExtension);
+        if (strategy is not ImageExportStrategy)
+            return baseFilters;
+
+        return FilterImageFilters(baseFilters, fileName, fileExtension);
     }
 
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
@@ -139,9 +143,13 @@ internal class ExportService(
         }
     }
 
-    private static FileFilter[] FilterImageFilters(FileFilter[] baseFilters, string sourceExtension)
+    private static FileFilter[] FilterImageFilters(FileFilter[] baseFilters, string fileName, string sourceExtension)
     {
         var sourceExt = sourceExtension.ToLowerInvariant();
+
+        if (FileExtensions.IsLowTexTexture(fileName))
+            return [new FileFilter(Strings.DDSImage, ".dds")];
+
         var filtered = new List<FileFilter>();
 
         foreach (var filter in baseFilters)

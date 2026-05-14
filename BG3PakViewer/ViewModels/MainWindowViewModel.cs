@@ -209,7 +209,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
     private async Task ExportFileAsync(PackageEntry node)
     {
-        var filters = _exportService.GetExportFilters(node.FileExtension);
+        var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
         var suggestedFileName = Path.GetFileName(node.Name);
 
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
