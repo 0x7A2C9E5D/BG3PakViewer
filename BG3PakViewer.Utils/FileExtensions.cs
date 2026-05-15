@@ -17,7 +17,7 @@ public static class FileExtensions
     private static readonly ImmutableHashSet<string> TextureFormats = ImmutableHashSet.Create(".dds");
 
     private static readonly ImmutableHashSet<string> BitmapImageFormats =
-        ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff");
+        ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".tga");
 
     public static bool IsLarianBinaryResource(string extension)
     {
