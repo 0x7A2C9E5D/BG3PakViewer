@@ -17,6 +17,31 @@ public static class ImageLoader
         };
     }
 
+    private static async Task<ScratchImage?> LoadTGAImageAsync(Stream stream)
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var imageData = ms.ToArray();
+            unsafe
+            {
+                fixed (byte* ptr = imageData)
+                {
+                    var images = DirectXTex.CreateScratchImage();
+                    var result =
+                        DirectXTex.LoadFromTGAMemory(ptr, (nuint)imageData.Length, TGAFlags.None, null, ref images);
+                    return result.IsSuccess ? images : null;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Failed to load standard image.");
+            return null;
+        }
+    }
+
     private static async Task<ScratchImage?> LoadStandardImageAsync(Stream stream)
     {
         try
@@ -29,9 +54,8 @@ public static class ImageLoader
                 fixed (byte* ptr = imageData)
                 {
                     var image = DirectXTex.CreateScratchImage();
-                    TexMetadata metadata = default;
                     var result =
-                        DirectXTex.LoadFromWICMemory(ptr, (nuint)imageData.Length, WICFlags.None, ref metadata,
+                        DirectXTex.LoadFromWICMemory(ptr, (nuint)imageData.Length, WICFlags.None, null,
                             ref image, null);
                     if (result.IsSuccess)
                         return image;
