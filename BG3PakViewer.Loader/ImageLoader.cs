@@ -17,44 +17,27 @@ public static class ImageLoader
         };
     }
 
-    private static async Task<ScratchImage?> LoadTgaImageAsync(Stream stream)
-    {
-        try
-        {
-            var imageData = await ReadStreamToByteArrayAsync(stream);
-            return ProcessImageWithDirectXTexAsync(imageData, (ptr, length) =>
-            {
-                unsafe
-                {
-                    var image = DirectXTex.CreateScratchImage();
-                    var result = DirectXTex.LoadFromTGAMemory(ptr.ToPointer(), (nuint)length, TGAFlags.None, null,
-                        ref image);
-                    return result.IsSuccess ? image : null;
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to load TGA image.");
-            return null;
-        }
-    }
-
     private static async Task<ScratchImage?> LoadStandardImageAsync(Stream stream)
     {
         try
         {
-            var imageData = await ReadStreamToByteArrayAsync(stream);
-            return ProcessImageWithDirectXTexAsync(imageData, (ptr, length) =>
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var imageData = ms.ToArray();
+            unsafe
             {
-                unsafe
+                fixed (byte* ptr = imageData)
                 {
                     var image = DirectXTex.CreateScratchImage();
-                    var result = DirectXTex.LoadFromWICMemory(ptr.ToPointer(), (nuint)length, WICFlags.None, null,
-                        ref image, null);
-                    return result.IsSuccess ? image : null;
+                    TexMetadata metadata = default;
+                    var result =
+                        DirectXTex.LoadFromWICMemory(ptr, (nuint)imageData.Length, WICFlags.None, ref metadata,
+                            ref image, null);
+                    if (result.IsSuccess)
+                        return image;
+                    return null;
                 }
-            });
+            }
         }
         catch (Exception e)
         {
@@ -65,42 +48,15 @@ public static class ImageLoader
 
     private static async Task<ScratchImage?> LoadTextureImageAsync(Stream stream)
     {
-        try
-        {
-            var imageData = await ReadStreamToByteArrayAsync(stream);
-            return ProcessImageWithDirectXTexAsync(imageData, (ptr, length) =>
-            {
-                unsafe
-                {
-                    var rawPtr = ptr.ToPointer();
-                    var images = DirectXTex.CreateScratchImage();
-                    var result = DirectXTex.LoadFromDDSMemory(rawPtr, (nuint)length, DDSFlags.None, null, ref images);
-                    return result.IsSuccess ? images : null;
-                }
-            });
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to load DDS texture.");
-            return null;
-        }
-    }
-
-    private static async Task<byte[]> ReadStreamToByteArrayAsync(Stream stream)
-    {
         using var ms = new MemoryStream();
         await stream.CopyToAsync(ms);
-        return ms.ToArray();
-    }
-
-    private static ScratchImage? ProcessImageWithDirectXTexAsync(byte[] imageData,
-        Func<IntPtr, int, ScratchImage?> processor)
-    {
         unsafe
         {
-            fixed (byte* ptr = imageData)
+            fixed (byte* ptr = ms.ToArray())
             {
-                return processor((IntPtr)ptr, imageData.Length);
+                var images = DirectXTex.CreateScratchImage();
+                var result = DirectXTex.LoadFromDDSMemory(ptr, (nuint)ms.Length, DDSFlags.None, null, ref images);
+                return result.IsSuccess ? images : null;
             }
         }
     }
@@ -113,7 +69,7 @@ public static class ImageLoader
             {
                 var image = images.GetImage(0, 0, 0);
                 var result = DirectXTex.SaveToDDSFile(image, DDSFlags.None, path);
-                return result.IsSuccess;
+                return Task.FromResult(result.IsSuccess);
             }
         });
     }
@@ -127,7 +83,7 @@ public static class ImageLoader
                 var image = images.GetImage(0, 0, 0);
                 var codec = GetWicCodecGuidFromExtension(path);
                 var result = DirectXTex.SaveToWICFile(image, WICFlags.None, codec, path, null, null);
-                return result.IsSuccess;
+                return Task.FromResult(result.IsSuccess);
             }
         });
     }
