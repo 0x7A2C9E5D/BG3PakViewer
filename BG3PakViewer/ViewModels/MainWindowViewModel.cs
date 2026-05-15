@@ -210,7 +210,21 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task ExportFileAsync(PackageEntry node)
     {
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
-        var suggestedFileName = Path.GetFileName(node.Name);
+        var suggestedFileName = Path.GetFileNameWithoutExtension(node.Name);
+
+        if (filters.Length > 0 && filters[0].Extensions is { Count: > 0 })
+        {
+            var defaultExtension = filters[0].Extensions?[0];
+            if (defaultExtension != "*" &&
+                !node.FileExtension.Equals(defaultExtension, StringComparison.OrdinalIgnoreCase))
+                suggestedFileName += defaultExtension;
+            else
+                suggestedFileName += node.FileExtension;
+        }
+        else
+        {
+            suggestedFileName += node.FileExtension;
+        }
 
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
         {
