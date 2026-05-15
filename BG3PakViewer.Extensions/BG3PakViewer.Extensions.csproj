@@ -34,4 +34,8 @@
         </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj" />
+    </ItemGroup>
+
 </Project>

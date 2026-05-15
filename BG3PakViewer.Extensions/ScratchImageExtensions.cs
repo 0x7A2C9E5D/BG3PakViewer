@@ -9,6 +9,7 @@ public static class ScratchImageExtensions
     public static unsafe BitmapSource ToBitmapSource(this ScratchImage images)
     {
         var image = images.GetImage(0, 0, 0);
+        image = DecompressIfNeeded(image);
         var width = (int)image->Width;
         var height = (int)image->Height;
         var pixels = image->Pixels;
@@ -19,6 +20,14 @@ public static class ScratchImageExtensions
             PointerToByteArray(pixels, dataLen), rowPitch);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static unsafe Image* DecompressIfNeeded(Image* image)
+    {
+        if (!DirectXTex.IsCompressed(image->Format)) return image;
+        var unCompressedImages = DirectXTex.CreateScratchImage();
+        var result = DirectXTex.Decompress(image, 87, ref unCompressedImages);
+        return result.IsFailure ? throw new InvalidOperationException() : unCompressedImages.GetImage(0, 0, 0);
     }
 
     private static unsafe byte[] PointerToByteArray(byte* pointer, int length)
