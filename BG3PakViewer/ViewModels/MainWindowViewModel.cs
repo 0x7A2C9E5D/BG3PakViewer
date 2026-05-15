@@ -214,12 +214,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
         if (filters.Length > 0 && filters[0].Extensions is { Count: > 0 })
         {
-            var defaultExtension = filters[0].Extensions?[0];
-            if (defaultExtension != "*" &&
-                !node.FileExtension.Equals(defaultExtension, StringComparison.OrdinalIgnoreCase))
-                suggestedFileName += defaultExtension;
-            else
-                suggestedFileName += node.FileExtension;
+            var ext = filters[0].Extensions?[0];
+            suggestedFileName += ext == "*" ? node.FileExtension : ext;
         }
         else
         {
