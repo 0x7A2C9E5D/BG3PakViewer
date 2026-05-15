@@ -18,6 +18,20 @@ public static class ImageLoader
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
     }
+    
+    public static async Task<bool> ExportAsync(ScratchImage images, string path)
+    {
+        var extension = Path.GetExtension(path).ToLowerInvariant();
+        return extension switch
+        {
+            ".dds" => await ExportTextureImageAsync(images, path),
+            ".tga" => await ExportTgaImageAsync(images, path),
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".hdp" or ".jxr" or ".wdp" or ".ico"
+                or ".heif" or ".heic"
+                => await ExportStandardImageAsync(images, path),
+            _ => throw new NotSupportedException($"Unsupported image format: {extension}")
+        };
+    }
 
     private static async Task<ScratchImage?> LoadStandardImageAsync(Stream stream)
     {
@@ -101,7 +115,7 @@ public static class ImageLoader
         });
     }
 
-    private static async Task<bool> ExportTGAImageAsync(ScratchImage images, string path)
+    private static async Task<bool> ExportTgaImageAsync(ScratchImage images, string path)
     {
         return await Task.Run(() =>
         {
