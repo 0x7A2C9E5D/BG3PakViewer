@@ -20,8 +20,8 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
-        <PackageReference Include="Hexa.NET.DirectXTex" Version="2.0.4" />
         <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0" />
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

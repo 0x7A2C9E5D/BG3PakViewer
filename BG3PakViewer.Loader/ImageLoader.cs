@@ -1,58 +1,42 @@
 using System.IO;
-using Hexa.NET.DirectXTex;
+using Pfim;
 using Serilog;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
+using ImageFormat = Pfim.ImageFormat;
 
 namespace BG3PakViewer.Loader;
 
 public static class ImageLoader
 {
-    public static async Task<ScratchImage?> LoadAsync(Stream stream, string extension)
+    public static async Task<Image?> LoadAsync(Stream stream, string extension)
     {
         return extension.ToLowerInvariant() switch
         {
             ".dds" => await LoadTextureImageAsync(stream),
-            ".tga" => await LoadTgaImageAsync(stream),
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".hdp" or ".jxr" or ".wdp" or ".ico"
-                or ".heif" or ".heic"
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
                 => await LoadStandardImageAsync(stream),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
     }
-
-    public static async Task<bool> ExportAsync(ScratchImage images, string path)
+    
+    public static async Task<bool> ExportAsync(Image images, string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();
         return extension switch
         {
-            ".dds" => await ExportTextureImageAsync(images, path),
-            ".tga" => await ExportTgaImageAsync(images, path),
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".hdp" or ".jxr" or ".wdp" or ".ico"
-                or ".heif" or ".heic"
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
                 => await ExportStandardImageAsync(images, path),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
     }
 
-    private static async Task<ScratchImage?> LoadStandardImageAsync(Stream stream)
+    private static async Task<Image?> LoadStandardImageAsync(Stream stream)
     {
         try
         {
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            var imageData = ms.ToArray();
-            unsafe
-            {
-                fixed (byte* ptr = imageData)
-                {
-                    var image = DirectXTex.CreateScratchImage();
-                    var result =
-                        DirectXTex.LoadFromWICMemory(ptr, (nuint)imageData.Length, WICFlags.None, null,
-                            ref image, null);
-                    if (result.IsSuccess)
-                        return image;
-                    return null;
-                }
-            }
+            return await Image.LoadAsync(stream);
         }
         catch (Exception e)
         {
@@ -61,109 +45,79 @@ public static class ImageLoader
         }
     }
 
-    private static async Task<ScratchImage?> LoadTgaImageAsync(Stream stream)
+    private static async Task<Image?> LoadTextureImageAsync(Stream stream)
     {
         try
         {
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            var imageData = ms.ToArray();
-            unsafe
-            {
-                fixed (byte* ptr = imageData)
-                {
-                    var images = DirectXTex.CreateScratchImage();
-                    var result =
-                        DirectXTex.LoadFromTGAMemory(ptr, (nuint)imageData.Length, TGAFlags.None, null, ref images);
-                    return result.IsSuccess ? images : null;
-                }
-            }
+            using var pfimImage = Pfimage.FromStream(stream);
+            var pixelData = RemoveStridePadding(pfimImage);
+            return await ConvertPfimToImageSharp(pfimImage, pixelData);
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load standard image.");
+            Log.Error(e, "Failed to load texture image.");
             return null;
         }
     }
 
-    private static async Task<ScratchImage?> LoadTextureImageAsync(Stream stream)
+    private static byte[] RemoveStridePadding(IImage image)
     {
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-        unsafe
+        var tightStride = image.Width * image.BitsPerPixel / 8;
+
+        if (image.Stride == tightStride) return image.Data;
+        var newData = new byte[image.Height * tightStride];
+        for (var i = 0; i < image.Height; i++)
+            Buffer.BlockCopy(image.Data, i * image.Stride, newData, i * tightStride, tightStride);
+        return newData;
+    }
+
+    private static async Task<Image?> ConvertPfimToImageSharp(IImage image, byte[] pixelData)
+    {
+        return image.Format switch
         {
-            fixed (byte* ptr = ms.ToArray())
+            ImageFormat.Rgba32 => await Task.Run(() =>
+                Image.LoadPixelData<Bgra32>(pixelData, image.Width, image.Height)),
+            ImageFormat.Rgb24 => await Task.Run(() =>
+                Image.LoadPixelData<Bgr24>(pixelData, image.Width, image.Height)),
+            ImageFormat.Rgba16 => await Task.Run(() =>
+                Image.LoadPixelData<Bgra4444>(pixelData, image.Width, image.Height)),
+            ImageFormat.R5g5b5 => await Task.Run(() =>
             {
-                var images = DirectXTex.CreateScratchImage();
-                var result = DirectXTex.LoadFromDDSMemory(ptr, (nuint)ms.Length, DDSFlags.None, null, ref images);
-                return result.IsSuccess ? images : null;
-            }
-        }
-    }
-
-    private static async Task<bool> ExportStandardImageAsync(ScratchImage images, string path)
-    {
-        return await Task.Run(() =>
-        {
-            unsafe
-            {
-                var image = images.GetImage(0, 0, 0);
-                var codec = GetWicCodecGuidFromExtension(path);
-                var result = DirectXTex.SaveToWICFile(image, WICFlags.None, codec, path, null, null);
-                return Task.FromResult(result.IsSuccess);
-            }
-        });
-    }
-
-    private static async Task<bool> ExportTgaImageAsync(ScratchImage images, string path)
-    {
-        return await Task.Run(() =>
-        {
-            unsafe
-            {
-                var image = images.GetImage(0, 0, 0);
-                var result = DirectXTex.SaveToTGAFile(image, TGAFlags.None, path, null);
-                return Task.FromResult(result.IsSuccess);
-            }
-        });
-    }
-
-    private static async Task<bool> ExportTextureImageAsync(ScratchImage images, string path)
-    {
-        return await Task.Run(() =>
-        {
-            unsafe
-            {
-                var image = images.GetImage(0, 0, 0);
-                var result = DirectXTex.SaveToDDSFile(image, DDSFlags.None, path);
-                return Task.FromResult(result.IsSuccess);
-            }
-        });
-    }
-
-    private static Guid GetWicCodecGuidFromExtension(string path)
-    {
-        return DirectXTex.GetWICCodec(GetWicCodecFromExtension(path));
-    }
-
-    private static WICCodecs GetWicCodecFromExtension(string path)
-    {
-        return WicCodecFromExtension(Path.GetExtension(path).ToLowerInvariant());
-    }
-
-    private static WICCodecs WicCodecFromExtension(string extension)
-    {
-        return extension switch
-        {
-            ".png" => WICCodecs.CodecPng,
-            ".jpg" or ".jpeg" => WICCodecs.CodecJpeg,
-            ".bmp" => WICCodecs.CodecBmp,
-            ".gif" => WICCodecs.CodecGif,
-            ".tiff" or ".tif" => WICCodecs.CodecTiff,
-            ".hdp" or ".jxr" or ".wdp" => WICCodecs.CodecWmp,
-            ".ico" => WICCodecs.CodecIco,
-            ".heif" or ".heic" => WICCodecs.CodecHeif,
-            _ => throw new ArgumentOutOfRangeException(nameof(extension))
+                SetR5G5B5AlphaBit(pixelData);
+                return Image.LoadPixelData<Bgra5551>(pixelData, image.Width, image.Height);
+            }),
+            ImageFormat.R5g5b5a1 => await Task.Run(() =>
+                Image.LoadPixelData<Bgra5551>(pixelData, image.Width, image.Height)),
+            ImageFormat.R5g6b5 => await Task.Run(() =>
+                Image.LoadPixelData<Bgr565>(pixelData, image.Width, image.Height)),
+            ImageFormat.Rgb8 => await Task.Run(() =>
+                Image.LoadPixelData<L8>(pixelData, image.Width, image.Height)),
+            ImageFormat.R16f or ImageFormat.R32f =>
+                throw new NotSupportedException($"Unsupported texture format: {image.Format}"),
+            _ => throw new NotSupportedException($"Unsupported texture format: {image.Format}")
         };
+    }
+
+    private static void SetR5G5B5AlphaBit(byte[] pixelData)
+    {
+        for (var i = 1; i < pixelData.Length; i += 2)
+            pixelData[i] |= 128;
+    }
+
+    private static async Task<bool> ExportStandardImageAsync(Image image, string path)
+    {
+        return await Task.Run(async () =>
+        {
+            try
+            {
+                await image.SaveAsync(path);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to export standard image.");
+                return false;
+            }
+        });
     }
 }

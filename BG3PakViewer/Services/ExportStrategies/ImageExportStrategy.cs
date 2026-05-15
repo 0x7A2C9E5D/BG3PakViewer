@@ -11,8 +11,8 @@ internal class ImageExportStrategy : IExportStrategy
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
-        var images = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
-        return images.HasValue && await ImageLoader.ExportAsync(images.Value, targetPath);
+        var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
+        return image is not null && await ImageLoader.ExportAsync(image, targetPath);
     }
 
     private static FileFilter[] GetBaseFilters()

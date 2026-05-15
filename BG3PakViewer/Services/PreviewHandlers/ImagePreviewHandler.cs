@@ -3,7 +3,6 @@ using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Utils;
-using Hexa.NET.DirectXTex;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -17,7 +16,7 @@ public class ImagePreviewHandler : IPreviewHandler
 
     public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
-        var images = await ImageLoader.LoadAsync(stream, fileExtension);
-        return !images.HasValue ? null : new ImageFileViewModel { Data = images.Value.ToBitmapSource() };
+        var image = await ImageLoader.LoadAsync(stream, fileExtension);
+        return image is null ? null : new ImageFileViewModel { Data = image.ToBitmapSource() };
     }
 }
