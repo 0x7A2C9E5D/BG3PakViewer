@@ -22,17 +22,8 @@ internal class ExportService(
         if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
             return _defaultStrategy.Filters;
         if (strategy is not ImageExportStrategy imageStrategy) return strategy.Filters;
-        if (FileExtensions.IsLowTexTexture(fileName))
-            return [new FileFilter(Strings.DDSImage, ".dds")];
-        
-        var filters = imageStrategy.Filters;
-        var matchingFilter = filters.FirstOrDefault(f => 
-            f.Extensions?.Any(e => e.Equals(fileExtension, StringComparison.OrdinalIgnoreCase)) == true);
-        
-        if (matchingFilter is null) return filters;
-        
-        var otherFilters = filters.Where(f => !ReferenceEquals(f, matchingFilter)).ToArray();
-        return [matchingFilter, .. otherFilters];
+        return FileExtensions.IsLowTexTexture(fileName) ? 
+            [new FileFilter(Strings.DDSImage, ".dds")] : imageStrategy.Filters;
     }
 
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)

@@ -226,6 +226,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
         {
             Filters = filters,
+            DefaultExtension = Path.GetExtension(node.Name),
             Title = Strings.SaveFile,
             SuggestedFileName = suggestedFileName,
             SuggestedStartLocation = GetDefaultExportLocation()
