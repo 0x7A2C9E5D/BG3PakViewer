@@ -8,17 +8,27 @@ public static class ScratchImageExtensions
 {
     public static unsafe BitmapSource ToBitmapSource(this ScratchImage images)
     {
-        var image = DecompressIfNeeded(images.GetImage(0, 0, 0));
-        var width = (int)image->Width;
-        var height = (int)image->Height;
-        var pixels = image->Pixels;
-        var rowPitch = (int)image->RowPitch;
+        var decompressedImage = DecompressIfNeeded(images.GetImage(0, 0, 0));
+        var bgra32Format = EnsureBgra32Format(decompressedImage);
+        var width = (int)bgra32Format->Width;
+        var height = (int)bgra32Format->Height;
+        var pixels = bgra32Format->Pixels;
+        var rowPitch = (int)bgra32Format->RowPitch;
         var dataLen = rowPitch * height;
         var bitmap = BitmapSource.Create(width, height,
             96.0, 96.0, PixelFormats.Bgra32, null,
             PointerToByteArray(pixels, dataLen), rowPitch);
         bitmap.Freeze();
         return bitmap;
+    }
+
+    private static unsafe Image* EnsureBgra32Format(Image* image)
+    {
+        if (image->Format == 87) return image;
+        var converted = DirectXTex.CreateScratchImage();
+        var result = DirectXTex.Convert(image, 87, TexFilterFlags.Default, 0.0f, ref converted);
+        image = result.IsSuccess ? converted.GetImage(0, 0, 0) : throw new InvalidOperationException();
+        return image;
     }
 
     private static unsafe Image* DecompressIfNeeded(Image* image)
