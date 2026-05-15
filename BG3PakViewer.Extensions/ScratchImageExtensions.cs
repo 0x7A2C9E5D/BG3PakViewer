@@ -4,14 +4,15 @@ using Hexa.NET.DirectXTex;
 
 namespace BG3PakViewer.Extensions;
 
-public static class ImageExtensions
+public static class ScratchImageExtensions
 {
-    public static unsafe BitmapSource ToBitmapSource(this Image image)
+    public static unsafe BitmapSource ToBitmapSource(this ScratchImage images)
     {
-        var width = (int)image.Width;
-        var height = (int)image.Height;
-        var pixels = image.Pixels;
-        var rowPitch = (int)image.RowPitch;
+        var image = images.GetImage(0, 0, 0);
+        var width = (int)image->Width;
+        var height = (int)image->Height;
+        var pixels = image->Pixels;
+        var rowPitch = (int)image->RowPitch;
         var dataLen = rowPitch * height;
         var bitmap = BitmapSource.Create(width, height,
             96.0, 96.0, PixelFormats.Bgra32, null,

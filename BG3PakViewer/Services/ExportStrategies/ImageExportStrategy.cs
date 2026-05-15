@@ -25,8 +25,8 @@ internal class ImageExportStrategy : IExportStrategy
 
         if (!IsTextureFormat(sourceExt) && IsTextureFormat(targetExt))
             return false;
-
-        return await ImageLoader.ExportAsync(sourceStream, targetPath, sourceExtension);
+        var images = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
+        return images.HasValue && await ImageLoader.ExportAsync(images.Value, targetPath);
     }
 
     private static bool IsTextureFormat(string extension)
