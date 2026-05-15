@@ -21,13 +21,9 @@ internal class ExportService(
     {
         if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
             return _defaultStrategy.Filters;
-
-        var baseFilters = strategy.Filters;
-
-        if (strategy is not ImageExportStrategy)
-            return baseFilters;
-
-        return FilterImageFilters(baseFilters, fileName, fileExtension);
+        if (strategy is ImageExportStrategy && FileExtensions.IsLowTexTexture(fileName))
+            return [new FileFilter(Strings.DDSImage, ".dds")];
+        return strategy.Filters;
     }
 
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
@@ -42,9 +38,7 @@ internal class ExportService(
             return false;
         }
 
-        var strategy = _exportStrategies.TryGetValue(node.FileExtension, out var s)
-            ? s
-            : _defaultStrategy;
+        var strategy = _exportStrategies.TryGetValue(node.FileExtension, out var s) ? s : _defaultStrategy;
         Log.Information("Exporting file: {SourcePath} -> {TargetPath}", node.FullPath, targetPath);
         try
         {
@@ -54,7 +48,6 @@ internal class ExportService(
                 Log.Information("Export completed successfully: {TargetPath}", targetPath);
             else
                 Log.Warning("Export failed: {TargetPath}", targetPath);
-
             return success;
         }
         catch (Exception ex)
@@ -141,37 +134,6 @@ internal class ExportService(
         {
             Log.Error(ex, "Error exporting file to folder: {Path}", file.Name);
         }
-    }
-
-    private static FileFilter[] FilterImageFilters(FileFilter[] baseFilters, string fileName, string sourceExtension)
-    {
-        var sourceExt = sourceExtension.ToLowerInvariant();
-
-        if (FileExtensions.IsLowTexTexture(fileName))
-            return [new FileFilter(Strings.DDSImage, ".dds")];
-
-        var filtered = new List<FileFilter>();
-
-        foreach (var filter in baseFilters)
-        {
-            if (filter.Extensions == null || filter.Extensions.Count == 0)
-                continue;
-
-            var shouldSkip = filter.Extensions.Select(ext => ext.ToLowerInvariant()).Any(extLower =>
-                (sourceExt == ".dds" && extLower == ".tga") || (sourceExt == ".tga" && extLower == ".dds") ||
-                (!IsTextureFormat(sourceExt) && IsTextureFormat(extLower)));
-
-            if (!shouldSkip)
-                filtered.Add(filter);
-        }
-
-        return filtered.ToArray();
-    }
-
-    private static bool IsTextureFormat(string extension)
-    {
-        return extension.Equals(".dds", StringComparison.OrdinalIgnoreCase)
-               || extension.Equals(".tga", StringComparison.OrdinalIgnoreCase);
     }
 
     private static Dictionary<string, IExportStrategy> BuildStrategyDictionary(IEnumerable<IExportStrategy> strategies)
