@@ -11,35 +11,12 @@ public static class ImageLoader
         return extension.ToLowerInvariant() switch
         {
             ".dds" => await LoadTextureImageAsync(stream),
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
+            ".tga" => await LoadTgaImageAsync(stream),
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".hdp" or ".jxr" or ".wdp" or ".ico"
+                or ".heif" or ".heic"
                 => await LoadStandardImageAsync(stream),
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
-    }
-
-    private static async Task<ScratchImage?> LoadTGAImageAsync(Stream stream)
-    {
-        try
-        {
-            using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            var imageData = ms.ToArray();
-            unsafe
-            {
-                fixed (byte* ptr = imageData)
-                {
-                    var images = DirectXTex.CreateScratchImage();
-                    var result =
-                        DirectXTex.LoadFromTGAMemory(ptr, (nuint)imageData.Length, TGAFlags.None, null, ref images);
-                    return result.IsSuccess ? images : null;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e, "Failed to load standard image.");
-            return null;
-        }
     }
 
     private static async Task<ScratchImage?> LoadStandardImageAsync(Stream stream)
@@ -70,6 +47,31 @@ public static class ImageLoader
         }
     }
 
+    private static async Task<ScratchImage?> LoadTgaImageAsync(Stream stream)
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var imageData = ms.ToArray();
+            unsafe
+            {
+                fixed (byte* ptr = imageData)
+                {
+                    var images = DirectXTex.CreateScratchImage();
+                    var result =
+                        DirectXTex.LoadFromTGAMemory(ptr, (nuint)imageData.Length, TGAFlags.None, null, ref images);
+                    return result.IsSuccess ? images : null;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Failed to load standard image.");
+            return null;
+        }
+    }
+
     private static async Task<ScratchImage?> LoadTextureImageAsync(Stream stream)
     {
         using var ms = new MemoryStream();
@@ -85,19 +87,6 @@ public static class ImageLoader
         }
     }
 
-    private static async Task<bool> ExportTextureImageAsync(ScratchImage images, string path)
-    {
-        return await Task.Run(() =>
-        {
-            unsafe
-            {
-                var image = images.GetImage(0, 0, 0);
-                var result = DirectXTex.SaveToDDSFile(image, DDSFlags.None, path);
-                return Task.FromResult(result.IsSuccess);
-            }
-        });
-    }
-
     private static async Task<bool> ExportStandardImageAsync(ScratchImage images, string path)
     {
         return await Task.Run(() =>
@@ -107,6 +96,32 @@ public static class ImageLoader
                 var image = images.GetImage(0, 0, 0);
                 var codec = GetWicCodecGuidFromExtension(path);
                 var result = DirectXTex.SaveToWICFile(image, WICFlags.None, codec, path, null, null);
+                return Task.FromResult(result.IsSuccess);
+            }
+        });
+    }
+
+    private static async Task<bool> ExportTGAImageAsync(ScratchImage images, string path)
+    {
+        return await Task.Run(() =>
+        {
+            unsafe
+            {
+                var image = images.GetImage(0, 0, 0);
+                var result = DirectXTex.SaveToTGAFile(image, TGAFlags.None, path, null);
+                return Task.FromResult(result.IsSuccess);
+            }
+        });
+    }
+
+    private static async Task<bool> ExportTextureImageAsync(ScratchImage images, string path)
+    {
+        return await Task.Run(() =>
+        {
+            unsafe
+            {
+                var image = images.GetImage(0, 0, 0);
+                var result = DirectXTex.SaveToDDSFile(image, DDSFlags.None, path);
                 return Task.FromResult(result.IsSuccess);
             }
         });
