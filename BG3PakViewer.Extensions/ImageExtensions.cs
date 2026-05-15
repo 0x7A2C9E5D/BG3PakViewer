@@ -65,14 +65,13 @@ public static class ImageExtensions
     {
         var width = image.Width;
         var height = image.Height;
-        var stride = width;
-        var data = new byte[height * stride];
+        var data = new byte[height * width];
 
         image.CopyPixelDataTo(data);
 
         return BitmapSource.Create(
             width, height, 96, 96,
-            PixelFormats.Gray8, null, data, stride);
+            PixelFormats.Gray8, null, data, width);
     }
 
     private static BitmapSource ConvertToBgra32(Image image)

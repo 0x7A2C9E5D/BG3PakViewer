@@ -34,4 +34,8 @@
         </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="sixlabors.lic" />
+    </ItemGroup>
+
 </Project>
