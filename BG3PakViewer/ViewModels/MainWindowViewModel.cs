@@ -212,9 +212,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
         var suggestedFileName = Path.GetFileNameWithoutExtension(node.Name);
 
-        if (filters[0].Extensions is { Count: > 0 })
+        var extensions = filters[0].Extensions;
+        if (extensions is { Count: > 0 })
         {
-            var ext = filters[0].Extensions![0];
+            var ext = extensions[0];
             suggestedFileName += ext is "*" ? node.FileExtension : ext;
         }
         else
