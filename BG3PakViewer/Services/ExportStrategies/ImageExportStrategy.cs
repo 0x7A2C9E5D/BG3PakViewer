@@ -25,7 +25,7 @@ internal class ImageExportStrategy : IExportStrategy
             new FileFilter(Strings.JPEGImage, [".jpg", ".jpeg"]),
             new FileFilter(Strings.GIFImage, ".gif"),
             new FileFilter(Strings.BMPImage, ".bmp"),
-            new FileFilter(Strings.TIFFImage, ".tiff")
+            new FileFilter(Strings.TIFFImage, [".tif",".tiff"])
         ];
     }
 }
