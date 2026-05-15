@@ -52,11 +52,11 @@ public static class ImageLoader
         await stream.CopyToAsync(ms);
         unsafe
         {
-            var image = DirectXTex.CreateScratchImage();
             fixed (byte* ptr = ms.ToArray())
             {
-                var result = DirectXTex.LoadFromDDSMemory(ptr, (nuint)ms.Length, DDSFlags.None, null, null);
-                return result.IsSuccess ? image : null;
+                var images = DirectXTex.CreateScratchImage();
+                var result = DirectXTex.LoadFromDDSMemory(ptr, (nuint)ms.Length, DDSFlags.None, null, ref images);
+                return result.IsSuccess ? images : null;
             }
         }
     }
@@ -90,13 +90,16 @@ public static class ImageLoader
 
     private static Guid GetWicCodecGuidFromExtension(string path)
     {
-        var codec = GetWicCodecFromExtension(path);
-        return DirectXTex.GetWICCodec(codec);
+        return DirectXTex.GetWICCodec(GetWicCodecFromExtension(path));
     }
 
     private static WICCodecs GetWicCodecFromExtension(string path)
     {
-        var extension = Path.GetExtension(path).ToLowerInvariant();
+        return WicCodecFromExtension(Path.GetExtension(path).ToLowerInvariant());
+    }
+
+    private static WICCodecs WicCodecFromExtension(string extension)
+    {
         return extension switch
         {
             ".png" => WICCodecs.CodecPng,
@@ -104,7 +107,10 @@ public static class ImageLoader
             ".bmp" => WICCodecs.CodecBmp,
             ".gif" => WICCodecs.CodecGif,
             ".tiff" or ".tif" => WICCodecs.CodecTiff,
-            _ => WICCodecs.CodecPng
+            ".hdp" or ".jxr" or ".wdp" => WICCodecs.CodecWmp,
+            ".ico" => WICCodecs.CodecIco,
+            ".heif" or ".heic" => WICCodecs.CodecHeif,
+            _ => throw new ArgumentOutOfRangeException(nameof(extension))
         };
     }
 }
