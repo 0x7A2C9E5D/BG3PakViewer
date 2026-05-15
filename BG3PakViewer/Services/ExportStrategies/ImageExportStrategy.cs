@@ -7,7 +7,9 @@ namespace BG3PakViewer.Services.ExportStrategies;
 
 internal class ImageExportStrategy : IExportStrategy
 {
-    public FileFilter[] Filters => GetBaseFilters();
+    private static readonly FileFilter[] BaseFilters = GetBaseFilters();
+
+    public FileFilter[] Filters => BaseFilters;
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
@@ -19,13 +21,13 @@ internal class ImageExportStrategy : IExportStrategy
     {
         return
         [
-            new FileFilter(Strings.DDSImage, ".dds"),
-            new FileFilter(Strings.TGAImage, ".tga"),
             new FileFilter(Strings.PNGImage, ".png"),
             new FileFilter(Strings.JPEGImage, [".jpg", ".jpeg"]),
+            new FileFilter(Strings.DDSImage, ".dds"),
+            new FileFilter(Strings.TGAImage, ".tga"),
             new FileFilter(Strings.GIFImage, ".gif"),
             new FileFilter(Strings.BMPImage, ".bmp"),
-            new FileFilter(Strings.TIFFImage, [".tif",".tiff"])
+            new FileFilter(Strings.TIFFImage, [".tif", ".tiff"])
         ];
     }
 }
