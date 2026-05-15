@@ -211,22 +211,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
         var suggestedFileName = Path.GetFileNameWithoutExtension(node.Name);
-
-        var extensions = filters[0].Extensions;
-        if (extensions is { Count: > 0 })
-        {
-            var ext = extensions[0];
-            suggestedFileName += ext is "*" ? node.FileExtension : ext;
-        }
-        else
-        {
-            suggestedFileName += node.FileExtension;
-        }
-
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
         {
             Filters = filters,
-            DefaultExtension = Path.GetExtension(node.Name),
             Title = Strings.SaveFile,
             SuggestedFileName = suggestedFileName,
             SuggestedStartLocation = GetDefaultExportLocation()
