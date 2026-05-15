@@ -21,13 +21,13 @@ internal class ImageExportStrategy : IExportStrategy
     {
         return
         [
-            new FileFilter(Strings.PNGImage, ".png"),
-            new FileFilter(Strings.JPEGImage, [".jpg", ".jpeg"]),
             new FileFilter(Strings.DDSImage, ".dds"),
             new FileFilter(Strings.TGAImage, ".tga"),
-            new FileFilter(Strings.GIFImage, ".gif"),
+            new FileFilter(Strings.PNGImage, ".png"),
             new FileFilter(Strings.BMPImage, ".bmp"),
-            new FileFilter(Strings.TIFFImage, [".tif", ".tiff"])
+            new FileFilter(Strings.JPEGImage, [".jpg", ".jpeg"]),
+            new FileFilter(Strings.TIFFImage, [".tif", ".tiff"]),
+            new FileFilter(Strings.GIFImage, ".gif")
         ];
     }
 }
