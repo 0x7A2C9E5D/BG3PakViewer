@@ -8,8 +8,7 @@ public static class ScratchImageExtensions
 {
     public static unsafe BitmapSource ToBitmapSource(this ScratchImage images)
     {
-        var image = images.GetImage(0, 0, 0);
-        image = DecompressIfNeeded(image);
+        var image = DecompressIfNeeded(images.GetImage(0, 0, 0));
         var width = (int)image->Width;
         var height = (int)image->Height;
         var pixels = image->Pixels;
