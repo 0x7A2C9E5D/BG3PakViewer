@@ -15,7 +15,6 @@ internal class ImageExportStrategy : IExportStrategy
         new(Strings.BMPImage, ".bmp"),
         new(Strings.JPEGImage, [".jpg", ".jpeg"]),
         new(Strings.TIFFImage, [".tif", ".tiff"]),
-        new(Strings.GIFImage, ".gif")
     ];
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
