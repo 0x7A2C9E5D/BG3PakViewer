@@ -67,10 +67,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="License.txt"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Controls\BG3PakViewer.Controls.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Dialogs\BG3PakViewer.Dialogs.csproj"/>
