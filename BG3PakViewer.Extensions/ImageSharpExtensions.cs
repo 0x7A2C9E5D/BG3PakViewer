@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace BG3PakViewer.Extensions;
 
-public static class ImageExtensions
+public static class ImageSharpExtensions
 {
     public static BitmapSource ToBitmapSource(this Image image)
     {
