@@ -15,25 +15,27 @@ internal class ImageExportStrategy : IExportStrategy
         new(Strings.PNGImage, ".png"),
         new(Strings.BMPImage, ".bmp"),
         new(Strings.JPEGImage, [".jpg", ".jpeg"]),
-        new(Strings.TIFFImage, [".tif", ".tiff"]),
+        new(Strings.TIFFImage, [".tif", ".tiff"])
     ];
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
-        if (sourceExtension == ".dds")
-            try
+        try
+        {
+            if (sourceExtension == ".dds")
             {
                 await using var targetStream = File.OpenWrite(targetPath);
                 await sourceStream.CopyToAsync(targetStream);
                 return true;
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "DDS export failed");
-                return false;
-            }
 
-        using var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
-        return image is not null && await ImageLoader.ExportAsync(image, targetPath);
+            using var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
+            return image is not null && await ImageLoader.ExportAsync(image, targetPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to export image.");
+            return false;
+        }
     }
 }
