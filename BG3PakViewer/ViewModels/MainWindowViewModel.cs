@@ -210,12 +210,13 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task ExportFileAsync(PackageEntry node)
     {
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
-        var suggestedFileName = Path.GetFileNameWithoutExtension(node.Name);
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
         {
-            Filters = filters,
             Title = Strings.SaveFile,
-            SuggestedFileName = suggestedFileName,
+            Filters = filters is { Length: > 0 } ? filters : [],
+            SuggestedFileName = filters is { Length: > 0 }
+                ? Path.GetFileNameWithoutExtension(node.Name)
+                : Path.GetFileName(node.Name),
             SuggestedStartLocation = GetDefaultExportLocation()
         });
         if (storageFile == null)
@@ -223,7 +224,6 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             Log.Information("Export file selection was cancelled.");
             return;
         }
-
         var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
         HandleExportResult(success);
     }

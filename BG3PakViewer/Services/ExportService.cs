@@ -21,10 +21,10 @@ internal class ExportService(
     {
         if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
             return _defaultStrategy.Filters;
-        if (strategy is not ImageExportStrategy imageStrategy) return strategy.Filters;
+        if (strategy is not ImageExportStrategy) return strategy.Filters;
         if (FileExtensions.IsLowTexTexture(fileName))
             return [new FileFilter(Strings.DDSImage, ".dds")];
-        var filters = imageStrategy.Filters;
+        var filters = strategy.Filters;
         return FileExtensions.IsBitmapImage(fileExtension)
             ? [.. filters.Where(f => !f.Extensions!.Any(e => e.Equals(".dds", StringComparison.OrdinalIgnoreCase)))]
             : filters;
