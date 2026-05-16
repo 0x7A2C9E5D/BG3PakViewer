@@ -19,7 +19,7 @@ internal class ImageExportStrategy : IExportStrategy
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
-        var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
+        using var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
         return image is not null && await ImageLoader.ExportAsync(image, targetPath);
     }
 }
