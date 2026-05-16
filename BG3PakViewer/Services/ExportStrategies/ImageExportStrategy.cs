@@ -2,6 +2,7 @@
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
+using Serilog;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
@@ -19,6 +20,19 @@ internal class ImageExportStrategy : IExportStrategy
 
     public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
     {
+        if (sourceExtension == ".dds")
+            try
+            {
+                await using var targetStream = File.OpenWrite(targetPath);
+                await sourceStream.CopyToAsync(targetStream);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "DDS export failed");
+                return false;
+            }
+
         using var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
         return image is not null && await ImageLoader.ExportAsync(image, targetPath);
     }
