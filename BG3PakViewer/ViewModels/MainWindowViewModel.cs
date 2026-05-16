@@ -77,12 +77,12 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty] public partial bool IsUpdateAvailable { get; private set; }
 
-    public void DragOver(IDropInfo dropInfo)
+    void IDropTarget.DragOver(IDropInfo dropInfo)
     {
         dropInfo.Effects = DragDropEffects.Copy;
     }
 
-    public async void Drop(IDropInfo dropInfo)
+    async void IDropTarget.Drop(IDropInfo dropInfo)
     {
         try
         {
