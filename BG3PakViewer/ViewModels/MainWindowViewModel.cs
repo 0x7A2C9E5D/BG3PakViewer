@@ -224,6 +224,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             Log.Information("Export file selection was cancelled.");
             return;
         }
+
         var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
         HandleExportResult(success);
     }
