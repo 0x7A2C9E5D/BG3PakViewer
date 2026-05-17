@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using BG3PakViewer.Locales;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
-using LSLib.VirtualTextures;
 using Serilog;
 
 namespace BG3PakViewer.Services.ExportStrategies;
