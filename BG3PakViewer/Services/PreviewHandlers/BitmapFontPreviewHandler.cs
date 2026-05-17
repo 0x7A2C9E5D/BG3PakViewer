@@ -29,9 +29,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         if (!streams.TryGetValue(".fnt", out var fntStream) 
             || !streams.TryGetValue(".png", out var pngStream)) return null;
         var font = LoadFont(fntStream);
-        if (font == null) return null;
         var textureImage = await LoadTexture(pngStream);
-        if (textureImage == null) return null;
         const string previewText = """
                                    ABCDEFGHIJKLMNOPQRSTUVWXYZ
                                    abcdefghijklmnopqrstuvwxyz
