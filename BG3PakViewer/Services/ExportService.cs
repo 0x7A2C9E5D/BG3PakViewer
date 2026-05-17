@@ -51,7 +51,7 @@ internal class ExportService(
             var success = await strategy.ExportAsync(stream, targetPath, node.FileExtension);
             if (success)
             {
-                if(strategy is VirtualTextureExportStrategy)
+                if (strategy is VirtualTextureExportStrategy)
                     await ExportVirtualTexturePagesAsync(node, targetPath);
                 Log.Information("Export completed successfully: {TargetPath}", targetPath);
             }

@@ -68,7 +68,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IExportStrategy, AudioExportStrategy>()
             .AddSingleton<IExportStrategy, LocalizationExportStrategy>()
             .AddSingleton<IExportStrategy, LarianResourceExportStrategy>()
-            .AddSingleton<IExportStrategy,VirtualTextureExportStrategy>()
+            .AddSingleton<IExportStrategy, VirtualTextureExportStrategy>()
             .AddSingleton<IPreviewHandler, TextPreviewHandler>()
             .AddSingleton<IPreviewHandler, LarianResourcePreviewHandler>()
             .AddSingleton<IPreviewHandler, LocalizationPreviewHandler>()
