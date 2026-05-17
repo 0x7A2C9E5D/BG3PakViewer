@@ -252,11 +252,4 @@
     <data name="TGAImage" xml:space="preserve">
         <value>TGA Image</value>
     </data>
-    <data name="GameDataDirectoryDescription" xml:space="preserve">
-        <value>Set game data directory for cross-file data extraction
-</value>
-    </data>
-    <data name="GameDataDirectoryHeader" xml:space="preserve">
-        <value>Game Data Directory</value>
-    </data>
 </root>
