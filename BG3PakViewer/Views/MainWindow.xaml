@@ -152,7 +152,11 @@
                 </i:Interaction.Triggers>
             </ui:AutoSuggestBox>
             <TreeView x:Name="TreeView" Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1"
-                      ItemsSource="{Binding PackageTree}" Padding="10" VirtualizingPanel.IsVirtualizing="True"
+                      ItemsSource="{Binding PackageTree}" Padding="10"
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.CacheLength="30"
+                      ScrollViewer.CanContentScroll="True"
                       dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding}">
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Children}">
