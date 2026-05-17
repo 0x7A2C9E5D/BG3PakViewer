@@ -294,25 +294,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set game data directory for cross-file data extraction
-        ///.
-        /// </summary>
-        public static string GameDataDirectoryDescription {
-            get {
-                return ResourceManager.GetString("GameDataDirectoryDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Game Data Directory.
-        /// </summary>
-        public static string GameDataDirectoryHeader {
-            get {
-                return ResourceManager.GetString("GameDataDirectoryHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to GIF Image.
         /// </summary>
         public static string GIFImage {

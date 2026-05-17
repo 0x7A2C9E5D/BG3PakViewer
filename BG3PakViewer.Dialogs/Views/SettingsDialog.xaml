@@ -68,37 +68,6 @@
                     </ui:SettingsCard>
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                Text="{I18N {x:Static l:LangKeys.DirectorySettingsHeader}}" />
-                    <ui:SettingsCard Header="{I18N {x:Static l:LangKeys.GameDataDirectoryHeader}}">
-                        <ui:SettingsCard.Description>
-                            <Grid>
-                                <TextBlock Text="{Binding Settings.GameDataDirectory}" />
-                                <TextBlock Text="{I18N {x:Static l:LangKeys.GameDataDirectoryDescription}}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Hidden" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Settings.GameDataDirectory}"
-                                                             Value="">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </ui:SettingsCard.Description>
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Game}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <iwk:SimpleStackPanel Orientation="Horizontal" Spacing="4">
-                            <Button Command="{Binding SettGameDataDirectoryCommand}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
-                            </Button>
-                            <Button Command="{Binding ResetGameDataDirectoryCommand}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
-                            </Button>
-                        </iwk:SimpleStackPanel>
-                    </ui:SettingsCard>
                     <ui:SettingsCard Header="{I18N {x:Static l:LangKeys.DefaultOpenDirectoryHeader}}">
                         <ui:SettingsCard.Description>
                             <Grid>

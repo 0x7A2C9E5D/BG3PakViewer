@@ -44,18 +44,4 @@ public partial class SettingsDialogViewModel(
     {
         Settings.DefaultExportDirectory = string.Empty;
     }
-
-    [RelayCommand]
-    private async Task SettGameDataDirectoryAsync()
-    {
-        var folder = await dialogService.ShowOpenFolderDialogAsync(this);
-        if (folder != null)
-            Settings.GameDataDirectory = folder.LocalPath;
-    }
-
-    [RelayCommand]
-    private void ResetGameDataDirectory()
-    {
-        Settings.GameDataDirectory = string.Empty;
-    }
 }
