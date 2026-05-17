@@ -351,4 +351,7 @@
     <data name="TGAImage" xml:space="preserve">
       <value>Immagine TGA</value>
     </data>
+    <data name="VirtualTextureFile" xml:space="preserve">
+      <value>File di Texture Virtuale</value>
+    </data>
 </root>

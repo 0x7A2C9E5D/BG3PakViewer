@@ -699,6 +699,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Virtual Texture File.
+        /// </summary>
+        public static string VirtualTextureFile {
+            get {
+                return ResourceManager.GetString("VirtualTextureFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vorbis Audio File.
         /// </summary>
         public static string VorbisAudioFile {
