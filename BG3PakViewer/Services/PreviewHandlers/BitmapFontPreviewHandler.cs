@@ -6,6 +6,7 @@ using Cyotek.Drawing.BitmapFont;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Size = System.Drawing.Size;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -26,7 +27,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
     public async Task<object?> CreatePreviewViewModelAsync(Dictionary<string, Stream> streams)
     {
         if (streams.Count != 2) return null;
-        if (!streams.TryGetValue(".fnt", out var fntStream) 
+        if (!streams.TryGetValue(".fnt", out var fntStream)
             || !streams.TryGetValue(".png", out var pngStream)) return null;
         var font = LoadFont(fntStream);
         var textureImage = await LoadTexture(pngStream);
@@ -54,7 +55,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         return await Image.LoadAsync<Rgba32>(stream);
     }
 
-    private static Image<Rgba32> RenderPreview(BitmapFont font, Image<Rgba32> texture, string text,System.Drawing.Size size)
+    private static Image<Rgba32> RenderPreview(BitmapFont font, Image<Rgba32> texture, string text, Size size)
     {
         var x = 0;
         var y = 0;
@@ -78,10 +79,8 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         {
             case '\n':
                 return (0, y + font.LineHeight);
-
             case '\r':
                 return (x, y);
-
             default:
                 var data = font[character];
                 if (data.IsEmpty) return (x, y);
@@ -94,12 +93,11 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
 
     private static void DrawCharacter(Image<Rgba32> target, Image<Rgba32> texture, Character character, int x, int y)
     {
-        var sourceRectangle = new Rectangle(character.X, character.Y, character.Width, character.Height);
-
+        var rectangle = new Rectangle(character.X, character.Y, character.Width, character.Height);
         target.Mutate(ctx =>
         {
             ctx.DrawImage(
-                texture.Clone(crop => crop.Crop(sourceRectangle)),
+                texture.Clone(crop => crop.Crop(rectangle)),
                 new Point(x, y),
                 1f);
         });
