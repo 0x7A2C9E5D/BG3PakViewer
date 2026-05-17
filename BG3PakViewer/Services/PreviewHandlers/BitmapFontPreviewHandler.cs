@@ -30,7 +30,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         if (!streams.TryGetValue(".fnt", out var fntStream)
             || !streams.TryGetValue(".png", out var pngStream)) return null;
         var font = LoadFont(fntStream);
-        var textureImage = await LoadTexture(pngStream);
+        using var textureImage = await LoadTexture(pngStream);
         const string previewText = """
                                    ABCDEFGHIJKLMNOPQRSTUVWXYZ
                                    abcdefghijklmnopqrstuvwxyz
@@ -40,6 +40,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         var size = font.MeasureFont(previewText);
         if (size.Width == 0 || size.Height == 0) return null;
         using var previewImage = RenderPreview(font, textureImage, previewText, size);
+        foreach (var stream in streams.Values) await stream.DisposeAsync();
         return new ImageFileViewModel { Data = previewImage.ToBitmapSource() };
     }
 
@@ -61,7 +62,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         var previousCharacter = ' ';
         var previewImage = new Image<Rgba32>(size.Width, size.Height, new Rgba32(0, 0, 0, 0));
         foreach (var character in text)
-            HandleCharacter(font, texture, previewImage, character,ref position, ref previousCharacter);
+            HandleCharacter(font, texture, previewImage, character, ref position, ref previousCharacter);
         return previewImage;
     }
 
@@ -83,7 +84,7 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
             default:
                 var data = font[character];
                 if (data.IsEmpty) break;
-            
+
                 var kerning = font.GetKerning(previousCharacter, character);
                 var drawPosition = new Point(
                     position.X + data.XOffset + kerning,
