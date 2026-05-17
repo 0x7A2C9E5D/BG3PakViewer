@@ -67,7 +67,7 @@ internal class ExportService(
 
     private async Task ExportVirtualTexturePagesAsync(PackageEntry node, string targetPath)
     {
-        var tileSet = new LSLib.VirtualTextures.VirtualTileSet(targetPath);
+        using var tileSet = new LSLib.VirtualTextures.VirtualTileSet(targetPath);
         var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
         var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
         var targetFolderPath = Path.GetDirectoryName(targetPath)!;
@@ -83,6 +83,7 @@ internal class ExportService(
             var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
             await using var pageStream = pageFile.CreateContentReader();
             await FileOperations.SaveStreamToFileAsync(targetFilePath, pageStream);
+            
         }
     }
 
