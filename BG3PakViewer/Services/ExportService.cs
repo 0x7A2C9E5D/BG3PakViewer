@@ -50,13 +50,13 @@ internal class ExportService(
             var success = await strategy.ExportAsync(stream, targetPath, node.FileExtension);
             if (success)
             {
-                var tileSet = new LSLib.VirtualTextures.VirtualTileSet();
+                var tileSet = new LSLib.VirtualTextures.VirtualTileSet(targetPath);
                 var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
                 var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
                 var targetFolderPath = Path.GetDirectoryName(targetPath)!;
                 foreach (var pageFileName in pageFileNames)
                 {
-                    var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName);
+                    var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
                     var pageFile = packageService.GetFileByPath(sourceFilePath);
                     if (pageFile == null)
                     {
