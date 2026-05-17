@@ -5,6 +5,7 @@ using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using LSLib.LS;
+using LSLib.VirtualTextures;
 using Serilog;
 
 namespace BG3PakViewer.Services;
@@ -54,7 +55,9 @@ internal class ExportService(
                 Log.Information("Export completed successfully: {TargetPath}", targetPath);
             }
             else
+            {
                 Log.Warning("Export failed: {TargetPath}", targetPath);
+            }
 
             return success;
         }
@@ -62,27 +65,6 @@ internal class ExportService(
         {
             Log.Error(ex, "Error exporting file: {Path}", node.FullPath);
             return false;
-        }
-    }
-
-    private async Task ExportVirtualTexturePagesAsync(PackageEntry node, string targetPath)
-    {
-        using var tileSet = new LSLib.VirtualTextures.VirtualTileSet(targetPath);
-        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
-        var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
-        var targetFolderPath = Path.GetDirectoryName(targetPath)!;
-        foreach (var pageFileName in pageFileNames)
-        {
-            var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
-            var pageFile = packageService.GetFileByPath(sourceFilePath);
-            if (pageFile == null)
-            {
-                Log.Warning("Page file not found: {Path}", sourceFilePath);
-                continue;
-            }
-            var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
-            await using var pageStream = pageFile.CreateContentReader();
-            await FileOperations.SaveStreamToFileAsync(targetFilePath, pageStream);
         }
     }
 
@@ -129,6 +111,39 @@ internal class ExportService(
             Log.Error(ex, "Error exporting folder: {FolderPath}", folderNode.FullPath);
             return false;
         }
+    }
+
+    private async Task ExportVirtualTexturePagesAsync(PackageEntry node, string targetPath)
+    {
+        using var tileSet = new VirtualTileSet(targetPath);
+        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
+        var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
+        var targetFolderPath = Path.GetDirectoryName(targetPath)!;
+        var parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        };
+        await Parallel.ForEachAsync(pageFileNames, parallelOptions, async (pageFileName, _) =>
+        {
+            try
+            {
+                var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
+                var pageFile = packageService.GetFileByPath(sourceFilePath);
+                if (pageFile == null)
+                {
+                    Log.Warning("Page file not found: {Path}", sourceFilePath);
+                    return;
+                }
+
+                var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
+                await using var pageStream = pageFile.CreateContentReader();
+                await FileOperations.SaveStreamToFileAsync(targetFilePath, pageStream);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error exporting page file: {Path}", pageFileName);
+            }
+        });
     }
 
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
