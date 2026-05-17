@@ -19,9 +19,10 @@ public class VirtualTextureExportStrategy : IExportStrategy
         {
             try
             {
-                await using var targetStream = File.Create(targetPath);
+                var targetStream = File.Create(targetPath);
                 await sourceStream.CopyToAsync(targetStream);
-                var tileSet = new VirtualTileSet(targetPath);
+                await targetStream.FlushAsync();
+                await targetStream.DisposeAsync();
                 return true;
             }
             catch (Exception e)
