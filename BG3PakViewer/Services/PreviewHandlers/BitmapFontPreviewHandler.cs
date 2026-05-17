@@ -40,7 +40,6 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
         var size = font.MeasureFont(previewText);
         if (size.Width == 0 || size.Height == 0) return null;
         using var previewImage = RenderPreview(font, textureImage, previewText, size);
-        foreach (var stream in streams.Values) await stream.DisposeAsync();
         return new ImageFileViewModel { Data = previewImage.ToBitmapSource() };
     }
 
