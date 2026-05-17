@@ -18,10 +18,10 @@ public class VirtualTextureExportStrategy : IExportStrategy
         {
             try
             {
-                var targetStream = File.Create(path);
-                await stream.CopyToAsync(targetStream);
-                await targetStream.FlushAsync();
-                await targetStream.DisposeAsync();
+                var fs = File.Create(path);
+                await stream.CopyToAsync(fs);
+                await fs.FlushAsync();
+                await fs.DisposeAsync();
                 return true;
             }
             catch (Exception e)
