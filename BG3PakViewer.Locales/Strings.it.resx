@@ -351,4 +351,10 @@
     <data name="TGAImage" xml:space="preserve">
       <value>Immagine TGA</value>
     </data>
+    <data name="GameDataDirectoryDescription" xml:space="preserve">
+      <value>Imposta cartella dati gioco per estrazione dati tra file</value>
+    </data>
+    <data name="GameDataDirectoryHeader" xml:space="preserve">
+      <value>Cartella Dati Gioco</value>
+    </data>
 </root>

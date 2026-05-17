@@ -29,4 +29,6 @@ internal partial class AppSettings : ObservableObject, IAppSettings
     [ObservableProperty] public partial string DefaultOpenDirectory { get; set; } = string.Empty;
 
     [ObservableProperty] public partial string DefaultExportDirectory { get; set; } = string.Empty;
+
+    [ObservableProperty] public partial string GameDataDirectory { get; set; } = string.Empty;
 }
