@@ -18,15 +18,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-        <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2" />
-        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+        <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2"/>
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0"/>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.IO.Hashing" Version="10.0.8" />
+        <PackageReference Include="System.IO.Hashing" Version="10.0.8"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -36,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="sixlabors.lic" />
+        <None Remove="sixlabors.lic"/>
     </ItemGroup>
 
 </Project>
