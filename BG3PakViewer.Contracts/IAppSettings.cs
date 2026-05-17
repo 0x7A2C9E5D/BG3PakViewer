@@ -15,4 +15,6 @@ public interface IAppSettings
     public string DefaultOpenDirectory { get; set; }
 
     public string DefaultExportDirectory { get; set; }
+
+    public string GameDataDirectory { get; set; }
 }
