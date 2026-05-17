@@ -4,7 +4,7 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class FontPreviewHandler : IMultiStreamPreviewHandler
+public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
 {
     public bool CanHandle(string extension)
     {
@@ -15,10 +15,7 @@ public class FontPreviewHandler : IMultiStreamPreviewHandler
     {
         var baseName = Path.GetFileNameWithoutExtension(primaryFilePath);
         var directory = Path.GetDirectoryName(primaryFilePath);
-        
-        // 返回需要的关联文件路径模式
         yield return $"{directory}/{baseName}_0.png";
-        yield return $"{directory}/{baseName}_1.png";
     }
 
     public async Task<object?> CreatePreviewViewModelAsync(Dictionary<string, Stream> streams)
