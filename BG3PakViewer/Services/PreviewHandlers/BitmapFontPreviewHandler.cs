@@ -57,48 +57,52 @@ public class BitmapFontPreviewHandler : IMultiStreamPreviewHandler
 
     private static Image<Rgba32> RenderPreview(BitmapFont font, Image<Rgba32> texture, string text, Size size)
     {
-        var x = 0;
-        var y = 0;
+        var position = new Point(0, 0);
         var previousCharacter = ' ';
         var previewImage = new Image<Rgba32>(size.Width, size.Height, new Rgba32(0, 0, 0, 0));
         foreach (var character in text)
-            (x, y) = HandleCharacter(font, texture, previewImage, character, x, y, ref previousCharacter);
+            HandleCharacter(font, texture, previewImage, character,ref position, ref previousCharacter);
         return previewImage;
     }
 
-    private static (int x, int y) HandleCharacter(
+    private static void HandleCharacter(
         BitmapFont font,
         Image<Rgba32> texture,
         Image<Rgba32> target,
         char character,
-        int x,
-        int y,
+        ref Point position,
         ref char previousCharacter)
     {
         switch (character)
         {
             case '\n':
-                return (0, y + font.LineHeight);
+                position = new Point(0, position.Y + font.LineHeight);
+                break;
             case '\r':
-                return (x, y);
+                break;
             default:
                 var data = font[character];
-                if (data.IsEmpty) return (x, y);
+                if (data.IsEmpty) break;
+            
                 var kerning = font.GetKerning(previousCharacter, character);
-                DrawCharacter(target, texture, data, x + data.XOffset + kerning, y + data.YOffset);
+                var drawPosition = new Point(
+                    position.X + data.XOffset + kerning,
+                    position.Y + data.YOffset);
+                DrawCharacter(target, texture, data, drawPosition);
                 previousCharacter = character;
-                return (x + data.XAdvance + kerning, y);
+                position = new Point(position.X + data.XAdvance + kerning, position.Y);
+                break;
         }
     }
 
-    private static void DrawCharacter(Image<Rgba32> target, Image<Rgba32> texture, Character character, int x, int y)
+    private static void DrawCharacter(Image<Rgba32> target, Image<Rgba32> texture, Character character, Point position)
     {
         var rectangle = new Rectangle(character.X, character.Y, character.Width, character.Height);
         target.Mutate(ctx =>
         {
             ctx.DrawImage(
                 texture.Clone(crop => crop.Crop(rectangle)),
-                new Point(x, y),
+                position,
                 1f);
         });
     }
