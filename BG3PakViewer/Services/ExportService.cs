@@ -49,9 +49,31 @@ internal class ExportService(
             await using var stream = file.CreateContentReader();
             var success = await strategy.ExportAsync(stream, targetPath, node.FileExtension);
             if (success)
+            {
+                var tileSet = new LSLib.VirtualTextures.VirtualTileSet();
+                var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
+                var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
+                var targetFolderPath = Path.GetDirectoryName(targetPath)!;
+                foreach (var pageFileName in pageFileNames)
+                {
+                    var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName);
+                    var pageFile = packageService.GetFileByPath(sourceFilePath);
+                    if (pageFile == null)
+                    {
+                        Log.Warning("Page file not found: {Path}", sourceFilePath);
+                        continue;
+                    }
+
+                    var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
+                    await using var pageStream = pageFile.CreateContentReader();
+                    await FileOperations.SaveStreamToFileAsync(targetFilePath, pageStream);
+                }
+
                 Log.Information("Export completed successfully: {TargetPath}", targetPath);
+            }
             else
                 Log.Warning("Export failed: {TargetPath}", targetPath);
+
             return success;
         }
         catch (Exception ex)
