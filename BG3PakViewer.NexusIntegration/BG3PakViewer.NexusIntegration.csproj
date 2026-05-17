@@ -9,15 +9,15 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <DebugType>embedded</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <DebugType>embedded</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ZeroQL" Version="8.0.0" />
+        <PackageReference Include="ZeroQL" Version="8.0.0"/>
     </ItemGroup>
 
 </Project>

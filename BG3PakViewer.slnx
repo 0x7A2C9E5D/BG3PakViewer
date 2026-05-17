@@ -1,41 +1,41 @@
 <Solution>
     <Configurations>
-        <Platform Name="x64" />
+        <Platform Name="x64"/>
     </Configurations>
     <Project Path="BG3PakViewer.Contracts/BG3PakViewer.Contracts.csproj" Id="36d4e01b-e932-499e-9003-56e94b2fe405">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Controls/BG3PakViewer.Controls.csproj" Id="2eafc917-0358-45bc-b635-98571a06c5fa">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Dialogs/BG3PakViewer.Dialogs.csproj" Id="e45421d1-1fd0-489a-90b7-49586442d6e2">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Extensions/BG3PakViewer.Extensions.csproj" Id="2ddc5288-a2c8-413d-83b3-d411b91ff659">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Loader/BG3PakViewer.Loader.csproj" Id="4bd4af00-2055-4a65-a4b5-6161e3941bbd">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Locales/BG3PakViewer.Locales.csproj" Id="4e548688-e0fc-4f52-a091-922e5ec04ee2">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Messaging/BG3PakViewer.Messaging.csproj" Id="7c46dd12-bca8-45a8-b51e-ba1e17295b4c">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Miscellaneous/BG3PakViewer.Miscellaneous.csproj">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.NexusIntegration/BG3PakViewer.NexusIntegration.csproj">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Shared/BG3PakViewer.Shared.csproj" Id="a0d799f2-5829-481e-bcde-0724351f73f7">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer.Utils/BG3PakViewer.Utils.csproj" Id="838d3e71-aa21-4c57-b090-3eb5dea2b8f3">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
     <Project Path="BG3PakViewer/BG3PakViewer.csproj">
-        <Platform Project="x64" />
+        <Platform Project="x64"/>
     </Project>
 </Solution>

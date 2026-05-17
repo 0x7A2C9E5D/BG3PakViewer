@@ -20,7 +20,7 @@ public static class ImageLoader
             _ => throw new NotSupportedException($"Unsupported image format: {extension}")
         };
     }
-    
+
     public static async Task<bool> ExportAsync(Image images, string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();
