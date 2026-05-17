@@ -53,4 +53,9 @@ public static class FileExtensions
     {
         return fileName.EndsWith("_lowtex.dds", StringComparison.OrdinalIgnoreCase);
     }
+
+    public static bool IsFontFormat(string extension)
+    {
+        return extension.Equals(".fnt");
+    }
 }
