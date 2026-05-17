@@ -7,5 +7,5 @@ public interface IExportStrategy
 {
     FileFilter[] Filters { get; }
 
-    Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension);
+    Task<bool> ExportAsync(Stream stream, string path, string extension);
 }

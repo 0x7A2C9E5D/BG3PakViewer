@@ -18,11 +18,11 @@ internal class ImageExportStrategy : IExportStrategy
         new(Strings.TIFFImage, [".tif", ".tiff"])
     ];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
-        if (sourceExtension == ".dds")
-            return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
-        using var image = await ImageLoader.LoadAsync(sourceStream, sourceExtension);
-        return image is not null && await ImageLoader.ExportAsync(image, targetPath);
+        if (extension == ".dds")
+            return await FileOperations.SaveStreamToFileAsync(path, stream);
+        using var image = await ImageLoader.LoadAsync(stream, extension);
+        return image is not null && await ImageLoader.ExportAsync(image, path);
     }
 }

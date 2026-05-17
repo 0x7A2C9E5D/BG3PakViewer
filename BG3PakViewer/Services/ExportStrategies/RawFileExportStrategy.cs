@@ -8,8 +8,8 @@ public class RawFileExportStrategy : IExportStrategy
 {
     public FileFilter[] Filters => [];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
-        return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+        return await FileOperations.SaveStreamToFileAsync(path, stream);
     }
 }

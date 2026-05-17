@@ -14,12 +14,12 @@ public class LocalizationExportStrategy : IExportStrategy
         new(Strings.LarianResourceFile, ".loca")
     ];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
-        if (sourceExtension.Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+        if (extension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(path, stream);
 
-        var resource = await LocalizationLoader.LoadAsync(sourceStream);
-        return resource != null && await LocalizationLoader.ExportAsync(resource, targetPath);
+        var resource = await LocalizationLoader.LoadAsync(stream);
+        return resource != null && await LocalizationLoader.ExportAsync(resource, path);
     }
 }

@@ -14,11 +14,11 @@ public class AudioExportStrategy : IExportStrategy
         new(Strings.VorbisAudioFile, ".ogg")
     ];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
-        if (Path.GetExtension(targetPath).Equals(".wem", StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+        if (Path.GetExtension(path).Equals(".wem", StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(path, stream);
 
-        return await WwiseAudioLoader.ExportAsync(sourceStream, targetPath);
+        return await WwiseAudioLoader.ExportAsync(stream, path);
     }
 }

@@ -13,14 +13,14 @@ public class VirtualTextureExportStrategy : IExportStrategy
         new(Strings.VirtualTextureFile, ".gts")
     ];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
         return await Task.Run(async () =>
         {
             try
             {
-                var targetStream = File.Create(targetPath);
-                await sourceStream.CopyToAsync(targetStream);
+                var targetStream = File.Create(path);
+                await stream.CopyToAsync(targetStream);
                 await targetStream.FlushAsync();
                 await targetStream.DisposeAsync();
                 return true;

@@ -15,12 +15,12 @@ internal class Model3DExportStrategy : IExportStrategy
         new(Strings.GLTransmissionFormat, ".gltf")
     ];
 
-    public async Task<bool> ExportAsync(Stream sourceStream, string targetPath, string sourceExtension)
+    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
     {
-        if (sourceExtension.Equals(Path.GetExtension(targetPath), StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(targetPath, sourceStream);
+        if (extension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(path, stream);
 
-        var root = await Model3DLoader.LoadAsync(sourceStream);
-        return root != null && await Model3DLoader.ExportAsync(root, targetPath);
+        var root = await Model3DLoader.LoadAsync(stream);
+        return root != null && await Model3DLoader.ExportAsync(root, path);
     }
 }
