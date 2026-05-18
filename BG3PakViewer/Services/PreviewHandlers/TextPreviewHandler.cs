@@ -1,26 +1,19 @@
 ﻿using System.IO;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class TextPreviewHandler(IAppSettings appSettings) : IPreviewHandler
+public class TextPreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
 {
-    public bool CanHandle(string fileExtension)
+    public override bool CanHandle(string fileExtension)
     {
         return FileExtensions.IsPlainText(fileExtension);
     }
 
-    public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
+    protected override async Task<string?> LoadAndExportTextAsync(Stream stream, string fileExtension)
     {
         using var reader = new StreamReader(stream, false);
-        var text = await reader.ReadToEndAsync();
-        var truncated = await PreviewTextHelper.TruncateTextToLines(text, appSettings.MaxPreviewLines);
-
-        return new PlainTextFilePreviewViewModel
-        {
-            Data = truncated
-        };
+        return await reader.ReadToEndAsync();
     }
 }
