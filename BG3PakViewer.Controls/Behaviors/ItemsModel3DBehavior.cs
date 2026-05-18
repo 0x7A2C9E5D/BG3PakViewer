@@ -4,7 +4,7 @@ using Microsoft.Xaml.Behaviors;
 
 namespace BG3PakViewer.Controls.Behaviors;
 
-public class ItemsModel3DBehavior : Behavior<ItemsModel3D>
+internal class ItemsModel3DBehavior : Behavior<ItemsModel3D>
 {
     protected override void OnAttached()
     {

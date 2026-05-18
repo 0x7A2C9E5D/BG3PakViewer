@@ -6,7 +6,7 @@ using Microsoft.Xaml.Behaviors;
 
 namespace BG3PakViewer.Controls.Behaviors;
 
-public class ImageBehavior : Behavior<Image>
+internal class ImageBehavior : Behavior<Image>
 {
     protected override void OnAttached()
     {
