@@ -12,7 +12,7 @@ public class LarianResourcePreviewHandler(IAppSettings appSettings) : TextBasedP
         return FileExtensions.IsLarianBinaryResource(fileExtension);
     }
 
-    protected override async Task<string?> LoadAndExportTextAsync(Stream stream, string fileExtension)
+    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
     {
         var resource = await ResourceLoader.LoadAsync(stream, fileExtension);
         return resource == null ? null : await ResourceLoader.ExportAsync(resource);

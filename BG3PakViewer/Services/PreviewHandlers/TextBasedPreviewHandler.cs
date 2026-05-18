@@ -11,7 +11,7 @@ public abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPrevi
 
     public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
-        var text = await LoadAndExportTextAsync(stream, fileExtension);
+        var text = await GetTextAsync(stream, fileExtension);
 
         if (string.IsNullOrEmpty(text))
             return null;
@@ -21,7 +21,7 @@ public abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPrevi
         return new PlainTextFilePreviewViewModel { Data = truncated };
     }
 
-    protected abstract Task<string?> LoadAndExportTextAsync(Stream stream, string fileExtension);
+    protected abstract Task<string?> GetTextAsync(Stream stream, string fileExtension);
 
     private static async Task<string> TruncateTextToLines(string text, int maxLines)
     {

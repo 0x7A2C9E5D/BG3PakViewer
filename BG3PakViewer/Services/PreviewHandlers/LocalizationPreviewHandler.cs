@@ -12,7 +12,7 @@ public class LocalizationPreviewHandler(IAppSettings appSettings) : TextBasedPre
         return FileExtensions.IsLocalizationFormat(fileExtension);
     }
 
-    protected override async Task<string?> LoadAndExportTextAsync(Stream stream, string fileExtension)
+    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
     {
         var resource = await LocalizationLoader.LoadAsync(stream);
         return resource == null ? null : await LocalizationLoader.ExportAsync(resource);

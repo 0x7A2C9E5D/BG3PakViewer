@@ -11,7 +11,7 @@ public class TextPreviewHandler(IAppSettings appSettings) : TextBasedPreviewHand
         return FileExtensions.IsPlainText(fileExtension);
     }
 
-    protected override async Task<string?> LoadAndExportTextAsync(Stream stream, string fileExtension)
+    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
     {
         using var reader = new StreamReader(stream, false);
         return await reader.ReadToEndAsync();
