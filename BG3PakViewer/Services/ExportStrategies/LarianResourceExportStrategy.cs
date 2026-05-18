@@ -6,7 +6,7 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public class LarianResourceExportStrategy : IExportStrategy
+internal class LarianResourceExportStrategy : IExportStrategy
 {
     private static FileFilter[] Filters =>
     [

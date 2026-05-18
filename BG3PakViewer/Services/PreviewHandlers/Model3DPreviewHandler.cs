@@ -9,7 +9,7 @@ using Serilog;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class Model3DPreviewHandler : IPreviewHandler
+internal class Model3DPreviewHandler : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {

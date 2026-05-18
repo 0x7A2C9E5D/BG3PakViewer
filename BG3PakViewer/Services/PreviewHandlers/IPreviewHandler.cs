@@ -2,7 +2,7 @@
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public interface IPreviewHandler
+internal interface IPreviewHandler
 {
     bool CanHandle(string fileExtension);
 

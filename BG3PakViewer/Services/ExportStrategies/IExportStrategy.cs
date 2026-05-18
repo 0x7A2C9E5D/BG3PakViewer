@@ -3,7 +3,7 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public interface IExportStrategy
+internal interface IExportStrategy
 {
     FileFilter[] Filters { get; }
 

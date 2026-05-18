@@ -5,7 +5,7 @@ using Cysharp.Text;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPreviewHandler
+internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPreviewHandler
 {
     public abstract bool CanHandle(string fileExtension);
 

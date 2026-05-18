@@ -6,7 +6,7 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public class AudioExportStrategy : IExportStrategy
+internal class AudioExportStrategy : IExportStrategy
 {
     public FileFilter[] Filters =>
     [

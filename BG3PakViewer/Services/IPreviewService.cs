@@ -2,7 +2,7 @@
 
 namespace BG3PakViewer.Services;
 
-public interface IPreviewService : IAsyncDisposable
+internal interface IPreviewService : IAsyncDisposable
 {
     Task<object?> CreatePreviewViewModelAsync(PackageEntry node);
 }

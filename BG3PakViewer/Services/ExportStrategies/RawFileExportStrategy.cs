@@ -4,7 +4,7 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public class RawFileExportStrategy : IExportStrategy
+internal class RawFileExportStrategy : IExportStrategy
 {
     public FileFilter[] Filters => [];
 

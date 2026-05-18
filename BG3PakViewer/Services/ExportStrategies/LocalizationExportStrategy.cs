@@ -6,7 +6,7 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public class LocalizationExportStrategy : IExportStrategy
+internal class LocalizationExportStrategy : IExportStrategy
 {
     public FileFilter[] Filters =>
     [

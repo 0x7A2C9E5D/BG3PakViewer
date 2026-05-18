@@ -6,7 +6,7 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
-public sealed class PackageService(PackageLoader packageLoader) : IPackageService
+internal sealed class PackageService(PackageLoader packageLoader) : IPackageService
 {
     private bool _disposedValue;
 

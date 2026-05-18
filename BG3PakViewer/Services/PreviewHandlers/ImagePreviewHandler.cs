@@ -6,7 +6,7 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class ImagePreviewHandler : IPreviewHandler
+internal class ImagePreviewHandler : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {

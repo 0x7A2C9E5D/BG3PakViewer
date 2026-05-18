@@ -5,7 +5,7 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class LarianResourcePreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
+internal class LarianResourcePreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
 {
     public override bool CanHandle(string fileExtension)
     {

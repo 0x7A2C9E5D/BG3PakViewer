@@ -5,7 +5,7 @@ using Serilog;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-public class VirtualTextureExportStrategy : IExportStrategy
+internal class VirtualTextureExportStrategy : IExportStrategy
 {
     public FileFilter[] Filters =>
     [
