@@ -1,11 +1,12 @@
 ﻿using System.IO;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class LocalizationPreviewHandler : IPreviewHandler
+public class LocalizationPreviewHandler(IAppSettings appSettings) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {
@@ -21,8 +22,11 @@ public class LocalizationPreviewHandler : IPreviewHandler
 
         var text = await LocalizationLoader.ExportAsync(resource);
 
-        return string.IsNullOrEmpty(text)
-            ? null
-            : new PlainTextFilePreviewViewModel { Data = text };
+        if (string.IsNullOrEmpty(text))
+            return null;
+
+        var truncated = await PreviewTextHelper.TruncateTextToLines(text, appSettings.MaxPreviewLines);
+
+        return new PlainTextFilePreviewViewModel { Data = truncated };
     }
 }
