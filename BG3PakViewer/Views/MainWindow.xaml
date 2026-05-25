@@ -79,10 +79,11 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" MinWidth="300" />
+                <ColumnDefinition Width="Auto" MinWidth="350"/>
+                <ColumnDefinition Width="1" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <ui:CommandBar HorizontalAlignment="Left" Grid.ColumnSpan="2" VerticalAlignment="Center">
+            <ui:CommandBar HorizontalAlignment="Left" Grid.ColumnSpan="3" VerticalAlignment="Center">
                 <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.OpenPakBtnLabel}}"
                                  Command="{Binding OpenPakCommand}">
                     <ui:AppBarButton.Icon>
@@ -185,7 +186,9 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TreeView>
-            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Margin="10,0,0,0"
+            <GridSplitter Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="1"
+                          Background="Transparent" />
+            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" Margin="10,0,0,0"
                          DataContext="{Binding PreviewVm}" />
             <ui:InfoBar
                 Grid.Row="2" Grid.Column="0"
