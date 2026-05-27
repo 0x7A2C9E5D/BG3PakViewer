@@ -19,32 +19,28 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0"/>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
-        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.3.0"/>
-        <PackageReference Include="HanumanInstitute.MvvmDialogs.Wpf" Version="2.3.0"/>
-        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1"/>
-        <PackageReference Include="LinkDotNet.BuildInformation" Version="2.1.4"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.8"/>
+        <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.3.0" />
+        <PackageReference Include="HanumanInstitute.MvvmDialogs.Wpf" Version="2.3.0" />
+        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
+        <PackageReference Include="LinkDotNet.BuildInformation" Version="2.1.4" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.8" />
         <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.275">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.9.50">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Serilog" Version="4.3.1"/>
-        <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
-        <PackageReference Include="Serilog.Sinks.Observable" Version="3.0.0"/>
+        <PackageReference Include="Serilog" Version="4.3.1" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.Observable" Version="3.0.0" />
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.27.0.140913">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Reactive" Version="6.1.0"/>
-        <PackageReference Include="ZString" Version="2.6.0"/>
+        <PackageReference Include="System.Reactive" Version="6.1.0" />
+        <PackageReference Include="ZString" Version="2.6.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,25 +58,25 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="..\..\..\..\.nuget\packages\naudio.vorbis\1.5.0\contentFiles\any\netstandard2.0\README.md"/>
-        <None Remove="License.txt"/>
+        <None Remove="..\..\..\..\.nuget\packages\naudio.vorbis\1.5.0\contentFiles\any\netstandard2.0\README.md" />
+        <None Remove="License.txt" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="License.txt"/>
+        <EmbeddedResource Include="License.txt" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Controls\BG3PakViewer.Controls.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Dialogs\BG3PakViewer.Dialogs.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Extensions\BG3PakViewer.Extensions.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Loader\BG3PakViewer.Loader.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Miscellaneous\BG3PakViewer.Miscellaneous.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.NexusIntegration\BG3PakViewer.NexusIntegration.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Controls\BG3PakViewer.Controls.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Dialogs\BG3PakViewer.Dialogs.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Extensions\BG3PakViewer.Extensions.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Loader\BG3PakViewer.Loader.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Miscellaneous\BG3PakViewer.Miscellaneous.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.NexusIntegration\BG3PakViewer.NexusIntegration.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj" />
     </ItemGroup>
 
 </Project>
