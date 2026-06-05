@@ -9,7 +9,7 @@ using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class Model3DFileViewModel(IMessenger messenger) : ObservableObject
+public partial class Model3DFileViewModel : ObservableObject
 {
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     [ObservableProperty] public partial Root? Data { get; set; }
@@ -55,9 +55,9 @@ public partial class Model3DFileViewModel(IMessenger messenger) : ObservableObje
     }
 
     [RelayCommand]
-    private void Zoom()
+    private static void Zoom()
     {
-        messenger.Send(new ZoomExtentsMessage(), MessageTokens.ZoomExtents);
+        WeakReferenceMessenger.Default.Send(new ZoomExtentsMessage(), MessageTokens.ZoomExtents);
         Log.Information("Model3DFileViewModel.Zoom");
     }
 }
