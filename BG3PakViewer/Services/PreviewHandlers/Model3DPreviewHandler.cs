@@ -22,9 +22,8 @@ internal class Model3DPreviewHandler : IPreviewHandler
 
         if (root == null)
             return null;
-        var messenger = Ioc.Default.GetRequiredService<IMessenger>();
         if (root.Meshes != null && root.Meshes.Count != 0)
-            return new Model3DFileViewModel(messenger) { Data = root };
+            return new Model3DFileViewModel { Data = root };
         Log.Warning("Model has no meshes");
         return new NotSupportedFileViewModel
         {
