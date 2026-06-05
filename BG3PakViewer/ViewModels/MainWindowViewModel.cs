@@ -10,6 +10,7 @@ using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
@@ -24,13 +25,10 @@ namespace BG3PakViewer.ViewModels;
 
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 {
-    private readonly IAppDiagnostics _appDiagnostics;
-    private readonly ICheckUpdateService _checkUpdateService;
     private readonly IDialogService _dialogService;
     private readonly IExplorerService _explorerService;
     private readonly IExportService _exportService;
     private readonly ILogAccessService _logAccessService;
-    private readonly IMessenger _messenger;
     private readonly IPackageService _packageService;
     private readonly IPreviewService _previewService;
     private readonly IRecentFilesService _recentFilesService;
@@ -39,25 +37,19 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private bool _isLoading;
 
     public MainWindowViewModel(
-        IAppDiagnostics appDiagnostics,
-        ICheckUpdateService checkUpdateService,
         IDialogService dialogService,
         IExplorerService explorerService,
         IExportService exportService,
         ILogAccessService logAccessService,
-        IMessenger messenger,
         IPackageService packageService,
         IPreviewService previewService,
         IRecentFilesService recentFilesService,
         ISettingsManagerService settingsManagerService)
     {
-        _appDiagnostics = appDiagnostics;
-        _checkUpdateService = checkUpdateService;
         _dialogService = dialogService;
         _explorerService = explorerService;
         _exportService = exportService;
         _logAccessService = logAccessService;
-        _messenger = messenger;
         _packageService = packageService;
         _previewService = previewService;
         _recentFilesService = recentFilesService;
@@ -162,7 +154,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (success)
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
-            _messenger.Send(new ValueChangedMessage<string>(string.Empty), MessageTokens.OpenFileFailed);
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
+                MessageTokens.OpenFileFailed);
         _isLoading = false;
     }
 
@@ -251,17 +244,17 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     }
 
 
-    private void HandleExportResult(bool success)
+    private static void HandleExportResult(bool success)
     {
         if (success)
         {
-            _messenger.Send(new ValueChangedMessage<string>(string.Empty),
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
                 MessageTokens.ExportCompleted);
             Log.Information("Export completed.");
         }
         else
         {
-            _messenger.Send(new ValueChangedMessage<string>(string.Empty),
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
                 MessageTokens.ExportFailed);
             Log.Warning("Failed to export file.");
         }
@@ -322,7 +315,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task ShowRecentDialog()
     {
-        using var viewModel = new RecentDialogViewModel(_recentFilesService, _messenger);
+        using var viewModel = new RecentDialogViewModel(_recentFilesService);
         await _dialogService.ShowDialogAsync(this, viewModel);
     }
 
@@ -358,7 +351,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
     private void RegisterFileMessageHandlers()
     {
-        _messenger.Register<MainWindowViewModel, AsyncRequestMessage<string, bool>, string>(
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, AsyncRequestMessage<string, bool>, string>(
             this,
             MessageTokens.RecentFileOpened,
             async void (_, m) =>
@@ -378,13 +371,13 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         if (_isLoading)
         {
-            _messenger.Send(new ValueChangedMessage<string>(string.Empty),
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
                 MessageTokens.FileLoadingDuplicate);
             return false;
         }
 
         if (PackageTree is null) return true;
-        return await _messenger.Send(
+        return await WeakReferenceMessenger.Default.Send(
             new AsyncRequestMessage<string, bool>(fileName),
             MessageTokens.ReOpenFile);
     }
@@ -392,7 +385,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task<bool> HandleIsExportingFiles()
     {
         if (!IsExporting) return true;
-        if (!await _messenger
+        if (!await WeakReferenceMessenger.Default
                 .Send(new AsyncRequestMessage<bool>(), MessageTokens.CancelExport)) return false;
         await _cancellationTokenSource!.CancelAsync();
         IsExporting = false;
@@ -418,7 +411,6 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task WindowLoadedAsync()
     {
-        _appDiagnostics.LogStartupInfo();
-        IsUpdateAvailable = await _checkUpdateService.CheckUpdate();
+        IsUpdateAvailable = await Ioc.Default.GetRequiredService<ICheckUpdateService>().CheckUpdate();
     }
 }

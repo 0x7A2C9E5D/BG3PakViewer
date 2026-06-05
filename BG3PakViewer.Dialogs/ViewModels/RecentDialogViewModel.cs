@@ -13,12 +13,10 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 
 public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogViewModel, ICloseable
 {
-    private readonly IMessenger _messenger;
     private readonly IRecentFilesService _recentFilesService;
 
-    public RecentDialogViewModel(IRecentFilesService recentFilesService, IMessenger messenger)
+    public RecentDialogViewModel(IRecentFilesService recentFilesService)
     {
-        _messenger = messenger;
         _recentFilesService = recentFilesService;
         _recentFilesService.RecentItems
             .CollectionChanged += OnRecentItemsOnCollectionChanged;
@@ -56,7 +54,7 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
     private void HandleExistingFile(IRecentItem recentItem)
     {
         RequestClose?.Invoke(this, EventArgs.Empty);
-        _ = _messenger.Send(new AsyncRequestMessage<string, bool>(recentItem.FilePath),
+        _ = WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(recentItem.FilePath),
             MessageTokens.RecentFileOpened);
     }
 
@@ -67,9 +65,9 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
             _recentFilesService.RemoveRecentFile(recentItem);
     }
 
-    private async Task<bool> NotifyFileNotFound(string filePath)
+    private static async Task<bool> NotifyFileNotFound(string filePath)
     {
-        return await _messenger.Send(new AsyncRequestMessage<string, bool>(filePath),
+        return await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(filePath),
             MessageTokens.OpenedFileNoFound);
     }
 

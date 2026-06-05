@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using iNKORE.UI.WPF.Modern;
@@ -14,17 +13,14 @@ namespace BG3PakViewer.Views;
 /// </summary>
 public partial class MainWindow
 {
-    private readonly IMessenger _messenger;
-
     public MainWindow()
     {
         InitializeComponent();
-        RegisterMessageHandlers(out _messenger);
+        RegisterMessageHandlers();
     }
 
-    private void RegisterMessageHandlers(out IMessenger messenger)
+    private void RegisterMessageHandlers()
     {
-        messenger = Ioc.Default.GetRequiredService<IMessenger>();
         RegisterFileOpenedMessageHandlers();
         RegisterExportMessageHandlers();
     }
@@ -38,7 +34,7 @@ public partial class MainWindow
                 () => Strings.FileOpenedNoFoundCaption)
         };
         foreach (var (token, message, caption) in messageHandlers)
-            _messenger.Register<MainWindow, AsyncRequestMessage<string, bool>, string>(
+            WeakReferenceMessenger.Default.Register<MainWindow, AsyncRequestMessage<string, bool>, string>(
                 this,
                 token,
                 (_, m) =>
@@ -47,7 +43,7 @@ public partial class MainWindow
                             MessageBoxResult.Yes);
                 });
 
-        _messenger.Register<MainWindow, ValueChangedMessage<string>, string>(
+        WeakReferenceMessenger.Default.Register<MainWindow, ValueChangedMessage<string>, string>(
             this,
             MessageTokens.OpenFileFailed,
             (_, _) =>
@@ -56,7 +52,7 @@ public partial class MainWindow
                     MessageBoxButton.OK, MessageBoxImage.Error);
             });
 
-        _messenger.Register<ValueChangedMessage<string>, string>(this,
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>, string>(this,
             MessageTokens.FileLoadingDuplicate,
             (_, _) =>
             {
@@ -77,10 +73,10 @@ public partial class MainWindow
             };
 
         foreach (var (token, message, caption, image) in valueChangedHandlers)
-            _messenger.Register<ValueChangedMessage<string>, string>(this, token,
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>, string>(this, token,
                 (_, _) => { MessageBox.Show(message(), caption(), MessageBoxButton.OK, image); });
 
-        _messenger.Register<AsyncRequestMessage<bool>, string>(this,
+        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<bool>, string>(this,
             MessageTokens.CancelExport,
             (_, m) =>
             {

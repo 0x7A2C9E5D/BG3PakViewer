@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using BG3PakViewer.Messaging;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;
@@ -10,12 +9,10 @@ namespace BG3PakViewer.Controls.Behaviors;
 
 internal class Viewport3DxBehavior : Behavior<Viewport3DX>
 {
-    private readonly IMessenger _messenger = Ioc.Default.GetRequiredService<IMessenger>();
-
     protected override void OnAttached()
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
-        _messenger.Register<ZoomExtentsMessage, string>(this, MessageTokens.ZoomExtents,
+        WeakReferenceMessenger.Default.Register<ZoomExtentsMessage, string>(this, MessageTokens.ZoomExtents,
             (_, _) => { AssociatedObject.ZoomExtents(); });
         Log.Information("Viewport3DxBehavior.OnAttached");
     }
@@ -23,7 +20,7 @@ internal class Viewport3DxBehavior : Behavior<Viewport3DX>
     protected override void OnDetaching()
     {
         AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
-        _messenger.UnregisterAll(this);
+        WeakReferenceMessenger.Default.UnregisterAll(this);
         Log.Information("Viewport3DxBehavior.OnDetaching");
     }
 

@@ -108,7 +108,13 @@ public sealed partial class App : IDisposable
         InitializeCulture();
         RegisterSyncfusionLicense();
         InitializeSettingsManager();
+        LogStartupInformation();
         InitializeMainWindow();
+    }
+
+    private static void LogStartupInformation()
+    {
+        Ioc.Default.GetRequiredService<IAppDiagnostics>().LogStartupInfo();
     }
 
     private static void InitializeSettingsManager()

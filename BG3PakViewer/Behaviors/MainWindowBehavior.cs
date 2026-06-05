@@ -3,7 +3,6 @@ using System.Windows;
 using BG3PakViewer.Locales;
 using BG3PakViewer.ViewModels;
 using BG3PakViewer.Views;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls.Primitives;
@@ -14,8 +13,6 @@ namespace BG3PakViewer.Behaviors;
 
 internal class MainWindowBehavior : Behavior<MainWindow>
 {
-    private readonly IMessenger _messenger = Ioc.Default.GetRequiredService<IMessenger>();
-
     protected override void OnAttached()
     {
         AssociatedObject.Closed += AssociatedObject_Closed;
@@ -34,8 +31,8 @@ internal class MainWindowBehavior : Behavior<MainWindow>
 
     private void AssociatedObject_Closed(object? sender, EventArgs e)
     {
-        _messenger.UnregisterAll(AssociatedObject);
-        _messenger.UnregisterAll((MainWindowViewModel)AssociatedObject.DataContext);
+        WeakReferenceMessenger.Default.UnregisterAll(AssociatedObject);
+        WeakReferenceMessenger.Default.UnregisterAll((MainWindowViewModel)AssociatedObject.DataContext);
     }
 
     private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
