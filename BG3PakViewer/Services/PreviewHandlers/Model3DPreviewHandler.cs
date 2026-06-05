@@ -3,8 +3,6 @@ using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Utils;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Messaging;
 using Serilog;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
