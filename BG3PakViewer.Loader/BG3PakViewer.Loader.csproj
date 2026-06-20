@@ -28,6 +28,9 @@
         </PackageReference>
         <PackageReference Include="System.IO.Hashing" Version="10.0.9" />
         <PackageReference Include="Ww2Ogg.Core" Version="1.0.0"/>
+        <PackageReference Update="Nerdbank.GitVersioning">
+          <Version>3.10.85</Version>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
