@@ -1,0 +1,249 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="About" xml:space="preserve">
+        <value>關於</value>
+    </data>
+    <data name="AboutDialogBuildTime" xml:space="preserve">
+        <value>編譯時間：</value>
+    </data>
+    <data name="AboutDialogOS" xml:space="preserve">
+        <value>作業系統：</value>
+    </data>
+    <data name="AboutDialogRuntime" xml:space="preserve">
+        <value>執行環境：</value>
+    </data>
+    <data name="AboutDialogVersion" xml:space="preserve">
+        <value>版本：</value>
+    </data>
+    <data name="AllFiles" xml:space="preserve">
+        <value>所有檔案</value>
+    </data>
+    <data name="AppTitle" xml:space="preserve">
+        <value>博德之門3資源瀏覽器（非官方）</value>
+    </data>
+    <data name="BMPImage" xml:space="preserve">
+        <value>BMP圖像</value>
+    </data>
+    <data name="CancelExportOperationCaption" xml:space="preserve">
+        <value>取消匯出</value>
+    </data>
+    <data name="CancelExportOperationMessage" xml:space="preserve">
+        <value>是否確認取消當前匯出任務？</value>
+    </data>
+    <data name="DDSImage" xml:space="preserve">
+        <value>DDS圖像</value>
+    </data>
+    <data name="DefaultExportDirectoryDescription" xml:space="preserve">
+        <value>設定SaveFileDialog和SaveFolderDialog的預設匯出路徑</value>
+    </data>
+    <data name="DefaultExportDirectoryHeader" xml:space="preserve">
+        <value>預設匯出路徑</value>
+    </data>
+    <data name="DefaultOpenDirectoryDescription" xml:space="preserve">
+        <value>設定OpenFileDialog預設開啟路徑</value>
+    </data>
+    <data name="DefaultOpenDirectoryHeader" xml:space="preserve">
+        <value>預設開啟路徑</value>
+    </data>
+    <data name="Dependencies" xml:space="preserve">
+        <value>依賴項</value>
+    </data>
+    <data name="DirectorySettingsHeader" xml:space="preserve">
+        <value>目錄設定</value>
+    </data>
+    <data name="ExportCompleted" xml:space="preserve">
+        <value>匯出完成</value>
+    </data>
+    <data name="ExportFailedCaption" xml:space="preserve">
+        <value>匯出失敗</value>
+    </data>
+    <data name="ExportFailedMessage" xml:space="preserve">
+        <value>匯出檔案失敗。請查看日誌以獲取詳細資訊。</value>
+    </data>
+    <data name="ExportPakBtnLabel" xml:space="preserve">
+        <value>匯出資源</value>
+    </data>
+    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
+        <value>正在載入</value>
+    </data>
+    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
+        <value>檔案載入中，請勿重複操作</value>
+    </data>
+    <data name="FileNotSupportedPreviewMessage" xml:space="preserve">
+        <value>檔案不支援預覽。</value>
+    </data>
+    <data name="FileOpenedNoFoundCaption" xml:space="preserve">
+        <value>開啟的檔案不存在</value>
+    </data>
+    <data name="FileOpenedNoFoundMessage" xml:space="preserve">
+        <value>開啟的檔案不存在，是否刪除記錄？</value>
+    </data>
+    <data name="GIFImage" xml:space="preserve">
+        <value>GIF圖像</value>
+    </data>
+    <data name="GLTransmissionFormat" xml:space="preserve">
+        <value>glTF/glb檔案</value>
+    </data>
+    <data name="Granny3DFile" xml:space="preserve">
+        <value>Granny 3D檔案</value>
+    </data>
+    <data name="HomePage" xml:space="preserve">
+        <value>主頁</value>
+    </data>
+    <data name="IsExporting" xml:space="preserve">
+        <value>正在匯出</value>
+    </data>
+    <data name="JPEGImage" xml:space="preserve">
+        <value>JPEG圖像</value>
+    </data>
+    <data name="LanguageDescription" xml:space="preserve">
+        <value>選擇應用程式界面顯示的語言</value>
+    </data>
+    <data name="LanguageHelpText" xml:space="preserve">
+        <value>語言</value>
+    </data>
+    <data name="LarianResourceFile" xml:space="preserve">
+        <value>拉瑞安資源檔案</value>
+    </data>
+    <data name="LoadResourceFailed" xml:space="preserve">
+        <value>載入資源失敗</value>
+    </data>
+    <data name="Log" xml:space="preserve">
+        <value>日誌</value>
+    </data>
+    <data name="LogLevel" xml:space="preserve">
+        <value>日誌級別</value>
+    </data>
+    <data name="LogMessage" xml:space="preserve">
+        <value>日誌內容</value>
+    </data>
+    <data name="LogTime" xml:space="preserve">
+        <value>日誌時間</value>
+    </data>
+    <data name="LowTexDDSNotSupportedMessage" xml:space="preserve">
+        <value>Low-Tech DDS檔案不支援預覽。</value>
+    </data>
+    <data name="Mark" xml:space="preserve">
+        <value>星標</value>
+    </data>
+    <data name="MaxPreviewLinesDescription" xml:space="preserve">
+        <value>設定文字預覽中顯示的最大行數</value>
+    </data>
+    <data name="MaxPreviewLinesHeader" xml:space="preserve">
+        <value>最大預覽行數</value>
+    </data>
+    <data name="Meshes" xml:space="preserve">
+        <value>網格</value>
+    </data>
+    <data name="ModelMissingMeshes" xml:space="preserve">
+        <value>不支援預覽缺失網格的模型</value>
+    </data>
+    <data name="MultipleInstanceCaption" xml:space="preserve">
+        <value>軟體已執行</value>
+    </data>
+    <data name="MultipleInstanceMessage" xml:space="preserve">
+        <value>多執行個體可能導致資料被錯誤覆蓋，僅支援單執行個體執行。是否喚醒已開啟視窗？</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>開啟</value>
+    </data>
+    <data name="OpenedTime" xml:space="preserve">
+        <value>開啟時間</value>
+    </data>
+    <data name="OpenFileFailedCaption" xml:space="preserve">
+        <value>開啟檔案失敗</value>
+    </data>
+    <data name="OpenFileFailedMessage" xml:space="preserve">
+        <value>開啟檔案失敗。檔案可能已損毀或不是有效的套件檔案。</value>
+    </data>
+    <data name="OpenPakBtnLabel" xml:space="preserve">
+        <value>開啟資源</value>
+    </data>
+    <data name="PakFile" xml:space="preserve">
+        <value>封包檔案</value>
+    </data>
+    <data name="Path" xml:space="preserve">
+        <value>路徑</value>
+    </data>
+    <data name="PNGImage" xml:space="preserve">
+        <value>PNG圖像</value>
+    </data>
+    <data name="Preview" xml:space="preserve">
+        <value>預覽</value>
+    </data>
+    <data name="PreviewSettingHeader" xml:space="preserve">
+        <value>預覽設定</value>
+    </data>
+    <data name="Recent" xml:space="preserve">
+        <value>最近開啟檔案</value>
+    </data>
+    <data name="ReOpenFileCaption" xml:space="preserve">
+        <value>開啟新檔案</value>
+    </data>
+    <data name="ReOpenFileMessage" xml:space="preserve">
+        <value>目前正在瀏覽資源封存，是否關閉現有檔案並開啟新檔案？</value>
+    </data>
+    <data name="SaveFile" xml:space="preserve">
+        <value>儲存檔案</value>
+    </data>
+    <data name="Search" xml:space="preserve">
+        <value>搜尋</value>
+    </data>
+    <data name="SelectPak" xml:space="preserve">
+        <value>選擇一個封存檔案</value>
+    </data>
+    <data name="Settings" xml:space="preserve">
+        <value>設定</value>
+    </data>
+    <data name="TGAImage" xml:space="preserve">
+        <value>TGA圖像</value>
+    </data>
+    <data name="TIFFImage" xml:space="preserve">
+        <value>TIFF圖像</value>
+    </data>
+    <data name="UpdateAvailable" xml:space="preserve">
+        <value>偵測到新版本</value>
+    </data>
+    <data name="UpdateBtnContent" xml:space="preserve">
+        <value>更新</value>
+    </data>
+    <data name="UserInterfaceSettingsHeader" xml:space="preserve">
+        <value>使用者介面設定</value>
+    </data>
+    <data name="Version" xml:space="preserve">
+        <value>版本</value>
+    </data>
+    <data name="VirtualTextureFile" xml:space="preserve">
+        <value>虛擬材質檔案</value>
+    </data>
+    <data name="VorbisAudioFile" xml:space="preserve">
+        <value>Vorbis音訊檔案</value>
+    </data>
+    <data name="WhenIsExportingExitMessage" xml:space="preserve">
+        <value>正在匯出。請確認是否退出程式？</value>
+    </data>
+    <data name="WwiseAudioFile" xml:space="preserve">
+        <value>Wwise音訊檔案</value>
+    </data>
+    <data name="XmlFile" xml:space="preserve">
+        <value>XML檔案</value>
+    </data>
+    <data name="Zoom" xml:space="preserve">
+        <value>縮放</value>
+    </data>
+</root>
