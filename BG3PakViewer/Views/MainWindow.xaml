@@ -192,7 +192,7 @@
                          DataContext="{Binding PreviewVm}" />
             <ui:InfoBar
                 Grid.Row="2" Grid.Column="0"
-                Grid.ColumnSpan="2"
+                Grid.ColumnSpan="3"
                 Margin="0,0,0,100"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
