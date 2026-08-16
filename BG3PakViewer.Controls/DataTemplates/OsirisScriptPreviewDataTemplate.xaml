@@ -12,9 +12,11 @@
             <ComboBox ui:ControlHelper.Header="Goal" ItemsSource="{Binding Goals}" DisplayMemberPath="Name"
                       SelectedItem="{Binding SelectedGoal}"
                       MinWidth="300" />
-            <Button Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" MinWidth="100"
-                    Content="{I18N {x:Static l:LangKeys.Decompile}}"
-                    Command="{Binding DecompileScriptsCommand}" />
+            <Button Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Command="{Binding DecompileScriptsCommand}">
+                <ui:IconAndText Icon="{x:Static ui:SegoeFluentIcons.Code}"
+                                Content="{I18N {x:Static l:LangKeys.Decompile}}" />
+            </Button>
             <TextBox Grid.Row="1" IsReadOnly="True" Margin="0,10,0,0" Text="{Binding Scripts,Mode=OneWay}" />
         </Grid>
     </DataTemplate>
