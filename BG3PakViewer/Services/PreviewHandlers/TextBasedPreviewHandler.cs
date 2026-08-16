@@ -27,7 +27,9 @@ internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPre
     {
         return await Task.Run(() =>
         {
-            var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None).Take(maxLines);
+            var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
+            if (lines.Length <= maxLines) return text;
+            lines = [.. lines.Take(maxLines)];
             using var stringBuilder = ZString.CreateStringBuilder();
             foreach (var line in lines) stringBuilder.AppendLine(line);
             return stringBuilder.ToString();
