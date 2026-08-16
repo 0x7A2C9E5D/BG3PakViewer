@@ -21,6 +21,7 @@
             <ComboBox ui:ControlHelper.Header="{I18N {x:Static l:LangKeys.Meshes}}" ItemsSource="{Binding Meshes}"
                       SelectedIndex="{Binding SelectedModelIndex}" />
             <iwk:SimpleStackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                                  VerticalAlignment="Bottom"
                                   Spacing="10">
                 <Button Command="{Binding PreviewCommand}">
                     <ui:IconAndText Icon="{x:Static ui:SegoeFluentIcons.Preview}"
