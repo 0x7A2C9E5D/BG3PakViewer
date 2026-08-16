@@ -23,7 +23,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Update="Nerdbank.GitVersioning">
-          <Version>3.10.91</Version>
+            <Version>3.10.91</Version>
         </PackageReference>
     </ItemGroup>
 
@@ -39,7 +39,7 @@
             <DependentUpon>Strings.resx</DependentUpon>
         </EmbeddedResource>
         <EmbeddedResource Update="Strings.zh-hant.resx">
-          <DependentUpon>Strings.resx</DependentUpon>
+            <DependentUpon>Strings.resx</DependentUpon>
         </EmbeddedResource>
     </ItemGroup>
 

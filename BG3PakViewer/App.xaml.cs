@@ -74,6 +74,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IPreviewHandler, LocalizationPreviewHandler>()
             .AddSingleton<IPreviewHandler, ImagePreviewHandler>()
             .AddSingleton<IPreviewHandler, Model3DPreviewHandler>()
+            .AddSingleton<IPreviewHandler, OsirisPreviewHandler>()
             .AddSingleton<IPreviewService, PreviewService>()
             .AddSingleton<IExportService, ExportService>()
             .AddSingleton<IMessenger, WeakReferenceMessenger>()

@@ -9,11 +9,14 @@
             Source="/BG3PakViewer.Controls;component/DataTemplates/ModelPreviewDataTemplateTemplate.xaml" />
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewFileDataTemplate.xaml" />
+        <ResourceDictionary
+            Source="/BG3PakViewer.Controls;component/DataTemplates/OsirisScriptPreviewDataTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
                                 FolderTemplate="{StaticResource FolderNodeDataTemplate}"
                                 PlainTextFilePreviewTemplate="{StaticResource PlainTextFilePreviewTemplate}"
                                 ImageFilePreviewTemplate="{StaticResource ImageFilePreviewTemplate}"
                                 ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"
-                                NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}" />
+                                NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}"
+                                OsirisScriptPreviewTemplate="{StaticResource OsirisScriptPreviewDataTemplate}" />
 </ResourceDictionary>

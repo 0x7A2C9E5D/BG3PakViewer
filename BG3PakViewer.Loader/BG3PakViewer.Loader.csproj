@@ -20,16 +20,16 @@
 
     <ItemGroup>
         <PackageReference Include="Pfim" Version="0.11.4"/>
-        <PackageReference Include="Serilog" Version="4.4.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="4.1.0" />
+        <PackageReference Include="Serilog" Version="4.4.0"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="4.1.0"/>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.32.0.713">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.IO.Hashing" Version="10.0.11" />
+        <PackageReference Include="System.IO.Hashing" Version="10.0.11"/>
         <PackageReference Include="Ww2Ogg.Core" Version="1.0.0"/>
         <PackageReference Update="Nerdbank.GitVersioning">
-          <Version>3.10.91</Version>
+            <Version>3.10.91</Version>
         </PackageReference>
     </ItemGroup>
 

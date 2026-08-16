@@ -16,6 +16,8 @@ internal class PreviewTemplateSelector : DataTemplateSelector
 
     public DataTemplate? NotSupportedPreviewFileDataTemplate { get; set; }
 
+    public DataTemplate? OsirisScriptPreviewTemplate { get; set; }
+
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
     {
         return item switch
@@ -24,6 +26,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             Model3DFileViewModel => ModelFilePreviewTemplate,
             PlainTextFilePreviewViewModel => PlainTextFilePreviewTemplate,
             NotSupportedFileViewModel => NotSupportedPreviewFileDataTemplate,
+            OsirisScriptPreviewViewModel => OsirisScriptPreviewTemplate,
             _ => FolderTemplate
         };
     }
