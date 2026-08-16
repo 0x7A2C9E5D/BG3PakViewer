@@ -1,12 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using BG3PakViewer.Contracts;
+using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class OsirisScriptPreviewViewModel : ObservableObject
+public partial class OsirisScriptPreviewViewModel(IAppSettings appSettings) : ObservableObject
 {
     [ObservableProperty]
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
@@ -35,7 +37,7 @@ public partial class OsirisScriptPreviewViewModel : ObservableObject
         {
             await using var writer = new StringWriter();
             SelectedGoal.Goal?.MakeScript(writer, Story);
-            Scripts = writer.ToString();
+            Scripts =  await TextOperations.TruncateToLinesAsync(writer.ToString(), appSettings.MaxPreviewLines);
         }
     }
 }

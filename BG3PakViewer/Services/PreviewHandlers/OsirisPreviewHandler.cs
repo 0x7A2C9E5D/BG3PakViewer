@@ -1,11 +1,12 @@
 ﻿using System.IO;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Utils;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class OsirisPreviewHandler : IPreviewHandler
+public class OsirisPreviewHandler(IAppSettings appSettings) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {
@@ -18,7 +19,7 @@ public class OsirisPreviewHandler : IPreviewHandler
         {
             var reader = new StoryReader();
             var story = reader.Read(stream);
-            return new OsirisScriptPreviewViewModel { Story = story };
+            return new OsirisScriptPreviewViewModel(appSettings) { Story = story };
         });
     }
 }
