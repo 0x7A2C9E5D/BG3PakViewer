@@ -188,7 +188,7 @@
             </TreeView>
             <GridSplitter Grid.Row="2" Grid.Column="1" VerticalAlignment="Stretch" Width="1"
                           Background="Transparent" />
-            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" Margin="10,0,0,0"
+            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" Margin="10,10,0,0"
                          DataContext="{Binding PreviewVm}" />
             <ui:InfoBar
                 Grid.Row="2" Grid.Column="0"
