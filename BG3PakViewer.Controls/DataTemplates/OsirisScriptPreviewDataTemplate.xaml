@@ -8,7 +8,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <ComboBox ui:ControlHelper.Header="Goal" ItemsSource="{Binding Goals}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedGoal}"
+            <ComboBox ui:ControlHelper.Header="Goal" ItemsSource="{Binding Goals}" DisplayMemberPath="Name"
+                      SelectedItem="{Binding SelectedGoal}"
                       MinWidth="300" />
             <Button Grid.Row="0" HorizontalAlignment="Right" Content="Decompile"
                     Command="{Binding DecompileScriptsCommand}" />

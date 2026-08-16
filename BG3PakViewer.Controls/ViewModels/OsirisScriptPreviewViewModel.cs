@@ -37,7 +37,7 @@ public partial class OsirisScriptPreviewViewModel(IAppSettings appSettings) : Ob
         {
             await using var writer = new StringWriter();
             SelectedGoal.Goal?.MakeScript(writer, Story);
-            Scripts =  await TextOperations.TruncateToLinesAsync(writer.ToString(), appSettings.MaxPreviewLines);
+            Scripts = await TextOperations.TruncateToLinesAsync(writer.ToString(), appSettings.MaxPreviewLines);
         }
     }
 }
