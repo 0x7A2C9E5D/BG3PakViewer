@@ -2,7 +2,6 @@
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Utils;
-using Cysharp.Text;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 

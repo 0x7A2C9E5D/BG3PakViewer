@@ -13,7 +13,7 @@ internal class PreviewService(
     IEnumerable<IPreviewHandler> previewHandlers)
     : IPreviewService
 {
-    private readonly List<IPreviewHandler> _previewHandlers = previewHandlers.ToList();
+    private readonly List<IPreviewHandler> _previewHandlers = [.. previewHandlers];
     private bool _disposed;
 
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
