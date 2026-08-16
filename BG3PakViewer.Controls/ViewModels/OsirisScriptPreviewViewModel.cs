@@ -34,7 +34,7 @@ public partial class OsirisScriptPreviewViewModel : ObservableObject
         if (SelectedGoal != null)
             await Task.Run(async () =>
             {
-                using var writer = new StringWriter();
+                await using var writer = new StringWriter();
                 SelectedGoal.Goal?.MakeScript(writer, Story);
                 Scripts = writer.ToString();
             });
