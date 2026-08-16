@@ -101,14 +101,14 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             Log.Information("Searching for '{Query}'...", query);
             PackageTree = _packageService.BuildTree(query);
             Log.Information("Search completed.");
-        });
+        }, CancellationToken.None);
     }
 
     [RelayCommand]
     private async Task ClearSearchAsync(string query)
     {
         if (!_packageService.IsLoaded || !string.IsNullOrWhiteSpace(query)) return;
-        await Task.Run(() => { PackageTree = _packageService.BuildTree(); });
+        await Task.Run(() => { PackageTree = _packageService.BuildTree(); }, CancellationToken.None);
         Log.Information("Search query cleared.");
     }
 
@@ -150,7 +150,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         {
             await CleanupCurrentPackageAsync();
             return await LoadAndBuildTreeAsync(path);
-        });
+        }, CancellationToken.None);
         if (success)
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
@@ -387,7 +387,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (!IsExporting) return true;
         if (!await WeakReferenceMessenger.Default
                 .Send(new AsyncRequestMessage<bool>(), MessageTokens.CancelExport)) return false;
-        await _cancellationTokenSource!.CancelAsync();
+        await _cancellationTokenSource?.CancelAsync()!;
         IsExporting = false;
         return true;
     }

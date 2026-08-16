@@ -15,7 +15,7 @@ public partial class Model3DFileViewModel : ObservableObject
     [ObservableProperty] public partial Root? Data { get; set; }
 
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    [ObservableProperty] public partial IEnumerable<string>? Meshes { get; private set; }
+    [ObservableProperty] public partial string[]? Meshes { get; private set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PreviewCommand))]
@@ -34,7 +34,7 @@ public partial class Model3DFileViewModel : ObservableObject
             return;
         }
 
-        Meshes = value.Meshes.Select(x => x.Name).ToArray();
+        Meshes = [.. value.Meshes.Select(x => x.Name)];
         SelectedModelIndex = Meshes.Any() ? 0 : -1;
         Log.Information("Model3DFileViewModel.DataChanged: Meshes: {0}", Meshes.Count());
         Log.Information("Model3DFileViewModel.DataChanged: SelectedModelIndex: {0}", SelectedModelIndex);
