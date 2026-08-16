@@ -32,11 +32,10 @@ public partial class OsirisScriptPreviewViewModel : ObservableObject
     private async Task DecompileScriptsAsync()
     {
         if (SelectedGoal != null)
-            await Task.Run(async () =>
-            {
-                await using var writer = new StringWriter();
-                SelectedGoal.Goal?.MakeScript(writer, Story);
-                Scripts = writer.ToString();
-            });
+        {
+            await using var writer = new StringWriter();
+            SelectedGoal.Goal?.MakeScript(writer, Story);
+            Scripts = writer.ToString();
+        }
     }
 }
