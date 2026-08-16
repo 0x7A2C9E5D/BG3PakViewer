@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
+using BG3PakViewer.Utils;
 using Cysharp.Text;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
@@ -16,23 +17,10 @@ internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPre
         if (string.IsNullOrEmpty(text))
             return null;
 
-        var truncated = await TruncateTextToLines(text, appSettings.MaxPreviewLines);
+        var truncated = await TextOperations.TruncateToLinesAsync(text, appSettings.MaxPreviewLines);
 
         return new PlainTextFilePreviewViewModel { Data = truncated };
     }
 
     protected abstract Task<string?> GetTextAsync(Stream stream, string fileExtension);
-
-    private static async Task<string> TruncateTextToLines(string text, int maxLines)
-    {
-        return await Task.Run(() =>
-        {
-            var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
-            if (lines.Length <= maxLines) return text;
-            lines = [.. lines.Take(maxLines)];
-            using var stringBuilder = ZString.CreateStringBuilder();
-            foreach (var line in lines) stringBuilder.AppendLine(line);
-            return stringBuilder.ToString();
-        });
-    }
 }
