@@ -54,8 +54,8 @@ public static class FileExtensions
         return fileName.EndsWith("_lowtex.dds", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static bool IsOsirisScript(string fileName)
+    public static bool IsOsirisScript(string extension)
     {
-        return fileName.EndsWith(".osi", StringComparison.OrdinalIgnoreCase);
+        return extension.Equals(".osi", StringComparison.OrdinalIgnoreCase);
     }
 }
