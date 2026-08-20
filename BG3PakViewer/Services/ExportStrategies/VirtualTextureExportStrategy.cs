@@ -18,10 +18,9 @@ internal class VirtualTextureExportStrategy : IExportStrategy
         {
             try
             {
-                var fs = File.Create(path);
+                await using var fs = File.Create(path);
                 await stream.CopyToAsync(fs);
                 await fs.FlushAsync();
-                await fs.DisposeAsync();
                 return true;
             }
             catch (Exception e)
