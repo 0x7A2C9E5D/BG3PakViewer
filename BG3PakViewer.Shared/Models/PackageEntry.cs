@@ -28,6 +28,14 @@ public class PackageEntry
         };
         root.Add(rootNode);
 
+        // Index nodes by full path for O(1) lookups, instead of scanning each
+        // level's children linearly per segment (which made the whole build O(n²)
+        // for large PAKs).
+        var nodeIndex = new Dictionary<string, PackageEntry>(StringComparer.Ordinal)
+        {
+            [string.Empty] = rootNode
+        };
+
         foreach (var path in filePaths)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -46,16 +54,17 @@ public class PackageEntry
                     accumulatedPath.Append('/');
                 accumulatedPath.Append(name);
 
-                var node = currentNodes.FirstOrDefault(x => x.Name == name);
-                if (node == null)
+                var fullPath = accumulatedPath.ToString();
+                if (!nodeIndex.TryGetValue(fullPath, out var node))
                 {
                     node = new PackageEntry
                     {
                         Name = name,
-                        FullPath = accumulatedPath.ToString(),
+                        FullPath = fullPath,
                         IsFolder = !isFile
                     };
                     currentNodes.Add(node);
+                    nodeIndex[fullPath] = node;
                 }
 
                 if (!isFile)
