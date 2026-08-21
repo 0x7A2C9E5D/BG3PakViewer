@@ -36,7 +36,7 @@ public partial class Model3DFileViewModel : ObservableObject
 
         Meshes = [.. value.Meshes.Select(x => x.Name)];
         SelectedModelIndex = Meshes.Any() ? 0 : -1;
-        Log.Information("Model3DFileViewModel.DataChanged: Meshes: {0}", Meshes.Count());
+        Log.Information("Model3DFileViewModel.DataChanged: Meshes: {0}", Meshes.Length);
         Log.Information("Model3DFileViewModel.DataChanged: SelectedModelIndex: {0}", SelectedModelIndex);
     }
 
