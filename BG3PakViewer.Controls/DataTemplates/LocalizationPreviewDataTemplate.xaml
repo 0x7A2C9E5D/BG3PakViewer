@@ -38,6 +38,7 @@
                         TextAlignment="Center" />
                     <sf:GridTextColumn
                         ColumnSizer="AutoWithLastColumnFill"
+                        HeaderText="Content"
                         MappingName="Text"
                         MinimumWidth="300"
                         TextWrapping="WrapWithOverflow" />
