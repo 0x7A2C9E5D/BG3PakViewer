@@ -187,8 +187,8 @@
                 </i:Interaction.Triggers>
             </TreeView>
             <GridSplitter Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" Width="10"
-                          Background="Transparent" />
-            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" DataContext="{Binding PreviewVm}" />
+                          Background="Transparent" Margin="0,10,0,0"/>
+            <c:Previewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="2" DataContext="{Binding PreviewVm}" Margin="0,10,0,0"/>
             <ui:InfoBar
                 Grid.Row="2" Grid.Column="0"
                 Grid.ColumnSpan="3"
