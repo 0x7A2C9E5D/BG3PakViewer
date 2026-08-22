@@ -20,6 +20,8 @@ internal class PreviewTemplateSelector : DataTemplateSelector
 
     public DataTemplate? LarianResourcePreviewTemplate { get; set; }
 
+    public DataTemplate? LocalizationPreviewTemplate { get; set; }
+
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
     {
         return item switch
@@ -30,6 +32,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             NotSupportedFileViewModel => NotSupportedPreviewFileDataTemplate,
             OsirisScriptPreviewViewModel => OsirisScriptPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
+            LocalizationPreviewViewModel => LocalizationPreviewTemplate,
             _ => FolderTemplate
         };
     }

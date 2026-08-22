@@ -1,20 +1,24 @@
-﻿using System.IO;
-using BG3PakViewer.Contracts;
+using System.IO;
+using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class LocalizationPreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
+internal class LocalizationPreviewHandler : IPreviewHandler
 {
-    public override bool CanHandle(string fileExtension)
+    public bool CanHandle(string fileExtension)
     {
         return FileExtensions.IsLocalizationFormat(fileExtension);
     }
 
-    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
+    public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
         var resource = await LocalizationLoader.LoadAsync(stream);
-        return resource == null ? null : await LocalizationLoader.ExportAsync(resource);
+        if (resource == null) return null;
+
+        // Build the table rows off the UI thread so large localizations don't
+        // block the UI.
+        return await Task.Run(() => LocalizationPreviewViewModel.FromResource(resource));
     }
 }

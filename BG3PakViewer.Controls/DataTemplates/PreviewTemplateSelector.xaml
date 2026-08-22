@@ -13,6 +13,8 @@
             Source="/BG3PakViewer.Controls;component/DataTemplates/OsirisScriptPreviewDataTemplate.xaml" />
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/LarianResourcePreviewDataTemplate.xaml" />
+        <ResourceDictionary
+            Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewDataTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
                                 FolderTemplate="{StaticResource FolderNodeDataTemplate}"
@@ -21,5 +23,6 @@
                                 ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"
                                 NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}"
                                 OsirisScriptPreviewTemplate="{StaticResource OsirisScriptPreviewDataTemplate}"
-                                LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}" />
+                                LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
+                                LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}" />
 </ResourceDictionary>

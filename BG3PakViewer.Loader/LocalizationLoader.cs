@@ -11,6 +11,7 @@ public static class LocalizationLoader
     {
         try
         {
+            // .loca files are native binary Loca resources; parse them directly.
             return await Task.Run(() => LocaUtils.Load(stream, LocaFormat.Loca));
         }
         catch (Exception e)
