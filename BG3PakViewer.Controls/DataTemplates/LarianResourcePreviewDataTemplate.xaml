@@ -13,7 +13,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="320" MinWidth="220" />
+                <ColumnDefinition MinWidth="300" />
             </Grid.ColumnDefinitions>
 
             <TreeView x:Name="ResourceTree" Grid.Column="0"
