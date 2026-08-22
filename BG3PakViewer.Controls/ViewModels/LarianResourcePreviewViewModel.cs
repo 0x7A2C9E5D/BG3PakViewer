@@ -31,13 +31,13 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
 
         var version = new Version((int)resource.Metadata.MajorVersion, (int)resource.Metadata.MinorVersion,
             (int)resource.Metadata.Revision, (int)resource.Metadata.BuildNumber);
-        var originalTimestamp = resource.Metadata.Timestamp;
-        var timestamp = originalTimestamp != 0
-            ? DateTime.UnixEpoch.AddSeconds(originalTimestamp)
+        var timestamp = resource.Metadata.Timestamp;
+        var dateTime = timestamp != 0
+            ? DateTime.UnixEpoch.AddSeconds(timestamp)
                 .ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : "Unknown";
         root.AddAttribute("Version", version.ToString())
-            .AddAttribute("Timestamp", timestamp);
+            .AddAttribute("DateTime", dateTime);
 
         viewModel.RootNodes.Add(root);
         foreach (var region in resource.Regions.Values)
