@@ -27,19 +27,19 @@ public class LarianResourceNodeViewModel(string name, bool isRegion, Node? sourc
 
     private ObservableCollection<LarianAttributeViewModel> BuildAttributes()
     {
-        var list = new ObservableCollection<LarianAttributeViewModel>();
-        if (source?.Attributes is not { } sourceAttributes) return list;
+        var attributes = new ObservableCollection<LarianAttributeViewModel>();
+        if (source?.Attributes is not { } sourceAttributes) return attributes;
 
         foreach (var (key, attribute) in sourceAttributes)
         {
-            list.Add(new LarianAttributeViewModel
+            attributes.Add(new LarianAttributeViewModel
             {
-                Name = key,
+                Key = key,
                 Value = FormatAttributeValue(attribute)
             });
         }
 
-        return list;
+        return attributes;
     }
 
     private static string FormatAttributeValue(NodeAttribute attribute)
@@ -60,9 +60,9 @@ public class LarianResourceNodeViewModel(string name, bool isRegion, Node? sourc
 /// </summary>
 public class LarianAttributeViewModel
 {
-    public required string Name { get; init; }
+    public required string Key { get; init; }
 
     public required string Value { get; init; }
 
-    public string DisplayText => $"{Name}: {Value}";
+    public string DisplayText => $"{Key}: {Value}";
 }
