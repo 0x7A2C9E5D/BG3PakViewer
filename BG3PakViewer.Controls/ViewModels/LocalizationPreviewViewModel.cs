@@ -33,9 +33,12 @@ public class LocalizationPreviewViewModel
 /// </summary>
 public class LocalizationRowViewModel
 {
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Key { get; init; }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required ushort Version { get; init; }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Text { get; init; }
 }

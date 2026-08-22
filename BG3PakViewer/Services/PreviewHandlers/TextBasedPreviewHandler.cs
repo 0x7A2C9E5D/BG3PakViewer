@@ -11,7 +11,7 @@ internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPre
 
     public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
-        var text = await GetTextAsync(stream, fileExtension);
+        var text = await GetTextAsync(stream);
 
         if (string.IsNullOrEmpty(text))
             return null;
@@ -21,5 +21,5 @@ internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPre
         return new PlainTextFilePreviewViewModel { Data = truncated };
     }
 
-    protected abstract Task<string?> GetTextAsync(Stream stream, string fileExtension);
+    protected abstract Task<string?> GetTextAsync(Stream stream);
 }

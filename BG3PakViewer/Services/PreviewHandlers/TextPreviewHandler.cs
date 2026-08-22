@@ -11,7 +11,7 @@ internal class TextPreviewHandler(IAppSettings appSettings) : TextBasedPreviewHa
         return FileExtensions.IsPlainText(fileExtension);
     }
 
-    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
+    protected override async Task<string?> GetTextAsync(Stream stream)
     {
         using var reader = new StreamReader(stream, false);
         return await reader.ReadToEndAsync();
