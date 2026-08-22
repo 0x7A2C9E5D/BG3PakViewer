@@ -26,27 +26,11 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
     public static LarianResourcePreviewViewModel FromResource(Resource resource)
     {
         var viewModel = new LarianResourcePreviewViewModel();
-
-        // Top-level root wrappers, mirroring the main file tree.
         var root = new LarianResourceNodeViewModel("Root", true, null);
         viewModel.RootNodes.Add(root);
-
         foreach (var region in resource.Regions.Values)
             root.Children.Add(BuildNode(region, true));
-
-        viewModel.SelectedNode = viewModel.FindFirstNode();
         return viewModel;
-    }
-
-    private LarianResourceNodeViewModel? FindFirstNode()
-    {
-        var first = RootNodes.FirstOrDefault();
-        return first is { HasChildren: true } ? FindFirstNode(first) : first;
-    }
-
-    private static LarianResourceNodeViewModel FindFirstNode(LarianResourceNodeViewModel node)
-    {
-        return node.Children.Count > 0 ? FindFirstNode(node.Children[0]) : node;
     }
 
     private static LarianResourceNodeViewModel BuildNode(Node node, bool isRegion)
