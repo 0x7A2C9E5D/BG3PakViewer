@@ -1,20 +1,25 @@
-﻿using System.IO;
-using BG3PakViewer.Contracts;
+using System.IO;
+using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class LarianResourcePreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
+internal class LarianResourcePreviewHandler : IPreviewHandler
 {
-    public override bool CanHandle(string fileExtension)
+    public bool CanHandle(string fileExtension)
     {
-        return FileExtensions.IsLarianBinaryResource(fileExtension);
+        return FileExtensions.IsLarianResource(fileExtension);
     }
 
-    protected override async Task<string?> GetTextAsync(Stream stream, string fileExtension)
+    public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
         var resource = await ResourceLoader.LoadAsync(stream, fileExtension);
-        return resource == null ? null : await ResourceLoader.ExportAsync(resource);
+        if (resource == null) return null;
+
+        // Build the tree off the UI thread so large resources don't block the UI.
+        // Attributes are formatted lazily per selected node. No LSX string is
+        // materialised for previewing.
+        return await Task.Run(() => LarianResourcePreviewViewModel.FromResource(resource));
     }
 }

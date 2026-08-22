@@ -1,14 +1,14 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 
 namespace BG3PakViewer.Utils;
 
 public static class FileExtensions
 {
-    private static readonly ImmutableHashSet<string> LarianBinaryResources =
-        ImmutableHashSet.Create(".lsf", ".lsfx", ".lsb", ".lsbc", ".lsbs");
+    private static readonly ImmutableHashSet<string> LarianResourceFormats =
+        ImmutableHashSet.Create(".lsf", ".lsfx", ".lsb", ".lsbc", ".lsbs", ".lsx", ".lsj");
 
     private static readonly ImmutableHashSet<string> PlainTextFormats =
-        ImmutableHashSet.Create(".lsx", ".lsj", ".xml", ".json", ".lua", ".txt");
+        ImmutableHashSet.Create(".xml", ".json", ".lua", ".txt");
 
     private static readonly ImmutableHashSet<string> LocalizationFormats = ImmutableHashSet.Create(".loca");
 
@@ -19,9 +19,9 @@ public static class FileExtensions
     private static readonly ImmutableHashSet<string> BitmapImageFormats =
         ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".tga");
 
-    public static bool IsLarianBinaryResource(string extension)
+    public static bool IsLarianResource(string extension)
     {
-        return LarianBinaryResources.Contains(extension.ToLowerInvariant());
+        return LarianResourceFormats.Contains(extension.ToLowerInvariant());
     }
 
     public static bool IsPlainText(string extension)
