@@ -9,13 +9,9 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     underlying <see cref="Node"/> only when the node is selected, so building the
 ///     tree for large resources does not pay the cost of formatting every attribute.
 /// </summary>
-public class LarianResourceNodeViewModel(string name, bool isRegion, Node? source)
+public class LarianResourceNodeViewModel(string name, Node? source)
 {
     public string Name { get; } = name;
-
-    public bool IsRegion { get; } = isRegion;
-
-    public bool HasChildren => Children.Count > 0;
 
     public ObservableCollection<LarianResourceNodeViewModel> Children { get; } = [];
 
@@ -24,6 +20,16 @@ public class LarianResourceNodeViewModel(string name, bool isRegion, Node? sourc
     /// </summary>
     public ObservableCollection<LarianAttributeViewModel> Attributes =>
         field ??= BuildAttributes();
+
+    /// <summary>
+    ///     Adds an explicit attribute (used for synthetic nodes such as the resource
+    ///     version header that have no underlying <see cref="Node"/>).
+    /// </summary>
+    public LarianResourceNodeViewModel AddAttribute(string key, string value)
+    {
+        Attributes.Add(new LarianAttributeViewModel { Key = key, Value = value });
+        return this;
+    }
 
     private ObservableCollection<LarianAttributeViewModel> BuildAttributes()
     {
