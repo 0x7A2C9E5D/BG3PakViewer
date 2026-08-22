@@ -19,7 +19,7 @@ internal class LarianResourcePreviewHandler : IPreviewHandler
 
         // Build the tree off the UI thread so large resources don't block the UI.
         // Attributes are formatted lazily per selected node. No LSX string is
-        // materialised for previewing.
+        // materialized for previewing.
         return await Task.Run(() => LarianResourcePreviewViewModel.FromResource(resource));
     }
 }

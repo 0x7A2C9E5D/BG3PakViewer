@@ -15,14 +15,12 @@ public class LocalizationPreviewViewModel
     {
         var viewModel = new LocalizationPreviewViewModel();
         foreach (var entry in resource.Entries)
-        {
             viewModel.Rows.Add(new LocalizationRowViewModel
             {
                 Key = entry.Key,
                 Version = entry.Version,
                 Text = entry.Text
             });
-        }
 
         return viewModel;
     }

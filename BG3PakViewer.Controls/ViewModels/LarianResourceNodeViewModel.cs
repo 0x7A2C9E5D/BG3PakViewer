@@ -6,7 +6,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// <summary>
 ///     A single structural node in the Larian resource preview tree.
 ///     Represents a region or a node; its attributes are lazily loaded from the
-///     underlying <see cref="Node"/> only when the node is selected, so building the
+///     underlying <see cref="Node" /> only when the node is selected, so building the
 ///     tree for large resources does not pay the cost of formatting every attribute.
 /// </summary>
 public class LarianResourceNodeViewModel(string name, Node? source)
@@ -23,7 +23,7 @@ public class LarianResourceNodeViewModel(string name, Node? source)
 
     /// <summary>
     ///     Adds an explicit attribute (used for synthetic nodes such as the resource
-    ///     version header that have no underlying <see cref="Node"/>).
+    ///     version header that have no underlying <see cref="Node" />).
     /// </summary>
     public LarianResourceNodeViewModel AddAttribute(string key, string value)
     {
@@ -37,13 +37,11 @@ public class LarianResourceNodeViewModel(string name, Node? source)
         if (source?.Attributes is not { } sourceAttributes) return attributes;
 
         foreach (var (key, attribute) in sourceAttributes)
-        {
             attributes.Add(new LarianAttributeViewModel
             {
                 Key = key,
                 Value = FormatAttributeValue(attribute)
             });
-        }
 
         return attributes;
     }
