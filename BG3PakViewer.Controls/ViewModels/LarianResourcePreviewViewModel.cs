@@ -37,7 +37,7 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
                 .ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
             : "Unknown";
         root.AddAttribute("Version", version.ToString())
-            .AddAttribute("DateTime", dateTime);
+            .AddAttribute("Timestamp", dateTime);
 
         viewModel.RootNodes.Add(root);
         foreach (var region in resource.Regions.Values)
