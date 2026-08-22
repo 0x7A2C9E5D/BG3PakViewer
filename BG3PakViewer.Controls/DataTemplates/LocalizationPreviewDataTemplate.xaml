@@ -15,7 +15,7 @@
 
             <sf:SfDataGrid x:Name="SfDataGrid"
                            Grid.Row="0"
-                           ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=TwoWay}"
+                           ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=OneWay}"
                            AutoGenerateColumns="False"
                            AllowSorting="True"
                            AllowResizingColumns="True"
