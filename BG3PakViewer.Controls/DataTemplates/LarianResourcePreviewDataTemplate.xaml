@@ -4,86 +4,141 @@
                     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
     <!--
-      Preview for Larian resource files: a structural tree on the left and a
-      detail panel on the right showing the selected node's attributes. The tree
-      mirrors the main file tree (gray border + IconAndText) so both panels read
-      as siblings. Attributes are shown in the detail panel, never on a tree row.
+      Preview for Larian resource files in file-explorer style: a WinUI-3-like
+      breadcrumb bar on top (click to jump back), and a folder/file list below.
+      Double-clicking a folder navigates into it; selecting an item shows its
+      attributes on the right.
     -->
     <DataTemplate x:Key="LarianResourcePreviewDataTemplate" DataType="{x:Type vm:LarianResourcePreviewViewModel}">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="320" MinWidth="220" />
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <TreeView x:Name="ResourceTree" Grid.Column="0"
-                      ItemsSource="{Binding RootNodes}"
-                      BorderBrush="Gray" BorderThickness="1" Padding="10"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      VirtualizingStackPanel.CacheLength="30"
-                      ScrollViewer.CanContentScroll="True"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Children}"
-                                              DataType="{x:Type vm:LarianResourceNodeViewModel}">
-                        <ui:IconAndText>
-                            <ui:IconAndText.Style>
-                                <Style TargetType="ui:IconAndText">
-                                    <Setter Property="Content" Value="{Binding Name}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsRegion}" Value="True">
-                                            <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
-                                            <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Folder}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsRegion}" Value="False">
-                                            <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
-                                            <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Document}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ui:IconAndText.Style>
-                        </ui:IconAndText>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectedItemChanged">
-                        <i:InvokeCommandAction Command="{Binding SelectNodeCommand}"
-                                               CommandParameter="{Binding SelectedItem, ElementName=ResourceTree, Mode=OneWay}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </TreeView>
-
-            <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch" Background="Transparent"
-                          ResizeBehavior="PreviousAndNext" />
-
-            <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1" Padding="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Text="{Binding SelectedNode.Name, FallbackValue=Properties}"
-                               FontWeight="SemiBold" Margin="0,0,0,8" />
-
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
-                        <!-- ReSharper disable once Xaml.PossibleNullReferenceException -->
-                        <ItemsControl ItemsSource="{Binding SelectedNode.Attributes}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:LarianAttributeViewModel}">
-                                    <TextBlock Text="{Binding DisplayText}"
-                                               TextWrapping="Wrap"
-                                               Margin="0,2,0,2" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
+            <!-- Breadcrumb bar (WinUI 3 style) -->
+            <Border Grid.Row="0" Margin="0,0,0,8" Padding="8,4"
+                    HorizontalAlignment="Left">
+                <ItemsControl ItemsSource="{Binding Breadcrumbs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:LarianResourceNodeViewModel}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <!-- Crumb: clickable to jump back -->
+                                <Button Command="{Binding DataContext.NavigateToCommand,
+                                                  RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                        CommandParameter="{Binding}"
+                                        Background="Transparent" BorderThickness="0" Padding="6,3">
+                                    <ui:IconAndText VerticalAlignment="Center">
+                                        <ui:IconAndText.Style>
+                                            <Style TargetType="ui:IconAndText">
+                                                <Setter Property="Content" Value="{Binding Name}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRegion}" Value="True">
+                                                        <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                                        <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Folder}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsRegion}" Value="False">
+                                                        <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                                        <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Document}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:IconAndText.Style>
+                                    </ui:IconAndText>
+                                </Button>
+                                <!-- Separator, except after the last crumb -->
+                                <TextBlock Text="›" Margin="4,0" VerticalAlignment="Center"
+                                           Foreground="Gray" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="320" MinWidth="220" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Folder / file list (explorer style) -->
+                <ListView x:Name="ExplorerList" Grid.Column="0"
+                          ItemsSource="{Binding CurrentItems}"
+                          BorderBrush="Gray" BorderThickness="1"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          VirtualizingStackPanel.CacheLength="30"
+                          ScrollViewer.CanContentScroll="True">
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:LarianResourceNodeViewModel}">
+                            <ui:IconAndText>
+                                <ui:IconAndText.Style>
+                                    <Style TargetType="ui:IconAndText">
+                                        <Setter Property="Content" Value="{Binding Name}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsRegion}" Value="True">
+                                                <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                                <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Folder}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsRegion}" Value="False">
+                                                <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
+                                                <Setter Property="Icon" Value="{x:Static ui:SegoeFluentIcons.Document}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:IconAndText.Style>
+                            </ui:IconAndText>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SelectItemCommand}"
+                                                   CommandParameter="{Binding SelectedItem, ElementName=ExplorerList, Mode=OneWay}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding OpenFolderCommand}"
+                                                   CommandParameter="{Binding SelectedItem, ElementName=ExplorerList, Mode=OneWay}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListView>
+
+                <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
+                              VerticalAlignment="Stretch" Background="Transparent"
+                              ResizeBehavior="PreviousAndNext" />
+
+                <!-- Selected item attributes -->
+                <Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="{Binding SelectedItem.Name, FallbackValue=Properties}"
+                                   FontWeight="SemiBold" Margin="0,0,0,8" />
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <!-- ReSharper disable once Xaml.PossibleNullReferenceException -->
+                            <ItemsControl ItemsSource="{Binding SelectedItem.Attributes}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:LarianAttributeViewModel}">
+                                        <TextBlock Text="{Binding DisplayText}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,2,0,2" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
