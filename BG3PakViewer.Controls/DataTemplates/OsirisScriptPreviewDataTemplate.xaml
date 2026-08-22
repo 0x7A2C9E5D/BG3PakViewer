@@ -9,9 +9,17 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <ComboBox ui:ControlHelper.Header="Goal" ItemsSource="{Binding Goals}" DisplayMemberPath="Name"
-                      SelectedItem="{Binding SelectedGoal}"
-                      MinWidth="300" />
+            <ComboBox ItemsSource="{Binding Goals}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedGoal}"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      VirtualizingPanel.CacheLength="50"
+                      ScrollViewer.CanContentScroll="True">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
             <Button Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                     Command="{Binding DecompileScriptsCommand}">
                 <ui:IconAndText Icon="{x:Static ui:SegoeFluentIcons.Code}"
