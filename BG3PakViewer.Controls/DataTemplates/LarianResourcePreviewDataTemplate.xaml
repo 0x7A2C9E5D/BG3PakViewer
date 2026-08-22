@@ -55,7 +55,7 @@
                 </i:Interaction.Triggers>
             </TreeView>
 
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"
+            <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
                           VerticalAlignment="Stretch" Background="Transparent"
                           ResizeBehavior="PreviousAndNext" />
 
