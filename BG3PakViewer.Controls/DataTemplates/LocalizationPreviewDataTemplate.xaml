@@ -22,23 +22,22 @@
                            HeaderRowHeight="28"
                            RowHeight="28"
                            SelectionMode="Single"
-                           NavigationMode="Row">
+                           NavigationMode="Row"
+                           EnableDataVirtualization="True">
                 <sf:SfDataGrid.Columns>
                     <sf:GridTextColumn
                         ColumnSizer="SizeToCells"
                         HeaderText="Id"
                         MappingName="Key"
-                        MinimumWidth="220"
-                        TextAlignment="Left" />
+                        MinimumWidth="300"
+                        TextAlignment="Center" />
                     <sf:GridTextColumn
                         ColumnSizer="SizeToHeader"
-                        HeaderText="Version"
                         MappingName="Version"
                         MinimumWidth="80"
                         TextAlignment="Center" />
                     <sf:GridTextColumn
                         ColumnSizer="AutoWithLastColumnFill"
-                        HeaderText="Text"
                         MappingName="Text"
                         MinimumWidth="300"
                         TextWrapping="WrapWithOverflow" />
