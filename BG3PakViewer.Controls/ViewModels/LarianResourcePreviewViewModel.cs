@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LSLib.LS;
@@ -28,12 +29,15 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
         var viewModel = new LarianResourcePreviewViewModel();
         var root = new LarianResourceNodeViewModel("Root", null);
 
-        // Show the resource metadata (version/build) when the root is selected.
-        root.AddAttribute("MajorVersion", resource.Metadata.MajorVersion.ToString())
-            .AddAttribute("MinorVersion", resource.Metadata.MinorVersion.ToString())
-            .AddAttribute("Revision", resource.Metadata.Revision.ToString())
-            .AddAttribute("BuildNumber", resource.Metadata.BuildNumber.ToString())
-            .AddAttribute("Timestamp", resource.Metadata.Timestamp.ToString());
+        var version = new Version((int)resource.Metadata.MajorVersion, (int)resource.Metadata.MinorVersion,
+            (int)resource.Metadata.Revision, (int)resource.Metadata.BuildNumber);
+        var originalTimestamp = resource.Metadata.Timestamp;
+        var timestamp = originalTimestamp != 0
+            ? DateTime.UnixEpoch.AddSeconds(originalTimestamp)
+                .ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
+            : "Unknown";
+        root.AddAttribute("Version", version.ToString())
+            .AddAttribute("Timestamp", timestamp);
 
         viewModel.RootNodes.Add(root);
         foreach (var region in resource.Regions.Values)
