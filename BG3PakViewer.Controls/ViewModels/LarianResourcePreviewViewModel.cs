@@ -28,7 +28,6 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
     {
         var viewModel = new LarianResourcePreviewViewModel();
         var root = new LarianResourceNodeViewModel("Root", null);
-
         var version = new Version((int)resource.Metadata.MajorVersion, (int)resource.Metadata.MinorVersion,
             (int)resource.Metadata.Revision, (int)resource.Metadata.BuildNumber);
         var timestamp = resource.Metadata.Timestamp;
@@ -38,11 +37,9 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
             : "Unknown";
         root.AddAttribute("Version", version.ToString())
             .AddAttribute("Timestamp", dateTime);
-
         viewModel.RootNodes.Add(root);
         foreach (var region in resource.Regions.Values)
             root.Children.Add(BuildNode(region, true));
-
         // Select the root by default so the metadata is shown on open.
         viewModel.SelectedNode = root;
         return viewModel;
@@ -51,12 +48,9 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
     private static LarianResourceNodeViewModel BuildNode(Node node, bool isRegion)
     {
         var name = isRegion ? ((Region)node).RegionName : node.Name ?? string.Empty;
-
         var nodeViewModel = new LarianResourceNodeViewModel(name, node);
-
         foreach (var child in node.Children.Values.SelectMany(childGroup => childGroup))
             nodeViewModel.Children.Add(BuildNode(child, false));
-
         return nodeViewModel;
     }
 }

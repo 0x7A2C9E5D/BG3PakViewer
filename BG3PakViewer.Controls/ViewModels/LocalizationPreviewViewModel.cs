@@ -21,7 +21,6 @@ public class LocalizationPreviewViewModel
                 Version = entry.Version,
                 Text = entry.Text
             });
-
         return viewModel;
     }
 }
