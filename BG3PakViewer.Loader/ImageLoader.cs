@@ -1,4 +1,5 @@
 using System.IO;
+using BG3PakViewer.Utils;
 using Pfim;
 using Serilog;
 using SixLabors.ImageSharp;
@@ -12,24 +13,18 @@ public static class ImageLoader
 {
     public static async Task<Image?> LoadAsync(Stream stream, string extension)
     {
-        return extension.ToLowerInvariant() switch
-        {
-            ".dds" => await LoadTextureImageAsync(stream),
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
-                => await LoadStandardImageAsync(stream),
-            _ => throw new NotSupportedException($"Unsupported image format: {extension}")
-        };
+        if (FileExtensions.IsTextureFormat(extension))
+            return await LoadTextureImageAsync(stream);
+        if (FileExtensions.IsBitmapImage(extension))
+            return await LoadStandardImageAsync(stream);
+        throw new NotSupportedException($"Unsupported image format: {extension}");
     }
 
     public static async Task<bool> ExportAsync(Image images, string path)
     {
-        var extension = Path.GetExtension(path).ToLowerInvariant();
-        return extension switch
-        {
-            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".tiff" or ".tif" or ".tga"
-                => await ExportStandardImageAsync(images, path),
-            _ => throw new NotSupportedException($"Unsupported image format: {extension}")
-        };
+        if (!FileExtensions.IsBitmapImage(Path.GetExtension(path)))
+            throw new NotSupportedException($"Unsupported image format: {Path.GetExtension(path)}");
+        return await ExportStandardImageAsync(images, path);
     }
 
     private static async Task<Image?> LoadStandardImageAsync(Stream stream)
