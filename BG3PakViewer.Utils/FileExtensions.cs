@@ -8,7 +8,7 @@ public static class FileExtensions
         ImmutableHashSet.Create(".lsf", ".lsfx", ".lsb", ".lsbc", ".lsbs", ".lsx", ".lsj");
 
     private static readonly ImmutableHashSet<string> PlainTextFormats =
-        ImmutableHashSet.Create(".xml", ".json", ".lua", ".txt", ".xaml");
+        ImmutableHashSet.Create(".xml", ".json", ".lua", ".txt", ".xaml", ".ann", ".anc", ".khn");
 
     private static readonly ImmutableHashSet<string> LocalizationFormats = ImmutableHashSet.Create(".loca");
 
