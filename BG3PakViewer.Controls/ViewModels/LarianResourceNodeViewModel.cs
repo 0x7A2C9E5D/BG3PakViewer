@@ -35,14 +35,12 @@ public class LarianResourceNodeViewModel(string name, Node? source)
     {
         var attributes = new ObservableCollection<LarianAttributeViewModel>();
         if (source?.Attributes is not { } sourceAttributes) return attributes;
-
         foreach (var (key, attribute) in sourceAttributes)
             attributes.Add(new LarianAttributeViewModel
             {
                 Key = key,
                 Value = FormatAttributeValue(attribute)
             });
-
         return attributes;
     }
 
