@@ -2,7 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:dt="clr-namespace:BG3PakViewer.Controls.DataTemplateSelectors">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/FolderNodeDataTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/ImagePreviewTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/PlainTextPreviewTemplate.xaml" />
         <ResourceDictionary
@@ -17,7 +16,6 @@
             Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
-                                FolderTemplate="{StaticResource FolderNodeDataTemplate}"
                                 PlainTextFilePreviewTemplate="{StaticResource PlainTextFilePreviewTemplate}"
                                 ImageFilePreviewTemplate="{StaticResource ImageFilePreviewTemplate}"
                                 ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"

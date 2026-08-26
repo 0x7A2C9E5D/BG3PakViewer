@@ -6,8 +6,6 @@ namespace BG3PakViewer.Controls.DataTemplateSelectors;
 
 internal class PreviewTemplateSelector : DataTemplateSelector
 {
-    public DataTemplate? FolderTemplate { get; set; }
-
     public DataTemplate? ImageFilePreviewTemplate { get; set; }
 
     public DataTemplate? ModelFilePreviewTemplate { get; set; }
@@ -33,7 +31,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             OsirisScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
-            _ => FolderTemplate
+            _ => null
         };
     }
 }
