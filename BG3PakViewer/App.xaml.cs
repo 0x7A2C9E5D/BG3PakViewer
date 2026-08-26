@@ -49,9 +49,9 @@ public sealed partial class App : IDisposable
             .AddSingleton<ICultureMatcher, CultureMatcher>()
             .AddSingleton<ICultureResolver, CultureResolver>()
             .AddSingleton<ILogAccessService, LogAccessService>()
-            .AddSingleton<IConfigService, ConfigService>()
+            .AddSingleton<ISettingsPersistenceService, SettingsPersistenceService>()
             .AddSingleton<IAppSettings, AppSettings>(x => x
-                .GetRequiredService<IConfigService>().Load<AppSettings>())
+                .GetRequiredService<ISettingsPersistenceService>().Load<AppSettings>())
             .AddSingleton<IShellOpenService, ShellOpenService>()
             .AddSingleton<ISettingsManagerService, SettingsManagerService>()
             .AddSingleton<IPackageService, PackageService>()
@@ -189,7 +189,7 @@ public sealed partial class App : IDisposable
 
     protected override void OnExit(ExitEventArgs e)
     {
-        Ioc.Default.GetRequiredService<IConfigService>()
+        Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
             .Save(Ioc.Default.GetRequiredService<IAppSettings>());
         Dispose();
     }

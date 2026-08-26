@@ -1,6 +1,6 @@
 ﻿namespace BG3PakViewer.Services;
 
-internal interface IConfigService
+internal interface ISettingsPersistenceService
 {
     public void Save<T>(T settings);
 

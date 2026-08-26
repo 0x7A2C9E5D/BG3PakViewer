@@ -7,7 +7,7 @@ using BG3PakViewer.Models;
 
 namespace BG3PakViewer.Services;
 
-internal class ConfigService : IConfigService
+internal class SettingsPersistenceService : ISettingsPersistenceService
 {
     private readonly string _filePath;
 
@@ -22,11 +22,11 @@ internal class ConfigService : IConfigService
         }
     };
 
-    public ConfigService() : this(AppPaths.ConfigPath)
+    public SettingsPersistenceService() : this(AppPaths.ConfigPath)
     {
     }
 
-    public ConfigService(string filePath)
+    public SettingsPersistenceService(string filePath)
     {
         _filePath = filePath;
         var configDirectory = Directory.GetParent(filePath)!.FullName;
