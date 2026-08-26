@@ -6,7 +6,7 @@
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/ImagePreviewTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/PlainTextPreviewTemplate.xaml" />
         <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/ModelPreviewTemplate.xaml" />
+            Source="/BG3PakViewer.Controls;component/DataTemplates/Model3DPreviewTemplate.xaml" />
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewTemplate.xaml" />
         <ResourceDictionary

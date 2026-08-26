@@ -27,7 +27,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
         return item switch
         {
             ImagePreviewViewModel => ImageFilePreviewTemplate,
-            ModelPreviewViewModel => ModelFilePreviewTemplate,
+            Model3DPreviewViewModel => ModelFilePreviewTemplate,
             PlainTextPreviewViewModel => PlainTextFilePreviewTemplate,
             NotSupportedPreviewViewModel => NotSupportedPreviewFileDataTemplate,
             OsirisScriptsPreviewViewModel => OsirisScriptPreviewTemplate,

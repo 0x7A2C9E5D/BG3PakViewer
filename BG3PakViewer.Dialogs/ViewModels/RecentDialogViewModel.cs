@@ -22,7 +22,7 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
             .CollectionChanged += OnRecentItemsOnCollectionChanged;
     }
 
-    public ObservableCollection<IRecentItem> RecentItems => _recentFilesService.RecentItems;
+    public ObservableCollection<IRecentFileEntry> RecentItems => _recentFilesService.RecentItems;
 
     public event EventHandler? RequestClose;
 
@@ -43,26 +43,26 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
     }
 
     [RelayCommand]
-    private async Task Open(IRecentItem recentItem)
+    private async Task Open(IRecentFileEntry recentFileEntry)
     {
-        if (!File.Exists(recentItem.FilePath))
-            await HandleMissingFile(recentItem);
+        if (!File.Exists(recentFileEntry.FilePath))
+            await HandleMissingFile(recentFileEntry);
         else
-            HandleExistingFile(recentItem);
+            HandleExistingFile(recentFileEntry);
     }
 
-    private void HandleExistingFile(IRecentItem recentItem)
+    private void HandleExistingFile(IRecentFileEntry recentFileEntry)
     {
         RequestClose?.Invoke(this, EventArgs.Empty);
-        _ = WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(recentItem.FilePath),
+        _ = WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(recentFileEntry.FilePath),
             MessageTokens.RecentFileOpened);
     }
 
-    private async Task HandleMissingFile(IRecentItem recentItem)
+    private async Task HandleMissingFile(IRecentFileEntry recentFileEntry)
     {
-        LogMissingFile(recentItem.FilePath);
-        if (await NotifyFileNotFound(recentItem.FilePath))
-            _recentFilesService.RemoveRecentFile(recentItem);
+        LogMissingFile(recentFileEntry.FilePath);
+        if (await NotifyFileNotFound(recentFileEntry.FilePath))
+            _recentFilesService.RemoveRecentFile(recentFileEntry);
     }
 
     private static async Task<bool> NotifyFileNotFound(string filePath)

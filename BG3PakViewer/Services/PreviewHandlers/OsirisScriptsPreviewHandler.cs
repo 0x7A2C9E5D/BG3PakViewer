@@ -6,7 +6,7 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class OsirisPreviewHandler(IAppSettings appSettings) : IPreviewHandler
+public class OsirisScriptsPreviewHandler(IAppSettings appSettings) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {

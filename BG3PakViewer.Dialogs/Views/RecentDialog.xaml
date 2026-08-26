@@ -127,7 +127,7 @@
                     MappingName="IsMarked"
                     MinimumWidth="100">
                     <sf:GridTemplateColumn.CellTemplate>
-                        <DataTemplate DataType="{x:Type c:IRecentItem}">
+                        <DataTemplate DataType="{x:Type c:IRecentFileEntry}">
                             <CheckBox
                                 HorizontalAlignment="Center"
                                 IsChecked="{Binding IsMarked}"

@@ -4,7 +4,7 @@ namespace BG3PakViewer.Contracts;
 
 public interface IAppSettings
 {
-    public ObservableCollection<IRecentItem> RecentItems { get; }
+    public ObservableCollection<IRecentFileEntry> RecentItems { get; }
 
     public string Language { get; set; }
 

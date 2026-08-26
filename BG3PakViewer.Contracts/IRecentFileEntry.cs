@@ -1,6 +1,6 @@
 ﻿namespace BG3PakViewer.Contracts;
 
-public interface IRecentItem
+public interface IRecentFileEntry
 {
     public string FilePath { get; }
 

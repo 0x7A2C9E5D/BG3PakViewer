@@ -17,8 +17,8 @@ internal class ConfigService : IConfigService
         Converters =
         {
             new JsonStringEnumConverter(),
-            new InterfaceJsonConverter<IRecentItem, RecentItem>(),
-            new ObservableCollectionJsonConverter<IRecentItem>()
+            new InterfaceJsonConverter<IRecentFileEntry, RecentFileEntry>(),
+            new ObservableCollectionJsonConverter<IRecentFileEntry>()
         }
     };
 

@@ -5,9 +5,9 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
-internal class RecentFilesService(ObservableCollection<IRecentItem> recentItems) : IRecentFilesService
+internal class RecentFilesService(ObservableCollection<IRecentFileEntry> recentItems) : IRecentFilesService
 {
-    public ObservableCollection<IRecentItem> RecentItems => recentItems;
+    public ObservableCollection<IRecentFileEntry> RecentItems => recentItems;
 
     public void AddOrUpdateRecentFile(string filePath)
     {
@@ -21,16 +21,16 @@ internal class RecentFilesService(ObservableCollection<IRecentItem> recentItems)
         }
         else
         {
-            recentItems.Add(new RecentItem(filePath, DateTime.Now));
+            recentItems.Add(new RecentFileEntry(filePath, DateTime.Now));
             Log.Information("Added new recent file: {FilePath}", filePath);
         }
     }
 
-    public void RemoveRecentFile(IRecentItem recentItem)
+    public void RemoveRecentFile(IRecentFileEntry recentFileEntry)
     {
-        if (recentItems.Remove(recentItem))
-            Log.Information("Removed recent file: {FilePath}", recentItem.FilePath);
+        if (recentItems.Remove(recentFileEntry))
+            Log.Information("Removed recent file: {FilePath}", recentFileEntry.FilePath);
         else
-            Log.Error("Failed to remove recent file: {FilePath}", recentItem.FilePath);
+            Log.Error("Failed to remove recent file: {FilePath}", recentFileEntry.FilePath);
     }
 }

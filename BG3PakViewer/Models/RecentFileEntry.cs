@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BG3PakViewer.Models;
 
-internal partial class RecentItem : ObservableObject, IRecentItem
+internal partial class RecentFileEntry : ObservableObject, IRecentFileEntry
 {
-    public RecentItem(string filePath, DateTime openedTime, bool isMarked = false)
+    public RecentFileEntry(string filePath, DateTime openedTime, bool isMarked = false)
     {
         IsMarked = isMarked;
         FilePath = filePath;

@@ -12,7 +12,7 @@ internal partial class AppSettings : ObservableObject, IAppSettings
     }
 
     [JsonConstructor]
-    public AppSettings(ObservableCollection<IRecentItem> recentItems, string language)
+    public AppSettings(ObservableCollection<IRecentFileEntry> recentItems, string language)
     {
         Language = language;
         RecentItems = [.. recentItems];
@@ -20,7 +20,7 @@ internal partial class AppSettings : ObservableObject, IAppSettings
 
     [ObservableProperty] public partial string Language { get; set; } = string.Empty;
 
-    public ObservableCollection<IRecentItem> RecentItems { get; } = [];
+    public ObservableCollection<IRecentFileEntry> RecentItems { get; } = [];
 
     [JsonIgnore] public string NexusModUrl => "https://www.nexusmods.com/baldursgate3/mods/22713";
 
