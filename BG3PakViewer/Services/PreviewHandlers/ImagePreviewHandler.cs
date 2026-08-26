@@ -17,6 +17,6 @@ internal class ImagePreviewHandler : IPreviewHandler
     public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
         using var image = await ImageLoader.LoadAsync(stream, fileExtension);
-        return image is null ? null : new ImageFileViewModel { Data = image.ToBitmapSource() };
+        return image is null ? null : new ImagePreviewViewModel { Data = image.ToBitmapSource() };
     }
 }

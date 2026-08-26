@@ -21,9 +21,9 @@ internal class Model3DPreviewHandler : IPreviewHandler
         if (root == null)
             return null;
         if (root.Meshes != null && root.Meshes.Count != 0)
-            return new Model3DFileViewModel { Data = root };
+            return new ModelPreviewViewModel { Data = root };
         Log.Warning("Model has no meshes");
-        return new NotSupportedFileViewModel
+        return new NotSupportedPreviewViewModel
         {
             HelpText = Strings.ModelMissingMeshes
         };

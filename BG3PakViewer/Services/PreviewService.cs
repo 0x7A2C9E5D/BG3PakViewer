@@ -45,7 +45,7 @@ internal class PreviewService(
         }
     }
 
-    private NotSupportedFileViewModel? ValidatePreviewRequest(PackageEntry node)
+    private NotSupportedPreviewViewModel? ValidatePreviewRequest(PackageEntry node)
     {
         var fileName = Path.GetFileName(node.FullPath);
         if (FileExtensions.IsLowTexTexture(fileName))
@@ -89,8 +89,8 @@ internal class PreviewService(
         }
     }
 
-    private static NotSupportedFileViewModel CreateNotSupportedViewModel(string helpText)
+    private static NotSupportedPreviewViewModel CreateNotSupportedViewModel(string helpText)
     {
-        return new NotSupportedFileViewModel { HelpText = helpText };
+        return new NotSupportedPreviewViewModel { HelpText = helpText };
     }
 }

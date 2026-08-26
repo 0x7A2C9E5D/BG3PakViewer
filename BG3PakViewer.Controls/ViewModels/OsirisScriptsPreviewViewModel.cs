@@ -8,15 +8,15 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class OsirisScriptPreviewViewModel(IAppSettings appSettings) : ObservableObject
+public partial class OsirisScriptsPreviewViewModel(IAppSettings appSettings) : ObservableObject
 {
     [ObservableProperty]
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public partial Story? Story { get; set; }
 
-    [ObservableProperty] public partial GoalViewModel? SelectedGoal { get; set; }
+    [ObservableProperty] public partial OsirisGoalItemViewModel? SelectedGoal { get; set; }
 
-    public ObservableCollection<GoalViewModel> Goals { get; } = [];
+    public ObservableCollection<OsirisGoalItemViewModel> Goals { get; } = [];
 
     [ObservableProperty] public partial string? Scripts { get; private set; }
 
@@ -25,7 +25,7 @@ public partial class OsirisScriptPreviewViewModel(IAppSettings appSettings) : Ob
         Goals.Clear();
         if (value is null) return;
         foreach (var goal in value.Goals.Values)
-            Goals.Add(new GoalViewModel { Goal = goal });
+            Goals.Add(new OsirisGoalItemViewModel { Goal = goal });
         if (Goals.Count > 0)
             SelectedGoal = Goals[0];
     }

@@ -18,7 +18,7 @@ internal abstract class TextBasedPreviewHandler(IAppSettings appSettings) : IPre
 
         var truncated = await TextOperations.TruncateToLinesAsync(text, appSettings.MaxPreviewLines);
 
-        return new PlainTextFilePreviewViewModel { Data = truncated };
+        return new PlainTextPreviewViewModel { Data = truncated };
     }
 
     protected abstract Task<string?> GetTextAsync(Stream stream);

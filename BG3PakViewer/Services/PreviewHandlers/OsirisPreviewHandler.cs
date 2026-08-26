@@ -19,7 +19,7 @@ public class OsirisPreviewHandler(IAppSettings appSettings) : IPreviewHandler
         {
             var reader = new StoryReader();
             var story = reader.Read(stream);
-            return new OsirisScriptPreviewViewModel(appSettings) { Story = story };
+            return new OsirisScriptsPreviewViewModel(appSettings) { Story = story };
         });
     }
 }

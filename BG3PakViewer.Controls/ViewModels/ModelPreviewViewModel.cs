@@ -9,7 +9,7 @@ using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class Model3DFileViewModel : ObservableObject
+public partial class ModelPreviewViewModel : ObservableObject
 {
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     [ObservableProperty] public partial Root? Data { get; set; }

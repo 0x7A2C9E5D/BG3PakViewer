@@ -8,7 +8,7 @@
                     xmlns:dx="clr-namespace:HelixToolkit.SharpDX;assembly=HelixToolkit.SharpDX"
                     xmlns:iwk="http://schemas.inkore.net/lib/ui/wpf"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
-    <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:Model3DFileViewModel}">
+    <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:ModelPreviewViewModel}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

@@ -4,7 +4,7 @@ using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class ImageFileViewModel : ObservableObject
+public partial class ImagePreviewViewModel : ObservableObject
 {
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     [ObservableProperty] public partial ImageSource? Data { get; set; }

@@ -3,7 +3,7 @@
                     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
-    <DataTemplate x:Key="OsirisScriptPreviewDataTemplate" DataType="{x:Type vm:OsirisScriptPreviewViewModel}">
+    <DataTemplate x:Key="OsirisScriptPreviewDataTemplate" DataType="{x:Type vm:OsirisScriptsPreviewViewModel}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

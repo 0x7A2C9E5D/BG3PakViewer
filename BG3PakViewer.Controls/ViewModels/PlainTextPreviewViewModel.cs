@@ -3,7 +3,7 @@ using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class PlainTextFilePreviewViewModel : ObservableObject
+public partial class PlainTextPreviewViewModel : ObservableObject
 {
     [ObservableProperty] public partial string? Data { get; set; }
 

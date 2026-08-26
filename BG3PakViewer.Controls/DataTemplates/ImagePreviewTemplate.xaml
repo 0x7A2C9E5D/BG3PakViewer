@@ -3,7 +3,7 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
-    <DataTemplate x:Key="ImageFilePreviewTemplate" DataType="{x:Type vm:ImageFileViewModel}">
+    <DataTemplate x:Key="ImageFilePreviewTemplate" DataType="{x:Type vm:ImagePreviewViewModel}">
         <Image Source="{Binding Data, NotifyOnTargetUpdated=True}">
             <i:Interaction.Behaviors>
                 <b:ImageBehavior />

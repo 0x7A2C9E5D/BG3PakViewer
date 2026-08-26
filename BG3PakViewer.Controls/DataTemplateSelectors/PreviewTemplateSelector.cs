@@ -26,11 +26,11 @@ internal class PreviewTemplateSelector : DataTemplateSelector
     {
         return item switch
         {
-            ImageFileViewModel => ImageFilePreviewTemplate,
-            Model3DFileViewModel => ModelFilePreviewTemplate,
-            PlainTextFilePreviewViewModel => PlainTextFilePreviewTemplate,
-            NotSupportedFileViewModel => NotSupportedPreviewFileDataTemplate,
-            OsirisScriptPreviewViewModel => OsirisScriptPreviewTemplate,
+            ImagePreviewViewModel => ImageFilePreviewTemplate,
+            ModelPreviewViewModel => ModelFilePreviewTemplate,
+            PlainTextPreviewViewModel => PlainTextFilePreviewTemplate,
+            NotSupportedPreviewViewModel => NotSupportedPreviewFileDataTemplate,
+            OsirisScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
             _ => FolderTemplate
