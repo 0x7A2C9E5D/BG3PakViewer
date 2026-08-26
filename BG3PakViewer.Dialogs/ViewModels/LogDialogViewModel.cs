@@ -15,13 +15,13 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 public sealed partial class LogDialogViewModel
     : DisposableViewModel, IModalDialogViewModel
 {
-    private readonly IExplorerService _explorerService;
+    private readonly IShellOpenService _shellOpenService;
     private readonly object _logEventsLock = new();
     private readonly ObservableCollection<LogEvent> _sourceLogEvents;
 
-    public LogDialogViewModel(ILogAccessService logAccessService, IExplorerService explorerService)
+    public LogDialogViewModel(ILogAccessService logAccessService, IShellOpenService shellOpenService)
     {
-        _explorerService = explorerService;
+        _shellOpenService = shellOpenService;
         _sourceLogEvents = logAccessService.Logs;
         BindingOperations.EnableCollectionSynchronization(LogEvents, _logEventsLock);
         LogEvents.CollectionChanged += OnLogEventsCollectionChanged;
@@ -47,7 +47,7 @@ public sealed partial class LogDialogViewModel
     [RelayCommand]
     private void OpenLogFolder()
     {
-        _explorerService.Open(AppPaths.LogDirectory);
+        _shellOpenService.Open(AppPaths.LogDirectory);
     }
 
     private void OnSourceLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

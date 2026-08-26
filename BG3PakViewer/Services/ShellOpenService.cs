@@ -3,7 +3,7 @@ using BG3PakViewer.Contracts;
 
 namespace BG3PakViewer.Services;
 
-internal class ExplorerService : IExplorerService
+internal class ShellOpenService : IShellOpenService
 {
     public void Open(string path)
     {

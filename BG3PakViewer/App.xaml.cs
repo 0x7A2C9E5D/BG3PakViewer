@@ -52,7 +52,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IConfigService, ConfigService>()
             .AddSingleton<IAppSettings, AppSettings>(x => x
                 .GetRequiredService<IConfigService>().Load<AppSettings>())
-            .AddSingleton<IExplorerService, ExplorerService>()
+            .AddSingleton<IShellOpenService, ShellOpenService>()
             .AddSingleton<ISettingsManagerService, SettingsManagerService>()
             .AddSingleton<IPackageService, PackageService>()
             .AddSingleton<IRecentFilesService>(x => new RecentFilesService(

@@ -26,7 +26,7 @@ namespace BG3PakViewer.ViewModels;
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 {
     private readonly IDialogService _dialogService;
-    private readonly IExplorerService _explorerService;
+    private readonly IShellOpenService _shellOpenService;
     private readonly IExportService _exportService;
     private readonly ILogAccessService _logAccessService;
     private readonly IPackageService _packageService;
@@ -38,7 +38,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
     public MainWindowViewModel(
         IDialogService dialogService,
-        IExplorerService explorerService,
+        IShellOpenService shellOpenService,
         IExportService exportService,
         ILogAccessService logAccessService,
         IPackageService packageService,
@@ -47,7 +47,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         ISettingsManagerService settingsManagerService)
     {
         _dialogService = dialogService;
-        _explorerService = explorerService;
+        _shellOpenService = shellOpenService;
         _exportService = exportService;
         _logAccessService = logAccessService;
         _packageService = packageService;
@@ -308,7 +308,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task ShowLogDialog()
     {
-        using var viewModel = new LogDialogViewModel(_logAccessService, _explorerService);
+        using var viewModel = new LogDialogViewModel(_logAccessService, _shellOpenService);
         await _dialogService.ShowDialogAsync(this, viewModel);
     }
 
@@ -404,7 +404,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private void OpenNexusMods()
     {
-        _explorerService.Open(AppSettings.NexusModUrl);
+        _shellOpenService.Open(AppSettings.NexusModUrl);
         Log.Information("NexusMods opened.");
     }
 
