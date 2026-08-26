@@ -6,7 +6,7 @@ using Serilog;
 
 namespace BG3PakViewer.Loader;
 
-public static class ResourceLoader
+public static class LarianResourceLoader
 {
     public static async Task<Resource?> LoadAsync(Stream stream, string extensions)
     {

@@ -14,7 +14,7 @@ internal class LarianResourcePreviewHandler : IPreviewHandler
 
     public async Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
     {
-        var resource = await ResourceLoader.LoadAsync(stream, fileExtension);
+        var resource = await LarianResourceLoader.LoadAsync(stream, fileExtension);
         if (resource == null) return null;
 
         // Build the tree off the UI thread so large resources don't block the UI.

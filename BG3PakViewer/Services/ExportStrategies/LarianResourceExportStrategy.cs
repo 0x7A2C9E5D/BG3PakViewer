@@ -23,8 +23,8 @@ internal class LarianResourceExportStrategy : IExportStrategy
         if (extension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
             return await FileOperations.SaveStreamToFileAsync(path, stream);
 
-        var resource = await ResourceLoader.LoadAsync(stream, extension);
-        return resource != null && await ResourceLoader.ExportAsync(resource, path);
+        var resource = await LarianResourceLoader.LoadAsync(stream, extension);
+        return resource != null && await LarianResourceLoader.ExportAsync(resource, path);
     }
 
     FileFilter[] IExportStrategy.Filters => Filters;
