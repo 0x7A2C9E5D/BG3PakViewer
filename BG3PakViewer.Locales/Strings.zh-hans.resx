@@ -246,7 +246,4 @@
     <data name="VirtualTextureFile" xml:space="preserve">
         <value>虚拟材质文件</value>
     </data>
-    <data name="Decompile" xml:space="preserve">
-        <value>反编译</value>
-    </data>
 </root>

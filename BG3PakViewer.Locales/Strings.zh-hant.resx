@@ -246,7 +246,4 @@
     <data name="Zoom" xml:space="preserve">
         <value>縮放</value>
     </data>
-    <data name="Decompile" xml:space="preserve">
-        <value>反編譯</value>
-    </data>
 </root>

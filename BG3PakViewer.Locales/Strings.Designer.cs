@@ -159,15 +159,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decompile.
-        /// </summary>
-        public static string Decompile {
-            get {
-                return ResourceManager.GetString("Decompile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Set default path for SaveFileDialog and SaveFolderDialog.
         /// </summary>
         public static string DefaultExportDirectoryDescription {

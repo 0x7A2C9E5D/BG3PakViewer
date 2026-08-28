@@ -354,7 +354,4 @@
     <data name="VirtualTextureFile" xml:space="preserve">
       <value>File di Texture Virtuale</value>
     </data>
-    <data name="Decompile" xml:space="preserve">
-      <value>Decompilare</value>
-    </data>
 </root>
