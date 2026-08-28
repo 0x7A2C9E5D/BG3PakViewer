@@ -31,7 +31,7 @@
                      HorizontalScrollBarVisibility="Auto"
                      AcceptsReturn="True"
                      TextWrapping="NoWrap"
-                     FontFamily="Consolas" FontSize="13"
+                     FontFamily="Consolas" FontSize="15"
                      Text="{Binding Scripts, Mode=OneWay}" />
         </Grid>
     </DataTemplate>
