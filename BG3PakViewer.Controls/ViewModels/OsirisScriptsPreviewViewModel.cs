@@ -1,9 +1,8 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -26,18 +25,23 @@ public partial class OsirisScriptsPreviewViewModel(IAppSettings appSettings) : O
         if (value is null) return;
         foreach (var goal in value.Goals.Values)
             Goals.Add(new OsirisGoalItemViewModel { Goal = goal });
-        if (Goals.Count > 0)
-            SelectedGoal = Goals[0];
     }
 
-    [RelayCommand]
+    partial void OnSelectedGoalChanged(OsirisGoalItemViewModel? value)
+    {
+        _ = DecompileScriptsAsync();
+    }
+
     private async Task DecompileScriptsAsync()
     {
-        if (SelectedGoal != null)
+        if (SelectedGoal is null)
         {
-            await using var writer = new StringWriter();
-            SelectedGoal.Goal?.MakeScript(writer, Story);
-            Scripts = await TextOperations.TruncateToLinesAsync(writer.ToString(), appSettings.MaxPreviewLines);
+            Scripts = null;
+            return;
         }
+
+        await using var writer = new StringWriter();
+        SelectedGoal.Goal?.MakeScript(writer, Story);
+        Scripts = await TextOperations.TruncateToLinesAsync(writer.ToString(), appSettings.MaxPreviewLines);
     }
 }
