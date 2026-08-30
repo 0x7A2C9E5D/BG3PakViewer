@@ -5,7 +5,6 @@ namespace BG3PakViewer.VirtualTextures;
 /// <summary>
 /// Cache of open GTP page files, lazily opened per pageFileIndex via the stream provider delegate
 /// (e.g. read from inside a PAK), without relying on disk paths.
-/// A GTS usually references only 1~8 page files, so no LRU eviction is needed; a plain dictionary suffices.
 /// </summary>
 public sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
 {
