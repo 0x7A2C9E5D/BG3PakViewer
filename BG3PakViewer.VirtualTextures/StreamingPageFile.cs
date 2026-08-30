@@ -4,14 +4,14 @@ using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
-public sealed class StreamPageFile : IDisposable
+public sealed class StreamingPageFile : IDisposable
 {
     private readonly VirtualTileSet _tileSet;
     private readonly Stream _stream;
     private readonly BinaryReader _reader;
     private readonly List<uint[]> _chunkOffsets;
 
-    public StreamPageFile(VirtualTileSet tileSet, Stream stream)
+    public StreamingPageFile(VirtualTileSet tileSet, Stream stream)
     {
         _tileSet = tileSet;
         _stream = stream;

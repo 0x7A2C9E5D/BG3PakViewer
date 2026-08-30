@@ -22,10 +22,10 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
             if (gtsStream is null) return null;
 
             IReadOnlyList<string>? pageFileNames = null;
-            StreamingTileSetExtractor? extractor = null;
+            VirtualTileSetExtractor? extractor = null;
             try
             {
-                extractor = new StreamingTileSetExtractor(gtsStream, pageFileIndex =>
+                extractor = new VirtualTileSetExtractor(gtsStream, pageFileIndex =>
                 {
                     var pageFileName = pageFileNames![pageFileIndex];
                     var pagePath = directory.Length == 0

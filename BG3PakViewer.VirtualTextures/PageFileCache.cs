@@ -9,9 +9,9 @@ namespace BG3PakViewer.VirtualTextures;
 /// </summary>
 public sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
 {
-    private readonly Dictionary<int, StreamPageFile> _open = [];
+    private readonly Dictionary<int, StreamingPageFile> _open = [];
 
-    public StreamPageFile Get(int pageFileIndex)
+    public StreamingPageFile Get(int pageFileIndex)
     {
         if (_open.TryGetValue(pageFileIndex, out var file))
         {
@@ -25,7 +25,7 @@ public sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> stre
             stream.CopyTo(buffer);
             stream = buffer;
         }
-        file = new StreamPageFile(tileSet, stream);
+        file = new StreamingPageFile(tileSet, stream);
 
         _open[pageFileIndex] = file;
         return file;

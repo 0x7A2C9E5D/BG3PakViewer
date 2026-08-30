@@ -1,10 +1,10 @@
-﻿using System.Text;
+using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
-public sealed class StreamingTileSetExtractor : IDisposable
+public sealed class VirtualTileSetExtractor : IDisposable
 {
     private readonly TileCompressor _compressor = new();
 
@@ -24,7 +24,7 @@ public sealed class StreamingTileSetExtractor : IDisposable
     /// without writing to disk; <paramref name="pageStreamProvider"/> supplies a stream for the GTP
     /// page file of a given pageFileIndex (e.g. read from inside a PAK).
     /// </summary>
-    public StreamingTileSetExtractor(Stream gtsStream, Func<int, Stream> pageStreamProvider)
+    public VirtualTileSetExtractor(Stream gtsStream, Func<int, Stream> pageStreamProvider)
     {
         using var reader = new BinaryReader(gtsStream, Encoding.UTF8, leaveOpen: true);
         TileSet = new VirtualTileSet();

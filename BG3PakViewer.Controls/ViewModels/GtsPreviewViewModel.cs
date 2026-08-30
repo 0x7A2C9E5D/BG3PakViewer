@@ -15,7 +15,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 {
-    private readonly StreamingTileSetExtractor _extractor;
+    private readonly VirtualTileSetExtractor _extractor;
     private CancellationTokenSource? _cts;
     private bool _disposed;
 
@@ -35,7 +35,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] public partial double Progress { get; set; }
 
-    public GtsPreviewViewModel(StreamingTileSetExtractor extractor)
+    public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
     {
         _extractor = extractor;
         Layers =
