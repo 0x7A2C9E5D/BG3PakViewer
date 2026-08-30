@@ -11,11 +11,15 @@ public sealed class StreamingTileSetExtractor : IDisposable
     private PageFileCache Cache { get; }
     public int LayerCount => TileSet.TileSetLayers.Length;
     public int LevelCount => TileSet.TileSetLevels.Length;
-
-    public StreamingTileSetExtractor(string gtsPath)
+    
+    public StreamingTileSetExtractor(Stream gtsStream, Func<int, Stream>? pageStreamProvider = null)
     {
-        TileSet = new VirtualTileSet(gtsPath);
-        Cache = new PageFileCache(TileSet);
+        using var reader = new BinaryReader(gtsStream, System.Text.Encoding.UTF8, leaveOpen: true);
+        TileSet = new VirtualTileSet();
+        TileSet.LoadFromStream(gtsStream, reader, false);
+        Cache = pageStreamProvider != null
+            ? new PageFileCache(TileSet, pageStreamProvider)
+            : new PageFileCache(TileSet);
     }
 
     public List<FourCCTextureMeta> GetTextures() => TileSet.FourCCMetadata.ExtractTextureMetadata();
@@ -84,7 +88,7 @@ public sealed class StreamingTileSetExtractor : IDisposable
                 if (!TileSet.GetTileInfo(level, layer, minX + col, minY + row, ref tileInfo)) continue;
 
                 var pageFile = Cache.Get(tileInfo.PageFileIndex);
-                var img = pageFile.UnpackTileBC5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
+                var img = pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
 
                 for (var b = 0; b < blockRows; b++)
                 {
