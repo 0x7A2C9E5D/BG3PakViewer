@@ -9,7 +9,7 @@ public static class ImageSharpExtensions
 {
     public static BitmapSource ToBitmapSource(this Image image)
     {
-        return image switch
+        var source = image switch
         {
             Image<Bgra32> bgra32Image => ConvertBgra32(bgra32Image),
             Image<Bgr24> bgr24Image => ConvertBgr24(bgr24Image),
@@ -17,6 +17,14 @@ public static class ImageSharpExtensions
             Image<L8> l8Image => ConvertL8(l8Image),
             _ => ConvertToBgra32(image)
         };
+        // BitmapSource.Create returns an unfrozen instance owned by the calling
+        // thread. Freeze it here so the result is safe to bind from the UI thread
+        // even when ToBitmapSource ran on a background thread (e.g. GTS preview).
+        if (source.CanFreeze)
+        {
+            source.Freeze();
+        }
+        return source;
     }
 
     private static BitmapSource ConvertBgra32(Image<Bgra32> image)
