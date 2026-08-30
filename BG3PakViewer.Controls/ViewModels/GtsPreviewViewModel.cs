@@ -5,14 +5,13 @@ using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
-using LSLib.VirtualTextures;
 using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
 /// <summary>
-/// GTS 虚拟纹理预览：左侧列出纹理，选中后在后台按图层提取并解码为位图。
-/// 提取期间支持取消与进度报告。
+/// GTS virtual texture preview: lists textures on the left; selecting one extracts and decodes
+/// the selected layer to a bitmap in the background, with cancellation and progress reporting.
 /// </summary>
 public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 {
@@ -39,9 +38,11 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
     public GtsPreviewViewModel(StreamingTileSetExtractor extractor)
     {
         _extractor = extractor;
-        Layers = Enumerable.Range(0, extractor.LayerCount)
-            .Select(i => $"Layer {i}")
-            .ToArray();
+        Layers =
+        [
+            .. Enumerable.Range(0, extractor.LayerCount)
+                .Select(i => $"Layer {i}")
+        ];
         foreach (var meta in extractor.GetTextures())
         {
             Textures.Add(new GtsTextureItemViewModel(meta));
@@ -49,8 +50,10 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
         SelectedTexture = Textures.FirstOrDefault();
     }
 
+    // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedTextureChanged(GtsTextureItemViewModel? value) => _ = LoadPreviewAsync();
 
+    // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedLayerIndexChanged(int value) => _ = LoadPreviewAsync();
 
     private async Task LoadPreviewAsync()
@@ -95,7 +98,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // 切换选择时取消上一任务，忽略
+            // A new selection canceled the previous task; ignore
         }
         catch (Exception ex)
         {

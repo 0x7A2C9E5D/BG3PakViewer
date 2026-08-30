@@ -3,9 +3,9 @@
 namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
-/// GTP page 文件缓存，按 pageFileIndex 通过委托惰性打开对应 page 流
-/// （如直接从 PAK 内读取），不依赖磁盘路径。
-/// GTS 通常只有 1~8 个 page 文件，无需 LRU 淘汰，纯 Dictionary 足够。
+/// Cache of open GTP page files, lazily opened per pageFileIndex via the stream provider delegate
+/// (e.g. read from inside a PAK), without relying on disk paths.
+/// A GTS usually references only 1~8 page files, so no LRU eviction is needed; a plain dictionary suffices.
 /// </summary>
 public sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
 {

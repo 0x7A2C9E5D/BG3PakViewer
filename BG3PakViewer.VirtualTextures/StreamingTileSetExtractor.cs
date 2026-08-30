@@ -16,12 +16,13 @@ public sealed class StreamingTileSetExtractor : IDisposable
     
     public int LevelCount => TileSet.TileSetLevels.Length;
 
-    /// <summary>GTS 引用的 GTP page 文件名列表（按 PageFileIndex 顺序）。</summary>
+    /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
     public IReadOnlyList<string> PageFileNames { get; }
 
     /// <summary>
-    /// 全流式构造：GTS 元数据直接读取自 <paramref name="gtsStream"/>，不落盘；
-    /// <paramref name="pageStreamProvider"/> 按 pageFileIndex 提供 GTP page 文件的流（如从 PAK 内读取）。
+    /// Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream"/>
+    /// without writing to disk; <paramref name="pageStreamProvider"/> supplies a stream for the GTP
+    /// page file of a given pageFileIndex (e.g. read from inside a PAK).
     /// </summary>
     public StreamingTileSetExtractor(Stream gtsStream, Func<int, Stream> pageStreamProvider)
     {
@@ -70,7 +71,7 @@ public sealed class StreamingTileSetExtractor : IDisposable
         var tileH = hdr.TileHeight - hdr.TileBorder * 2;
         var cols = maxX - minX + 1;
         var rows = maxY - minY + 1;
-        if (cols <= 0 || rows <= 0) throw new ArgumentException("空的 tile 范围");
+        if (cols <= 0 || rows <= 0) throw new ArgumentException("Empty tile range");
 
         var width = cols * tileW;
         var height = rows * tileH;
@@ -107,7 +108,7 @@ public sealed class StreamingTileSetExtractor : IDisposable
 
                 var pageFile = Cache.Get(tileInfo.PageFileIndex);
                 var img = pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
-                // 通过 LSLib 的 BC5Image.CopyTo 跳过 tile border，按 4x4 block 拼到 strip 行带
+                // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
                 img.CopyTo(strip, hdr.TileBorder, hdr.TileBorder,
                     col * tileW, 0, tileW, tileH);
             }
