@@ -7,10 +7,9 @@ namespace BG3PakViewer.VirtualTextures;
 public sealed class VirtualTileSetExtractor : IDisposable
 {
     private readonly TileCompressor _compressor = new();
+    private readonly PageFileCache _pageFileCache;
 
     private VirtualTileSet TileSet { get; }
-
-    private PageFileCache Cache { get; }
     
     public int LayerCount => TileSet.TileSetLayers.Length;
     
@@ -30,7 +29,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(gtsStream, reader, false);
         PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
-        Cache = new PageFileCache(TileSet, pageStreamProvider);
+        _pageFileCache = new PageFileCache(TileSet, pageStreamProvider);
     }
 
     public List<FourCCTextureMeta> GetTextures() => TileSet.FourCCMetadata.ExtractTextureMetadata();
@@ -106,7 +105,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
             {
                 if (!TileSet.GetTileInfo(level, layer, minX + col, minY + row, ref tileInfo)) continue;
 
-                var pageFile = Cache.Get(tileInfo.PageFileIndex);
+                var pageFile = _pageFileCache.Get(tileInfo.PageFileIndex);
                 var img = pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
                 // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
                 img.CopyTo(strip, hdr.TileBorder, hdr.TileBorder,
@@ -135,7 +134,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
 
     public void Dispose()
     {
-        Cache.Dispose();
+        _pageFileCache.Dispose();
         TileSet.Dispose();
     }
 }
