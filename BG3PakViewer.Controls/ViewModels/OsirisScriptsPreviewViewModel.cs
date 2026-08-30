@@ -27,6 +27,7 @@ public partial class OsirisScriptsPreviewViewModel(IAppSettings appSettings) : O
             Goals.Add(new OsirisGoalItemViewModel { Goal = goal });
     }
 
+    // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedGoalChanged(OsirisGoalItemViewModel? value)
     {
         _ = DecompileScriptsAsync();

@@ -43,10 +43,10 @@ public sealed class VirtualTileSetExtractor : IDisposable
         var tH = tex.Height / tlH;
         var lv = 1 << level;
 
-        minX = (tX / lv) + ((tX % lv) > 0 ? 1 : 0);
-        minY = (tY / lv) + ((tY % lv) > 0 ? 1 : 0);
-        maxX = ((tX + tW) / lv) + (((tX + tW) % lv) > 0 ? 1 : 0) - 1;
-        maxY = ((tY + tH) / lv) + (((tY + tH) % lv) > 0 ? 1 : 0) - 1;
+        minX = tX / lv + (tX % lv > 0 ? 1 : 0);
+        minY = tY / lv + (tY % lv > 0 ? 1 : 0);
+        maxX = (tX + tW) / lv + ((tX + tW) % lv > 0 ? 1 : 0) - 1;
+        maxY = (tY + tH) / lv + ((tY + tH) % lv > 0 ? 1 : 0) - 1;
 
         return maxX >= minX && maxY >= minY;
     }

@@ -31,7 +31,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] public partial bool IsBusy { get; set; }
 
-    [ObservableProperty] public partial string? StatusText { get; set; }
+    [ObservableProperty] public partial string? StatusText { get; private set; }
 
     [ObservableProperty] public partial double Progress { get; set; }
 

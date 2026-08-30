@@ -36,6 +36,7 @@ public sealed class StreamingPageFile : IDisposable
     {
         _stream.Position = _chunkOffsets[pageIndex][chunkIndex] + pageIndex * _tileSet.Header.PageSize;
         var header = BinUtils.ReadStruct<GTPChunkHeader>(_reader);
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return header.Codec switch
         {
             GTSCodec.Uniform => DoUnpackTileUniform(),
