@@ -354,9 +354,6 @@
     <data name="VirtualTextureFile" xml:space="preserve">
       <value>File di Texture Virtuale</value>
     </data>
-    <data name="GtsLayerFormat" xml:space="preserve">
-      <value>Livello {0}</value>
-    </data>
     <data name="GtsLayerLabel" xml:space="preserve">
       <value>Livello:</value>
     </data>

@@ -246,9 +246,6 @@
     <data name="Zoom" xml:space="preserve">
         <value>縮放</value>
     </data>
-    <data name="GtsLayerFormat" xml:space="preserve">
-        <value>圖層 {0}</value>
-    </data>
     <data name="GtsLayerLabel" xml:space="preserve">
         <value>圖層：</value>
     </data>

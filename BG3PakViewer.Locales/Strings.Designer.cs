@@ -321,15 +321,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Layer {0}.
-        /// </summary>
-        public static string GtsLayerFormat {
-            get {
-                return ResourceManager.GetString("GtsLayerFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Layer:.
         /// </summary>
         public static string GtsLayerLabel {

@@ -40,11 +40,10 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
     public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
     {
         _extractor = extractor;
-        var layerFormat = I18NExtension.Translate(LangKeys.GtsLayerFormat, "Layer {0}") ?? "Layer {0}";
         Layers =
         [
             .. Enumerable.Range(0, extractor.LayerCount)
-                .Select(i => string.Format(layerFormat, i))
+                .Select(i => $"Layer {i}")
         ];
         foreach (var meta in extractor.GetTextures())
         {
