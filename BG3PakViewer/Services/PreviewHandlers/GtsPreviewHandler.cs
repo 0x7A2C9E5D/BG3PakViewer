@@ -21,13 +21,14 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
             var gtsStream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
             if (gtsStream is null) return null;
 
-            IReadOnlyList<string>? pageFileNames = null;
+            IReadOnlyList<string> pageFileNames = [];
             VirtualTileSetExtractor? extractor = null;
             try
             {
                 extractor = new VirtualTileSetExtractor(gtsStream, pageFileIndex =>
                 {
-                    var pageFileName = pageFileNames![pageFileIndex];
+                    // ReSharper disable once AccessToModifiedClosure
+                    var pageFileName = pageFileNames[pageFileIndex];
                     var pagePath = directory.Length == 0
                         ? pageFileName
                         : $"{directory}/{pageFileName}";
