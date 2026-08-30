@@ -47,10 +47,10 @@ public sealed class StreamingPageFile : IDisposable
 
     public BC5Image UnpackTileBc5(int pageIndex, int chunkIndex, TileCompressor compressor)
     {
-        var hdr = _tileSet.Header;
-        var outputSize = 16 * ((hdr.TileWidth + 3) / 4) * ((hdr.TileHeight + 3) / 4)
-                       + 16 * ((hdr.TileWidth / 2 + 3) / 4) * ((hdr.TileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackTile(pageIndex, chunkIndex, outputSize, compressor), hdr.TileWidth, hdr.TileHeight);
+        var header = _tileSet.Header;
+        var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
+                       + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
+        return new BC5Image(UnpackTile(pageIndex, chunkIndex, outputSize, compressor), header.TileWidth, header.TileHeight);
     }
 
     private byte[] DoUnpackTileBc(GTPChunkHeader header, int outputSize, TileCompressor compressor)
