@@ -12,8 +12,6 @@ public sealed class VirtualTileSetExtractor : IDisposable
     private VirtualTileSet TileSet { get; }
     
     public int LayerCount => TileSet.TileSetLayers.Length;
-    
-    public int LevelCount => TileSet.TileSetLevels.Length;
 
     /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
     public IReadOnlyList<string> PageFileNames { get; }
