@@ -11,7 +11,7 @@
     <DataTemplate x:Key="GtsPreviewDataTemplate" DataType="{x:Type vm:GtsPreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="350" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition MinWidth="400" />
             </Grid.ColumnDefinitions>
