@@ -27,7 +27,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
-    [ObservableProperty] public partial ImageSource? Preview { get; set; }
+    [ObservableProperty] public partial ImageSource? Preview { get; private set; }
 
     [ObservableProperty] public partial bool IsBusy { get; set; }
 
