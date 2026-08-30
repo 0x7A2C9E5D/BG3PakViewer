@@ -11,7 +11,9 @@ public sealed class StreamingTileSetExtractor : IDisposable
     private VirtualTileSet TileSet { get; }
 
     private PageFileCache Cache { get; }
+    
     public int LayerCount => TileSet.TileSetLayers.Length;
+    
     public int LevelCount => TileSet.TileSetLevels.Length;
 
     /// <summary>GTS 引用的 GTP page 文件名列表（按 PageFileIndex 顺序）。</summary>
