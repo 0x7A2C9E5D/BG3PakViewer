@@ -67,6 +67,14 @@ internal class PreviewService(
 
         try
         {
+            var multiStreamViewModel = await handler.CreatePreviewViewModelAsync(node);
+            if (multiStreamViewModel != null)
+            {
+                Log.Debug("Multi-stream preview created successfully for: {FileName}",
+                    Path.GetFileName(node.FullPath));
+                return multiStreamViewModel;
+            }
+
             await using var stream = packageService.GetFileByPath(node.FullPath)!.CreateContentReader();
             var viewModel = await handler.CreatePreviewViewModelAsync(stream, node.FileExtension);
 

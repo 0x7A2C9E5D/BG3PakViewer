@@ -1,4 +1,6 @@
-﻿using LSLib.VirtualTextures;
+﻿using System.Text;
+using LSLib.LS;
+using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
@@ -11,15 +13,21 @@ public sealed class StreamingTileSetExtractor : IDisposable
     private PageFileCache Cache { get; }
     public int LayerCount => TileSet.TileSetLayers.Length;
     public int LevelCount => TileSet.TileSetLevels.Length;
-    
-    public StreamingTileSetExtractor(Stream gtsStream, Func<int, Stream>? pageStreamProvider = null)
+
+    /// <summary>GTS 引用的 GTP page 文件名列表（按 PageFileIndex 顺序）。</summary>
+    public IReadOnlyList<string> PageFileNames { get; }
+
+    /// <summary>
+    /// 全流式构造：GTS 元数据直接读取自 <paramref name="gtsStream"/>，不落盘；
+    /// <paramref name="pageStreamProvider"/> 按 pageFileIndex 提供 GTP page 文件的流（如从 PAK 内读取）。
+    /// </summary>
+    public StreamingTileSetExtractor(Stream gtsStream, Func<int, Stream> pageStreamProvider)
     {
-        using var reader = new BinaryReader(gtsStream, System.Text.Encoding.UTF8, leaveOpen: true);
+        using var reader = new BinaryReader(gtsStream, Encoding.UTF8, leaveOpen: true);
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(gtsStream, reader, false);
-        Cache = pageStreamProvider != null
-            ? new PageFileCache(TileSet, pageStreamProvider)
-            : new PageFileCache(TileSet);
+        PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
+        Cache = new PageFileCache(TileSet, pageStreamProvider);
     }
 
     public List<FourCCTextureMeta> GetTextures() => TileSet.FourCCMetadata.ExtractTextureMetadata();
@@ -62,26 +70,34 @@ public sealed class StreamingTileSetExtractor : IDisposable
         var rows = maxY - minY + 1;
         if (cols <= 0 || rows <= 0) throw new ArgumentException("空的 tile 范围");
 
-        var width  = cols * tileW;
+        var width = cols * tileW;
         var height = rows * tileH;
-        var srcOff = hdr.TileBorder * 2;
 
-        var srcBlocksPerRow = hdr.TileWidth / 4;
-        var dstBlocksPerRow = width / 4;
-        var blockCols = tileW / 4;
-        var blockRows = tileH / 4;
-        var copyBytes = blockCols * 16;
-        var srcBlockX = srcOff / 4;
-        var srcBlockY = srcOff / 4;
+        var header = new DDSHeader
+        {
+            dwMagic = DDSHeader.DDSMagic,
+            dwSize = DDSHeader.HeaderSize,
+            dwFlags = 0x1007,
+            dwWidth = (uint)width,
+            dwHeight = (uint)height,
+            dwPitchOrLinearSize = (uint)(width * height),
+            dwDepth = 1,
+            dwMipMapCount = 1,
+            dwPFSize = 32,
+            dwPFFlags = 0x04,
+            dwFourCC = DDSHeader.FourCC_DXT5,
+            dwCaps = 0x1000
+        };
+        using var bw = new BinaryWriter(output, Encoding.UTF8, leaveOpen: true);
+        BinUtils.WriteStruct(bw, ref header);
 
-        var writer = new DdsWriter(output, width, height);
-        var strip = new byte[width * tileH];
+        var strip = new BC5Image(width, tileH);
         GTSFlatTileInfo tileInfo = default;
 
         for (var row = 0; row < rows; row++)
         {
             ct.ThrowIfCancellationRequested();
-            Array.Clear(strip);
+            Array.Clear(strip.Data);
 
             for (var col = 0; col < cols; col++)
             {
@@ -89,16 +105,12 @@ public sealed class StreamingTileSetExtractor : IDisposable
 
                 var pageFile = Cache.Get(tileInfo.PageFileIndex);
                 var img = pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
-
-                for (var b = 0; b < blockRows; b++)
-                {
-                    var src = (srcBlockX + (srcBlockY + b) * srcBlocksPerRow) * 16;
-                    var dst = (col * blockCols + b * dstBlocksPerRow) * 16;
-                    Buffer.BlockCopy(img.Data, src, strip, dst, copyBytes);
-                }
+                // 通过 LSLib 的 BC5Image.CopyTo 跳过 tile border，按 4x4 block 拼到 strip 行带
+                img.CopyTo(strip, hdr.TileBorder, hdr.TileBorder,
+                    col * tileW, 0, tileW, tileH);
             }
 
-            writer.WriteStrip(strip, strip.Length);
+            output.Write(strip.Data, 0, strip.Data.Length);
             progress?.Report((row + 1, rows));
         }
     }

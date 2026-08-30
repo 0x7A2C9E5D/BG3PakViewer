@@ -40,7 +40,7 @@ public sealed class StreamPageFile : IDisposable
         {
             GTSCodec.Uniform => DoUnpackTileUniform(),
             GTSCodec.BC => DoUnpackTileBc(header, outputSize, compressor),
-            _ => throw new InvalidDataException($"Unsupported codec: {header.Codec}"),
+            _ => throw new InvalidDataException($"Unsupported codec: {header.Codec}")
         };
     }
 

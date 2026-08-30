@@ -79,6 +79,7 @@
         <ProjectReference Include="..\BG3PakViewer.Miscellaneous\BG3PakViewer.Miscellaneous.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.NexusIntegration\BG3PakViewer.NexusIntegration.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.VirtualTextures\BG3PakViewer.VirtualTextures.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -20,6 +20,8 @@ internal class PreviewTemplateSelector : DataTemplateSelector
 
     public DataTemplate? LocalizationPreviewTemplate { get; set; }
 
+    public DataTemplate? GtsPreviewTemplate { get; set; }
+
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
     {
         return item switch
@@ -31,6 +33,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             OsirisScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
+            GtsPreviewViewModel => GtsPreviewTemplate,
             _ => null
         };
     }
