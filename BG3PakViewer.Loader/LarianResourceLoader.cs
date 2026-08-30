@@ -20,6 +20,7 @@ public static class LarianResourceLoader
             ResourceUtils.LoadResource(stream, format, ResourceLoadParameters.FromGameVersion(Game.BaldursGate3)));
     }
 
+    // ReSharper disable once UnusedMember.Global
     public static async Task<string> ExportAsync(Resource resource)
     {
         try

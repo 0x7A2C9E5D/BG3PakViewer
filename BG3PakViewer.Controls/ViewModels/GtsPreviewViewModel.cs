@@ -3,8 +3,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using BG3PakViewer.Extensions;
-using BG3PakViewer.Locales;
 using BG3PakViewer.Loader;
+using BG3PakViewer.Locales;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
@@ -12,14 +12,25 @@ using Serilog;
 namespace BG3PakViewer.Controls.ViewModels;
 
 /// <summary>
-/// GTS virtual texture preview: lists textures on the left; selecting one extracts and decodes
-/// the selected layer to a bitmap in the background, with cancellation and progress reporting.
+///     GTS virtual texture preview: lists textures on the left; selecting one extracts and decodes
+///     the selected layer to a bitmap in the background, with cancellation and progress reporting.
 /// </summary>
-public partial class GtsPreviewViewModel : ObservableObject, IDisposable
+public partial class GtsPreviewViewModel : DisposableViewModel
 {
     private readonly VirtualTileSetExtractor _extractor;
     private CancellationTokenSource? _cts;
-    private bool _disposed;
+
+    public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
+    {
+        _extractor = extractor;
+        Layers =
+        [
+            .. Enumerable.Range(0, extractor.LayerCount)
+                .Select(i => $"Layer {i}")
+        ];
+        foreach (var meta in extractor.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
+        SelectedTexture = Textures.FirstOrDefault();
+    }
 
     public ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
 
@@ -37,30 +48,21 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
 
     [ObservableProperty] public partial double Progress { get; set; }
 
-    public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnSelectedTextureChanged(GtsTextureItemViewModel? value)
     {
-        _extractor = extractor;
-        Layers =
-        [
-            .. Enumerable.Range(0, extractor.LayerCount)
-                .Select(i => $"Layer {i}")
-        ];
-        foreach (var meta in extractor.GetTextures())
-        {
-            Textures.Add(new GtsTextureItemViewModel(meta));
-        }
-        SelectedTexture = Textures.FirstOrDefault();
+        _ = LoadPreviewAsync();
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedTextureChanged(GtsTextureItemViewModel? value) => _ = LoadPreviewAsync();
-
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedLayerIndexChanged(int value) => _ = LoadPreviewAsync();
+    partial void OnSelectedLayerIndexChanged(int value)
+    {
+        _ = LoadPreviewAsync();
+    }
 
     private async Task LoadPreviewAsync()
     {
-        if(_cts is not null)
+        if (_cts is not null)
             await _cts.CancelAsync();
         var cts = new CancellationTokenSource();
         _cts = cts;
@@ -111,24 +113,14 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            if (!cts.IsCancellationRequested)
-            {
-                IsBusy = false;
-            }
+            if (!cts.IsCancellationRequested) IsBusy = false;
         }
     }
 
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-        _disposed = true;
         if (!disposing) return;
+        base.Dispose(disposing);
         _ = _cts?.CancelAsync();
         _extractor.Dispose();
     }

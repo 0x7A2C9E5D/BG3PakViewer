@@ -69,6 +69,7 @@
                         </Image>
                     </Border>
 
+                    <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
                     <ProgressBar Grid.Row="2" Height="4" Value="{Binding Progress}"
                                  Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
