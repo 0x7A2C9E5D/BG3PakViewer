@@ -303,6 +303,60 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decode failed.
+        /// </summary>
+        public static string GtsDecodeFailed {
+            get {
+                return ResourceManager.GetString("GtsDecodeFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extracting….
+        /// </summary>
+        public static string GtsExtracting {
+            get {
+                return ResourceManager.GetString("GtsExtracting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Layer {0}.
+        /// </summary>
+        public static string GtsLayerFormat {
+            get {
+                return ResourceManager.GetString("GtsLayerFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Layer:.
+        /// </summary>
+        public static string GtsLayerLabel {
+            get {
+                return ResourceManager.GetString("GtsLayerLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data for this layer.
+        /// </summary>
+        public static string GtsNoDataForLayer {
+            get {
+                return ResourceManager.GetString("GtsNoDataForLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preview failed.
+        /// </summary>
+        public static string GtsPreviewFailed {
+            get {
+                return ResourceManager.GetString("GtsPreviewFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GL Transmission Format.
         /// </summary>
         public static string GLTransmissionFormat {

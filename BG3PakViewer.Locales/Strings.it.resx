@@ -354,4 +354,22 @@
     <data name="VirtualTextureFile" xml:space="preserve">
       <value>File di Texture Virtuale</value>
     </data>
+    <data name="GtsLayerFormat" xml:space="preserve">
+      <value>Livello {0}</value>
+    </data>
+    <data name="GtsLayerLabel" xml:space="preserve">
+      <value>Livello:</value>
+    </data>
+    <data name="GtsExtracting" xml:space="preserve">
+      <value>Estrazione…</value>
+    </data>
+    <data name="GtsNoDataForLayer" xml:space="preserve">
+      <value>Nessun dato per questo livello</value>
+    </data>
+    <data name="GtsDecodeFailed" xml:space="preserve">
+      <value>Decodifica non riuscita</value>
+    </data>
+    <data name="GtsPreviewFailed" xml:space="preserve">
+      <value>Anteprima non riuscita</value>
+    </data>
 </root>

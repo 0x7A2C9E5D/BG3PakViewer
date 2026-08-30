@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows;
 using System.Windows.Media;
 using BG3PakViewer.Extensions;
+using BG3PakViewer.Locales;
 using BG3PakViewer.Loader;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,10 +40,11 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
     public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
     {
         _extractor = extractor;
+        var layerFormat = I18NExtension.Translate(LangKeys.GtsLayerFormat, "Layer {0}") ?? "Layer {0}";
         Layers =
         [
             .. Enumerable.Range(0, extractor.LayerCount)
-                .Select(i => $"Layer {i}")
+                .Select(i => string.Format(layerFormat, i))
         ];
         foreach (var meta in extractor.GetTextures())
         {
@@ -70,7 +73,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
         try
         {
             IsBusy = true;
-            StatusText = "Extracting…";
+            StatusText = I18NExtension.Translate(LangKeys.GtsExtracting, "Extracting…");
             Progress = 0;
 
             var progress = new Progress<(int Done, int Total)>(p =>
@@ -85,7 +88,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
             if (!extracted)
             {
                 Preview = null;
-                StatusText = "No data for this layer";
+                StatusText = I18NExtension.Translate(LangKeys.GtsNoDataForLayer, "No data for this layer");
                 return;
             }
 
@@ -94,7 +97,9 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
             if (cts.IsCancellationRequested) return;
 
             Preview = image?.ToBitmapSource();
-            StatusText = image is null ? "Decode failed" : $"{meta.Width} × {meta.Height}";
+            StatusText = image is null
+                ? I18NExtension.Translate(LangKeys.GtsDecodeFailed, "Decode failed")
+                : $"{meta.Width} × {meta.Height}";
         }
         catch (OperationCanceledException)
         {
@@ -103,7 +108,7 @@ public partial class GtsPreviewViewModel : ObservableObject, IDisposable
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to preview GTS texture: {Name}", meta.Name);
-            StatusText = "Preview failed";
+            StatusText = I18NExtension.Translate(LangKeys.GtsPreviewFailed, "Preview failed");
         }
         finally
         {

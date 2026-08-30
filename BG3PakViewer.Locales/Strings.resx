@@ -255,4 +255,22 @@
     <data name="VirtualTextureFile" xml:space="preserve">
         <value>Virtual Texture File</value>
     </data>
+    <data name="GtsLayerFormat" xml:space="preserve">
+        <value>Layer {0}</value>
+    </data>
+    <data name="GtsLayerLabel" xml:space="preserve">
+        <value>Layer:</value>
+    </data>
+    <data name="GtsExtracting" xml:space="preserve">
+        <value>Extracting…</value>
+    </data>
+    <data name="GtsNoDataForLayer" xml:space="preserve">
+        <value>No data for this layer</value>
+    </data>
+    <data name="GtsDecodeFailed" xml:space="preserve">
+        <value>Decode failed</value>
+    </data>
+    <data name="GtsPreviewFailed" xml:space="preserve">
+        <value>Preview failed</value>
+    </data>
 </root>

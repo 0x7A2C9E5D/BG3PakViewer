@@ -2,7 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
+                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
     <!--
       Preview for GTS virtual textures: texture list on the left, and the
       selected texture decoded per-layer on the right (with layer selector).
@@ -50,7 +51,7 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="Layer:" VerticalAlignment="Center" />
+                        <TextBlock Text="{I18N {x:Static l:LangKeys.GtsLayerLabel}}" VerticalAlignment="Center" />
                         <ComboBox Width="120" Margin="8,0,0,0" VerticalAlignment="Center"
                                   ItemsSource="{Binding Layers}"
                                   SelectedIndex="{Binding SelectedLayerIndex}" />
