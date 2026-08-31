@@ -1,8 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
-                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
     <!--
       Preview for GTS virtual textures: texture list on the left, and the
@@ -61,12 +59,10 @@
 
                     <Border Grid.Row="1" Background="#1E1E1E" Margin="0,0,0,8"
                             BorderBrush="Gray" BorderThickness="1">
-                        <Image Source="{Binding Preview, NotifyOnTargetUpdated=True}"
-                               RenderOptions.BitmapScalingMode="HighQuality">
-                            <i:Interaction.Behaviors>
-                                <b:ImageBehavior />
-                            </i:Interaction.Behaviors>
-                        </Image>
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+                            <Image Source="{Binding Preview}"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Viewbox>
                     </Border>
 
                     <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
