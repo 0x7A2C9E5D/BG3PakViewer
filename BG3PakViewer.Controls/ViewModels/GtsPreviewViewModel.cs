@@ -63,7 +63,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         _ = LoadPreviewAsync();
     }
 
-    /// <summary>Orchestrates a preview reload: starts a new load, runs the extract/decode pipeline, and handles errors.</summary>
     private async Task LoadPreviewAsync()
     {
         var cts = await BeginLoadAsync();
@@ -90,7 +89,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         }
     }
 
-    /// <summary>Extracts the selected layer to DDS, decodes it, and shows the result.</summary>
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
         using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
@@ -108,7 +106,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         ShowPreview(image);
     }
 
-    /// <summary>Clears the preview when the selected layer has no data.</summary>
     private void ShowNoData()
     {
         Preview = null;
