@@ -15,8 +15,8 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 public sealed partial class LogDialogViewModel
     : DisposableViewModel, IModalDialogViewModel
 {
-    private readonly IShellOpenService _shellOpenService;
     private readonly object _logEventsLock = new();
+    private readonly IShellOpenService _shellOpenService;
     private readonly ObservableCollection<LogEvent> _sourceLogEvents;
 
     public LogDialogViewModel(ILogAccessService logAccessService, IShellOpenService shellOpenService)

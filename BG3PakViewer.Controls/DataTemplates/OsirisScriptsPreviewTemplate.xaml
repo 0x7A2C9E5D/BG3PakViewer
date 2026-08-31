@@ -4,7 +4,7 @@
     <DataTemplate x:Key="OsirisScriptPreviewDataTemplate" DataType="{x:Type vm:OsirisScriptsPreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400" MinWidth="300"/>
+                <ColumnDefinition Width="400" MinWidth="300" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>

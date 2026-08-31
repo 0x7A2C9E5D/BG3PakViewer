@@ -9,28 +9,37 @@ public sealed class VirtualTileSetExtractor : IDisposable
     private readonly TileCompressor _compressor = new();
     private readonly PageFileCache _pageFileCache;
 
-    private VirtualTileSet TileSet { get; }
-    
-    public int LayerCount => TileSet.TileSetLayers.Length;
-
-    /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
-    public IReadOnlyList<string> PageFileNames { get; }
-
     /// <summary>
-    /// Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream"/>
-    /// without writing to disk; <paramref name="pageStreamProvider"/> supplies a stream for the GTP
-    /// page file of a given pageFileIndex (e.g. read from inside a PAK).
+    ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
+    ///     without writing to disk; <paramref name="pageStreamProvider" /> supplies a stream for the GTP
+    ///     page file of a given pageFileIndex (e.g. read from inside a PAK).
     /// </summary>
     public VirtualTileSetExtractor(Stream gtsStream, Func<int, Stream> pageStreamProvider)
     {
-        using var reader = new BinaryReader(gtsStream, Encoding.UTF8, leaveOpen: true);
+        using var reader = new BinaryReader(gtsStream, Encoding.UTF8, true);
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(gtsStream, reader, false);
         PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
         _pageFileCache = new PageFileCache(TileSet, pageStreamProvider);
     }
 
-    public List<FourCCTextureMeta> GetTextures() => TileSet.FourCCMetadata.ExtractTextureMetadata();
+    private VirtualTileSet TileSet { get; }
+
+    public int LayerCount => TileSet.TileSetLayers.Length;
+
+    /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
+    public IReadOnlyList<string> PageFileNames { get; }
+
+    public void Dispose()
+    {
+        _pageFileCache.Dispose();
+        TileSet.Dispose();
+    }
+
+    public List<FourCCTextureMeta> GetTextures()
+    {
+        return TileSet.FourCCMetadata.ExtractTextureMetadata();
+    }
 
     private bool TryGetTileRange(int level, FourCCTextureMeta tex,
         out int minX, out int minY, out int maxX, out int maxY)
@@ -55,8 +64,9 @@ public sealed class VirtualTileSetExtractor : IDisposable
     {
         GTSFlatTileInfo tile = default;
         for (var y = minY; y <= maxY; y++)
-            for (var x = minX; x <= maxX; x++)
-                if (!TileSet.GetTileInfo(level, layer, x, y, ref tile)) return false;
+        for (var x = minX; x <= maxX; x++)
+            if (!TileSet.GetTileInfo(level, layer, x, y, ref tile))
+                return false;
         return true;
     }
 
@@ -88,7 +98,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
             dwFourCC = DDSHeader.FourCC_DXT5,
             dwCaps = 0x1000
         };
-        using var bw = new BinaryWriter(output, Encoding.UTF8, leaveOpen: true);
+        using var bw = new BinaryWriter(output, Encoding.UTF8, true);
         BinUtils.WriteStruct(bw, ref header);
 
         var strip = new BC5Image(width, tileH);
@@ -127,12 +137,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
             ExtractToStream(level, layer, minX, minY, maxX, maxY, output, progress, ct);
             return true;
         }
-        return false;
-    }
 
-    public void Dispose()
-    {
-        _pageFileCache.Dispose();
-        TileSet.Dispose();
+        return false;
     }
 }

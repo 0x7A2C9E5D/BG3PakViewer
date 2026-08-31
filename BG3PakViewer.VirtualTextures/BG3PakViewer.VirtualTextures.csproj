@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="LSLib">
-        <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
-      </Reference>
+        <Reference Include="LSLib">
+            <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

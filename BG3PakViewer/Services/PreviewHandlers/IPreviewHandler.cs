@@ -8,6 +8,9 @@ internal interface IPreviewHandler
     bool CanHandle(string fileExtension);
 
     Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension);
-    
-    Task<object?> CreatePreviewViewModelAsync(PackageEntry node) => Task.FromResult<object?>(null);
+
+    Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
+    {
+        return Task.FromResult<object?>(null);
+    }
 }

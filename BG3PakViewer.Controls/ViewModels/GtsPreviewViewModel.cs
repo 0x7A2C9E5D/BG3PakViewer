@@ -138,6 +138,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             await _cts.CancelAsync();
             _cts.Dispose();
         }
+
         _extractor.Dispose();
     }
 }

@@ -26,13 +26,13 @@ namespace BG3PakViewer.ViewModels;
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 {
     private readonly IDialogService _dialogService;
-    private readonly IShellOpenService _shellOpenService;
     private readonly IExportService _exportService;
     private readonly ILogAccessService _logAccessService;
     private readonly IPackageService _packageService;
     private readonly IPreviewService _previewService;
     private readonly IRecentFilesService _recentFilesService;
     private readonly ISettingsManagerService _settingsManagerService;
+    private readonly IShellOpenService _shellOpenService;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isLoading;
 

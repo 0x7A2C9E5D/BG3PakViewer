@@ -6,16 +6,16 @@ namespace BG3PakViewer.VirtualTextures;
 
 public sealed class StreamingPageFile : IDisposable
 {
-    private readonly VirtualTileSet _tileSet;
-    private readonly Stream _stream;
-    private readonly BinaryReader _reader;
     private readonly List<uint[]> _chunkOffsets;
+    private readonly BinaryReader _reader;
+    private readonly Stream _stream;
+    private readonly VirtualTileSet _tileSet;
 
     public StreamingPageFile(VirtualTileSet tileSet, Stream stream)
     {
         _tileSet = tileSet;
         _stream = stream;
-        _reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: false);
+        _reader = new BinaryReader(stream, Encoding.UTF8, false);
 
         BinUtils.ReadStruct<GTPHeader>(_reader);
 
@@ -30,6 +30,11 @@ public sealed class StreamingPageFile : IDisposable
             _chunkOffsets.Add(offsets);
             stream.Position = (page + 1) * pageSize;
         }
+    }
+
+    public void Dispose()
+    {
+        _reader.Dispose();
     }
 
     private byte[] UnpackTile(int pageIndex, int chunkIndex, int outputSize, TileCompressor compressor)
@@ -49,24 +54,21 @@ public sealed class StreamingPageFile : IDisposable
     {
         var header = _tileSet.Header;
         var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
-                       + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackTile(pageIndex, chunkIndex, outputSize, compressor), header.TileWidth, header.TileHeight);
+                         + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
+        return new BC5Image(UnpackTile(pageIndex, chunkIndex, outputSize, compressor), header.TileWidth,
+            header.TileHeight);
     }
 
     private byte[] DoUnpackTileBc(GTPChunkHeader header, int outputSize, TileCompressor compressor)
     {
         var parameterBlock = (GTSBCParameterBlock)_tileSet.ParameterBlocks[header.ParameterBlockID];
         var compressed = _reader.ReadBytes((int)header.Size);
-        return compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1, parameterBlock.CompressionName2);
+        return compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
+            parameterBlock.CompressionName2);
     }
 
     private byte[] DoUnpackTileUniform()
     {
         return new byte[_tileSet.Header.TileWidth * _tileSet.Header.TileHeight];
-    }
-
-    public void Dispose()
-    {
-        _reader.Dispose();
     }
 }
