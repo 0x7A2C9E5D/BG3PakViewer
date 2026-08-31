@@ -39,6 +39,7 @@
         <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Loader\BG3PakViewer.Loader.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.Shared\BG3PakViewer.Shared.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.VirtualTextures\BG3PakViewer.VirtualTextures.csproj"/>
     </ItemGroup>

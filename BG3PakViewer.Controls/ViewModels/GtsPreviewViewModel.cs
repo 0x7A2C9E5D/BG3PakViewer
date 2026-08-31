@@ -5,6 +5,7 @@ using System.Windows.Media;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
@@ -125,20 +126,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();
-        _extractor.Dispose();
-    }
-
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        await base.DisposeAsyncCore();
-        if (_cts is not null)
-        {
-            await _cts.CancelAsync();
-            _cts.Dispose();
-        }
-
         _extractor.Dispose();
     }
 }
