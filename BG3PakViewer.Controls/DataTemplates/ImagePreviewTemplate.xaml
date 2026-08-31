@@ -1,13 +1,10 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
-                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
     <DataTemplate x:Key="ImageFilePreviewTemplate" DataType="{x:Type vm:ImagePreviewViewModel}">
-        <Image Source="{Binding Data, NotifyOnTargetUpdated=True}">
-            <i:Interaction.Behaviors>
-                <b:ImageBehavior />
-            </i:Interaction.Behaviors>
-        </Image>
+        <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+            <Image Source="{Binding Data}"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+        </Viewbox>
     </DataTemplate>
 </ResourceDictionary>
