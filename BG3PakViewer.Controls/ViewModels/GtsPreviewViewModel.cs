@@ -7,7 +7,9 @@ using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
+using LSLib.VirtualTextures;
 using Serilog;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -63,45 +65,26 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private async Task LoadPreviewAsync()
     {
-        if (_cts is not null)
-            await _cts.CancelAsync();
-        var cts = new CancellationTokenSource();
-        _cts = cts;
-
+        var cts = await BeginLoadAsync();
         if (SelectedTexture is null) return;
         var meta = SelectedTexture.Meta;
         var layer = SelectedLayerIndex;
 
         try
         {
-            IsBusy = true;
-            StatusText = Strings.GtsExtracting;
-            Progress = 0;
-
-            var progress = new Progress<(int Done, int Total)>(p =>
-                Progress = p.Total == 0 ? 0 : p.Done * 100.0 / p.Total);
-
-            using var ddsStream = new MemoryStream();
-            var extracted = await Task.Run(
-                () => _extractor.ExtractTexture(layer, meta, ddsStream, progress, cts.Token),
-                cts.Token);
-
+            using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
             if (cts.IsCancellationRequested) return;
-            if (!extracted)
+            if (ddsStream is null)
             {
                 Preview = null;
                 StatusText = Strings.GtsNoDataForLayer;
                 return;
             }
 
-            ddsStream.Position = 0;
-            using var image = await ImageLoader.LoadAsync(ddsStream, ".dds");
+            using var image = await DecodeDdsAsync(ddsStream);
             if (cts.IsCancellationRequested) return;
 
-            Preview = image?.ToBitmapSource();
-            StatusText = image is null
-                ? Strings.GtsDecodeFailed
-                : $"{image.Width} × {image.Height}";
+            ShowPreview(image);
         }
         catch (OperationCanceledException)
         {
@@ -116,6 +99,59 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         {
             if (!cts.IsCancellationRequested) IsBusy = false;
         }
+    }
+
+    private async Task<CancellationTokenSource> BeginLoadAsync()
+    {
+        if (_cts is not null)
+            await _cts.CancelAsync();
+        var cts = new CancellationTokenSource();
+        _cts = cts;
+
+        IsBusy = true;
+        StatusText = Strings.GtsExtracting;
+        Progress = 0;
+        return cts;
+    }
+
+    private async Task<MemoryStream?> ExtractDdsAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
+    {
+        var progress = new Progress<(int Done, int Total)>(p =>
+            Progress = p.Total == 0 ? 0 : p.Done * 100.0 / p.Total);
+
+        var ddsStream = new MemoryStream();
+        try
+        {
+            var extracted = await Task.Run(
+                () => _extractor.ExtractTexture(layer, meta, ddsStream, progress, cts.Token),
+                cts.Token);
+            if (!extracted)
+            {
+                await ddsStream.DisposeAsync();
+                return null;
+            }
+
+            ddsStream.Position = 0;
+            return ddsStream;
+        }
+        catch
+        {
+            await ddsStream.DisposeAsync();
+            throw;
+        }
+    }
+
+    private static async Task<Image?> DecodeDdsAsync(MemoryStream ddsStream)
+    {
+        return await ImageLoader.LoadAsync(ddsStream, ".dds");
+    }
+
+    private void ShowPreview(Image? image)
+    {
+        Preview = image?.ToBitmapSource();
+        StatusText = image is null
+            ? Strings.GtsDecodeFailed
+            : $"{image.Width} × {image.Height}";
     }
 
     protected override void Dispose(bool disposing)
