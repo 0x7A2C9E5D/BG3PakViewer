@@ -63,6 +63,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         _ = LoadPreviewAsync();
     }
 
+    /// <summary>Orchestrates a preview reload: starts a new load, runs the extract/decode pipeline, and handles errors.</summary>
     private async Task LoadPreviewAsync()
     {
         var cts = await BeginLoadAsync();
@@ -72,19 +73,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
         try
         {
-            using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
-            if (cts.IsCancellationRequested) return;
-            if (ddsStream is null)
-            {
-                Preview = null;
-                StatusText = Strings.GtsNoDataForLayer;
-                return;
-            }
-
-            using var image = await DecodeDdsAsync(ddsStream);
-            if (cts.IsCancellationRequested) return;
-
-            ShowPreview(image);
+            await LoadPreviewCoreAsync(meta, layer, cts);
         }
         catch (OperationCanceledException)
         {
@@ -99,6 +88,31 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         {
             if (!cts.IsCancellationRequested) IsBusy = false;
         }
+    }
+
+    /// <summary>Extracts the selected layer to DDS, decodes it, and shows the result.</summary>
+    private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
+    {
+        using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
+        if (cts.IsCancellationRequested) return;
+
+        if (ddsStream is null)
+        {
+            ShowNoData();
+            return;
+        }
+
+        using var image = await DecodeDdsAsync(ddsStream);
+        if (cts.IsCancellationRequested) return;
+
+        ShowPreview(image);
+    }
+
+    /// <summary>Clears the preview when the selected layer has no data.</summary>
+    private void ShowNoData()
+    {
+        Preview = null;
+        StatusText = Strings.GtsNoDataForLayer;
     }
 
     private async Task<CancellationTokenSource> BeginLoadAsync()
@@ -116,29 +130,34 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private async Task<MemoryStream?> ExtractDdsAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        var progress = new Progress<(int Done, int Total)>(p =>
-            Progress = p.Total == 0 ? 0 : p.Done * 100.0 / p.Total);
-
         var ddsStream = new MemoryStream();
+        var transferred = false;
         try
         {
-            var extracted = await Task.Run(
-                () => _extractor.ExtractTexture(layer, meta, ddsStream, progress, cts.Token),
-                cts.Token);
-            if (!extracted)
-            {
-                await ddsStream.DisposeAsync();
-                return null;
-            }
+            var extracted = await ExtractToStreamAsync(meta, layer, ddsStream,
+                CreateTileProgress(p => Progress = p), cts.Token);
+            if (!extracted) return null;
 
             ddsStream.Position = 0;
+            transferred = true;
             return ddsStream;
         }
-        catch
+        finally
         {
-            await ddsStream.DisposeAsync();
-            throw;
+            if (!transferred) await ddsStream.DisposeAsync();
         }
+    }
+
+    private static Progress<(int Done, int Total)> CreateTileProgress(Action<double> report)
+    {
+        return new Progress<(int Done, int Total)>(p =>
+            report(p.Total == 0 ? 0 : p.Done * 100.0 / p.Total));
+    }
+
+    private Task<bool> ExtractToStreamAsync(FourCCTextureMeta meta, int layer, Stream output,
+        IProgress<(int Done, int Total)> progress, CancellationToken ct)
+    {
+        return Task.Run(() => _extractor.ExtractTexture(layer, meta, output, progress, ct), ct);
     }
 
     private static async Task<Image?> DecodeDdsAsync(MemoryStream ddsStream)
