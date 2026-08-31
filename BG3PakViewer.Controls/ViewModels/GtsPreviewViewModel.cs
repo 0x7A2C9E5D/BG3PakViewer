@@ -101,7 +101,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             Preview = image?.ToBitmapSource();
             StatusText = image is null
                 ? Strings.GtsDecodeFailed
-                : FormatResolution(image.Width, image.Height, meta.Width, meta.Height);
+                : $"{image.Width} × {image.Height}";
         }
         catch (OperationCanceledException)
         {
@@ -116,19 +116,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         {
             if (!cts.IsCancellationRequested) IsBusy = false;
         }
-    }
-
-    /// <summary>
-    ///     Renders the resolution actually decoded from the extracted tiles. A virtual texture is
-    ///     stitched from a tile grid and may fall back to a coarser mip level when tiles are missing
-    ///     for the current layer, so the real size can differ from the metadata's declared size.
-    ///     The declared size is appended whenever the two disagree.
-    /// </summary>
-    private static string FormatResolution(int width, int height, int declaredWidth, int declaredHeight)
-    {
-        return width == declaredWidth && height == declaredHeight
-            ? $"{width} × {height}"
-            : $"{width} × {height} ({declaredWidth} × {declaredHeight})";
     }
 
     protected override void Dispose(bool disposing)
