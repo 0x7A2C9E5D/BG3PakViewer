@@ -57,6 +57,13 @@ public sealed class VirtualTileSetExtractor : IDisposable
         maxX = (tX + tW) / lv + ((tX + tW) % lv > 0 ? 1 : 0) - 1;
         maxY = (tY + tH) / lv + ((tY + tH) % lv > 0 ? 1 : 0) - 1;
 
+        // GetTileInfo indexes the flat tile array of this level without bounds checks,
+        // so clamp the range to the level's actual tile grid.
+        var levelWidth = (int)TileSet.TileSetLevels[level].Width;
+        var levelHeight = (int)TileSet.TileSetLevels[level].Height;
+        if (maxX > levelWidth - 1) maxX = levelWidth - 1;
+        if (maxY > levelHeight - 1) maxY = levelHeight - 1;
+
         return maxX >= minX && maxY >= minY;
     }
 
