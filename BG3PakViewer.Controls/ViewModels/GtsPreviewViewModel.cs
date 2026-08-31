@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Windows;
 using System.Windows.Media;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
@@ -76,7 +75,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         try
         {
             IsBusy = true;
-            StatusText = I18NExtension.Translate(LangKeys.GtsExtracting, "Extracting…");
+            StatusText = Strings.GtsExtracting;
             Progress = 0;
 
             var progress = new Progress<(int Done, int Total)>(p =>
@@ -91,7 +90,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             if (!extracted)
             {
                 Preview = null;
-                StatusText = I18NExtension.Translate(LangKeys.GtsNoDataForLayer, "No data for this layer");
+                StatusText = Strings.GtsNoDataForLayer;
                 return;
             }
 
@@ -101,7 +100,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
             Preview = image?.ToBitmapSource();
             StatusText = image is null
-                ? I18NExtension.Translate(LangKeys.GtsDecodeFailed, "Decode failed")
+                ? Strings.GtsDecodeFailed
                 : $"{meta.Width} × {meta.Height}";
         }
         catch (OperationCanceledException)
@@ -111,7 +110,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to preview GTS texture: {Name}", meta.Name);
-            StatusText = I18NExtension.Translate(LangKeys.GtsPreviewFailed, "Preview failed");
+            StatusText = Strings.GtsPreviewFailed;
         }
         finally
         {
