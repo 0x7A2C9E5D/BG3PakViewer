@@ -19,6 +19,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 {
     private readonly VirtualTileSetExtractor _extractor;
     private CancellationTokenSource? _cts;
+    private bool _disposed;
 
     public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
     {
@@ -119,9 +120,24 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        if (!disposing) return;
+        if (_disposed) return;
+        _disposed = true;
         base.Dispose(disposing);
+        if (!disposing) return;
         _ = _cts?.CancelAsync();
+        _extractor.Dispose();
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        await base.DisposeAsyncCore();
+        if (_cts is not null)
+        {
+            await _cts.CancelAsync();
+            _cts.Dispose();
+        }
         _extractor.Dispose();
     }
 }
