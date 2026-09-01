@@ -4,7 +4,7 @@ using Syncfusion.UI.Xaml.Grid;
 
 namespace BG3PakViewer.Controls.Behaviors;
 
-public class SfDataGridBehavior : Behavior<SfDataGrid>
+internal class SfDataGridBehavior : Behavior<SfDataGrid>
 {
     protected override void OnAttached()
     {
