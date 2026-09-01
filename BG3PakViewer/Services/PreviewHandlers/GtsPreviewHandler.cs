@@ -13,13 +13,13 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
     public Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
         => Task.FromResult<object?>(null);
 
-    public Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
+    public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        return Task.Run<object?>(() =>
+        return await Task.Run(async () =>
         {
             var directory = Path.GetDirectoryName(node.FullPath)?.Replace('\\', '/') ?? string.Empty;
             var gtsStream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
-            if (gtsStream is null) return null;
+            if (gtsStream is null) return await Task.FromResult<object?>(null);
 
             IReadOnlyList<string> pageFileNames = [];
             VirtualTileSetExtractor? extractor = null;
