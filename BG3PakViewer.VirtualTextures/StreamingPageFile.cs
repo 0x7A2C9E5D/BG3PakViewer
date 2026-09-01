@@ -4,7 +4,7 @@ using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
-public sealed class StreamingPageFile : IDisposable
+internal sealed class StreamingPageFile : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly BinaryReader _reader;
