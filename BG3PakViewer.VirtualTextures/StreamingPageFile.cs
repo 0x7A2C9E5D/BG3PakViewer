@@ -18,18 +18,27 @@ public sealed class StreamingPageFile : IDisposable
         _reader = new BinaryReader(stream, Encoding.UTF8, false);
 
         BinUtils.ReadStruct<GTPHeader>(_reader);
+        _chunkOffsets = ReadChunkOffsetTables();
+    }
 
-        var pageSize = tileSet.Header.PageSize;
-        var numPages = (int)(stream.Length / pageSize);
-        _chunkOffsets = new List<uint[]>(numPages);
+    /// <summary>
+    ///     Reads the chunk offset table of every page: each page stores its own count of offsets
+    ///     followed by that many uint offsets, and pages are aligned to VirtualTileSet.Header.PageSize.
+    /// </summary>
+    private List<uint[]> ReadChunkOffsetTables()
+    {
+        var pageSize = _tileSet.Header.PageSize;
+        var numPages = (int)(_stream.Length / pageSize);
+        var tables = new List<uint[]>(numPages);
         for (var page = 0; page < numPages; page++)
         {
             var numOffsets = _reader.ReadUInt32();
             var offsets = new uint[numOffsets];
             BinUtils.ReadStructs(_reader, offsets);
-            _chunkOffsets.Add(offsets);
-            stream.Position = (page + 1) * pageSize;
+            tables.Add(offsets);
+            _stream.Position = (page + 1) * pageSize;
         }
+        return tables;
     }
 
     public void Dispose()
