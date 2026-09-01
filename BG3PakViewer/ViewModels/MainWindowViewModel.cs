@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Dialogs.Extensions;
 using BG3PakViewer.Dialogs.ViewModels;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
@@ -13,13 +14,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging.Messages;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using iNKORE.UI.WPF.DragDrop;
 using Microsoft.Extensions.DependencyModel;
 using Serilog;
+using MessageBoxImage = System.Windows.MessageBoxImage;
 
 namespace BG3PakViewer.ViewModels;
 
@@ -152,7 +153,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task ValidateAndOpenPackageAsync(string path)
     {
         if (!(await HandleIsExportingFiles()
-              && await HandleReOpenFile(path))) return;
+              && await HandleReOpenFile())) return;
         await OpenPackageAsync(path);
     }
 
@@ -168,8 +169,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (success)
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
-                MessageTokens.OpenFileFailed);
+            await _dialogService.NotifyAsync(this, Strings.OpenFileFailedMessage, Strings.OpenFileFailedCaption,
+                MessageBoxImage.Error);
         _isLoading = false;
     }
 
@@ -233,7 +234,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
 
         var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
-        HandleExportResult(success);
+        await HandleExportResultAsync(success);
     }
 
     private async Task ExportFolderAsync(PackageEntry node)
@@ -254,22 +255,21 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (_cancellationTokenSource.IsCancellationRequested)
             Log.Information("Folder export was cancelled.");
         else
-            HandleExportResult(success);
+            await HandleExportResultAsync(success);
     }
 
 
-    private static void HandleExportResult(bool success)
+    private async Task HandleExportResultAsync(bool success)
     {
         if (success)
         {
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
-                MessageTokens.ExportCompleted);
+            await _dialogService.NotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted);
             Log.Information("Export completed.");
         }
         else
         {
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
-                MessageTokens.ExportFailed);
+            await _dialogService.NotifyAsync(this, Strings.ExportFailedMessage, Strings.ExportFailedCaption,
+                MessageBoxImage.Error);
             Log.Warning("Failed to export file.");
         }
     }
@@ -329,7 +329,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task ShowRecentDialog()
     {
-        using var viewModel = new RecentDialogViewModel(_recentFilesService);
+        using var viewModel = new RecentDialogViewModel(_recentFilesService, _dialogService);
         await _dialogService.ShowDialogAsync(this, viewModel);
     }
 
@@ -381,26 +381,24 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             });
     }
 
-    private async Task<bool> HandleReOpenFile(string fileName)
+    private async Task<bool> HandleReOpenFile()
     {
         if (_isLoading)
         {
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(string.Empty),
-                MessageTokens.FileLoadingDuplicate);
+            await _dialogService.NotifyAsync(this, Strings.FileLoadingDuplicateMessage,
+                Strings.FileLoadingDuplicateCaption, MessageBoxImage.Warning);
             return false;
         }
 
         if (PackageTree is null) return true;
-        return await WeakReferenceMessenger.Default.Send(
-            new AsyncRequestMessage<string, bool>(fileName),
-            MessageTokens.ReOpenFile);
+        return await _dialogService.ConfirmAsync(this, Strings.ReOpenFileMessage, Strings.ReOpenFileCaption);
     }
 
     private async Task<bool> HandleIsExportingFiles()
     {
         if (!IsExporting) return true;
-        if (!await WeakReferenceMessenger.Default
-                .Send(new AsyncRequestMessage<bool>(), MessageTokens.CancelExport)) return false;
+        if (!await _dialogService.ConfirmAsync(this, Strings.CancelExportOperationMessage,
+                Strings.CancelExportOperationCaption, MessageBoxImage.Warning)) return false;
         await _cancellationTokenSource?.CancelAsync()!;
         IsExporting = false;
         return true;

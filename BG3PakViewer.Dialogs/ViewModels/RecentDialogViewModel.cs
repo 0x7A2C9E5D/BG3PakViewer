@@ -2,6 +2,8 @@
 using System.Collections.Specialized;
 using System.IO;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Dialogs.Extensions;
+using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.Input;
@@ -13,11 +15,13 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 
 public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogViewModel, ICloseable
 {
+    private readonly IDialogService _dialogService;
     private readonly IRecentFilesService _recentFilesService;
 
-    public RecentDialogViewModel(IRecentFilesService recentFilesService)
+    public RecentDialogViewModel(IRecentFilesService recentFilesService, IDialogService dialogService)
     {
         _recentFilesService = recentFilesService;
+        _dialogService = dialogService;
         _recentFilesService.RecentItems
             .CollectionChanged += OnRecentItemsOnCollectionChanged;
     }
@@ -61,14 +65,9 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
     private async Task HandleMissingFile(IRecentFileEntry recentFileEntry)
     {
         LogMissingFile(recentFileEntry.FilePath);
-        if (await NotifyFileNotFound(recentFileEntry.FilePath))
+        if (await _dialogService.ConfirmAsync(this, Strings.FileOpenedNoFoundMessage,
+                Strings.FileOpenedNoFoundCaption))
             _recentFilesService.RemoveRecentFile(recentFileEntry);
-    }
-
-    private static async Task<bool> NotifyFileNotFound(string filePath)
-    {
-        return await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(filePath),
-            MessageTokens.OpenedFileNoFound);
     }
 
     private static void LogMissingFile(string filePath)
