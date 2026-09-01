@@ -1,7 +1,8 @@
 using System.IO;
-using System.Windows;
+using BG3PakViewer.Messaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -20,14 +21,11 @@ public partial class GtsTextureItemViewModel(FourCCTextureMeta meta) : Observabl
     [RelayCommand]
     private async Task CopyNameAsync()
     {
-        try
-        {
-            Clipboard.SetText(DisplayName);
-        }
-        catch (Exception)
-        {
-            // Clipboard may be locked by another process; silently ignore.
-        }
+        // Request the copy from the UI layer: the clipboard is a platform capability, and
+        // routing it through the messenger keeps this view model free of UI dependencies.
+        var copied = await WeakReferenceMessenger.Default.Send(
+            new AsyncRequestMessage<string, bool>(DisplayName), MessageTokens.CopyToClipboard);
+        if (!copied) return;
 
         IsCopied = true;
         await Task.Delay(1500);
