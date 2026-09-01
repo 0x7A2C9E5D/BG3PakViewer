@@ -36,9 +36,10 @@
                             <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Dimensions}"
                                        Foreground="Gray" FontSize="11" />
-                            <Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                            <Button Grid.Column="1" Grid.Row="0"
                                     Command="{Binding CopyNameCommand}"
                                     Padding="2,0" Margin="4,0,0,0"
+                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Center"
                                     Width="22" Height="22">
                                 <Button.Style>
