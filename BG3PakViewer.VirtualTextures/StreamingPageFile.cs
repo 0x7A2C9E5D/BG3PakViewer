@@ -15,7 +15,7 @@ public sealed class StreamingPageFile : IDisposable
     {
         _tileSet = tileSet;
         _stream = stream;
-        _reader = new BinaryReader(stream, Encoding.UTF8, false);
+        _reader = new BinaryReader(_stream, Encoding.UTF8, false);
 
         BinUtils.ReadStruct<GTPHeader>(_reader);
         _chunkOffsets = ReadChunkOffsetTables();
