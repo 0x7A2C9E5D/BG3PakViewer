@@ -46,38 +46,14 @@ public sealed class StreamingPageFile : IDisposable
         _reader.Dispose();
     }
 
-    private byte[] UnpackTile(int pageIndex, int chunkIndex, int outputSize, TileCompressor compressor)
+    /// <summary>
+    ///     Positions the stream at the chunk (<paramref name="pageIndex" />, <paramref name="chunkIndex" />)
+    ///     and returns its GTP chunk header together with the raw (still compressed) chunk bytes.
+    /// </summary>
+    public (GTPChunkHeader Header, byte[] Data) ReadChunk(int pageIndex, int chunkIndex)
     {
         _stream.Position = _chunkOffsets[pageIndex][chunkIndex] + pageIndex * _tileSet.Header.PageSize;
         var header = BinUtils.ReadStruct<GTPChunkHeader>(_reader);
-        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
-        return header.Codec switch
-        {
-            GTSCodec.Uniform => DoUnpackTileUniform(),
-            GTSCodec.BC => DoUnpackTileBc(header, outputSize, compressor),
-            _ => throw new InvalidDataException($"Unsupported codec: {header.Codec}")
-        };
-    }
-
-    public BC5Image UnpackTileBc5(int pageIndex, int chunkIndex, TileCompressor compressor)
-    {
-        var header = _tileSet.Header;
-        var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
-                         + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackTile(pageIndex, chunkIndex, outputSize, compressor), header.TileWidth,
-            header.TileHeight);
-    }
-
-    private byte[] DoUnpackTileBc(GTPChunkHeader header, int outputSize, TileCompressor compressor)
-    {
-        var parameterBlock = (GTSBCParameterBlock)_tileSet.ParameterBlocks[header.ParameterBlockID];
-        var compressed = _reader.ReadBytes((int)header.Size);
-        return compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
-            parameterBlock.CompressionName2);
-    }
-
-    private byte[] DoUnpackTileUniform()
-    {
-        return new byte[_tileSet.Header.TileWidth * _tileSet.Header.TileHeight];
+        return (header, _reader.ReadBytes((int)header.Size));
     }
 }

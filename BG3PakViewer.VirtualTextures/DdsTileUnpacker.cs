@@ -36,6 +36,35 @@ public sealed class DdsTileUnpacker(VirtualTileSet tileSet, PageFileCache pageFi
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
         var pageFile = pageFileCache.Get(tileInfo.PageFileIndex);
-        return pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
+        return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
+    }
+
+    /// <summary>Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into a BC5 image.</summary>
+    private BC5Image UnpackChunkBc5(StreamingPageFile pageFile, int pageIndex, int chunkIndex)
+    {
+        var header = tileSet.Header;
+        var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
+                         + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
+        return new BC5Image(UnpackChunk(pageFile, pageIndex, chunkIndex, outputSize), header.TileWidth,
+            header.TileHeight);
+    }
+
+    private byte[] UnpackChunk(StreamingPageFile pageFile, int pageIndex, int chunkIndex, int outputSize)
+    {
+        var (chunkHeader, compressed) = pageFile.ReadChunk(pageIndex, chunkIndex);
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
+        return chunkHeader.Codec switch
+        {
+            GTSCodec.Uniform => new byte[tileSet.Header.TileWidth * tileSet.Header.TileHeight],
+            GTSCodec.BC => DecompressBc(chunkHeader, compressed, outputSize),
+            _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
+        };
+    }
+
+    private byte[] DecompressBc(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
+    {
+        var parameterBlock = (GTSBCParameterBlock)tileSet.ParameterBlocks[chunkHeader.ParameterBlockID];
+        return _compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
+            parameterBlock.CompressionName2);
     }
 }
