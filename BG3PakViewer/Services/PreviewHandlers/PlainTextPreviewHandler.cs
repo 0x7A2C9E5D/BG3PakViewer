@@ -4,7 +4,8 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class PlainTextPreviewHandler(IAppSettings appSettings) : TextBasedPreviewHandler(appSettings)
+internal class PlainTextPreviewHandler(IPackageService packageService, IAppSettings appSettings)
+    : TextBasedPreviewHandler(packageService, appSettings)
 {
     public override bool CanHandle(string fileExtension)
     {

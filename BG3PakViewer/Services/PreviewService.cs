@@ -67,31 +67,21 @@ internal class PreviewService(
 
         try
         {
-            var multiStreamViewModel = await handler.CreatePreviewViewModelAsync(node);
-            if (multiStreamViewModel != null)
-            {
-                Log.Debug("Multi-stream preview created successfully for: {FileName}",
-                    Path.GetFileName(node.FullPath));
-                return multiStreamViewModel;
-            }
-
-            await using var stream = packageService.GetFileByPath(node.FullPath)!.CreateContentReader();
-            var viewModel = await handler.CreatePreviewViewModelAsync(stream, node.FileExtension);
-
+            var viewModel = await handler.CreatePreviewViewModelAsync(node);
             if (viewModel != null)
             {
-                Log.Debug("Single-stream preview created successfully for: {FileName}",
+                Log.Debug("Preview created successfully for: {FileName}",
                     Path.GetFileName(node.FullPath));
                 return viewModel;
             }
 
-            Log.Warning("Single-stream handler returned null for: {FileName}",
+            Log.Warning("Preview handler returned null for: {FileName}",
                 Path.GetFileName(node.FullPath));
             return null;
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error creating single-stream preview for: {FileName}",
+            Log.Error(ex, "Error creating preview for: {FileName}",
                 Path.GetFileName(node.FullPath));
             return null;
         }

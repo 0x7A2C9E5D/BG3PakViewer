@@ -1,5 +1,4 @@
-﻿using System.IO;
-using BG3PakViewer.Shared.Models;
+﻿using BG3PakViewer.Shared.Models;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -7,10 +6,5 @@ internal interface IPreviewHandler
 {
     bool CanHandle(string fileExtension);
 
-    Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension);
-
-    Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
-    {
-        return Task.FromResult<object?>(null);
-    }
+    Task<object?> CreatePreviewViewModelAsync(PackageEntry node);
 }

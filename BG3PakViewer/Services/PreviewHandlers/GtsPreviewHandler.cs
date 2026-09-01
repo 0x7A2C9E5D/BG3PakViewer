@@ -8,10 +8,9 @@ namespace BG3PakViewer.Services.PreviewHandlers;
 internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
-        => fileExtension.Equals(".gts", StringComparison.OrdinalIgnoreCase);
-
-    public Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
-        => Task.FromResult<object?>(null);
+    {
+        return fileExtension.Equals(".gts", StringComparison.OrdinalIgnoreCase);
+    }
 
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
@@ -44,5 +43,10 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
                 throw;
             }
         });
+    }
+
+    public Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
+    {
+        return Task.FromResult<object?>(null);
     }
 }

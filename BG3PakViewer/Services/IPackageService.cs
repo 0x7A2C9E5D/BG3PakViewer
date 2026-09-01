@@ -4,7 +4,7 @@ using LSLib.LS;
 
 namespace BG3PakViewer.Services;
 
-internal interface IPackageService : IDisposable
+public interface IPackageService : IDisposable
 {
     bool IsLoaded { get; }
 
