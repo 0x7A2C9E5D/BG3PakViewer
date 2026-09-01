@@ -3,11 +3,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Dialogs.Extensions;
 using BG3PakViewer.Dialogs.ViewModels;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Services;
+using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,7 +20,6 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using iNKORE.UI.WPF.DragDrop;
 using Microsoft.Extensions.DependencyModel;
 using Serilog;
-using MessageBoxImage = System.Windows.MessageBoxImage;
 
 namespace BG3PakViewer.ViewModels;
 
@@ -170,7 +169,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
             await _dialogService.NotifyAsync(this, Strings.OpenFileFailedMessage, Strings.OpenFileFailedCaption,
-                MessageBoxImage.Error);
+                DialogSeverity.Error);
         _isLoading = false;
     }
 
@@ -263,13 +262,14 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         if (success)
         {
-            await _dialogService.NotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted);
+            await _dialogService.NotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted,
+                DialogSeverity.Success);
             Log.Information("Export completed.");
         }
         else
         {
             await _dialogService.NotifyAsync(this, Strings.ExportFailedMessage, Strings.ExportFailedCaption,
-                MessageBoxImage.Error);
+                DialogSeverity.Error);
             Log.Warning("Failed to export file.");
         }
     }
@@ -386,7 +386,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (_isLoading)
         {
             await _dialogService.NotifyAsync(this, Strings.FileLoadingDuplicateMessage,
-                Strings.FileLoadingDuplicateCaption, MessageBoxImage.Warning);
+                Strings.FileLoadingDuplicateCaption, DialogSeverity.Warning);
             return false;
         }
 
@@ -398,7 +398,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         if (!IsExporting) return true;
         if (!await _dialogService.ConfirmAsync(this, Strings.CancelExportOperationMessage,
-                Strings.CancelExportOperationCaption, MessageBoxImage.Warning)) return false;
+                Strings.CancelExportOperationCaption, DialogSeverity.Warning)) return false;
         await _cancellationTokenSource?.CancelAsync()!;
         IsExporting = false;
         return true;
