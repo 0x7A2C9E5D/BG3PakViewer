@@ -21,7 +21,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 {
     private readonly VirtualTileSetExtractor _extractor;
     private CancellationTokenSource? _cts;
-    private bool _disposed;
 
     public GtsPreviewViewModel(VirtualTileSetExtractor extractor)
     {
@@ -172,8 +171,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        if (_disposed) return;
-        _disposed = true;
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();
