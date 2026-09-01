@@ -30,6 +30,10 @@ public sealed class VirtualTileSetExtractor : IDisposable
     /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
     public IReadOnlyList<string> PageFileNames { get; }
 
+    private int TileWidth => TileSet.Header.TileWidth - TileSet.Header.TileBorder * 2;
+
+    private int TileHeight => TileSet.Header.TileHeight - TileSet.Header.TileBorder * 2;
+
     public void Dispose()
     {
         _pageFileCache.Dispose();
@@ -71,7 +75,9 @@ public sealed class VirtualTileSetExtractor : IDisposable
     }
 
     private static int DivideCeiling(int value, int divisor)
-        => value / divisor + (value % divisor > 0 ? 1 : 0);
+    {
+        return value / divisor + (value % divisor > 0 ? 1 : 0);
+    }
 
     private void ClampToLevelGrid(int level, ref int maxX, ref int maxY)
     {
@@ -156,10 +162,6 @@ public sealed class VirtualTileSetExtractor : IDisposable
         var pageFile = _pageFileCache.Get(tileInfo.PageFileIndex);
         return pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
     }
-
-    private int TileWidth => TileSet.Header.TileWidth - TileSet.Header.TileBorder * 2;
-
-    private int TileHeight => TileSet.Header.TileHeight - TileSet.Header.TileBorder * 2;
 
     public bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
