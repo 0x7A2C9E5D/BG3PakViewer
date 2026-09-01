@@ -44,9 +44,4 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
             }
         });
     }
-
-    public Task<object?> CreatePreviewViewModelAsync(Stream stream, string fileExtension)
-    {
-        return Task.FromResult<object?>(null);
-    }
 }
