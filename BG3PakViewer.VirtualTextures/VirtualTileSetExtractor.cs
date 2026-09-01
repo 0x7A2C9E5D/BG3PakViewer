@@ -80,16 +80,26 @@ public sealed class VirtualTileSetExtractor : IDisposable
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var hdr = TileSet.Header;
-        var tileW = hdr.TileWidth - hdr.TileBorder * 2;
-        var tileH = hdr.TileHeight - hdr.TileBorder * 2;
         var cols = maxX - minX + 1;
         var rows = maxY - minY + 1;
         if (cols <= 0 || rows <= 0) throw new ArgumentException("Empty tile range");
 
-        var width = cols * tileW;
-        var height = rows * tileH;
+        using var bw = new BinaryWriter(output, Encoding.UTF8, true);
+        WriteDdsHeader(bw, cols * TileWidth, rows * TileHeight);
 
+        var strip = new BC5Image(cols * TileWidth, TileHeight);
+        for (var row = 0; row < rows; row++)
+        {
+            ct.ThrowIfCancellationRequested();
+            StitchRow(level, layer, minX, minY + row, cols, strip);
+            output.Write(strip.Data, 0, strip.Data.Length);
+            progress?.Report((row + 1, rows));
+        }
+    }
+
+    /// <summary>Writes a single-mip DXT5 DDS header sized to the stitched output.</summary>
+    private static void WriteDdsHeader(BinaryWriter bw, int width, int height)
+    {
         var header = new DDSHeader
         {
             dwMagic = DDSHeader.DDSMagic,
@@ -105,32 +115,37 @@ public sealed class VirtualTileSetExtractor : IDisposable
             dwFourCC = DDSHeader.FourCC_DXT5,
             dwCaps = 0x1000
         };
-        using var bw = new BinaryWriter(output, Encoding.UTF8, true);
         BinUtils.WriteStruct(bw, ref header);
+    }
 
-        var strip = new BC5Image(width, tileH);
+    /// <summary>Stitches one horizontal band of tiles into <paramref name="strip" />, trimming tile borders.</summary>
+    private void StitchRow(int level, int layer, int startX, int y, int cols, BC5Image strip)
+    {
+        Array.Clear(strip.Data);
         GTSFlatTileInfo tileInfo = default;
-
-        for (var row = 0; row < rows; row++)
+        for (var col = 0; col < cols; col++)
         {
-            ct.ThrowIfCancellationRequested();
-            Array.Clear(strip.Data);
-
-            for (var col = 0; col < cols; col++)
-            {
-                if (!TileSet.GetTileInfo(level, layer, minX + col, minY + row, ref tileInfo)) continue;
-
-                var pageFile = _pageFileCache.Get(tileInfo.PageFileIndex);
-                var img = pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
-                // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
-                img.CopyTo(strip, hdr.TileBorder, hdr.TileBorder,
-                    col * tileW, 0, tileW, tileH);
-            }
-
-            output.Write(strip.Data, 0, strip.Data.Length);
-            progress?.Report((row + 1, rows));
+            var tile = TryUnpackTile(level, layer, startX + col, y, ref tileInfo);
+            // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
+            tile?.CopyTo(strip, TileSet.Header.TileBorder, TileSet.Header.TileBorder,
+                col * TileWidth, 0, TileWidth, TileHeight);
         }
     }
+
+    /// <summary>
+    ///     Decompresses the tile at (<paramref name="x" />, <paramref name="y" />) of the current level/layer,
+    ///     or returns null when that position has no tile.
+    /// </summary>
+    private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
+    {
+        if (!TileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
+        var pageFile = _pageFileCache.Get(tileInfo.PageFileIndex);
+        return pageFile.UnpackTileBc5(tileInfo.PageIndex, tileInfo.ChunkIndex, _compressor);
+    }
+
+    private int TileWidth => TileSet.Header.TileWidth - TileSet.Header.TileBorder * 2;
+
+    private int TileHeight => TileSet.Header.TileHeight - TileSet.Header.TileBorder * 2;
 
     public bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
