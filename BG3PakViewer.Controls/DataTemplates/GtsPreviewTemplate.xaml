@@ -77,12 +77,12 @@
                                                             <BeginStoryboard>
                                                                 <Storyboard>
                                                                     <DoubleAnimation Duration="00:00:00.15" To="0"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleX" />
                                                                     <DoubleAnimation Duration="00:00:00.15" To="0"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleY" />
                                                                     <DoubleAnimation BeginTime="00:00:00.1"
-                                                                                     Duration="00:00:00.01" To="0"
-                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                            Duration="00:00:00.01" To="0"
+                                                                            Storyboard.TargetProperty="Opacity" />
                                                                 </Storyboard>
                                                             </BeginStoryboard>
                                                         </DataTrigger.EnterActions>
@@ -90,14 +90,14 @@
                                                             <BeginStoryboard>
                                                                 <Storyboard>
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.15" To="1"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                            Duration="00:00:00.15" To="1"
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleX" />
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.15" To="1"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                            Duration="00:00:00.15" To="1"
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleY" />
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.15" To="1"
-                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                            Duration="00:00:00.15" To="1"
+                                                                            Storyboard.TargetProperty="Opacity" />
                                                                 </Storyboard>
                                                             </BeginStoryboard>
                                                         </DataTrigger.ExitActions>
@@ -121,24 +121,24 @@
                                                             <BeginStoryboard>
                                                                 <Storyboard>
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.15" To="1"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX">
+                                                                            Duration="00:00:00.15" To="1"
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleX">
                                                                         <DoubleAnimation.EasingFunction>
                                                                             <BackEase EasingMode="EaseOut"
-                                                                                      Amplitude="0.2" />
+                                                                                    Amplitude="0.2" />
                                                                         </DoubleAnimation.EasingFunction>
                                                                     </DoubleAnimation>
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.15" To="1"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY">
+                                                                            Duration="00:00:00.15" To="1"
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleY">
                                                                         <DoubleAnimation.EasingFunction>
                                                                             <BackEase EasingMode="EaseOut"
-                                                                                      Amplitude="0.2" />
+                                                                                    Amplitude="0.2" />
                                                                         </DoubleAnimation.EasingFunction>
                                                                     </DoubleAnimation>
                                                                     <DoubleAnimation BeginTime="00:00:00.15"
-                                                                                     Duration="00:00:00.015" To="1"
-                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                            Duration="00:00:00.015" To="1"
+                                                                            Storyboard.TargetProperty="Opacity" />
                                                                 </Storyboard>
                                                             </BeginStoryboard>
                                                         </DataTrigger.EnterActions>
@@ -146,11 +146,11 @@
                                                             <BeginStoryboard>
                                                                 <Storyboard>
                                                                     <DoubleAnimation Duration="00:00:00.15" To="0"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleX" />
                                                                     <DoubleAnimation Duration="00:00:00.15" To="0"
-                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                            Storyboard.TargetProperty="RenderTransform.ScaleY" />
                                                                     <DoubleAnimation Duration="00:00:00.15" To="0"
-                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                            Storyboard.TargetProperty="Opacity" />
                                                                 </Storyboard>
                                                             </BeginStoryboard>
                                                         </DataTrigger.ExitActions>
