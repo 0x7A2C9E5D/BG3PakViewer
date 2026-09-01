@@ -10,7 +10,7 @@
     <DataTemplate x:Key="GtsPreviewDataTemplate" DataType="{x:Type vm:GtsPreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350" />
+                <ColumnDefinition Width="360" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition MinWidth="400" />
             </Grid.ColumnDefinitions>
@@ -21,7 +21,19 @@
                       BorderBrush="Gray" BorderThickness="1" Padding="5"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <!--
+                  Every row must lay out at the same width, otherwise the copy button of a
+                  long-named row drifts to the right and the buttons stop lining up.
+                  Horizontal scrolling is therefore disabled (it measures rows at infinite
+                  width), rows stretch to the full viewport, and long names are trimmed.
+                -->
+                <ListView.ItemContainerStyle>
+                    <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+                    <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:GtsTextureItemViewModel}">
                         <Grid Margin="2">
@@ -33,9 +45,11 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Dimensions}"
-                                       Foreground="Gray" FontSize="11" />
+                                       Foreground="Gray" FontSize="11"
+                                       TextTrimming="CharacterEllipsis" />
 
                             <!--
                               Copy-name button: uses the theme's default button chrome (no
@@ -43,10 +57,9 @@
                               bound to IsCopied, because VisualStateManager cannot resolve
                               Storyboard.TargetName across a DataTemplate's name scope.
                             -->
-                            <Button Grid.Column="1" Grid.Row="0"
-                                    Margin="4,0,0,0" Padding="0"
+                            <Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                                    Margin="4,0,0,0" Padding="0" Width="30" Height="30"
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     Command="{Binding CopyNameCommand}"
                                     AutomationProperties.Name="{I18N {x:Static l:LangKeys.CopyName}}"
                                     ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.CopyName}}">
