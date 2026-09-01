@@ -100,42 +100,24 @@ public sealed class VirtualTileSetExtractor : IDisposable
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var cols = maxX - minX + 1;
-        var rows = maxY - minY + 1;
-        if (cols <= 0 || rows <= 0) throw new ArgumentException("Empty tile range");
+        var (cols, rows) = GetTileRangeSize(minX, minY, maxX, maxY);
 
-        using var bw = new BinaryWriter(output, Encoding.UTF8, true);
-        WriteDdsHeader(bw, cols * TileWidth, rows * TileHeight);
-
-        var strip = new BC5Image(cols * TileWidth, TileHeight);
+        using var writer = new DdsStripWriter(output, cols, rows, TileWidth, TileHeight,
+            (startX, y, colCount, strip) => StitchRow(level, layer, startX, y, colCount, strip));
         for (var row = 0; row < rows; row++)
         {
-            ct.ThrowIfCancellationRequested();
-            StitchRow(level, layer, minX, minY + row, cols, strip);
-            output.Write(strip.Data, 0, strip.Data.Length);
+            writer.WriteRow(minX, minY + row, cols, ct);
             progress?.Report((row + 1, rows));
         }
     }
 
-    /// <summary>Writes a single-mip DXT5 DDS header sized to the stitched output.</summary>
-    private static void WriteDdsHeader(BinaryWriter bw, int width, int height)
+    /// <summary>Computes the tile grid dimensions of a range, rejecting empty ranges.</summary>
+    private static (int Cols, int Rows) GetTileRangeSize(int minX, int minY, int maxX, int maxY)
     {
-        var header = new DDSHeader
-        {
-            dwMagic = DDSHeader.DDSMagic,
-            dwSize = DDSHeader.HeaderSize,
-            dwFlags = 0x1007,
-            dwWidth = (uint)width,
-            dwHeight = (uint)height,
-            dwPitchOrLinearSize = (uint)(width * height),
-            dwDepth = 1,
-            dwMipMapCount = 1,
-            dwPFSize = 32,
-            dwPFFlags = 0x04,
-            dwFourCC = DDSHeader.FourCC_DXT5,
-            dwCaps = 0x1000
-        };
-        BinUtils.WriteStruct(bw, ref header);
+        var cols = maxX - minX + 1;
+        var rows = maxY - minY + 1;
+        if (cols <= 0 || rows <= 0) throw new ArgumentException("Empty tile range");
+        return (cols, rows);
     }
 
     /// <summary>Stitches one horizontal band of tiles into <paramref name="strip" />, trimming tile borders.</summary>
