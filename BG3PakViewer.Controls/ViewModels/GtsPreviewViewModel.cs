@@ -91,7 +91,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
+        await using var ddsStream = await ExtractDdsAsync(meta, layer, cts);
         if (cts.IsCancellationRequested) return;
 
         if (ddsStream is null)
@@ -125,7 +125,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         return cts;
     }
 
-    private async Task<MemoryStream?> ExtractDdsAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
+    private async Task<Stream?> ExtractDdsAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
         var ddsStream = new MemoryStream();
         var transferred = false;
@@ -157,7 +157,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         return Task.Run(() => _extractor.ExtractTexture(layer, meta, output, progress, ct), ct);
     }
 
-    private static async Task<Image?> DecodeDdsAsync(MemoryStream ddsStream)
+    private static async Task<Image?> DecodeDdsAsync(Stream ddsStream)
     {
         return await ImageLoader.LoadAsync(ddsStream, ".dds");
     }
