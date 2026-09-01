@@ -44,27 +44,41 @@ public sealed class VirtualTileSetExtractor : IDisposable
     private bool TryGetTileRange(int level, FourCCTextureMeta tex,
         out int minX, out int minY, out int maxX, out int maxY)
     {
-        var tlW = TileSet.Header.TileWidth - TileSet.Header.TileBorder * 2;
-        var tlH = TileSet.Header.TileHeight - TileSet.Header.TileBorder * 2;
-        var tX = tex.X / tlW;
-        var tY = tex.Y / tlH;
-        var tW = tex.Width / tlW;
-        var tH = tex.Height / tlH;
-        var lv = 1 << level;
-
-        minX = tX / lv + (tX % lv > 0 ? 1 : 0);
-        minY = tY / lv + (tY % lv > 0 ? 1 : 0);
-        maxX = (tX + tW) / lv + ((tX + tW) % lv > 0 ? 1 : 0) - 1;
-        maxY = (tY + tH) / lv + ((tY + tH) % lv > 0 ? 1 : 0) - 1;
+        var (x, y, w, h) = GetTextureTileSpan(tex);
+        (minX, minY, maxX, maxY) = ToLevelRange(x, y, w, h, level);
 
         // GetTileInfo indexes the flat tile array of this level without bounds checks,
         // so clamp the range to the level's actual tile grid.
+        ClampToLevelGrid(level, ref maxX, ref maxY);
+
+        return maxX >= minX && maxY >= minY;
+    }
+
+    /// <summary>Returns the tile-grid span (start x/y and tile counts) covered by a texture at level 0.</summary>
+    private (int X, int Y, int Width, int Height) GetTextureTileSpan(FourCCTextureMeta tex)
+    {
+        return (tex.X / TileWidth, tex.Y / TileHeight,
+            tex.Width / TileWidth, tex.Height / TileHeight);
+    }
+
+    /// <summary>Scales a level-0 tile span down to the coarser grid of the given mip level.</summary>
+    private static (int MinX, int MinY, int MaxX, int MaxY) ToLevelRange(
+        int x, int y, int width, int height, int level)
+    {
+        var lv = 1 << level;
+        return (DivideCeiling(x, lv), DivideCeiling(y, lv),
+            DivideCeiling(x + width, lv) - 1, DivideCeiling(y + height, lv) - 1);
+    }
+
+    private static int DivideCeiling(int value, int divisor)
+        => value / divisor + (value % divisor > 0 ? 1 : 0);
+
+    private void ClampToLevelGrid(int level, ref int maxX, ref int maxY)
+    {
         var levelWidth = (int)TileSet.TileSetLevels[level].Width;
         var levelHeight = (int)TileSet.TileSetLevels[level].Height;
         if (maxX > levelWidth - 1) maxX = levelWidth - 1;
         if (maxY > levelHeight - 1) maxY = levelHeight - 1;
-
-        return maxX >= minX && maxY >= minY;
     }
 
     private bool RegionExists(int level, int layer, int minX, int minY, int maxX, int maxY)
