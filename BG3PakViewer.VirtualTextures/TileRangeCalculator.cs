@@ -8,9 +8,20 @@ namespace BG3PakViewer.VirtualTextures;
 /// </summary>
 public sealed class TileRangeCalculator(VirtualTileSet tileSet)
 {
-    private int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
+    /// <summary>Effective tile width after trimming the border.</summary>
+    public int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
 
-    private int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
+    /// <summary>Effective tile height after trimming the border.</summary>
+    public int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
+
+    /// <summary>Computes the tile grid dimensions of a range, rejecting empty ranges.</summary>
+    public static (int Cols, int Rows) GetTileRangeSize(int minX, int minY, int maxX, int maxY)
+    {
+        var cols = maxX - minX + 1;
+        var rows = maxY - minY + 1;
+        if (cols <= 0 || rows <= 0) throw new ArgumentException("Empty tile range");
+        return (cols, rows);
+    }
 
     public bool TryGetTileRange(int level, FourCCTextureMeta tex,
         out int minX, out int minY, out int maxX, out int maxY)
