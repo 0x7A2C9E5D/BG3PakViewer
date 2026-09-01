@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Windows.Data;
 using System.Windows.Media;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
@@ -7,6 +9,7 @@ using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LSLib.VirtualTextures;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
@@ -31,14 +34,21 @@ public partial class GtsPreviewViewModel : DisposableViewModel
                 .Select(i => $"Layer {i}")
         ];
         foreach (var meta in extractor.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
+        TexturesView = CollectionViewSource.GetDefaultView(Textures);
+        TexturesView.Filter = FilterTexture;
         SelectedTexture = Textures.FirstOrDefault();
     }
 
-    public ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
+    private ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
+
+    /// <summary>Filtered view of <see cref="Textures" />, driven by <see cref="SearchText" />.</summary>
+    public ICollectionView TexturesView { get; }
 
     public IReadOnlyList<string> Layers { get; }
 
     [ObservableProperty] public partial GtsTextureItemViewModel? SelectedTexture { get; set; }
+
+    [ObservableProperty] public partial string? SearchText { get; set; }
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
@@ -49,6 +59,36 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     [ObservableProperty] public partial string? StatusText { get; private set; }
 
     [ObservableProperty] public partial double Progress { get; set; }
+
+    [RelayCommand]
+    private void Search(string? text)
+    {
+        SearchText = text;
+    }
+
+    /// <summary>
+    ///     Only handles the case where the text was cleared: resets the search state so the
+    ///     full list is shown again. Non-empty text changes are deliberately ignored here;
+    ///     searching happens exclusively via <see cref="SearchCommand" /> (QuerySubmitted).
+    /// </summary>
+    [RelayCommand]
+    private void ClearSearch(string? text)
+    {
+        if (!string.IsNullOrEmpty(text)) return;
+        SearchText = null;
+    }
+
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnSearchTextChanged(string? value)
+    {
+        TexturesView.Refresh();
+    }
+
+    private bool FilterTexture(object item)
+    {
+        return string.IsNullOrWhiteSpace(SearchText) ||
+               ((GtsTextureItemViewModel)item).DisplayName.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+    }
 
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedTextureChanged(GtsTextureItemViewModel? value)
