@@ -10,7 +10,7 @@
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0"
-                     ItemsSource="{Binding Goals}"
+                     ItemsSource="{Binding GoalsView}"
                      DisplayMemberPath="Name"
                      SelectedItem="{Binding SelectedGoal}"
                      BorderBrush="Gray" BorderThickness="1" Padding="4"
