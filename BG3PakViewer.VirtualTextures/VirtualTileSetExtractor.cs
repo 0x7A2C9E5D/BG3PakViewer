@@ -1,5 +1,4 @@
 using System.Text;
-using LSLib.LS;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
@@ -8,6 +7,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
 {
     private readonly TileCompressor _compressor = new();
     private readonly PageFileCache _pageFileCache;
+    private readonly TileRangeCalculator _tileRanges;
 
     /// <summary>
     ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
@@ -21,6 +21,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
         TileSet.LoadFromStream(gtsStream, reader, false);
         PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
         _pageFileCache = new PageFileCache(TileSet, pageStreamProvider);
+        _tileRanges = new TileRangeCalculator(TileSet);
     }
 
     private VirtualTileSet TileSet { get; }
@@ -45,64 +46,12 @@ public sealed class VirtualTileSetExtractor : IDisposable
         return TileSet.FourCCMetadata.ExtractTextureMetadata();
     }
 
-    private bool TryGetTileRange(int level, FourCCTextureMeta tex,
-        out int minX, out int minY, out int maxX, out int maxY)
-    {
-        var (x, y, w, h) = GetTextureTileSpan(tex);
-        (minX, minY, maxX, maxY) = ToLevelRange(x, y, w, h, level);
-
-        // GetTileInfo indexes the flat tile array of this level without bounds checks,
-        // so clamp the range to the level's actual tile grid.
-        ClampToLevelGrid(level, ref maxX, ref maxY);
-
-        return maxX >= minX && maxY >= minY;
-    }
-
-    /// <summary>Returns the tile-grid span (start x/y and tile counts) covered by a texture at level 0.</summary>
-    private (int X, int Y, int Width, int Height) GetTextureTileSpan(FourCCTextureMeta tex)
-    {
-        return (tex.X / TileWidth, tex.Y / TileHeight,
-            tex.Width / TileWidth, tex.Height / TileHeight);
-    }
-
-    /// <summary>Scales a level-0 tile span down to the coarser grid of the given mip level.</summary>
-    private static (int MinX, int MinY, int MaxX, int MaxY) ToLevelRange(
-        int x, int y, int width, int height, int level)
-    {
-        var lv = 1 << level;
-        return (DivideCeiling(x, lv), DivideCeiling(y, lv),
-            DivideCeiling(x + width, lv) - 1, DivideCeiling(y + height, lv) - 1);
-    }
-
-    private static int DivideCeiling(int value, int divisor)
-    {
-        return value / divisor + (value % divisor > 0 ? 1 : 0);
-    }
-
-    private void ClampToLevelGrid(int level, ref int maxX, ref int maxY)
-    {
-        var levelWidth = (int)TileSet.TileSetLevels[level].Width;
-        var levelHeight = (int)TileSet.TileSetLevels[level].Height;
-        if (maxX > levelWidth - 1) maxX = levelWidth - 1;
-        if (maxY > levelHeight - 1) maxY = levelHeight - 1;
-    }
-
-    private bool RegionExists(int level, int layer, int minX, int minY, int maxX, int maxY)
-    {
-        GTSFlatTileInfo tile = default;
-        for (var y = minY; y <= maxY; y++)
-        for (var x = minX; x <= maxX; x++)
-            if (!TileSet.GetTileInfo(level, layer, x, y, ref tile))
-                return false;
-        return true;
-    }
-
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         var (cols, rows) = GetTileRangeSize(minX, minY, maxX, maxY);
 
-        using var writer = new DdsStripWriter(output, cols, rows, TileWidth, TileHeight,
+        using var writer = new DdsTitleWriter(output, cols, rows, TileWidth, TileHeight,
             (startX, y, colCount, strip) => StitchRow(level, layer, startX, y, colCount, strip));
         for (var row = 0; row < rows; row++)
         {
@@ -151,8 +100,9 @@ public sealed class VirtualTileSetExtractor : IDisposable
         for (var level = 0; level < TileSet.TileSetLevels.Length; level++)
         {
             ct.ThrowIfCancellationRequested();
-            if (!TryGetTileRange(level, tex, out var minX, out var minY, out var maxX, out var maxY)) continue;
-            if (!RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
+            if (!_tileRanges.TryGetTileRange(level, tex, out var minX, out var minY, out var maxX, out var maxY))
+                continue;
+            if (!_tileRanges.RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
 
             ExtractToStream(level, layer, minX, minY, maxX, maxY, output, progress, ct);
             return true;
