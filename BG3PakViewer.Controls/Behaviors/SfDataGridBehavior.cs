@@ -16,6 +16,7 @@ internal class SfDataGridBehavior : Behavior<SfDataGrid>
     protected override void OnAttached()
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
+        AssociatedObject.SearchHelper.CanHighlightSearchText = false;
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
