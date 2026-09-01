@@ -50,7 +50,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial GtsTextureItemViewModel? SelectedTexture { get; set; }
 
-    [ObservableProperty] public partial string? SearchText { get; set; }
+    [ObservableProperty] private partial string? SearchText { get; set; }
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
