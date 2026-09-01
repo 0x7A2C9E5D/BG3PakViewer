@@ -76,7 +76,8 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     private bool FilterTexture(object item)
     {
         return string.IsNullOrWhiteSpace(SearchText) ||
-               ((GtsTextureItemViewModel)item).DisplayName.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+               ((GtsTextureItemViewModel)item).DisplayName
+               .Contains(SearchText, StringComparison.OrdinalIgnoreCase);
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod

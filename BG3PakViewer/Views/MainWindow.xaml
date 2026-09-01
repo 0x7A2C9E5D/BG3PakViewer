@@ -35,6 +35,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MinWidth="400" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition x:Name="RightPaddingColumn" Width="0" />
             </Grid.ColumnDefinitions>
@@ -44,9 +46,7 @@
                 VerticalAlignment="Center"
                 Text="{I18N {x:Static l:LangKeys.AppTitle}}" />
             <ui:AutoSuggestBox x:Name="GlobalSearchBox"
-                               Grid.Column="1"
-                               Width="360"
-                               HorizontalAlignment="Center"
+                               Grid.Column="2"
                                VerticalAlignment="Center"
                                PlaceholderText="{I18N {x:Static l:LangKeys.Search}}">
                 <ui:AutoSuggestBox.QueryIcon>
@@ -64,7 +64,8 @@
                 </i:Interaction.Triggers>
             </ui:AutoSuggestBox>
             <Button
-                Grid.Column="2"
+                Grid.Column="4"
+                HorizontalAlignment="Right"
                 Background="Transparent"
                 BorderThickness="0"
                 Width="48"
