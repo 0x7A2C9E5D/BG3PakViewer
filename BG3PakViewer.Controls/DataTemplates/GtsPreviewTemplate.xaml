@@ -36,30 +36,116 @@
                             <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Dimensions}"
                                        Foreground="Gray" FontSize="11" />
-                            <Button Grid.Column="1" Grid.Row="0"
+
+                            <!--
+                              Copy-name button: uses the theme's default button chrome (no
+                              custom template). The glyphs animate themselves through styles
+                              bound to IsCopied, because VisualStateManager cannot resolve
+                              Storyboard.TargetName across a DataTemplate's name scope.
+                            -->
+                            <Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                                    Margin="4,0,0,0" Padding="6"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                     Command="{Binding CopyNameCommand}"
-                                    Padding="2,0" Margin="4,0,0,0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Width="22" Height="22">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                        <Setter Property="Content">
-                                            <Setter.Value>
-                                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}" FontSize="12"/>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCopied}" Value="True">
-                                                <Setter Property="Content">
-                                                    <Setter.Value>
-                                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Accept}"/>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
+                                    AutomationProperties.Name="{I18N {x:Static l:LangKeys.CopyName}}"
+                                    ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.CopyName}}">
+                                <Grid>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"
+                                                 RenderTransformOrigin="0.5 0.5">
+                                        <FrameworkElement.RenderTransform>
+                                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                                        </FrameworkElement.RenderTransform>
+                                        <ui:FontIcon.Style>
+                                            <Style TargetType="ui:FontIcon">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Duration="00:00:00.15" To="0"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                    <DoubleAnimation Duration="00:00:00.15" To="0"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                    <DoubleAnimation BeginTime="00:00:00.1"
+                                                                                     Duration="00:00:00.01" To="0"
+                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.15" To="1"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.15" To="1"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.15" To="1"
+                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:FontIcon.Style>
+                                    </ui:FontIcon>
+
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CheckMark}"
+                                                 Opacity="0"
+                                                 RenderTransformOrigin="0.5 0.5">
+                                        <FrameworkElement.RenderTransform>
+                                            <ScaleTransform ScaleX="0" ScaleY="0" />
+                                        </FrameworkElement.RenderTransform>
+                                        <ui:FontIcon.Style>
+                                            <Style TargetType="ui:FontIcon">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCopied}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.15" To="1"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX">
+                                                                        <DoubleAnimation.EasingFunction>
+                                                                            <BackEase EasingMode="EaseOut"
+                                                                                      Amplitude="0.2" />
+                                                                        </DoubleAnimation.EasingFunction>
+                                                                    </DoubleAnimation>
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.15" To="1"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY">
+                                                                        <DoubleAnimation.EasingFunction>
+                                                                            <BackEase EasingMode="EaseOut"
+                                                                                      Amplitude="0.2" />
+                                                                        </DoubleAnimation.EasingFunction>
+                                                                    </DoubleAnimation>
+                                                                    <DoubleAnimation BeginTime="00:00:00.15"
+                                                                                     Duration="00:00:00.015" To="1"
+                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Duration="00:00:00.15" To="0"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleX" />
+                                                                    <DoubleAnimation Duration="00:00:00.15" To="0"
+                                                                                     Storyboard.TargetProperty="RenderTransform.ScaleY" />
+                                                                    <DoubleAnimation Duration="00:00:00.15" To="0"
+                                                                                     Storyboard.TargetProperty="Opacity" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:FontIcon.Style>
+                                    </ui:FontIcon>
+                                </Grid>
                             </Button>
                         </Grid>
                     </DataTemplate>

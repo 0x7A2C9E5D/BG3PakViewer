@@ -348,6 +348,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy name.
+        /// </summary>
+        public static string CopyName {
+            get {
+                return ResourceManager.GetString("CopyName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GL Transmission Format.
         /// </summary>
         public static string GLTransmissionFormat {

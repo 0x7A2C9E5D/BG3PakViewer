@@ -261,4 +261,7 @@
     <data name="GtsPreviewFailed" xml:space="preserve">
         <value>预览失败</value>
     </data>
+    <data name="CopyName" xml:space="preserve">
+        <value>复制名称</value>
+    </data>
 </root>

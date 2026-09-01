@@ -270,4 +270,7 @@
     <data name="GtsPreviewFailed" xml:space="preserve">
         <value>Preview failed</value>
     </data>
+    <data name="CopyName" xml:space="preserve">
+        <value>Copy name</value>
+    </data>
 </root>
