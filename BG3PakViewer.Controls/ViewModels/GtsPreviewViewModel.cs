@@ -6,10 +6,11 @@ using System.Windows.Media;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using LSLib.VirtualTextures;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
@@ -37,6 +38,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         TexturesView = CollectionViewSource.GetDefaultView(Textures);
         TexturesView.Filter = FilterTexture;
         SelectedTexture = Textures.FirstOrDefault();
+        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
     private ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
@@ -60,22 +62,9 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial double Progress { get; set; }
 
-    [RelayCommand]
-    private void Search(string? text)
+    private void OnSearchMessage(SearchMessage message)
     {
-        SearchText = text;
-    }
-
-    /// <summary>
-    ///     Only handles the case where the text was cleared: resets the search state so the
-    ///     full list is shown again. Non-empty text changes are deliberately ignored here;
-    ///     searching happens exclusively via <see cref="SearchCommand" /> (QuerySubmitted).
-    /// </summary>
-    [RelayCommand]
-    private void ClearSearch(string? text)
-    {
-        if (!string.IsNullOrEmpty(text)) return;
-        SearchText = null;
+        SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
@@ -211,6 +200,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
+        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();

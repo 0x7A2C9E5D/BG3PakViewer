@@ -43,6 +43,26 @@
                 Margin="20,0,0,0"
                 VerticalAlignment="Center"
                 Text="{I18N {x:Static l:LangKeys.AppTitle}}" />
+            <ui:AutoSuggestBox x:Name="GlobalSearchBox"
+                               Grid.Column="1"
+                               Width="360"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               PlaceholderText="{I18N {x:Static l:LangKeys.Search}}">
+                <ui:AutoSuggestBox.QueryIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
+                </ui:AutoSuggestBox.QueryIcon>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="QuerySubmitted">
+                        <i:InvokeCommandAction Command="{Binding SearchCommand}"
+                                               CommandParameter="{Binding Text, ElementName=GlobalSearchBox}" />
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:InvokeCommandAction Command="{Binding ClearSearchCommand}"
+                                               CommandParameter="{Binding Text, ElementName=GlobalSearchBox}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ui:AutoSuggestBox>
             <Button
                 Grid.Column="2"
                 Background="Transparent"

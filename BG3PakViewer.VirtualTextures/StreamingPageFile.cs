@@ -21,6 +21,11 @@ internal sealed class StreamingPageFile : IDisposable
         _chunkOffsets = ReadChunkOffsetTables();
     }
 
+    public void Dispose()
+    {
+        _reader.Dispose();
+    }
+
     /// <summary>
     ///     Reads the chunk offset table of every page: each page stores its own count of offsets
     ///     followed by that many uint offsets, and pages are aligned to VirtualTileSet.Header.PageSize.
@@ -38,12 +43,8 @@ internal sealed class StreamingPageFile : IDisposable
             tables.Add(offsets);
             _stream.Position = (page + 1) * pageSize;
         }
-        return tables;
-    }
 
-    public void Dispose()
-    {
-        _reader.Dispose();
+        return tables;
     }
 
     /// <summary>

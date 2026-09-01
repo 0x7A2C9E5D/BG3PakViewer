@@ -91,9 +91,16 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Broadcasts the search query so the active preview (GTS texture list / localization
+    ///     grid) handles it via the messenger; with no preview open it searches the package tree.
+    /// </summary>
     [RelayCommand]
     private async Task SearchAsync(string query)
     {
+        WeakReferenceMessenger.Default.Send(new SearchMessage(query));
+        if (PreviewVm is not null) return;
+
         if (!_packageService.IsLoaded) return;
 
         await Task.Run(() =>
@@ -104,10 +111,17 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }, CancellationToken.None);
     }
 
+    /// <summary>
+    ///     Only clears the search state (full list / full tree) when the text was emptied.
+    /// </summary>
     [RelayCommand]
     private async Task ClearSearchAsync(string query)
     {
-        if (!_packageService.IsLoaded || !string.IsNullOrWhiteSpace(query)) return;
+        if (!string.IsNullOrWhiteSpace(query)) return;
+        WeakReferenceMessenger.Default.Send(new SearchMessage(null));
+        if (PreviewVm is not null) return;
+
+        if (!_packageService.IsLoaded) return;
         await Task.Run(() => { PackageTree = _packageService.BuildTree(); }, CancellationToken.None);
         Log.Information("Search query cleared.");
     }
