@@ -19,6 +19,4 @@ public static class MessageTokens
     public const string ExportFailed = "ExportFailed";
 
     public const string FileLoadingDuplicate = "FileLoadingDuplicate";
-
-    public const string CopyToClipboard = "CopyToClipboard";
 }

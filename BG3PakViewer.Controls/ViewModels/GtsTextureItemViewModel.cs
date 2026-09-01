@@ -1,8 +1,8 @@
 using System.IO;
-using BG3PakViewer.Messaging;
+using BG3PakViewer.Contracts;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -18,14 +18,18 @@ public partial class GtsTextureItemViewModel(FourCCTextureMeta meta) : Observabl
 
     [ObservableProperty] public partial bool IsCopied { get; set; }
 
+    /// <summary>
+    ///     The clipboard is a platform capability, so it is reached through a service rather
+    ///     than being called directly. It is resolved from the container instead of being
+    ///     injected, which keeps the intermediate view models that create this item free of
+    ///     a dependency they do not use themselves.
+    /// </summary>
+    private static IClipboardService ClipboardService => Ioc.Default.GetRequiredService<IClipboardService>();
+
     [RelayCommand]
     private async Task CopyNameAsync()
     {
-        // Request the copy from the UI layer: the clipboard is a platform capability, and
-        // routing it through the messenger keeps this view model free of UI dependencies.
-        var copied = await WeakReferenceMessenger.Default.Send(
-            new AsyncRequestMessage<string, bool>(DisplayName), MessageTokens.CopyToClipboard);
-        if (!copied) return;
+        if (!ClipboardService.TrySetText(DisplayName)) return;
 
         IsCopied = true;
         await Task.Delay(1500);

@@ -4,7 +4,6 @@ using BG3PakViewer.Messaging;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using iNKORE.UI.WPF.Modern;
-using Serilog;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace BG3PakViewer.Views;
@@ -24,29 +23,6 @@ public partial class MainWindow
     {
         RegisterFileOpenedMessageHandlers();
         RegisterExportMessageHandlers();
-        RegisterClipboardMessageHandler();
-    }
-
-    private void RegisterClipboardMessageHandler()
-    {
-        WeakReferenceMessenger.Default.Register<MainWindow, AsyncRequestMessage<string, bool>, string>(
-            this,
-            MessageTokens.CopyToClipboard,
-            (_, m) => m.Reply(TrySetClipboardText(m.Request)));
-    }
-
-    private static bool TrySetClipboardText(string text)
-    {
-        try
-        {
-            Clipboard.SetText(text);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Failed to copy text to clipboard");
-            return false;
-        }
     }
 
     private void RegisterFileOpenedMessageHandlers()
