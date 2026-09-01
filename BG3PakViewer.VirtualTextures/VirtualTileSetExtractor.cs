@@ -7,7 +7,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
 {
     private readonly PageFileCache _pageFileCache;
     private readonly TileRangeCalculator _tileRanges;
-    private readonly TileStitcher _stitcher;
+    private readonly DdsTileUnpacker _unpacker;
 
     /// <summary>
     ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
@@ -22,7 +22,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
         PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
         _pageFileCache = new PageFileCache(TileSet, pageStreamProvider);
         _tileRanges = new TileRangeCalculator(TileSet);
-        _stitcher = new TileStitcher(TileSet, _pageFileCache);
+        _unpacker = new DdsTileUnpacker(TileSet, _pageFileCache);
     }
 
     private VirtualTileSet TileSet { get; }
@@ -49,7 +49,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
         var (cols, rows) = TileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
 
         using var writer = new DdsTitleWriter(output, cols, rows, _tileRanges.TileWidth, _tileRanges.TileHeight,
-            (startX, y, colCount, strip) => _stitcher.StitchRow(level, layer, startX, y, colCount, strip));
+            (startX, y, colCount, strip) => _unpacker.StitchRow(level, layer, startX, y, colCount, strip));
         for (var row = 0; row < rows; row++)
         {
             writer.WriteRow(minX, minY + row, cols, ct);
