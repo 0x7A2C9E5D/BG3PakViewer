@@ -43,9 +43,10 @@
                               bound to IsCopied, because VisualStateManager cannot resolve
                               Storyboard.TargetName across a DataTemplate's name scope.
                             -->
-                            <Button Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
-                                    Margin="4,0,0,0" Padding="6"
+                            <Button Grid.Column="1" Grid.Row="0"
+                                    Margin="4,0,0,0" Padding="0"
                                     HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     Command="{Binding CopyNameCommand}"
                                     AutomationProperties.Name="{I18N {x:Static l:LangKeys.CopyName}}"
                                     ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.CopyName}}">
