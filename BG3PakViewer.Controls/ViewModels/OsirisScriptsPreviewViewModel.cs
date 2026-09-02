@@ -41,7 +41,8 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
     ///     Predicate the view applies to <see cref="Goals" />; null shows every goal. Rebuilt whenever
     ///     <c>SearchText</c> changes, which the view picks up and re-applies.
     /// </summary>
-    [ObservableProperty] public partial Predicate<object>? GoalFilter { get; private set; }
+    [ObservableProperty]
+    public partial Predicate<object>? GoalFilter { get; private set; }
 
     partial void OnStoryChanged(Story? value)
     {

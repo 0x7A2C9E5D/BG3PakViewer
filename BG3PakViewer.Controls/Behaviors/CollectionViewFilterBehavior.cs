@@ -67,5 +67,7 @@ internal class CollectionViewFilterBehavior : Behavior<ItemsControl>
     ///     yields the same instance the control uses, so setting the filter here affects what is displayed.
     /// </summary>
     private ICollectionView? GetView()
-        => AssociatedObject.ItemsSource is { } source ? CollectionViewSource.GetDefaultView(source) : null;
+    {
+        return AssociatedObject.ItemsSource is { } source ? CollectionViewSource.GetDefaultView(source) : null;
+    }
 }

@@ -50,7 +50,8 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     ///     Predicate the view applies to <see cref="Textures" />; null shows every texture. Rebuilt
     ///     whenever <c>SearchText</c> changes, which the view picks up and re-applies.
     /// </summary>
-    [ObservableProperty] public partial Predicate<object>? TextureFilter { get; private set; }
+    [ObservableProperty]
+    public partial Predicate<object>? TextureFilter { get; private set; }
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
@@ -58,7 +59,8 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     ///     The decoded preview image, platform-agnostic (no WPF types). The view converts it for
     ///     display; this view model owns it and disposes it when replaced or disposed.
     /// </summary>
-    [ObservableProperty] public partial Image? Preview { get; private set; }
+    [ObservableProperty]
+    public partial Image? Preview { get; private set; }
 
     [ObservableProperty] public partial bool IsBusy { get; set; }
 

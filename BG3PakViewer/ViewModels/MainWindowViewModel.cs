@@ -168,7 +168,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (success)
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
-            await _dialogService.MessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage, Strings.OpenFileFailedCaption,
+            await _dialogService.MessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
+                Strings.OpenFileFailedCaption,
                 MessageBoxIcon.Error);
         _isLoading = false;
     }

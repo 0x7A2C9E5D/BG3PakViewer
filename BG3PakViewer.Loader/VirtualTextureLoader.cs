@@ -40,6 +40,12 @@ public sealed class VirtualTextureLoader : IDisposable
     /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
     public IReadOnlyList<string> TextureNames { get; }
 
+    public void Dispose()
+    {
+        _texturePageCache.Dispose();
+        TileSet.Dispose();
+    }
+
     public List<FourCCTextureMeta> GetTextures()
     {
         return TileSet.FourCCMetadata.ExtractTextureMetadata();
@@ -68,12 +74,6 @@ public sealed class VirtualTextureLoader : IDisposable
         {
             if (!transferred) await ddsStream.DisposeAsync();
         }
-    }
-
-    public void Dispose()
-    {
-        _texturePageCache.Dispose();
-        TileSet.Dispose();
     }
 
     private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
