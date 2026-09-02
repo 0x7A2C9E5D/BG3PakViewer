@@ -19,7 +19,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
         using var reader = new BinaryReader(gtsStream, Encoding.UTF8, true);
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(gtsStream, reader, false);
-        PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
+        TextureNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
         _texturePageCache = new TexturePageCache(TileSet, pageStreamProvider);
         _tileRanges = new TileRangeCalculator(TileSet);
         _unpacker = new TextureUnpacker(TileSet, _texturePageCache);
@@ -30,7 +30,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
     public int LayerCount => TileSet.TileSetLayers.Length;
 
     /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
-    public IReadOnlyList<string> PageFileNames { get; }
+    public IReadOnlyList<string> TextureNames { get; }
 
     public void Dispose()
     {

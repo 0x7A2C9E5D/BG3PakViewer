@@ -35,7 +35,7 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
                     return packageService.GetFileByPath(pagePath)?.CreateContentReader()
                            ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
                 });
-                pageFileNames = extractor.PageFileNames;
+                pageFileNames = extractor.TextureNames;
                 return new GtsPreviewViewModel(new VirtualTextureLoader(extractor));
             }
             catch

@@ -20,7 +20,7 @@ public sealed class VirtualTextureLoader(VirtualTileSetExtractor extractor) : ID
     ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into a seekable DDS stream,
     ///     reporting progress in percent; returns null when the layer contains no data.
     /// </summary>
-    public async Task<Stream?> ExtractDdsAsync(FourCCTextureMeta meta, int layer,
+    public async Task<Stream?> ExtractAsync(FourCCTextureMeta meta, int layer,
         IProgress<double>? progress, CancellationToken ct)
     {
         var ddsStream = new MemoryStream();
@@ -41,8 +41,8 @@ public sealed class VirtualTextureLoader(VirtualTileSetExtractor extractor) : ID
         }
     }
 
-    /// <summary>Decodes a DDS stream produced by <see cref="ExtractDdsAsync" /> into an image.</summary>
-    public static async Task<Image?> DecodeDdsAsync(Stream ddsStream)
+    /// <summary>Decodes a DDS stream produced by <see cref="ExtractAsync" /> into an image.</summary>
+    public static async Task<Image?> DecodeAsync(Stream ddsStream)
     {
         return await ImageLoader.LoadAsync(ddsStream, ".dds");
     }

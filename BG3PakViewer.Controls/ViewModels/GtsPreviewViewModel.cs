@@ -118,7 +118,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        await using var ddsStream = await _loader.ExtractDdsAsync(meta, layer,
+        await using var ddsStream = await _loader.ExtractAsync(meta, layer,
             new Progress<double>(p => Progress = p), cts.Token);
         if (cts.IsCancellationRequested) return;
 
@@ -128,7 +128,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             return;
         }
 
-        using var image = await VirtualTextureLoader.DecodeDdsAsync(ddsStream);
+        using var image = await VirtualTextureLoader.DecodeAsync(ddsStream);
         if (cts.IsCancellationRequested) return;
 
         ShowPreview(image);
