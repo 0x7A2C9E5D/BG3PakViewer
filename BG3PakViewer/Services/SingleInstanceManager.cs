@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Serilog;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
 using CommunityToolkit.Diagnostics;
+using Serilog;
 
 namespace BG3PakViewer.Services;
 
@@ -61,6 +61,7 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
                 mainWindowHandle.ToHexString());
             return;
         }
+
         if (placement.showCmd == SHOW_WINDOW_CMD.SW_SHOWMINIMIZED)
             PInvoke.ShowWindow(mainWindowHandle, SHOW_WINDOW_CMD.SW_RESTORE);
         PInvoke.SetForegroundWindow(mainWindowHandle);
