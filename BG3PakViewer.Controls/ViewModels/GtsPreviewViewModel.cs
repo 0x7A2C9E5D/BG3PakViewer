@@ -7,7 +7,6 @@ using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
-using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using LSLib.VirtualTextures;
