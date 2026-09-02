@@ -176,17 +176,33 @@ public sealed partial class App : IDisposable
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // Set up logging before anything else: the full pipeline also feeds the in-app log view and
+        // depends on the service container, so failures before that point would otherwise be lost.
+        InitializeEarlyLogging();
+
         _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
         if (_singleInstanceManager.IsAnotherInstanceRunning())
         {
+            Log.Information("Another instance is already running; prompting the user.");
             if (MessageBox.Show(Strings.MultipleInstanceMessage, Strings.MultipleInstanceCaption,
                     MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                 _singleInstanceManager.ActivateExistingInstance();
+            Log.Information("Shutting down this instance.");
             Shutdown();
             return;
         }
 
         InitializeApplication();
+    }
+
+    private static void InitializeEarlyLogging()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(
+                Path.Combine(AppPaths.LogDirectory, "log.txt"),
+                rollingInterval: RollingInterval.Day,
+                formatProvider: CultureInfo.InvariantCulture)
+            .CreateLogger();
     }
 
     protected override void OnExit(ExitEventArgs e)
