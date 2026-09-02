@@ -4,18 +4,18 @@ using LSLib.LS;
 namespace BG3PakViewer.Controls.ViewModels;
 
 /// <summary>
-///     View model for previewing Larian localization files (.loca) in a table.
-///     Each row maps a localization key to its text, with the version column.
+///     View model for previewing Larian localization files (.loca): exposes the resource's entries
+///     (key / version / text), which the view renders as a table.
 /// </summary>
 public class LocalizationPreviewViewModel
 {
-    public ObservableCollection<LocalizationRowViewModel> Rows { get; } = [];
+    public ObservableCollection<LocalizationEntryViewModel> Entries { get; } = [];
 
     public static LocalizationPreviewViewModel FromResource(LocaResource resource)
     {
         var viewModel = new LocalizationPreviewViewModel();
         foreach (var entry in resource.Entries)
-            viewModel.Rows.Add(new LocalizationRowViewModel
+            viewModel.Entries.Add(new LocalizationEntryViewModel
             {
                 Key = entry.Key,
                 Version = entry.Version,
@@ -26,9 +26,9 @@ public class LocalizationPreviewViewModel
 }
 
 /// <summary>
-///     A single localization entry rendered as a row in the preview table.
+///     A single localization entry: the resource key mapped to its text, with the version column.
 /// </summary>
-public class LocalizationRowViewModel
+public class LocalizationEntryViewModel
 {
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Key { get; init; }
