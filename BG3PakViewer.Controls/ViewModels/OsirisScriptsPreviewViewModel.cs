@@ -34,6 +34,7 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial string? Scripts { get; private set; }
 
+    // ReSharper disable once UnusedMember.Local
     [ObservableProperty] private partial string? SearchText { get; set; }
 
     /// <summary>
