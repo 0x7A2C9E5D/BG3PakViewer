@@ -11,7 +11,8 @@ public partial class ImagePreviewViewModel : DisposableViewModel
     ///     display; this view model owns it and disposes it when replaced or disposed.
     /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    [ObservableProperty] public partial Image? Preview { get; set; }
+    [ObservableProperty]
+    public partial Image? Preview { get; set; }
 
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
