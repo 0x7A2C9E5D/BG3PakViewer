@@ -17,18 +17,18 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 {
-    private readonly VirtualTextureLoader _extractor;
+    private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
-    public VirtualTexturePreviewViewModel(VirtualTextureLoader extractor)
+    public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
     {
-        _extractor = extractor;
+        _loader = loader;
         Layers =
         [
-            .. Enumerable.Range(0, extractor.LayerCount)
+            .. Enumerable.Range(0, loader.LayerCount)
                 .Select(i => $"Layer {i}")
         ];
-        foreach (var meta in extractor.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
+        foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
@@ -122,7 +122,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        await using var ddsStream = await _extractor.ExtractAsync(meta, layer,
+        await using var ddsStream = await _loader.ExtractAsync(meta, layer,
             new Progress<double>(p => Progress = p), cts.Token);
         if (cts.IsCancellationRequested) return;
 
@@ -181,7 +181,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();
-        _extractor.Dispose();
+        _loader.Dispose();
 
         // Detach the view from the image before releasing it.
         Preview = null;
