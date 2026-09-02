@@ -35,6 +35,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.VirtualTextures\BG3PakViewer.VirtualTextures.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

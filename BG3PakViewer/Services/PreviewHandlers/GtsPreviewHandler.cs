@@ -1,5 +1,6 @@
 using System.IO;
 using BG3PakViewer.Controls.ViewModels;
+using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.VirtualTextures;
 
@@ -35,7 +36,7 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
                            ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
                 });
                 pageFileNames = extractor.PageFileNames;
-                return new GtsPreviewViewModel(extractor);
+                return new GtsPreviewViewModel(new VirtualTextureLoader(extractor));
             }
             catch
             {
