@@ -6,7 +6,7 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-public class OsirisScriptsPreviewHandler(IPackageService packageService, IAppSettings appSettings) : IPreviewHandler
+public class StoryScriptsPreviewHandler(IPackageService packageService, IAppSettings appSettings) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {
@@ -22,7 +22,7 @@ public class OsirisScriptsPreviewHandler(IPackageService packageService, IAppSet
         {
             var reader = new StoryReader();
             var story = reader.Read(stream);
-            return new OsirisScriptsPreviewViewModel(appSettings) { Story = story };
+            return new StoryScriptsPreviewViewModel(appSettings) { Story = story };
         });
     }
 }

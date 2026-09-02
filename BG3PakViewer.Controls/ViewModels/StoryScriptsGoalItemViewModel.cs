@@ -3,7 +3,7 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public class OsirisGoalItemViewModel : ObservableObject
+public class StoryScriptsGoalItemViewModel : ObservableObject
 {
     public Goal? Goal { get; init; }
 

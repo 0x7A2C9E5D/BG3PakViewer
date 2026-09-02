@@ -9,20 +9,20 @@
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewTemplate.xaml" />
         <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/OsirisScriptsPreviewTemplate.xaml" />
+            Source="/BG3PakViewer.Controls;component/DataTemplates/StoryScriptsPreviewTemplate.xaml" />
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/LarianResourcePreviewTemplate.xaml" />
         <ResourceDictionary
             Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewTemplate.xaml" />
         <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/GtsPreviewTemplate.xaml" />
+            Source="/BG3PakViewer.Controls;component/DataTemplates/VirtualTexturePreviewTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
                                 PlainTextFilePreviewTemplate="{StaticResource PlainTextFilePreviewTemplate}"
                                 ImageFilePreviewTemplate="{StaticResource ImageFilePreviewTemplate}"
                                 ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"
                                 NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}"
-                                OsirisScriptPreviewTemplate="{StaticResource OsirisScriptPreviewDataTemplate}"
+                                OsirisScriptPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
                                 LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
                                 LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}"
                                 GtsPreviewTemplate="{StaticResource GtsPreviewDataTemplate}" />

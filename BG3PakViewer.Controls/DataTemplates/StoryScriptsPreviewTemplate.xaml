@@ -3,7 +3,7 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
-    <DataTemplate x:Key="OsirisScriptPreviewDataTemplate" DataType="{x:Type vm:OsirisScriptsPreviewViewModel}">
+    <DataTemplate x:Key="StoryScriptPreviewDataTemplate" DataType="{x:Type vm:StoryScriptsPreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="400" MinWidth="300" />

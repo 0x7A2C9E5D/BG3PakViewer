@@ -11,7 +11,7 @@
       Preview for GTS virtual textures: texture list on the left, and the
       selected texture decoded per-layer on the right (with layer selector).
     -->
-    <DataTemplate x:Key="GtsPreviewDataTemplate" DataType="{x:Type vm:GtsPreviewViewModel}">
+    <DataTemplate x:Key="VirtualTexturePreviewDataTemplate" DataType="{x:Type vm:VirtualTexturePreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="360" />
@@ -42,7 +42,7 @@
                     </Style>
                 </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:GtsTextureItemViewModel}">
+                    <DataTemplate DataType="{x:Type vm:VirtualTextureItemViewModel}">
                         <Grid Margin="2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />

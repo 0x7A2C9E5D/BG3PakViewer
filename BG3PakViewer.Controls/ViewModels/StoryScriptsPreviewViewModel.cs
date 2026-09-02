@@ -10,11 +10,11 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
+public partial class StoryScriptsPreviewViewModel : DisposableViewModel
 {
     private readonly IAppSettings _appSettings;
 
-    public OsirisScriptsPreviewViewModel(IAppSettings appSettings)
+    public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
@@ -24,13 +24,13 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public partial Story? Story { get; set; }
 
-    [ObservableProperty] public partial OsirisGoalItemViewModel? SelectedGoal { get; set; }
+    [ObservableProperty] public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
     ///     Full goal list. Filtering is a view concern: the view applies <c>GoalFilter</c> to this
     ///     collection's collection view, which keeps WPF's ICollectionView out of the view model.
     /// </summary>
-    public ObservableCollection<OsirisGoalItemViewModel> Goals { get; } = [];
+    public ObservableCollection<StoryScriptsGoalItemViewModel> Goals { get; } = [];
 
     [ObservableProperty] public partial string? Scripts { get; private set; }
 
@@ -49,7 +49,7 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
         Goals.Clear();
         if (value is null) return;
         foreach (var goal in value.Goals.Values)
-            Goals.Add(new OsirisGoalItemViewModel { Goal = goal });
+            Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
     }
 
     private void OnSearchMessage(SearchMessage message)
@@ -62,12 +62,12 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
     {
         GoalFilter = string.IsNullOrWhiteSpace(value)
             ? null
-            : item => item is OsirisGoalItemViewModel goal &&
+            : item => item is StoryScriptsGoalItemViewModel goal &&
                       goal.Name.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedGoalChanged(OsirisGoalItemViewModel? value)
+    partial void OnSelectedGoalChanged(StoryScriptsGoalItemViewModel? value)
     {
         _ = DecompileScriptsAsync();
     }

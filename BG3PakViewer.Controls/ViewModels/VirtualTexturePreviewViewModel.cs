@@ -15,12 +15,12 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     GTS virtual texture preview: lists textures on the left; selecting one extracts and decodes
 ///     the selected layer to a bitmap in the background, with cancellation and progress reporting.
 /// </summary>
-public partial class GtsPreviewViewModel : DisposableViewModel
+public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 {
     private readonly VirtualTextureLoader _extractor;
     private CancellationTokenSource? _cts;
 
-    public GtsPreviewViewModel(VirtualTextureLoader extractor)
+    public VirtualTexturePreviewViewModel(VirtualTextureLoader extractor)
     {
         _extractor = extractor;
         Layers =
@@ -28,7 +28,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             .. Enumerable.Range(0, extractor.LayerCount)
                 .Select(i => $"Layer {i}")
         ];
-        foreach (var meta in extractor.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
+        foreach (var meta in extractor.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
@@ -37,11 +37,11 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     ///     Full texture list. Filtering is a view concern: the view applies <c>TextureFilter</c>
     ///     to this collection's collection view, which keeps WPF's ICollectionView out of the view model.
     /// </summary>
-    public ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
+    public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
 
     public IReadOnlyList<string> Layers { get; }
 
-    [ObservableProperty] public partial GtsTextureItemViewModel? SelectedTexture { get; set; }
+    [ObservableProperty] public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
 
     // ReSharper disable once UnusedMember.Local
     [ObservableProperty] private partial string? SearchText { get; set; }
@@ -78,12 +78,12 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     {
         TextureFilter = string.IsNullOrWhiteSpace(value)
             ? null
-            : item => item is GtsTextureItemViewModel texture &&
+            : item => item is VirtualTextureItemViewModel texture &&
                       texture.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedTextureChanged(GtsTextureItemViewModel? value)
+    partial void OnSelectedTextureChanged(VirtualTextureItemViewModel? value)
     {
         _ = LoadPreviewAsync();
     }

@@ -30,10 +30,10 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             Model3DPreviewViewModel => ModelFilePreviewTemplate,
             PlainTextPreviewViewModel => PlainTextFilePreviewTemplate,
             NotSupportedPreviewViewModel => NotSupportedPreviewFileDataTemplate,
-            OsirisScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
+            StoryScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
-            GtsPreviewViewModel => GtsPreviewTemplate,
+            VirtualTexturePreviewViewModel => GtsPreviewTemplate,
             _ => null
         };
     }
