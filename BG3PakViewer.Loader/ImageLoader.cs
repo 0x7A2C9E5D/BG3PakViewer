@@ -14,9 +14,9 @@ public static class ImageLoader
     public static async Task<Image?> LoadAsync(Stream stream, string extension)
     {
         if (FileExtensions.IsTextureFormat(extension))
-            return await LoadTextureImageAsync(stream);
+            return await LoadTextureImageAsync(stream, extension);
         if (FileExtensions.IsBitmapImage(extension))
-            return await LoadStandardImageAsync(stream);
+            return await LoadStandardImageAsync(stream, extension);
         throw new NotSupportedException($"Unsupported image format: {extension}");
     }
 
@@ -33,7 +33,7 @@ public static class ImageLoader
         return await ExportStandardImageAsync(images, path);
     }
 
-    private static async Task<Image?> LoadStandardImageAsync(Stream stream)
+    private static async Task<Image?> LoadStandardImageAsync(Stream stream, string extension)
     {
         try
         {
@@ -41,12 +41,12 @@ public static class ImageLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load standard image.");
+            Log.Error(e, "Failed to load image of type {Extension}.", extension);
             return null;
         }
     }
 
-    private static async Task<Image?> LoadTextureImageAsync(Stream stream)
+    private static async Task<Image?> LoadTextureImageAsync(Stream stream, string extension)
     {
         try
         {
@@ -56,7 +56,7 @@ public static class ImageLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load texture image.");
+            Log.Error(e, "Failed to load texture of type {Extension}.", extension);
             return null;
         }
     }

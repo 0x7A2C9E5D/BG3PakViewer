@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
@@ -13,38 +12,14 @@ using Serilog;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 
-public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogViewModel, ICloseable
+public partial class RecentDialogViewModel(IRecentFilesService recentFilesService, IDialogService dialogService)
+    : DisposableViewModel, IModalDialogViewModel, ICloseable
 {
-    private readonly IDialogService _dialogService;
-    private readonly IRecentFilesService _recentFilesService;
-
-    public RecentDialogViewModel(IRecentFilesService recentFilesService, IDialogService dialogService)
-    {
-        _recentFilesService = recentFilesService;
-        _dialogService = dialogService;
-        _recentFilesService.RecentItems
-            .CollectionChanged += OnRecentItemsOnCollectionChanged;
-    }
-
-    public ObservableCollection<IRecentFileEntry> RecentItems => _recentFilesService.RecentItems;
+    public ObservableCollection<IRecentFileEntry> RecentItems => recentFilesService.RecentItems;
 
     public event EventHandler? RequestClose;
 
     public bool? DialogResult => true;
-
-    private static void OnRecentItemsOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (e.Action == NotifyCollectionChangedAction.Remove)
-            Log.Information("Recent items collection changed: {Count} items removed.",
-                e.OldItems?.Count ?? 0);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-        if (disposing)
-            _recentFilesService.RecentItems.CollectionChanged -= OnRecentItemsOnCollectionChanged;
-    }
 
     [RelayCommand]
     private async Task Open(IRecentFileEntry recentFileEntry)
@@ -65,13 +40,14 @@ public partial class RecentDialogViewModel : DisposableViewModel, IModalDialogVi
     private async Task HandleMissingFile(IRecentFileEntry recentFileEntry)
     {
         LogMissingFile(recentFileEntry.FilePath);
-        if (await _dialogService.MessageBoxConfirmAsync(this, Strings.FileOpenedNoFoundMessage,
+        if (await dialogService.MessageBoxConfirmAsync(this, Strings.FileOpenedNoFoundMessage,
                 Strings.FileOpenedNoFoundCaption))
-            _recentFilesService.RemoveRecentFile(recentFileEntry);
+            recentFilesService.RemoveRecentFile(recentFileEntry);
     }
 
     private static void LogMissingFile(string filePath)
     {
-        Log.Error("The file {Path} for the recent item being opened does not exist.", filePath);
+        // The user is asked whether to drop the entry, so this is an expected state, not a failure.
+        Log.Warning("The file {Path} of the recent item being opened no longer exists.", filePath);
     }
 }

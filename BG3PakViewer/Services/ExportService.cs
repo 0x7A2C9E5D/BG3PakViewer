@@ -117,7 +117,7 @@ internal class ExportService(
     private async Task ExportVirtualTexturePagesAsync(PackageEntry node, string targetPath)
     {
         using var tileSet = new VirtualTileSet(targetPath);
-        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName);
+        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName).ToList();
         var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
         var targetFolderPath = Path.GetDirectoryName(targetPath)!;
         var parallelOptions = new ParallelOptions
@@ -145,6 +145,9 @@ internal class ExportService(
                 Log.Error(e, "Error exporting page file: {Path}", pageFileName);
             }
         });
+
+        Log.Information("Exported {Count} virtual texture page file(s) next to {TargetPath}",
+            pageFileNames.Count, targetPath);
     }
 
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)

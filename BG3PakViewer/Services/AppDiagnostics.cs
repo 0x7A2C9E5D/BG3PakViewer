@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Miscellaneous;
@@ -39,6 +40,9 @@ internal class AppDiagnostics(
         var supportedCultures = cultureResolver.SupportedCultures;
         Log.Information("Installed Language Packs: {Languages}",
             string.Join(", ", supportedCultures.Select(x => x.Name)));
+        // Recorded together with the resolved language so that an unexpected English UI can be
+        // traced back to a system culture that has no matching language pack.
+        Log.Information("System UI Culture: {Culture}", CultureInfo.InstalledUICulture.Name);
         Log.Information("Current Language: {Language}", appSettings.Language);
     }
 }

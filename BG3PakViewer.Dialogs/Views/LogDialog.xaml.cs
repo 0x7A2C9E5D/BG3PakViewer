@@ -1,5 +1,4 @@
 ﻿using iNKORE.UI.WPF.Modern.Controls;
-using Serilog;
 
 namespace BG3PakViewer.Dialogs.Views;
 
@@ -25,7 +24,6 @@ public partial class LogDialog
     {
         if (string.IsNullOrWhiteSpace(args.QueryText)) return;
         SfDataGrid.SearchHelper.Search(args.QueryText);
-        Log.Information("Search query submitted: {QueryText}", args.QueryText);
     }
 
     private void AutoSuggestBox_OnTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)

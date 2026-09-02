@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using HelixToolkit.Wpf.SharpDX;
 using LSLib.Granny.Model;
-using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -26,18 +25,14 @@ public partial class Model3DPreviewViewModel : ObservableObject
 
     partial void OnModelChanged(Root? value)
     {
-        Log.Information("Model3DPreviewViewModel.ModelChanged");
         if (value?.Meshes == null)
         {
             SelectedModelIndex = -1;
-            Log.Information("Model3DPreviewViewModel.ModelChanged: No meshes");
             return;
         }
 
         Meshes = [.. value.Meshes.Select(x => x.Name)];
         SelectedModelIndex = Meshes.Any() ? 0 : -1;
-        Log.Information("Model3DPreviewViewModel.ModelChanged: Meshes: {0}", Meshes.Length);
-        Log.Information("Model3DPreviewViewModel.ModelChanged: SelectedModelIndex: {0}", SelectedModelIndex);
     }
 
     private bool CanPreview()
@@ -49,15 +44,12 @@ public partial class Model3DPreviewViewModel : ObservableObject
     private void Preview()
     {
         Models.Clear();
-        Log.Information("Model3DPreviewViewModel.Preview");
         Models.Add(Model!.ToGeometry3D(SelectedModelIndex).ToGeometryModel3D());
-        Log.Information("Model3DPreviewViewModel.Preview: Models: {0}", Models.Count);
     }
 
     [RelayCommand]
     private static void Zoom()
     {
         WeakReferenceMessenger.Default.Send(new ZoomExtentsMessage(), MessageTokens.ZoomExtents);
-        Log.Information("Model3DPreviewViewModel.Zoom");
     }
 }
