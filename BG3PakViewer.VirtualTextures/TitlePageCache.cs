@@ -6,9 +6,9 @@ namespace BG3PakViewer.VirtualTextures;
 ///     Cache of open GTP page files, lazily opened per pageFileIndex via the stream provider delegate
 ///     (e.g. read from inside a PAK), without relying on disk paths.
 /// </summary>
-internal sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
+internal sealed class TitlePageCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
 {
-    private readonly Dictionary<int, StreamingPageFile> _open = [];
+    private readonly Dictionary<int, TitlePage> _open = [];
 
     public void Dispose()
     {
@@ -16,7 +16,7 @@ internal sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> st
         _open.Clear();
     }
 
-    public StreamingPageFile Get(int pageFileIndex)
+    public TitlePage Get(int pageFileIndex)
     {
         if (_open.TryGetValue(pageFileIndex, out var file)) return file;
 
@@ -28,7 +28,7 @@ internal sealed class PageFileCache(VirtualTileSet tileSet, Func<int, Stream> st
             stream = buffer;
         }
 
-        file = new StreamingPageFile(tileSet, stream);
+        file = new TitlePage(tileSet, stream);
 
         _open[pageFileIndex] = file;
         return file;

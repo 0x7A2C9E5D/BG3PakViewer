@@ -6,7 +6,7 @@ namespace BG3PakViewer.VirtualTextures;
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band
 ///     of tiles into a reusable strip buffer, trimming tile borders.
 /// </summary>
-internal sealed class DdsTileUnpacker(VirtualTileSet tileSet, PageFileCache pageFileCache)
+internal sealed class TileUnpacker(VirtualTileSet tileSet, TitlePageCache titlePageCache)
 {
     private readonly TileCompressor _compressor = new();
 
@@ -35,23 +35,23 @@ internal sealed class DdsTileUnpacker(VirtualTileSet tileSet, PageFileCache page
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
-        var pageFile = pageFileCache.Get(tileInfo.PageFileIndex);
+        var pageFile = titlePageCache.Get(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
     }
 
     /// <summary>Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into a BC5 image.</summary>
-    private BC5Image UnpackChunkBc5(StreamingPageFile pageFile, int pageIndex, int chunkIndex)
+    private BC5Image UnpackChunkBc5(TitlePage page, int pageIndex, int chunkIndex)
     {
         var header = tileSet.Header;
         var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
                          + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackChunk(pageFile, pageIndex, chunkIndex, outputSize), header.TileWidth,
+        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), header.TileWidth,
             header.TileHeight);
     }
 
-    private byte[] UnpackChunk(StreamingPageFile pageFile, int pageIndex, int chunkIndex, int outputSize)
+    private byte[] UnpackChunk(TitlePage page, int pageIndex, int chunkIndex, int outputSize)
     {
-        var (chunkHeader, compressed) = pageFile.ReadChunk(pageIndex, chunkIndex);
+        var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return chunkHeader.Codec switch
         {

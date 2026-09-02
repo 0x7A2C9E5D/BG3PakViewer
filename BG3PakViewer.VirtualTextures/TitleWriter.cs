@@ -9,13 +9,13 @@ namespace BG3PakViewer.VirtualTextures;
 ///     one horizontal tile band into a reusable strip buffer per row. Row stitching is
 ///     delegated to a callback so the writer stays independent of the tile source.
 /// </summary>
-internal sealed class DdsTitleWriter : IDisposable
+internal sealed class TitleWriter : IDisposable
 {
     private readonly BinaryWriter _bw;
     private readonly Action<int, int, int, BC5Image> _stitchRow;
     private readonly BC5Image _strip;
 
-    public DdsTitleWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
+    public TitleWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
         Action<int, int, int, BC5Image> stitchRow)
     {
         _bw = new BinaryWriter(output, Encoding.UTF8, true);

@@ -5,9 +5,9 @@ namespace BG3PakViewer.VirtualTextures;
 
 public sealed class VirtualTileSetExtractor : IDisposable
 {
-    private readonly PageFileCache _pageFileCache;
+    private readonly TitlePageCache _titlePageCache;
     private readonly TileRangeCalculator _tileRanges;
-    private readonly DdsTileUnpacker _unpacker;
+    private readonly TileUnpacker _unpacker;
 
     /// <summary>
     ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
@@ -20,9 +20,9 @@ public sealed class VirtualTileSetExtractor : IDisposable
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(gtsStream, reader, false);
         PageFileNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
-        _pageFileCache = new PageFileCache(TileSet, pageStreamProvider);
+        _titlePageCache = new TitlePageCache(TileSet, pageStreamProvider);
         _tileRanges = new TileRangeCalculator(TileSet);
-        _unpacker = new DdsTileUnpacker(TileSet, _pageFileCache);
+        _unpacker = new TileUnpacker(TileSet, _titlePageCache);
     }
 
     private VirtualTileSet TileSet { get; }
@@ -34,7 +34,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
 
     public void Dispose()
     {
-        _pageFileCache.Dispose();
+        _titlePageCache.Dispose();
         TileSet.Dispose();
     }
 
@@ -48,7 +48,7 @@ public sealed class VirtualTileSetExtractor : IDisposable
     {
         var (cols, rows) = TileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
 
-        using var writer = new DdsTitleWriter(output, cols, rows, _tileRanges.TileWidth, _tileRanges.TileHeight,
+        using var writer = new TitleWriter(output, cols, rows, _tileRanges.TileWidth, _tileRanges.TileHeight,
             (startX, y, colCount, strip) => _unpacker.StitchRow(level, layer, startX, y, colCount, strip));
         for (var row = 0; row < rows; row++)
         {
