@@ -5,7 +5,7 @@ using BG3PakViewer.Shared.Models;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandler
+internal class VirtualTexturePreviewHandler(IPackageService packageService) : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {
