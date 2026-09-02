@@ -25,5 +25,5 @@
                                 OsirisScriptPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
                                 LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
                                 LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}"
-                                GtsPreviewTemplate="{StaticResource GtsPreviewDataTemplate}" />
+                                GtsPreviewTemplate="{StaticResource VirtualTexturePreviewDataTemplate}" />
 </ResourceDictionary>
