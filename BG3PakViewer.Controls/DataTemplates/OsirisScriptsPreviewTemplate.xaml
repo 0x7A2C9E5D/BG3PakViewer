@@ -1,6 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
+                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
     <DataTemplate x:Key="OsirisScriptPreviewDataTemplate" DataType="{x:Type vm:OsirisScriptsPreviewViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -10,7 +12,7 @@
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0"
-                     ItemsSource="{Binding GoalsView}"
+                     ItemsSource="{Binding Goals}"
                      DisplayMemberPath="Name"
                      SelectedItem="{Binding SelectedGoal}"
                      BorderBrush="Gray" BorderThickness="1" Padding="4"
@@ -18,7 +20,11 @@
                      VirtualizingStackPanel.VirtualizationMode="Recycling"
                      VirtualizingStackPanel.CacheLength="50"
                      ScrollViewer.CanContentScroll="True"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <i:Interaction.Behaviors>
+                    <b:CollectionViewFilterBehavior Filter="{Binding GoalFilter}" />
+                </i:Interaction.Behaviors>
+            </ListBox>
 
             <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
                           VerticalAlignment="Stretch" Background="Transparent"

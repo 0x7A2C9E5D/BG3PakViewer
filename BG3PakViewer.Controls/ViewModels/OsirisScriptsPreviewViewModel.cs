@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Windows.Data;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
@@ -19,8 +17,6 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
     public OsirisScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
-        GoalsView = CollectionViewSource.GetDefaultView(Goals);
-        GoalsView.Filter = FilterGoal;
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
@@ -30,14 +26,21 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial OsirisGoalItemViewModel? SelectedGoal { get; set; }
 
-    private ObservableCollection<OsirisGoalItemViewModel> Goals { get; } = [];
-
-    /// <summary>Filtered view of <see cref="Goals" />, driven by <see cref="SearchText" />.</summary>
-    public ICollectionView GoalsView { get; }
+    /// <summary>
+    ///     Full goal list. Filtering is a view concern: the view applies <c>GoalFilter</c> to this
+    ///     collection's collection view, which keeps WPF's ICollectionView out of the view model.
+    /// </summary>
+    public ObservableCollection<OsirisGoalItemViewModel> Goals { get; } = [];
 
     [ObservableProperty] public partial string? Scripts { get; private set; }
 
     [ObservableProperty] private partial string? SearchText { get; set; }
+
+    /// <summary>
+    ///     Predicate the view applies to <see cref="Goals" />; null shows every goal. Rebuilt whenever
+    ///     <c>SearchText</c> changes, which the view picks up and re-applies.
+    /// </summary>
+    [ObservableProperty] public partial Predicate<object>? GoalFilter { get; private set; }
 
     partial void OnStoryChanged(Story? value)
     {
@@ -45,7 +48,6 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
         if (value is null) return;
         foreach (var goal in value.Goals.Values)
             Goals.Add(new OsirisGoalItemViewModel { Goal = goal });
-        GoalsView.Refresh();
     }
 
     private void OnSearchMessage(SearchMessage message)
@@ -56,13 +58,10 @@ public partial class OsirisScriptsPreviewViewModel : DisposableViewModel
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSearchTextChanged(string? value)
     {
-        GoalsView.Refresh();
-    }
-
-    private bool FilterGoal(object item)
-    {
-        return string.IsNullOrWhiteSpace(SearchText) ||
-               ((OsirisGoalItemViewModel)item).Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        GoalFilter = string.IsNullOrWhiteSpace(value)
+            ? null
+            : item => item is OsirisGoalItemViewModel goal &&
+                      goal.Name.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod

@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Data;
 using System.Windows.Media;
 using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
@@ -33,22 +31,28 @@ public partial class GtsPreviewViewModel : DisposableViewModel
                 .Select(i => $"Layer {i}")
         ];
         foreach (var meta in extractor.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
-        TexturesView = CollectionViewSource.GetDefaultView(Textures);
-        TexturesView.Filter = FilterTexture;
         SelectedTexture = Textures.FirstOrDefault();
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
-    private ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
-
-    /// <summary>Filtered view of <see cref="Textures" />, driven by <see cref="SearchText" />.</summary>
-    public ICollectionView TexturesView { get; }
+    /// <summary>
+    ///     Full texture list. Filtering is a view concern: the view applies <c>TextureFilter</c>
+    ///     to this collection's collection view, which keeps WPF's ICollectionView out of the view model.
+    /// </summary>
+    public ObservableCollection<GtsTextureItemViewModel> Textures { get; } = [];
 
     public IReadOnlyList<string> Layers { get; }
 
     [ObservableProperty] public partial GtsTextureItemViewModel? SelectedTexture { get; set; }
 
+    // ReSharper disable once UnusedMember.Local
     [ObservableProperty] private partial string? SearchText { get; set; }
+
+    /// <summary>
+    ///     Predicate the view applies to <see cref="Textures" />; null shows every texture. Rebuilt
+    ///     whenever <c>SearchText</c> changes, which the view picks up and re-applies.
+    /// </summary>
+    [ObservableProperty] public partial Predicate<object>? TextureFilter { get; private set; }
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
@@ -68,14 +72,10 @@ public partial class GtsPreviewViewModel : DisposableViewModel
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSearchTextChanged(string? value)
     {
-        TexturesView.Refresh();
-    }
-
-    private bool FilterTexture(object item)
-    {
-        return string.IsNullOrWhiteSpace(SearchText) ||
-               ((GtsTextureItemViewModel)item).DisplayName
-               .Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        TextureFilter = string.IsNullOrWhiteSpace(value)
+            ? null
+            : item => item is GtsTextureItemViewModel texture &&
+                      texture.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod

@@ -2,7 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
-                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
+                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
+                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
     <!--
       Preview for GTS virtual textures: texture list on the left, and the
       selected texture decoded per-layer on the right (with layer selector).
@@ -16,12 +18,15 @@
             </Grid.ColumnDefinitions>
 
             <ListView Grid.Column="0"
-                      ItemsSource="{Binding TexturesView}"
+                      ItemsSource="{Binding Textures}"
                       SelectedItem="{Binding SelectedTexture}"
                       BorderBrush="Gray" BorderThickness="1" Padding="5"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <i:Interaction.Behaviors>
+                    <b:CollectionViewFilterBehavior Filter="{Binding TextureFilter}" />
+                </i:Interaction.Behaviors>
                 <!--
                   Every row must lay out at the same width, otherwise the copy button of a
                   long-named row drifts to the right and the buttons stop lining up.
