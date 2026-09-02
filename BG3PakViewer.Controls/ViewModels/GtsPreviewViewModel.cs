@@ -7,6 +7,7 @@ using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using LSLib.VirtualTextures;
@@ -21,18 +22,18 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class GtsPreviewViewModel : DisposableViewModel
 {
-    private readonly VirtualTextureLoader _loader;
+    private readonly VirtualTextureLoader _extractor;
     private CancellationTokenSource? _cts;
 
-    public GtsPreviewViewModel(VirtualTextureLoader loader)
+    public GtsPreviewViewModel(VirtualTextureLoader extractor)
     {
-        _loader = loader;
+        _extractor = extractor;
         Layers =
         [
-            .. Enumerable.Range(0, loader.LayerCount)
+            .. Enumerable.Range(0, extractor.LayerCount)
                 .Select(i => $"Layer {i}")
         ];
-        foreach (var meta in loader.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
+        foreach (var meta in extractor.GetTextures()) Textures.Add(new GtsTextureItemViewModel(meta));
         TexturesView = CollectionViewSource.GetDefaultView(Textures);
         TexturesView.Filter = FilterTexture;
         SelectedTexture = Textures.FirstOrDefault();
@@ -118,7 +119,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        await using var ddsStream = await _loader.ExtractAsync(meta, layer,
+        await using var ddsStream = await _extractor.ExtractAsync(meta, layer,
             new Progress<double>(p => Progress = p), cts.Token);
         if (cts.IsCancellationRequested) return;
 
@@ -128,7 +129,7 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             return;
         }
 
-        using var image = await VirtualTextureLoader.DecodeAsync(ddsStream);
+        using var image = await ImageLoader.DecodeDdsAsync(ddsStream);
         if (cts.IsCancellationRequested) return;
 
         ShowPreview(image);
@@ -167,6 +168,6 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();
-        _loader.Dispose();
+        _extractor.Dispose();
     }
 }

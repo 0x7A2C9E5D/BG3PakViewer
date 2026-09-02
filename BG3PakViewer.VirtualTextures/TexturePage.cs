@@ -4,7 +4,7 @@ using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
-internal sealed class TexturePage : IDisposable
+public sealed class TexturePage : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly BinaryReader _reader;

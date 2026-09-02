@@ -20,6 +20,12 @@ public static class ImageLoader
         throw new NotSupportedException($"Unsupported image format: {extension}");
     }
 
+    /// <summary>Decodes a DDS stream (e.g. produced by a virtual texture extractor) into an image.</summary>
+    public static async Task<Image?> DecodeDdsAsync(Stream ddsStream)
+    {
+        return await LoadAsync(ddsStream, ".dds");
+    }
+
     public static async Task<bool> ExportAsync(Image images, string path)
     {
         if (!FileExtensions.IsBitmapImage(Path.GetExtension(path)))

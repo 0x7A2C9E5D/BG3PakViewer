@@ -6,7 +6,7 @@ namespace BG3PakViewer.VirtualTextures;
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band
 ///     of tiles into a reusable strip buffer, trimming tile borders.
 /// </summary>
-internal sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache texturePageCache)
+public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache texturePageCache)
 {
     private readonly TileCompressor _compressor = new();
 

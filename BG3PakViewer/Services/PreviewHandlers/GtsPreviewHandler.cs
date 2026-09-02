@@ -22,10 +22,10 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
             if (gtsStream is null) return await Task.FromResult<object?>(null);
 
             IReadOnlyList<string> pageFileNames = [];
-            VirtualTileSetExtractor? extractor = null;
+            VirtualTextureLoader? extractor = null;
             try
             {
-                extractor = new VirtualTileSetExtractor(gtsStream, pageFileIndex =>
+                extractor = new VirtualTextureLoader(gtsStream, pageFileIndex =>
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     var pageFileName = pageFileNames[pageFileIndex];
@@ -36,7 +36,7 @@ internal class GtsPreviewHandler(IPackageService packageService) : IPreviewHandl
                            ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
                 });
                 pageFileNames = extractor.TextureNames;
-                return new GtsPreviewViewModel(new VirtualTextureLoader(extractor));
+                return new GtsPreviewViewModel(extractor);
             }
             catch
             {

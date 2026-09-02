@@ -1,20 +1,49 @@
 using System.IO;
+using System.Text;
 using BG3PakViewer.VirtualTextures;
 using LSLib.VirtualTextures;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace BG3PakViewer.Loader;
 
 /// <summary>
-///     High-level facade over <see cref="VirtualTileSetExtractor" />: exposes only the pieces a
-///     preview/export caller needs (layer count, texture metadata, DDS extraction and decoding),
-///     hiding LSLib tile set, paging and unpacking internals.
+///     Fully stream-based virtual texture extractor: loads a GTS directly from a stream (no temp files),
+///     exposes its layers and texture metadata, and extracts a selected layer into a DDS stream that can
+///     be decoded by <c>ImageLoader.DecodeDdsAsync</c>. GTP page files are opened lazily per pageFileIndex
+///     via a stream provider delegate (e.g. read from inside a PAK).
 /// </summary>
-public sealed class VirtualTextureLoader(VirtualTileSetExtractor extractor) : IDisposable
+public sealed class VirtualTextureLoader : IDisposable
 {
-    public int LayerCount => extractor.LayerCount;
+    private readonly TexturePageCache _texturePageCache;
+    private readonly TileRangeCalculator _tileRanges;
+    private readonly TextureUnpacker _unpacker;
 
-    public IReadOnlyList<FourCCTextureMeta> GetTextures() => extractor.GetTextures();
+    /// <summary>
+    ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
+    ///     without writing to disk; <paramref name="pageStreamProvider" /> supplies a stream for the GTP
+    ///     page file of a given pageFileIndex (e.g. read from inside a PAK).
+    /// </summary>
+    public VirtualTextureLoader(Stream gtsStream, Func<int, Stream> pageStreamProvider)
+    {
+        using var reader = new BinaryReader(gtsStream, Encoding.UTF8, true);
+        TileSet = new VirtualTileSet();
+        TileSet.LoadFromStream(gtsStream, reader, false);
+        TextureNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
+        _texturePageCache = new TexturePageCache(TileSet, pageStreamProvider);
+        _tileRanges = new TileRangeCalculator(TileSet);
+        _unpacker = new TextureUnpacker(TileSet, _texturePageCache);
+    }
+
+    private VirtualTileSet TileSet { get; }
+
+    public int LayerCount => TileSet.TileSetLayers.Length;
+
+    /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
+    public IReadOnlyList<string> TextureNames { get; }
+
+    public List<FourCCTextureMeta> GetTextures()
+    {
+        return TileSet.FourCCMetadata.ExtractTextureMetadata();
+    }
 
     /// <summary>
     ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into a seekable DDS stream,
@@ -28,7 +57,7 @@ public sealed class VirtualTextureLoader(VirtualTileSetExtractor extractor) : ID
         try
         {
             var extracted = await Task.Run(
-                () => extractor.ExtractTexture(layer, meta, ddsStream, CreateTileProgress(progress), ct), ct);
+                () => ExtractTexture(layer, meta, ddsStream, CreateTileProgress(progress), ct), ct);
             if (!extracted) return null;
 
             ddsStream.Position = 0;
@@ -41,13 +70,42 @@ public sealed class VirtualTextureLoader(VirtualTileSetExtractor extractor) : ID
         }
     }
 
-    /// <summary>Decodes a DDS stream produced by <see cref="ExtractAsync" /> into an image.</summary>
-    public static async Task<Image?> DecodeAsync(Stream ddsStream)
+    public void Dispose()
     {
-        return await ImageLoader.LoadAsync(ddsStream, ".dds");
+        _texturePageCache.Dispose();
+        TileSet.Dispose();
     }
 
-    public void Dispose() => extractor.Dispose();
+    private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
+        IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
+    {
+        for (var level = 0; level < TileSet.TileSetLevels.Length; level++)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (!_tileRanges.TryGetTileRange(level, tex, out var minX, out var minY, out var maxX, out var maxY))
+                continue;
+            if (!_tileRanges.RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
+
+            ExtractToStream(level, layer, minX, minY, maxX, maxY, output, progress, ct);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
+        Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
+    {
+        var (cols, rows) = TileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
+
+        using var writer = new TextureWriter(output, cols, rows, _tileRanges.TileWidth, _tileRanges.TileHeight,
+            (startX, y, colCount, strip) => _unpacker.StitchRow(level, layer, startX, y, colCount, strip));
+        for (var row = 0; row < rows; row++)
+        {
+            writer.WriteRow(minX, minY + row, cols, ct);
+            progress?.Report((row + 1, rows));
+        }
+    }
 
     private static Progress<(int Done, int Total)>? CreateTileProgress(IProgress<double>? progress)
     {
