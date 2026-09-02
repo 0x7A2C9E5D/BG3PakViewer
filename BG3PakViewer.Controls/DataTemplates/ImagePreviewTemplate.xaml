@@ -1,9 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
+                    xmlns:c="clr-namespace:BG3PakViewer.Controls.Converters">
+    <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <DataTemplate x:Key="ImageFilePreviewTemplate" DataType="{x:Type vm:ImagePreviewViewModel}">
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-            <Image Source="{Binding Data}"
+            <Image Source="{Binding Data, Converter={StaticResource ImageToBitmapSourceConverter}}"
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Viewbox>
     </DataTemplate>

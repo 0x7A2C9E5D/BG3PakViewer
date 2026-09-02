@@ -1,5 +1,4 @@
 ﻿using BG3PakViewer.Controls.ViewModels;
-using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
@@ -19,7 +18,8 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return null;
 
-        using var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
-        return image is null ? null : new ImagePreviewViewModel { Data = image.ToBitmapSource() };
+        // Ownership of the image is transferred to the view model, which disposes it.
+        var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
+        return image is null ? null : new ImagePreviewViewModel { Data = image };
     }
 }

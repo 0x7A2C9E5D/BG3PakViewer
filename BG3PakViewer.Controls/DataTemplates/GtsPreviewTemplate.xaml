@@ -4,7 +4,9 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
+                    xmlns:c="clr-namespace:BG3PakViewer.Controls.Converters">
+    <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <!--
       Preview for GTS virtual textures: texture list on the left, and the
       selected texture decoded per-layer on the right (with layer selector).
@@ -195,8 +197,9 @@
                     <Border Grid.Row="1" Margin="0,0,0,8"
                             BorderBrush="Gray" BorderThickness="1">
                         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-                            <Image Source="{Binding Preview}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <Image
+                                Source="{Binding Preview, Converter={StaticResource ImageToBitmapSourceConverter}}"
+                                RenderOptions.BitmapScalingMode="HighQuality" />
                         </Viewbox>
                     </Border>
 

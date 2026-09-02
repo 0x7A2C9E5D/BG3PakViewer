@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows.Media;
-using BG3PakViewer.Extensions;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
@@ -56,7 +54,11 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
-    [ObservableProperty] public partial ImageSource? Preview { get; private set; }
+    /// <summary>
+    ///     The decoded preview image, platform-agnostic (no WPF types). The view converts it for
+    ///     display; this view model owns it and disposes it when replaced or disposed.
+    /// </summary>
+    [ObservableProperty] public partial Image? Preview { get; private set; }
 
     [ObservableProperty] public partial bool IsBusy { get; set; }
 
@@ -128,8 +130,13 @@ public partial class GtsPreviewViewModel : DisposableViewModel
             return;
         }
 
-        using var image = await ImageLoader.DecodeDdsAsync(ddsStream);
-        if (cts.IsCancellationRequested) return;
+        // Ownership of the image is transferred to Preview; it is disposed when replaced or disposed.
+        var image = await ImageLoader.DecodeDdsAsync(ddsStream);
+        if (cts.IsCancellationRequested)
+        {
+            image?.Dispose();
+            return;
+        }
 
         ShowPreview(image);
     }
@@ -155,10 +162,15 @@ public partial class GtsPreviewViewModel : DisposableViewModel
 
     private void ShowPreview(Image? image)
     {
-        Preview = image?.ToBitmapSource();
+        Preview = image;
         StatusText = image is null
             ? Strings.GtsDecodeFailed
             : $"{image.Width} × {image.Height}";
+    }
+
+    partial void OnPreviewChanging(Image? oldValue, Image? newValue)
+    {
+        if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();
     }
 
     protected override void Dispose(bool disposing)
@@ -168,5 +180,8 @@ public partial class GtsPreviewViewModel : DisposableViewModel
         if (!disposing) return;
         _ = _cts?.CancelAsync();
         _extractor.Dispose();
+
+        // Detach the view from the image before releasing it.
+        Preview = null;
     }
 }
