@@ -20,6 +20,6 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
 
         // Ownership of the image is transferred to the view model, which disposes it.
         var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
-        return image is null ? null : new ImagePreviewViewModel { Data = image };
+        return image is null ? null : new ImagePreviewViewModel { Preview = image };
     }
 }

@@ -5,6 +5,6 @@
                   DataType="{x:Type vm:PlainTextPreviewViewModel}">
         <TextBox IsReadOnly="True" AcceptsReturn="True"
                  ScrollViewer.HorizontalScrollBarVisibility="Visible"
-                 Text="{Binding Data}" />
+                 Text="{Binding Text}" />
     </DataTemplate>
 </ResourceDictionary>

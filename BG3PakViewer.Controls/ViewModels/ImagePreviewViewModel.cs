@@ -8,20 +8,19 @@ namespace BG3PakViewer.Controls.ViewModels;
 public partial class ImagePreviewViewModel : DisposableViewModel
 {
     /// <summary>
-    ///     The decoded image, platform-agnostic (no WPF types). The view converts it for display;
-    ///     this view model owns it and disposes it when replaced or disposed.
+    ///     The decoded preview image, platform-agnostic (no WPF types). The view converts it for
+    ///     display; this view model owns it and disposes it when replaced or disposed.
     /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    [ObservableProperty]
-    public partial Image? Data { get; set; }
+    [ObservableProperty] public partial Image? Preview { get; set; }
 
     // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnDataChanged(Image? value)
+    partial void OnPreviewChanged(Image? value)
     {
-        Log.Information("ImageFileViewModel.DataChanged");
+        Log.Information("ImagePreviewViewModel.PreviewChanged");
     }
 
-    partial void OnDataChanging(Image? oldValue, Image? newValue)
+    partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();
     }
@@ -32,6 +31,6 @@ public partial class ImagePreviewViewModel : DisposableViewModel
         if (!disposing) return;
 
         // Detach the view from the image before releasing it.
-        Data = null;
+        Preview = null;
     }
 }

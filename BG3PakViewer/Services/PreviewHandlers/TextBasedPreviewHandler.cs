@@ -23,7 +23,7 @@ internal abstract class TextBasedPreviewHandler(IPackageService packageService, 
 
         var truncated = await TextOperations.TruncateToLinesAsync(text, appSettings.MaxPreviewLines);
 
-        return new PlainTextPreviewViewModel { Data = truncated };
+        return new PlainTextPreviewViewModel { Text = truncated };
     }
 
     protected abstract Task<string?> GetTextAsync(Stream stream);

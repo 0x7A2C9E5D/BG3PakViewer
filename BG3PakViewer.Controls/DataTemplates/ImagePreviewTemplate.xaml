@@ -5,7 +5,7 @@
     <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <DataTemplate x:Key="ImageFilePreviewTemplate" DataType="{x:Type vm:ImagePreviewViewModel}">
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
-            <Image Source="{Binding Data, Converter={StaticResource ImageToBitmapSourceConverter}}"
+            <Image Source="{Binding Preview, Converter={StaticResource ImageToBitmapSourceConverter}}"
                    RenderOptions.BitmapScalingMode="HighQuality" />
         </Viewbox>
     </DataTemplate>
