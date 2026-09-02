@@ -6,7 +6,7 @@ namespace BG3PakViewer.VirtualTextures;
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band
 ///     of tiles into a reusable strip buffer, trimming tile borders.
 /// </summary>
-internal sealed class TileUnpacker(VirtualTileSet tileSet, TitlePageCache titlePageCache)
+internal sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache texturePageCache)
 {
     private readonly TileCompressor _compressor = new();
 
@@ -35,12 +35,12 @@ internal sealed class TileUnpacker(VirtualTileSet tileSet, TitlePageCache titleP
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
-        var pageFile = titlePageCache.Get(tileInfo.PageFileIndex);
+        var pageFile = texturePageCache.Get(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
     }
 
     /// <summary>Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into a BC5 image.</summary>
-    private BC5Image UnpackChunkBc5(TitlePage page, int pageIndex, int chunkIndex)
+    private BC5Image UnpackChunkBc5(TexturePage page, int pageIndex, int chunkIndex)
     {
         var header = tileSet.Header;
         var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
@@ -49,7 +49,7 @@ internal sealed class TileUnpacker(VirtualTileSet tileSet, TitlePageCache titleP
             header.TileHeight);
     }
 
-    private byte[] UnpackChunk(TitlePage page, int pageIndex, int chunkIndex, int outputSize)
+    private byte[] UnpackChunk(TexturePage page, int pageIndex, int chunkIndex, int outputSize)
     {
         var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
