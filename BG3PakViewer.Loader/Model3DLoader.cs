@@ -48,12 +48,12 @@ public static class Model3DLoader
                 };
                 exporter.Export();
             });
-            Log.Information("Exported model to {0}", path);
+            Log.Information("Exported model to {Path}", path);
             return true;
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to export model.");
+            Log.Error(e, "Failed to export model to {Path}", path);
             return false;
         }
     }

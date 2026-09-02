@@ -323,29 +323,57 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task ShowLogDialog()
     {
-        using var viewModel = new LogDialogViewModel(_logAccessService, _shellOpenService);
-        await _dialogService.ShowDialogAsync(this, viewModel);
+        try
+        {
+            using var viewModel = new LogDialogViewModel(_logAccessService, _shellOpenService);
+            await _dialogService.ShowDialogAsync(this, viewModel);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to show the log dialog.");
+        }
     }
 
     [RelayCommand]
     private async Task ShowRecentDialog()
     {
-        using var viewModel = new RecentDialogViewModel(_recentFilesService, _dialogService);
-        await _dialogService.ShowDialogAsync(this, viewModel);
+        try
+        {
+            using var viewModel = new RecentDialogViewModel(_recentFilesService, _dialogService);
+            await _dialogService.ShowDialogAsync(this, viewModel);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to show the recent files dialog.");
+        }
     }
 
     [RelayCommand]
     private async Task ShowSettingsDialog()
     {
-        var viewModel = new SettingsDialogViewModel(_settingsManagerService, _dialogService);
-        await _dialogService.ShowDialogAsync(this, viewModel);
+        try
+        {
+            var viewModel = new SettingsDialogViewModel(_settingsManagerService, _dialogService);
+            await _dialogService.ShowDialogAsync(this, viewModel);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to show the settings dialog.");
+        }
     }
 
     [RelayCommand]
     private async Task ShowAbout()
     {
-        var viewModel = new AboutDialogViewModel(BuildAboutData());
-        await _dialogService.ShowDialogAsync(this, viewModel);
+        try
+        {
+            var viewModel = new AboutDialogViewModel(BuildAboutData());
+            await _dialogService.ShowDialogAsync(this, viewModel);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to show the about dialog.");
+        }
     }
 
     private static Dictionary<string, object?> BuildAboutData()

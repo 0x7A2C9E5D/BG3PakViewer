@@ -30,7 +30,7 @@ public static class LocalizationLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to export localization.");
+            Log.Error(e, "Failed to export localization to {Path}", path);
             return false;
         }
     }

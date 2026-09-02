@@ -57,7 +57,7 @@ public static class LarianResourceLoader
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to export resource.");
+            Log.Error(ex, "Failed to export resource to {Path}", path);
             return false;
         }
     }

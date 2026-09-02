@@ -28,7 +28,7 @@ public static class WwiseAudioLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to export audio.");
+            Log.Error(e, "Failed to export audio to {Path}", path);
             return false;
         }
     }

@@ -14,10 +14,11 @@ public partial class ImagePreviewViewModel : DisposableViewModel
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     [ObservableProperty] public partial Image? Preview { get; set; }
 
-    // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnPreviewChanged(Image? value)
     {
-        Log.Information("ImagePreviewViewModel.PreviewChanged");
+        // A new image arrives with every selection and carries no diagnostic value on its own,
+        // so it is recorded at debug level only.
+        Log.Debug("Image preview changed: {Width}x{Height}", value?.Width, value?.Height);
     }
 
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)

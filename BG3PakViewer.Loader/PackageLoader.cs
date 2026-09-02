@@ -15,7 +15,7 @@ public class PackageLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load package.");
+            Log.Error(e, "Failed to load package: {Path}", path);
             return null;
         }
     }
