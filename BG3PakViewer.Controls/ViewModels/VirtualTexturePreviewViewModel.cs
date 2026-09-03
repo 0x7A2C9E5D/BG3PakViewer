@@ -112,7 +112,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to preview GTS texture: {Name}", meta.Name);
-            StatusText = Strings.GtsPreviewFailed;
+            StatusText = Strings.VirtualTexturePreviewFailed;
         }
         finally
         {
@@ -146,7 +146,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     private void ShowNoData()
     {
         Preview = null;
-        StatusText = Strings.GtsNoDataForLayer;
+        StatusText = Strings.VirtualTextureNoDataForLayer;
     }
 
     private async Task<CancellationTokenSource> BeginLoadAsync()
@@ -157,7 +157,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         _cts = cts;
 
         IsBusy = true;
-        StatusText = Strings.GtsExtracting;
+        StatusText = Strings.VirtualTextureExtracting;
         Progress = 0;
         return cts;
     }
@@ -166,7 +166,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     {
         Preview = image;
         StatusText = image is null
-            ? Strings.GtsDecodeFailed
+            ? Strings.VirtualTextureDecodeFailed
             : $"{image.Width} × {image.Height}";
     }
 
