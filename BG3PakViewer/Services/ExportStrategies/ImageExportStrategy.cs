@@ -21,8 +21,11 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
 
     public FileFilter[] GetExportFilters(string fileName, string fileExtension)
     {
-        return [.. Filters.Where(f =>
-            f.Extensions!.Any(ext => GetOperation(fileName, fileExtension, ext) != ExportOperation.Forbidden))];
+        return
+        [
+            .. Filters.Where(f =>
+                f.Extensions!.Any(ext => GetOperation(fileName, fileExtension, ext) != ExportOperation.Forbidden))
+        ];
     }
 
     public async Task<bool> ExportAsync(PackageEntry node, string path)
@@ -52,7 +55,9 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
     private static ExportOperation GetOperation(string fileName, string sourceExtension, string targetExtension)
     {
         if (FileExtensions.IsTextureFormat(targetExtension))
-            return FileExtensions.IsTextureFormat(sourceExtension) ? ExportOperation.RawCopy : ExportOperation.Forbidden;
+            return FileExtensions.IsTextureFormat(sourceExtension)
+                ? ExportOperation.RawCopy
+                : ExportOperation.Forbidden;
         if (FileExtensions.IsLowTexTexture(fileName))
             return ExportOperation.Forbidden;
         return sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase)

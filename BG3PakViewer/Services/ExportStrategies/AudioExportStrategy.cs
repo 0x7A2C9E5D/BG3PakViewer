@@ -17,8 +17,11 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
 
     public FileFilter[] GetExportFilters(string fileName, string fileExtension)
     {
-        return [.. Filters.Where(f =>
-            f.Extensions!.Any(ext => GetOperation(fileExtension, ext) != ExportOperation.Forbidden))];
+        return
+        [
+            .. Filters.Where(f =>
+                f.Extensions!.Any(ext => GetOperation(fileExtension, ext) != ExportOperation.Forbidden))
+        ];
     }
 
     public async Task<bool> ExportAsync(PackageEntry node, string path)
