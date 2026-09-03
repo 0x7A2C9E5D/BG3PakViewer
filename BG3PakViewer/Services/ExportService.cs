@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using BG3PakViewer.Locales;
 using BG3PakViewer.Services.ExportStrategies;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
@@ -14,23 +13,13 @@ internal class ExportService(
     IEnumerable<IExportStrategy> strategies)
     : IExportService
 {
-    private readonly RawFileExportStrategy _defaultStrategy = new(packageService);
+    private readonly IExportStrategy _defaultStrategy = new RawFileExportStrategy(packageService);
     private readonly Dictionary<string, IExportStrategy> _exportStrategies = BuildStrategyDictionary(strategies);
 
     public FileFilter[] GetExportFilters(string fileName, string fileExtension)
     {
-        if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
-            return _defaultStrategy.Filters;
-        // OGG audio sources cannot be converted to WEM; only raw .ogg export is allowed.
-        if (strategy is AudioExportStrategy && fileExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
-            return [.. strategy.Filters.Where(f => !f.Extensions!.Any(e => e.Equals(".wem", StringComparison.OrdinalIgnoreCase)))];
-        if (strategy is not ImageExportStrategy) return strategy.Filters;
-        if (FileExtensions.IsLowTexTexture(fileName))
-            return [new FileFilter(Strings.DDSImage, ".dds")];
-        var filters = strategy.Filters;
-        return FileExtensions.IsBitmapImage(fileExtension)
-            ? [.. filters.Where(f => !f.Extensions!.Any(e => e.Equals(".dds", StringComparison.OrdinalIgnoreCase)))]
-            : filters;
+        var strategy = _exportStrategies.TryGetValue(fileExtension, out var s) ? s : _defaultStrategy;
+        return strategy.GetExportFilters(fileName, fileExtension);
     }
 
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)

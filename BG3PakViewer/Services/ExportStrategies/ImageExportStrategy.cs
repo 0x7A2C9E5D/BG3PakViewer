@@ -19,26 +19,44 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
         new(Strings.TIFFImage, [".tif", ".tiff"])
     ];
 
+    public FileFilter[] GetExportFilters(string fileName, string fileExtension)
+    {
+        return [.. Filters.Where(f =>
+            f.Extensions!.Any(ext => GetOperation(fileName, fileExtension, ext) != ExportOperation.Forbidden))];
+    }
+
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return false;
-        var sourceExtension = node.FileExtension;
-        var targetExtension = Path.GetExtension(path);
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        switch (GetOperation(node.Name, node.FileExtension, Path.GetExtension(path)))
+        {
+            case ExportOperation.RawCopy:
+                return await FileOperations.SaveStreamToFileAsync(stream, path);
+            case ExportOperation.Convert:
+            {
+                using var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
+                return image is not null && await ImageLoader.ExportAsync(image, path);
+            }
+            default:
+                return false;
+        }
+    }
 
-        // DDS cannot be encoded: only DDS sources may be copied as-is; bitmap sources must not produce DDS.
+    // Single source of truth for the supported export directions, shared by GetExportFilters
+    // (dialog options) and ExportAsync (runtime guard):
+    //  - DDS cannot be encoded, so a .dds target can only be a raw copy of a DDS source.
+    //  - Low-resolution thumbnails (_lowtex.dds) may only be exported as-is, never converted.
+    //  - Bitmap sources may be copied as-is or converted to another bitmap format, never to DDS.
+    private static ExportOperation GetOperation(string fileName, string sourceExtension, string targetExtension)
+    {
         if (FileExtensions.IsTextureFormat(targetExtension))
-            return FileExtensions.IsTextureFormat(sourceExtension)
-                && await FileOperations.SaveStreamToFileAsync(stream, path);
-
-        // Low-resolution thumbnail textures (_lowtex.dds) must not be converted to other formats.
-        if (FileExtensions.IsLowTexTexture(node.Name))
-            return false;
-
-        // Copy bitmap sources as-is when the target format matches; otherwise convert between bitmap formats.
-        if (sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(stream, path);
-        using var image = await ImageLoader.LoadAsync(stream, sourceExtension);
-        return image is not null && await ImageLoader.ExportAsync(image, path);
+            return FileExtensions.IsTextureFormat(sourceExtension) ? ExportOperation.RawCopy : ExportOperation.Forbidden;
+        if (FileExtensions.IsLowTexTexture(fileName))
+            return ExportOperation.Forbidden;
+        return sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase)
+            ? ExportOperation.RawCopy
+            : ExportOperation.Convert;
     }
 }

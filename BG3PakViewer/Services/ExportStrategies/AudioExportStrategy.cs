@@ -15,25 +15,38 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
         new(Strings.VorbisAudioFile, ".ogg")
     ];
 
+    public FileFilter[] GetExportFilters(string fileName, string fileExtension)
+    {
+        return [.. Filters.Where(f =>
+            f.Extensions!.Any(ext => GetOperation(fileExtension, ext) != ExportOperation.Forbidden))];
+    }
+
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return false;
-        var sourceExtension = node.FileExtension;
-        var targetExtension = Path.GetExtension(path);
-
-        // WEM-to-OGG is a one-way conversion: OGG sources can only be copied as-is, never transcoded to WEM.
-        if (sourceExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
+        return GetOperation(node.FileExtension, Path.GetExtension(path)) switch
         {
-            if (!targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
-                return false;
-            return await FileOperations.SaveStreamToFileAsync(stream, path);
-        }
+            ExportOperation.RawCopy => await FileOperations.SaveStreamToFileAsync(stream, path),
+            ExportOperation.Convert => await WwiseAudioLoader.ExportAsync(stream, path),
+            _ => false
+        };
+    }
 
-        // WEM sources: copy as-is for .wem targets, transcode for .ogg targets; other targets are unsupported.
+    // Single source of truth for the supported export directions, shared by GetExportFilters
+    // (dialog options) and ExportAsync (runtime guard):
+    // WEM-to-OGG is the only supported conversion; an OGG source may only be copied as-is,
+    // and can never be transcoded to WEM.
+    private static ExportOperation GetOperation(string sourceExtension, string targetExtension)
+    {
+        if (sourceExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
+            return targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
+                ? ExportOperation.RawCopy
+                : ExportOperation.Forbidden;
         if (targetExtension.Equals(".wem", StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(stream, path);
+            return ExportOperation.RawCopy;
         return targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
-            && await WwiseAudioLoader.ExportAsync(stream, path);
+            ? ExportOperation.Convert
+            : ExportOperation.Forbidden;
     }
 }
