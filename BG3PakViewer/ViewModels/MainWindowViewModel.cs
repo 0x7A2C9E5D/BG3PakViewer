@@ -92,7 +92,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     }
 
     /// <summary>
-    ///     Broadcasts the search query so the active preview (vitual texture list / localization
+    ///     Broadcasts the search query so the active preview (virtual texture list / localization
     ///     grid) handles it via the messenger; with no preview open it searches the package tree.
     /// </summary>
     [RelayCommand]
