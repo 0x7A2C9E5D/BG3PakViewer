@@ -30,7 +30,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         ];
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
-        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>>(this,
+        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>, string>(this,
+            MessageTokens.Search,
             (_, message) => OnSearchMessage(message));
     }
 
@@ -178,7 +179,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>>(this);
+        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>, string>(
+            this, MessageTokens.Search);
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();

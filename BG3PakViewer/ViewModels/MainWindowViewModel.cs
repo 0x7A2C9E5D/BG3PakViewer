@@ -98,7 +98,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task SearchAsync(string query)
     {
-        await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string?, bool>(query));
+        await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string?, bool>(query),
+            MessageTokens.Search);
         if (PreviewVm is not null) return;
 
         if (!_packageService.IsLoaded) return;
@@ -118,7 +119,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task ClearSearchAsync(string query)
     {
         if (!string.IsNullOrWhiteSpace(query)) return;
-        await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string?, bool>(null));
+        await WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string?, bool>(null),
+            MessageTokens.Search);
         if (PreviewVm is not null) return;
 
         if (!_packageService.IsLoaded) return;
