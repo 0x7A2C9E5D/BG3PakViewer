@@ -17,8 +17,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
-        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>>(this,
-            (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
     [ObservableProperty]
@@ -53,9 +52,9 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
             Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
     }
 
-    private void OnSearchMessage(AsyncRequestMessage<string?, bool> message)
+    private void OnSearchMessage(SearchMessage message)
     {
-        SearchText = string.IsNullOrEmpty(message.Request) ? null : message.Request;
+        SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
@@ -88,7 +87,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>>(this);
+        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
         base.Dispose(disposing);
     }
 }

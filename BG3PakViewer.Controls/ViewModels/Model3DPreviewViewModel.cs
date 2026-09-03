@@ -50,6 +50,6 @@ public partial class Model3DPreviewViewModel : ObservableObject
     [RelayCommand]
     private static void Zoom()
     {
-        WeakReferenceMessenger.Default.Send(string.Empty, MessageTokens.ZoomExtents);
+        WeakReferenceMessenger.Default.Send(new ZoomExtentsMessage(), MessageTokens.ZoomExtents);
     }
 }

@@ -8,8 +8,8 @@ namespace BG3PakViewer.Controls.Behaviors;
 
 /// <summary>
 ///     Keeps the localization grid's <see cref="SfDataGrid.SearchHelper" /> in sync with
-///     <see cref="AsyncRequestMessage{TRequest,TResponse}" /> search requests: non-empty text
-///     performs a filtered search, empty text clears it so the full content is restored.
+///     <see cref="SearchMessage" /> broadcasts: non-empty text performs a filtered search,
+///     empty text clears it so the full content is restored.
 /// </summary>
 internal class SfDataGridBehavior : Behavior<SfDataGrid>
 {
@@ -17,19 +17,18 @@ internal class SfDataGridBehavior : Behavior<SfDataGrid>
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
         AssociatedObject.SearchHelper.CanHighlightSearchText = false;
-        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>>(this,
-            (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
     protected override void OnDetaching()
     {
         AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
-        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>>(this);
+        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
     }
 
-    private void OnSearchMessage(AsyncRequestMessage<string?, bool> message)
+    private void OnSearchMessage(SearchMessage message)
     {
-        var text = message.Request;
+        var text = message.Text;
         if (string.IsNullOrEmpty(text))
         {
             AssociatedObject.SearchHelper.ClearSearch();
