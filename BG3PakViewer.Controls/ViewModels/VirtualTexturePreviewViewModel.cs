@@ -112,7 +112,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to preview GTS texture: {Name}", meta.Name);
-            StatusText = Strings.GtsPreviewFailed;
+            StatusText = Strings.TitlePreviewFailed;
         }
         finally
         {

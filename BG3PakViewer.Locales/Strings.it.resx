@@ -366,7 +366,7 @@
     <data name="TitleDecodeFailed" xml:space="preserve">
       <value>Decodifica non riuscita</value>
     </data>
-    <data name="GtsPreviewFailed" xml:space="preserve">
+    <data name="TitlePreviewFailed" xml:space="preserve">
       <value>Anteprima non riuscita</value>
     </data>
     <data name="CopyName" xml:space="preserve">

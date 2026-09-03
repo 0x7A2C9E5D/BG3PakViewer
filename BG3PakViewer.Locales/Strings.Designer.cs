@@ -330,15 +330,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Preview failed.
-        /// </summary>
-        public static string GtsPreviewFailed {
-            get {
-                return ResourceManager.GetString("GtsPreviewFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Home Page.
         /// </summary>
         public static string HomePage {
@@ -713,6 +704,15 @@ namespace BG3PakViewer.Locales {
         public static string TitleNoDataForLayer {
             get {
                 return ResourceManager.GetString("TitleNoDataForLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preview failed.
+        /// </summary>
+        public static string TitlePreviewFailed {
+            get {
+                return ResourceManager.GetString("TitlePreviewFailed", resourceCulture);
             }
         }
         
