@@ -10,7 +10,7 @@ public class StoryScriptsPreviewHandler(IPackageService packageService, IAppSett
 {
     public bool CanHandle(string fileExtension)
     {
-        return FileExtensions.IsOsirisScript(fileExtension);
+        return FileExtensions.IsStoryScripts(fileExtension);
     }
 
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
