@@ -20,7 +20,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
 
     public DataTemplate? LocalizationPreviewTemplate { get; set; }
 
-    public DataTemplate? GtsPreviewTemplate { get; set; }
+    public DataTemplate? VirtualTexturePreviewTemplate { get; set; }
 
     public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
     {
@@ -33,7 +33,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             StoryScriptsPreviewViewModel => StoryScriptsPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
-            VirtualTexturePreviewViewModel => GtsPreviewTemplate,
+            VirtualTexturePreviewViewModel => VirtualTexturePreviewTemplate,
             _ => null
         };
     }

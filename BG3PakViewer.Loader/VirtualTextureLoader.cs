@@ -18,15 +18,15 @@ public sealed class VirtualTextureLoader : IDisposable
     private readonly TextureUnpacker _unpacker;
 
     /// <summary>
-    ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="gtsStream" />
+    ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="stream" />
     ///     without writing to disk; <paramref name="pageStreamProvider" /> supplies a stream for the GTP
     ///     page file of a given pageFileIndex (e.g. read from inside a PAK).
     /// </summary>
-    public VirtualTextureLoader(Stream gtsStream, Func<int, Stream> pageStreamProvider)
+    public VirtualTextureLoader(Stream stream, Func<int, Stream> pageStreamProvider)
     {
-        using var reader = new BinaryReader(gtsStream, Encoding.UTF8, true);
+        using var reader = new BinaryReader(stream, Encoding.UTF8, true);
         TileSet = new VirtualTileSet();
-        TileSet.LoadFromStream(gtsStream, reader, false);
+        TileSet.LoadFromStream(stream, reader, false);
         TextureNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
         _texturePageCache = new TexturePageCache(TileSet, pageStreamProvider);
         _tileRanges = new TileRangeCalculator(TileSet);
