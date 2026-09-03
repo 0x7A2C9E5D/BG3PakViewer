@@ -17,8 +17,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
-        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>, string>(this,
-            MessageTokens.Search,
+        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>>(this,
             (_, message) => OnSearchMessage(message));
     }
 
@@ -89,8 +88,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>, string>(
-            this, MessageTokens.Search);
+        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>>(this);
         base.Dispose(disposing);
     }
 }
