@@ -30,7 +30,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         ];
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
-        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string?, bool>>(this,
+            (_, message) => OnSearchMessage(message));
     }
 
     /// <summary>
@@ -68,9 +69,9 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     [ObservableProperty] public partial double Progress { get; set; }
 
-    private void OnSearchMessage(SearchMessage message)
+    private void OnSearchMessage(AsyncRequestMessage<string?, bool> message)
     {
-        SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
+        SearchText = string.IsNullOrEmpty(message.Request) ? null : message.Request;
     }
 
     // ReSharper disable once UnusedParameterInPartialMethod
@@ -177,7 +178,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<AsyncRequestMessage<string?, bool>>(this);
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();

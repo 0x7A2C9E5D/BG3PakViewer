@@ -11,7 +11,7 @@ internal class Viewport3DxBehavior : Behavior<Viewport3DX>
     protected override void OnAttached()
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
-        WeakReferenceMessenger.Default.Register<ZoomExtentsMessage, string>(this, MessageTokens.ZoomExtents,
+        WeakReferenceMessenger.Default.Register<string, string>(this, MessageTokens.ZoomExtents,
             (_, _) => { AssociatedObject.ZoomExtents(); });
     }
 
