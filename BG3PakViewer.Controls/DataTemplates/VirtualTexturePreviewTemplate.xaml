@@ -8,7 +8,7 @@
                     xmlns:c="clr-namespace:BG3PakViewer.Controls.Converters">
     <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <!--
-      Preview for GTS virtual textures: texture list on the left, and the
+      Preview for virtual textures: texture list on the left, and the
       selected texture decoded per-layer on the right (with layer selector).
     -->
     <DataTemplate x:Key="VirtualTexturePreviewDataTemplate" DataType="{x:Type vm:VirtualTexturePreviewViewModel}">
