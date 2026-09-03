@@ -23,7 +23,7 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return false;
-        if (Path.GetExtension(path) == ".dds")
+        if (FileExtensions.IsTextureFormat(Path.GetExtension(path)))
             return await FileOperations.SaveStreamToFileAsync(stream, path);
         using var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         return image is not null && await ImageLoader.ExportAsync(image, path);
