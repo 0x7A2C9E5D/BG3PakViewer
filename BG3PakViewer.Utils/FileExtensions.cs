@@ -49,6 +49,16 @@ public static class FileExtensions
         return BitmapImageFormats.Contains(extension.ToLowerInvariant());
     }
 
+    public static bool IsVorbisAudio(string extension)
+    {
+        return extension.Equals(".ogg", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsWwiseAudio(string extension)
+    {
+        return extension.Equals(".wem", StringComparison.OrdinalIgnoreCase);
+    }
+
     public static bool IsLowTexTexture(string fileName)
     {
         return fileName.EndsWith("_lowtex.dds", StringComparison.OrdinalIgnoreCase);

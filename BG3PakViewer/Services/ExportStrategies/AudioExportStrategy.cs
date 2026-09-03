@@ -39,13 +39,13 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
     // and can never be transcoded to WEM.
     private static ExportOperation GetOperation(string sourceExtension, string targetExtension)
     {
-        if (sourceExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
-            return targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
+        if (FileExtensions.IsVorbisAudio(sourceExtension))
+            return FileExtensions.IsVorbisAudio(targetExtension)
                 ? ExportOperation.RawCopy
                 : ExportOperation.Forbidden;
-        if (targetExtension.Equals(".wem", StringComparison.OrdinalIgnoreCase))
+        if (FileExtensions.IsWwiseAudio(targetExtension))
             return ExportOperation.RawCopy;
-        return targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
+        return FileExtensions.IsVorbisAudio(targetExtension)
             ? ExportOperation.Convert
             : ExportOperation.Forbidden;
     }
