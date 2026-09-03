@@ -150,15 +150,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copy name.
-        /// </summary>
-        public static string CopyName {
-            get {
-                return ResourceManager.GetString("CopyName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to DDS Image.
         /// </summary>
         public static string DDSImage {
@@ -308,6 +299,60 @@ namespace BG3PakViewer.Locales {
         public static string GIFImage {
             get {
                 return ResourceManager.GetString("GIFImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decode failed.
+        /// </summary>
+        public static string GtsDecodeFailed {
+            get {
+                return ResourceManager.GetString("GtsDecodeFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extracting….
+        /// </summary>
+        public static string GtsExtracting {
+            get {
+                return ResourceManager.GetString("GtsExtracting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Layer:.
+        /// </summary>
+        public static string GtsLayerLabel {
+            get {
+                return ResourceManager.GetString("GtsLayerLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data for this layer.
+        /// </summary>
+        public static string GtsNoDataForLayer {
+            get {
+                return ResourceManager.GetString("GtsNoDataForLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Preview failed.
+        /// </summary>
+        public static string GtsPreviewFailed {
+            get {
+                return ResourceManager.GetString("GtsPreviewFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy name.
+        /// </summary>
+        public static string CopyName {
+            get {
+                return ResourceManager.GetString("CopyName", resourceCulture);
             }
         }
         
@@ -708,56 +753,11 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decode failed.
-        /// </summary>
-        public static string VirtualTextureDecodeFailed {
-            get {
-                return ResourceManager.GetString("VirtualTextureDecodeFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Extracting….
-        /// </summary>
-        public static string VirtualTextureExtracting {
-            get {
-                return ResourceManager.GetString("VirtualTextureExtracting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Virtual Texture File.
         /// </summary>
         public static string VirtualTextureFile {
             get {
                 return ResourceManager.GetString("VirtualTextureFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Layer:.
-        /// </summary>
-        public static string VirtualTextureLayerLabel {
-            get {
-                return ResourceManager.GetString("VirtualTextureLayerLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No data for this layer.
-        /// </summary>
-        public static string VirtualTextureNoDataForLayer {
-            get {
-                return ResourceManager.GetString("VirtualTextureNoDataForLayer", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Preview failed.
-        /// </summary>
-        public static string VirtualTexturePreviewFailed {
-            get {
-                return ResourceManager.GetString("VirtualTexturePreviewFailed", resourceCulture);
             }
         }
         

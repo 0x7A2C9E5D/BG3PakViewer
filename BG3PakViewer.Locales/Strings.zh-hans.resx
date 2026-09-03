@@ -246,19 +246,19 @@
     <data name="VirtualTextureFile" xml:space="preserve">
         <value>虚拟材质文件</value>
     </data>
-    <data name="VirtualTextureLayerLabel" xml:space="preserve">
+    <data name="GtsLayerLabel" xml:space="preserve">
         <value>图层：</value>
     </data>
-    <data name="VirtualTextureExtracting" xml:space="preserve">
+    <data name="GtsExtracting" xml:space="preserve">
         <value>正在提取…</value>
     </data>
-    <data name="VirtualTextureNoDataForLayer" xml:space="preserve">
+    <data name="GtsNoDataForLayer" xml:space="preserve">
         <value>此图层没有数据</value>
     </data>
-    <data name="VirtualTextureDecodeFailed" xml:space="preserve">
+    <data name="GtsDecodeFailed" xml:space="preserve">
         <value>解码失败</value>
     </data>
-    <data name="VirtualTexturePreviewFailed" xml:space="preserve">
+    <data name="GtsPreviewFailed" xml:space="preserve">
         <value>预览失败</value>
     </data>
     <data name="CopyName" xml:space="preserve">

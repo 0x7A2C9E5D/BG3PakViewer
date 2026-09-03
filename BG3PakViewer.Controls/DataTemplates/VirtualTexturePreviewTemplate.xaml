@@ -186,7 +186,7 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="{I18N {x:Static l:LangKeys.VirtualTextureLayerLabel}}" VerticalAlignment="Center" />
+                        <TextBlock Text="{I18N {x:Static l:LangKeys.GtsLayerLabel}}" VerticalAlignment="Center" />
                         <ComboBox Width="120" Margin="8,0,0,0" VerticalAlignment="Center"
                                   ItemsSource="{Binding Layers}"
                                   SelectedIndex="{Binding SelectedLayerIndex}" />
