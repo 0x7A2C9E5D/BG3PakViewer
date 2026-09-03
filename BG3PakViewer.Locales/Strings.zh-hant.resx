@@ -246,16 +246,16 @@
     <data name="Zoom" xml:space="preserve">
         <value>縮放</value>
     </data>
-    <data name="GtsLayerLabel" xml:space="preserve">
+    <data name="TitleLayerLabel" xml:space="preserve">
         <value>圖層：</value>
     </data>
-    <data name="GtsExtracting" xml:space="preserve">
+    <data name="TitleExtracting" xml:space="preserve">
         <value>正在提取…</value>
     </data>
-    <data name="GtsNoDataForLayer" xml:space="preserve">
+    <data name="TitleNoDataForLayer" xml:space="preserve">
         <value>此圖層沒有資料</value>
     </data>
-    <data name="GtsDecodeFailed" xml:space="preserve">
+    <data name="TitleDecodeFailed" xml:space="preserve">
         <value>解碼失敗</value>
     </data>
     <data name="GtsPreviewFailed" xml:space="preserve">
