@@ -18,7 +18,7 @@ public sealed class VirtualTextureLoader : IDisposable
     private readonly TextureUnpacker _unpacker;
 
     /// <summary>
-    ///     Fully stream-based constructor: GTS metadata is read directly from <paramref name="stream" />
+    ///     Fully stream-based constructor: title metadata is read directly from <paramref name="stream" />
     ///     without writing to disk; <paramref name="pageStreamProvider" /> supplies a stream for the GTP
     ///     page file of a given pageFileIndex (e.g. read from inside a PAK).
     /// </summary>

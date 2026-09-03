@@ -19,7 +19,7 @@ public static class ImageSharpExtensions
         };
         // BitmapSource.Create returns an unfrozen instance owned by the calling
         // thread. Freeze it here so the result is safe to bind from the UI thread
-        // even when ToBitmapSource ran on a background thread (e.g. GTS preview).
+        // even when ToBitmapSource ran on a background thread (e.g. virtual texture preview).
         if (source.CanFreeze) source.Freeze();
         return source;
     }
