@@ -2,6 +2,7 @@ using System.IO;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
+using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -9,7 +10,7 @@ internal class VirtualTexturePreviewHandler(IPackageService packageService) : IP
 {
     public bool CanHandle(string fileExtension)
     {
-        return fileExtension.Equals(".gts", StringComparison.OrdinalIgnoreCase);
+        return FileExtensions.IsVirtualTexture(fileExtension);
     }
 
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)

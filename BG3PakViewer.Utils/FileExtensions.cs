@@ -68,4 +68,9 @@ public static class FileExtensions
     {
         return extension.Equals(".osi", StringComparison.OrdinalIgnoreCase);
     }
+
+    public static bool IsVirtualTexture(string extension)
+    {
+        return extension.Equals(".gts", StringComparison.OrdinalIgnoreCase);
+    }
 }
