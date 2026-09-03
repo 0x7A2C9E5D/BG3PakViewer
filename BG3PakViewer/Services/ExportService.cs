@@ -5,7 +5,6 @@ using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using LSLib.LS;
-using LSLib.VirtualTextures;
 using Serilog;
 
 namespace BG3PakViewer.Services;
@@ -15,7 +14,7 @@ internal class ExportService(
     IEnumerable<IExportStrategy> strategies)
     : IExportService
 {
-    private readonly RawFileExportStrategy _defaultStrategy = new();
+    private readonly RawFileExportStrategy _defaultStrategy = new(packageService);
     private readonly Dictionary<string, IExportStrategy> _exportStrategies = BuildStrategyDictionary(strategies);
 
     public FileFilter[] GetExportFilters(string fileName, string fileExtension)
@@ -47,18 +46,11 @@ internal class ExportService(
         Log.Information("Exporting file: {SourcePath} -> {TargetPath}", node.FullPath, targetPath);
         try
         {
-            await using var stream = file.CreateContentReader();
-            var success = await strategy.ExportAsync(stream, targetPath, node.FileExtension);
+            var success = await strategy.ExportAsync(node, targetPath);
             if (success)
-            {
-                if (strategy is VirtualTextureExportStrategy)
-                    await ExportVirtualTexturePagesAsync(node, targetPath);
                 Log.Information("Export completed successfully: {TargetPath}", targetPath);
-            }
             else
-            {
                 Log.Warning("Export failed: {TargetPath}", targetPath);
-            }
 
             return success;
         }
@@ -114,42 +106,6 @@ internal class ExportService(
         }
     }
 
-    private async Task ExportVirtualTexturePagesAsync(PackageEntry node, string targetPath)
-    {
-        using var tileSet = new VirtualTileSet(targetPath);
-        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName).ToList();
-        var sourceFolderPath = Path.GetDirectoryName(node.FullPath)!;
-        var targetFolderPath = Path.GetDirectoryName(targetPath)!;
-        var parallelOptions = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
-        await Parallel.ForEachAsync(pageFileNames, parallelOptions, async (pageFileName, _) =>
-        {
-            try
-            {
-                var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
-                var pageFile = packageService.GetFileByPath(sourceFilePath);
-                if (pageFile == null)
-                {
-                    Log.Warning("Page file not found: {Path}", sourceFilePath);
-                    return;
-                }
-
-                var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
-                await using var pageStream = pageFile.CreateContentReader();
-                await FileOperations.SaveStreamToFileAsync(targetFilePath, pageStream);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Error exporting page file: {Path}", pageFileName);
-            }
-        });
-
-        Log.Information("Exported {Count} virtual texture page file(s) next to {TargetPath}",
-            pageFileNames.Count, targetPath);
-    }
-
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
     {
         return packageService.GetValidFiles()
@@ -175,7 +131,7 @@ internal class ExportService(
         try
         {
             await using var stream = file.CreateContentReader();
-            if (!await FileOperations.SaveStreamToFileAsync(targetPath, stream))
+            if (!await FileOperations.SaveStreamToFileAsync(stream, targetPath))
                 Log.Warning("Failed to export file: {Path}", file.Name);
         }
         catch (Exception ex)

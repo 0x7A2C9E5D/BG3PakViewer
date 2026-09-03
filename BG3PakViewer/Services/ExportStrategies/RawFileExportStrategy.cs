@@ -1,15 +1,17 @@
-﻿using System.IO;
+﻿using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-internal class RawFileExportStrategy : IExportStrategy
+internal class RawFileExportStrategy(IPackageService packageService) : IExportStrategy
 {
     public FileFilter[] Filters => [];
 
-    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
+    public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        return await FileOperations.SaveStreamToFileAsync(path, stream);
+        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        if (stream is null) return false;
+        return await FileOperations.SaveStreamToFileAsync(stream, path);
     }
 }

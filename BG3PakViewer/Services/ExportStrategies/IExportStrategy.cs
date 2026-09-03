@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using BG3PakViewer.Shared.Models;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
@@ -7,5 +7,5 @@ internal interface IExportStrategy
 {
     FileFilter[] Filters { get; }
 
-    Task<bool> ExportAsync(Stream stream, string path, string extension);
+    Task<bool> ExportAsync(PackageEntry node, string path);
 }

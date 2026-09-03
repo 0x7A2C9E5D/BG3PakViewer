@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-internal class Model3DExportStrategy : IExportStrategy
+internal class Model3DExportStrategy(IPackageService packageService) : IExportStrategy
 {
     public FileFilter[] Filters =>
     [
@@ -15,11 +16,12 @@ internal class Model3DExportStrategy : IExportStrategy
         new(Strings.GLTransmissionFormat, ".gltf")
     ];
 
-    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
+    public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        if (extension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(path, stream);
-
+        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        if (stream is null) return false;
+        if (node.FileExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(stream, path);
         var root = await Model3DLoader.LoadAsync(stream);
         return root != null && await Model3DLoader.ExportAsync(root, path);
     }

@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-internal class ImageExportStrategy : IExportStrategy
+internal class ImageExportStrategy(IPackageService packageService) : IExportStrategy
 {
     public FileFilter[] Filters =>
     [
@@ -18,11 +19,13 @@ internal class ImageExportStrategy : IExportStrategy
         new(Strings.TIFFImage, [".tif", ".tiff"])
     ];
 
-    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
+    public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        if (extension == ".dds")
-            return await FileOperations.SaveStreamToFileAsync(path, stream);
-        using var image = await ImageLoader.LoadAsync(stream, extension);
+        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        if (stream is null) return false;
+        if (Path.GetExtension(path) == ".dds")
+            return await FileOperations.SaveStreamToFileAsync(stream, path);
+        using var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         return image is not null && await ImageLoader.ExportAsync(image, path);
     }
 }

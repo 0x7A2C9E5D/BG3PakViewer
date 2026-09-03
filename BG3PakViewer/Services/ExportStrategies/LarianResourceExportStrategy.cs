@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
-internal class LarianResourceExportStrategy : IExportStrategy
+internal class LarianResourceExportStrategy(IPackageService packageService) : IExportStrategy
 {
     private static FileFilter[] Filters =>
     [
@@ -18,12 +19,13 @@ internal class LarianResourceExportStrategy : IExportStrategy
         new(Strings.LarianResourceFile, ".lsbs")
     ];
 
-    public async Task<bool> ExportAsync(Stream stream, string path, string extension)
+    public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        if (extension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
-            return await FileOperations.SaveStreamToFileAsync(path, stream);
-
-        var resource = await LarianResourceLoader.LoadAsync(stream, extension);
+        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        if (stream is null) return false;
+        if (node.FileExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(stream, path);
+        var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
         return resource != null && await LarianResourceLoader.ExportAsync(resource, path);
     }
 

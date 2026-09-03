@@ -4,7 +4,7 @@ namespace BG3PakViewer.Utils;
 
 public static class FileOperations
 {
-    public static async Task<bool> SaveStreamToFileAsync(string path, Stream stream)
+    public static async Task<bool> SaveStreamToFileAsync(Stream stream, string path)
     {
         try
         {
