@@ -9,7 +9,7 @@ namespace BG3PakViewer.Services.ExportStrategies;
 
 internal class LarianResourceExportStrategy(IPackageService packageService) : IExportStrategy
 {
-    private static FileFilter[] Filters =>
+    public FileFilter[] Filters =>
     [
         new(Strings.LarianResourceFile, ".lsx"),
         new(Strings.LarianResourceFile, ".lsj"),
@@ -28,6 +28,4 @@ internal class LarianResourceExportStrategy(IPackageService packageService) : IE
         var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
         return resource != null && await LarianResourceLoader.ExportAsync(resource, path);
     }
-
-    FileFilter[] IExportStrategy.Filters => Filters;
 }
