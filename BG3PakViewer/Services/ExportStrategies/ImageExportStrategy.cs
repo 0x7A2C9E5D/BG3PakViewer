@@ -23,9 +23,22 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return false;
-        if (FileExtensions.IsTextureFormat(Path.GetExtension(path)))
+        var sourceExtension = node.FileExtension;
+        var targetExtension = Path.GetExtension(path);
+
+        // DDS cannot be encoded: only DDS sources may be copied as-is; bitmap sources must not produce DDS.
+        if (FileExtensions.IsTextureFormat(targetExtension))
+            return FileExtensions.IsTextureFormat(sourceExtension)
+                && await FileOperations.SaveStreamToFileAsync(stream, path);
+
+        // Low-resolution thumbnail textures (_lowtex.dds) must not be converted to other formats.
+        if (FileExtensions.IsLowTexTexture(node.Name))
+            return false;
+
+        // Copy bitmap sources as-is when the target format matches; otherwise convert between bitmap formats.
+        if (sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase))
             return await FileOperations.SaveStreamToFileAsync(stream, path);
-        using var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
+        using var image = await ImageLoader.LoadAsync(stream, sourceExtension);
         return image is not null && await ImageLoader.ExportAsync(image, path);
     }
 }

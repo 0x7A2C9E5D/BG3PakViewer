@@ -21,6 +21,9 @@ internal class ExportService(
     {
         if (!_exportStrategies.TryGetValue(fileExtension, out var strategy))
             return _defaultStrategy.Filters;
+        // OGG audio sources cannot be converted to WEM; only raw .ogg export is allowed.
+        if (strategy is AudioExportStrategy && fileExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
+            return [.. strategy.Filters.Where(f => !f.Extensions!.Any(e => e.Equals(".wem", StringComparison.OrdinalIgnoreCase)))];
         if (strategy is not ImageExportStrategy) return strategy.Filters;
         if (FileExtensions.IsLowTexTexture(fileName))
             return [new FileFilter(Strings.DDSImage, ".dds")];

@@ -1,4 +1,5 @@
-﻿using BG3PakViewer.Loader;
+﻿using System.IO;
+using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
@@ -18,8 +19,21 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return false;
-        if (node.FileExtension.Equals(".wem", StringComparison.OrdinalIgnoreCase))
+        var sourceExtension = node.FileExtension;
+        var targetExtension = Path.GetExtension(path);
+
+        // WEM-to-OGG is a one-way conversion: OGG sources can only be copied as-is, never transcoded to WEM.
+        if (sourceExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase))
+                return false;
             return await FileOperations.SaveStreamToFileAsync(stream, path);
-        return await WwiseAudioLoader.ExportAsync(stream, path);
+        }
+
+        // WEM sources: copy as-is for .wem targets, transcode for .ogg targets; other targets are unsupported.
+        if (targetExtension.Equals(".wem", StringComparison.OrdinalIgnoreCase))
+            return await FileOperations.SaveStreamToFileAsync(stream, path);
+        return targetExtension.Equals(".ogg", StringComparison.OrdinalIgnoreCase)
+            && await WwiseAudioLoader.ExportAsync(stream, path);
     }
 }
