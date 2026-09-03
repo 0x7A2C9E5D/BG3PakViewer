@@ -12,7 +12,7 @@ using Image = SixLabors.ImageSharp.Image;
 namespace BG3PakViewer.Controls.ViewModels;
 
 /// <summary>
-///     GTS virtual texture preview: lists textures on the left; selecting one extracts and decodes
+///     virtual texture preview: lists textures on the left; selecting one extracts and decodes
 ///     the selected layer to a bitmap in the background, with cancellation and progress reporting.
 /// </summary>
 public partial class VirtualTexturePreviewViewModel : DisposableViewModel

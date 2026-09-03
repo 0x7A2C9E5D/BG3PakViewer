@@ -7,7 +7,7 @@ using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
-/// <summary>List item describing a single virtual texture inside a GTS.</summary>
+/// <summary>List item describing a single virtual texture inside a title set.</summary>
 public partial class VirtualTextureItemViewModel(FourCCTextureMeta meta) : ObservableObject
 {
     public FourCCTextureMeta Meta { get; } = meta;

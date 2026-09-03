@@ -6,7 +6,7 @@ using LSLib.VirtualTextures;
 namespace BG3PakViewer.Loader;
 
 /// <summary>
-///     Fully stream-based virtual texture extractor: loads a GTS directly from a stream (no temp files),
+///     Fully stream-based virtual texture extractor: loads a title set directly from a stream (no temp files),
 ///     exposes its layers and texture metadata, and extracts a selected layer into a DDS stream that can
 ///     be decoded by <c>ImageLoader.DecodeDdsAsync</c>. GTP page files are opened lazily per pageFileIndex
 ///     via a stream provider delegate (e.g. read from inside a PAK).
@@ -37,7 +37,7 @@ public sealed class VirtualTextureLoader : IDisposable
 
     public int LayerCount => TileSet.TileSetLayers.Length;
 
-    /// <summary>GTP page file names referenced by the GTS, ordered by PageFileIndex.</summary>
+    /// <summary>title page file names referenced by the title set, ordered by PageFileIndex.</summary>
     public IReadOnlyList<string> TextureNames { get; }
 
     public void Dispose()
