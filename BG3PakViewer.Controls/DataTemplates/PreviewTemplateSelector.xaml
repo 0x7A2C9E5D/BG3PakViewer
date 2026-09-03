@@ -22,7 +22,7 @@
                                 ImageFilePreviewTemplate="{StaticResource ImageFilePreviewTemplate}"
                                 ModelFilePreviewTemplate="{StaticResource ModelPreviewDataTemplateTemplate}"
                                 NotSupportedPreviewFileDataTemplate="{StaticResource NotSupportedPreviewFileDataTemplate}"
-                                OsirisScriptPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
+                                StoryScriptsPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
                                 LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
                                 LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}"
                                 GtsPreviewTemplate="{StaticResource VirtualTexturePreviewDataTemplate}" />

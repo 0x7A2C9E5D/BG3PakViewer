@@ -14,7 +14,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
 
     public DataTemplate? NotSupportedPreviewFileDataTemplate { get; set; }
 
-    public DataTemplate? OsirisScriptPreviewTemplate { get; set; }
+    public DataTemplate? StoryScriptsPreviewTemplate { get; set; }
 
     public DataTemplate? LarianResourcePreviewTemplate { get; set; }
 
@@ -30,7 +30,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             Model3DPreviewViewModel => ModelFilePreviewTemplate,
             PlainTextPreviewViewModel => PlainTextFilePreviewTemplate,
             NotSupportedPreviewViewModel => NotSupportedPreviewFileDataTemplate,
-            StoryScriptsPreviewViewModel => OsirisScriptPreviewTemplate,
+            StoryScriptsPreviewViewModel => StoryScriptsPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
             VirtualTexturePreviewViewModel => GtsPreviewTemplate,
