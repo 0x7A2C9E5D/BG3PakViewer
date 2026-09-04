@@ -3,10 +3,18 @@ using Serilog;
 
 namespace BG3PakViewer.Loader;
 
+/// <summary>
+///     PackageLoader
+/// </summary>
 public class PackageLoader
 {
     private readonly PackageReader _packageReader = new();
-
+    
+    /// <summary>
+    ///     Loads a package from a file.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public async Task<Package?> LoadAsync(string path)
     {
         try

@@ -35,9 +35,14 @@ public sealed class VirtualTextureLoader : IDisposable
 
     private VirtualTileSet TileSet { get; }
 
+    /// <summary>
+    ///     The number of layers in the virtual texture.
+    /// </summary>
     public int LayerCount => TileSet.TileSetLayers.Length;
 
-    /// <summary>title page file names referenced by the title set, ordered by PageFileIndex.</summary>
+    /// <summary>
+    ///     The names of the textures in the virtual texture.
+    /// </summary>
     public IReadOnlyList<string> TextureNames { get; }
 
     public void Dispose()
@@ -46,6 +51,10 @@ public sealed class VirtualTextureLoader : IDisposable
         TileSet.Dispose();
     }
 
+    /// <summary>
+    ///     Gets the metadata for all textures in the virtual texture.
+    /// </summary>
+    /// <returns></returns>
     public List<FourCCTextureMeta> GetTextures()
     {
         return TileSet.FourCCMetadata.ExtractTextureMetadata();
@@ -76,6 +85,15 @@ public sealed class VirtualTextureLoader : IDisposable
         }
     }
 
+    /// <summary>
+    ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into <paramref name="output" />,
+    /// </summary>
+    /// <param name="layer"></param>
+    /// <param name="tex"></param>
+    /// <param name="output"></param>
+    /// <param name="progress"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
@@ -93,6 +111,18 @@ public sealed class VirtualTextureLoader : IDisposable
         return false;
     }
 
+    /// <summary>
+    ///     Extracts a region of a layer into a DDS stream.
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="layer"></param>
+    /// <param name="minX"></param>
+    /// <param name="minY"></param>
+    /// <param name="maxX"></param>
+    /// <param name="maxY"></param>
+    /// <param name="output"></param>
+    /// <param name="progress"></param>
+    /// <param name="ct"></param>
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
@@ -107,6 +137,11 @@ public sealed class VirtualTextureLoader : IDisposable
         }
     }
 
+    /// <summary>
+    ///     Creates a progress reporter for tile extraction.
+    /// </summary>
+    /// <param name="progress"></param>
+    /// <returns></returns>
     private static Progress<(int Done, int Total)>? CreateTileProgress(IProgress<double>? progress)
     {
         if (progress is null) return null;

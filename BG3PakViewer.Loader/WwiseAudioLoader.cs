@@ -4,8 +4,16 @@ using Ww2Ogg.Core;
 
 namespace BG3PakViewer.Loader;
 
+/// <summary>
+///     WwiseAudioLoader
+/// </summary>
 public static class WwiseAudioLoader
 {
+    /// <summary>
+    ///     Exports a Wwise audio file to a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
     private static async Task<Stream> ExportAsync(Stream stream)
     {
         var ms = new MemoryStream();
@@ -16,6 +24,12 @@ public static class WwiseAudioLoader
         return ms;
     }
 
+    /// <summary>
+    ///     Exports a Wwise audio file to a file.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task<bool> ExportAsync(Stream stream, string path)
     {
         try

@@ -4,8 +4,16 @@ using Serilog;
 
 namespace BG3PakViewer.Loader;
 
+/// <summary>
+///     LocalizationLoader
+/// </summary>
 public static class LocalizationLoader
 {
+    /// <summary>
+    ///     Loads a localization resource from a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
     public static async Task<LocaResource?> LoadAsync(Stream stream)
     {
         try
@@ -20,6 +28,12 @@ public static class LocalizationLoader
         }
     }
 
+    /// <summary>
+    ///     Exports a localization resource to a file.
+    /// </summary>
+    /// <param name="resource"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task<bool> ExportAsync(LocaResource resource, string path)
     {
         try

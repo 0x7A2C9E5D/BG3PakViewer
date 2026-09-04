@@ -6,8 +6,16 @@ using Serilog;
 
 namespace BG3PakViewer.Loader;
 
+/// <summary>
+///     Model3DLoader
+/// </summary>
 public static class Model3DLoader
 {
+    /// <summary>
+    ///     Loads a model from a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
     public static async Task<Root?> LoadAsync(Stream stream)
     {
         try
@@ -28,6 +36,13 @@ public static class Model3DLoader
         }
     }
 
+    /// <summary>
+    ///     Exports a model to a file.
+    /// </summary>
+    /// <param name="root"></param>
+    /// <param name="path"></param>
+    /// <param name="format"></param>
+    /// <returns></returns>
     private static async Task<bool> ExportAsync(Root root, string path, ExportFormat format)
     {
         try
@@ -58,12 +73,23 @@ public static class Model3DLoader
         }
     }
 
+    /// <summary>
+    ///     Exports a model to a file.
+    /// </summary>
+    /// <param name="root"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task<bool> ExportAsync(Root root, string path)
     {
         var format = GetExportFormatFromExtension(path);
         return await ExportAsync(root, path, format);
     }
 
+    /// <summary>
+    ///     Gets the export format from the file extension.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
     private static ExportFormat GetExportFormatFromExtension(string path)
     {
         var extension = Path.GetExtension(path).ToLowerInvariant();

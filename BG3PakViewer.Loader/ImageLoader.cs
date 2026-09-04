@@ -9,8 +9,18 @@ using ImageFormat = Pfim.ImageFormat;
 
 namespace BG3PakViewer.Loader;
 
+/// <summary>
+///     ImageLoader
+/// </summary>
 public static class ImageLoader
 {
+    /// <summary>
+    ///     Loads an image from a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="extension"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
     public static async Task<Image?> LoadAsync(Stream stream, string extension)
     {
         if (FileExtensions.IsTextureFormat(extension))
@@ -19,13 +29,24 @@ public static class ImageLoader
             return await LoadStandardImageAsync(stream, extension);
         throw new NotSupportedException($"Unsupported image format: {extension}");
     }
-
-    /// <summary>Decodes a DDS stream (e.g. produced by a virtual texture extractor) into an image.</summary>
+    
+    /// <summary>
+    ///     Decodes a DDS image from a stream.
+    /// </summary>
+    /// <param name="ddsStream"></param>
+    /// <returns></returns>
     public static async Task<Image?> DecodeDdsAsync(Stream ddsStream)
     {
         return await LoadAsync(ddsStream, ".dds");
     }
 
+    /// <summary>
+    ///     Exports an image to a file.
+    /// </summary>
+    /// <param name="images"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
     public static async Task<bool> ExportAsync(Image images, string path)
     {
         if (!FileExtensions.IsBitmapImage(Path.GetExtension(path)))
@@ -33,6 +54,12 @@ public static class ImageLoader
         return await ExportStandardImageAsync(images, path);
     }
 
+    /// <summary>
+    ///     Loads a standard image from a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="extension"></param>
+    /// <returns></returns>
     private static async Task<Image?> LoadStandardImageAsync(Stream stream, string extension)
     {
         try
@@ -46,6 +73,12 @@ public static class ImageLoader
         }
     }
 
+    /// <summary>
+    ///     Loads a texture image from a stream.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="extension"></param>
+    /// <returns></returns>
     private static async Task<Image?> LoadTextureImageAsync(Stream stream, string extension)
     {
         try
@@ -61,6 +94,11 @@ public static class ImageLoader
         }
     }
 
+    /// <summary>
+    ///     Removes stride padding from a Pfim image.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static byte[] RemoveStridePadding(IImage image)
     {
         var tightStride = image.Width * image.BitsPerPixel / 8;
@@ -72,6 +110,13 @@ public static class ImageLoader
         return newData;
     }
 
+    /// <summary>
+    ///     Converts a Pfim image to an ImageSharp image.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="pixelData"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
     private static async Task<Image?> ConvertPfimToImageSharp(IImage image, byte[] pixelData)
     {
         return image.Format switch
@@ -99,12 +144,22 @@ public static class ImageLoader
         };
     }
 
+    /// <summary>
+    ///     Sets the alpha bit for R5G5B5 images.
+    /// </summary>
+    /// <param name="pixelData"></param>
     private static void SetR5G5B5AlphaBit(byte[] pixelData)
     {
         for (var i = 1; i < pixelData.Length; i += 2)
             pixelData[i] |= 128;
     }
 
+    /// <summary>
+    ///     Exports an image to a file.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     private static async Task<bool> ExportStandardImageAsync(Image image, string path)
     {
         return await Task.Run(async () =>
