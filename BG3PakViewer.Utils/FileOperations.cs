@@ -2,8 +2,17 @@
 
 namespace BG3PakViewer.Utils;
 
+/// <summary>
+///     FileOperations
+/// </summary>
 public static class FileOperations
 {
+    /// <summary>
+    ///     Saves a stream to a file.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static async Task<bool> SaveStreamToFileAsync(Stream stream, string path)
     {
         try
@@ -20,6 +29,10 @@ public static class FileOperations
         }
     }
 
+    /// <summary>
+    ///     Ensures the directory exists.
+    /// </summary>
+    /// <param name="filePath"></param>
     public static void EnsureDirectoryExists(string filePath)
     {
         var directory = Path.GetDirectoryName(filePath);

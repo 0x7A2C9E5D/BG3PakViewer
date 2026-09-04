@@ -2,8 +2,17 @@
 
 namespace BG3PakViewer.Utils;
 
+/// <summary>
+///     TextOperations
+/// </summary>
 public static class TextOperations
 {
+    /// <summary>
+    ///     Truncates the text to the specified number of lines.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="maxLines"></param>
+    /// <returns></returns>
     public static async Task<string> TruncateToLinesAsync(string text, int maxLines)
     {
         return await Task.Run(() =>

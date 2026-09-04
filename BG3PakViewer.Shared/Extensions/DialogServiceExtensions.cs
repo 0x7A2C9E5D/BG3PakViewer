@@ -11,16 +11,24 @@ namespace BG3PakViewer.Shared.Extensions;
 /// </summary>
 public enum MessageBoxIcon
 {
-    /// <summary>Neutral information.</summary>
+    /// <summary>
+    ///     Information
+    /// </summary>
     Information,
-
-    /// <summary>Something succeeded but the user should notice it.</summary>
+    
+    /// <summary>
+    ///     Success
+    /// </summary>
     Success,
 
-    /// <summary>Something is off, but the flow can continue.</summary>
+    /// <summary>
+    ///     Warning
+    /// </summary>
     Warning,
 
-    /// <summary>An operation failed.</summary>
+    /// <summary>
+    ///     Error
+    /// </summary>
     Error
 }
 
@@ -37,7 +45,14 @@ public static class DialogServiceExtensions
 {
     extension(IDialogService service)
     {
-        /// <summary>Shows a notification that the user acknowledges with a single OK button.</summary>
+        /// <summary>
+        ///    Show a message box
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="content"></param>
+        /// <param name="title"></param>
+        /// <param name="severity"></param>
+        /// <returns></returns>
         public Task MessageBoxNotifyAsync(INotifyPropertyChanged owner,
             string content,
             string title,
@@ -45,8 +60,15 @@ public static class DialogServiceExtensions
         {
             return Task.FromResult(Show(service, owner, content, title, MessageBoxButton.OK, severity));
         }
-
-        /// <summary>Asks the user a yes/no question.</summary>
+        
+        /// <summary>
+        ///     Show a message box with Yes/No buttons
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="content"></param>
+        /// <param name="title"></param>
+        /// <param name="severity"></param>
+        /// <returns></returns>
         public Task<bool> MessageBoxConfirmAsync(INotifyPropertyChanged owner,
             string content,
             string title,
@@ -56,7 +78,18 @@ public static class DialogServiceExtensions
                                    MessageBoxResult.Yes);
         }
     }
-
+    
+    /// <summary>
+    ///     Show a message box
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="owner"></param>
+    /// <param name="content"></param>
+    /// <param name="caption"></param>
+    /// <param name="button"></param>
+    /// <param name="severity"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
     private static MessageBoxResult Show(
         IDialogService service,
         INotifyPropertyChanged owner,
@@ -74,6 +107,11 @@ public static class DialogServiceExtensions
             : MessageBox.Show(ownerWindow, content, caption, button, MapIcon(severity));
     }
 
+    /// <summary>
+    ///     Map the icon to the MessageBoxImage
+    /// </summary>
+    /// <param name="icon"></param>
+    /// <returns></returns>
     private static MessageBoxImage MapIcon(MessageBoxIcon icon)
     {
         return icon switch

@@ -2,6 +2,9 @@
 
 namespace BG3PakViewer.Shared.ViewModels;
 
+/// <summary>
+///     DisposableViewModel
+/// </summary>
 public abstract class DisposableViewModel : ObservableObject, IDisposable
 {
     private bool _disposedValue;

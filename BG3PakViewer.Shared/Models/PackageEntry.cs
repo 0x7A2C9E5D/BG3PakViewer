@@ -4,18 +4,41 @@ using System.Text;
 
 namespace BG3PakViewer.Shared.Models;
 
+/// <summary>
+///     PackageEntry
+/// </summary>
 public class PackageEntry
 {
+    /// <summary>
+    ///     Gets or sets the name.
+    /// </summary>
     public required string Name { get; init; }
 
+    /// <summary>
+    ///     Gets or sets the full path.
+    /// </summary>
     public required string FullPath { get; init; }
 
+    /// <summary>
+    ///     Gets or sets a value indicating whether this <see cref="PackageEntry"/> is folder.
+    /// </summary>
     public bool IsFolder { get; set; }
 
+    /// <summary>
+    ///     Gets or sets the children.
+    /// </summary>
     public ObservableCollection<PackageEntry> Children { get; } = [];
 
+    /// <summary>
+    ///     Gets the file extension.
+    /// </summary>
     public string FileExtension => Path.GetExtension(FullPath).ToLowerInvariant();
 
+    /// <summary>
+    ///     Builds the tree.
+    /// </summary>
+    /// <param name="filePaths"></param>
+    /// <returns></returns>
     public static ObservableCollection<PackageEntry> BuildTree(IEnumerable<string> filePaths)
     {
         var root = new ObservableCollection<PackageEntry>();
