@@ -13,7 +13,7 @@ public class LocalizationPreviewViewModel
     ///     The localization entries.
     /// </summary>
     public ObservableCollection<LocalizationEntryViewModel> Entries { get; } = [];
-    
+
     /// <summary>
     ///     Builds a view model from a localization resource.
     /// </summary>
@@ -43,13 +43,13 @@ public class LocalizationEntryViewModel
     /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Key { get; init; }
-    
+
     /// <summary>
     ///     The localization version.
     /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required ushort Version { get; init; }
-        
+
     /// <summary>
     ///     The localization text.
     /// </summary>

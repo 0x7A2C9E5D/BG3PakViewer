@@ -82,18 +82,21 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     ///     Package tree
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    [ObservableProperty] public partial ObservableCollection<PackageEntry>? PackageTree { get; private set; }
+    [ObservableProperty]
+    public partial ObservableCollection<PackageEntry>? PackageTree { get; private set; }
 
     /// <summary>
     ///     Preview view model
     /// </summary>
-    [ObservableProperty] public partial object? PreviewVm { get; private set; }
+    [ObservableProperty]
+    public partial object? PreviewVm { get; private set; }
 
     /// <summary>
     ///     Is update available
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    [ObservableProperty] public partial bool IsUpdateAvailable { get; private set; }
+    [ObservableProperty]
+    public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
     ///     Is loading
@@ -361,7 +364,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
                 AppSettings.DefaultExportDirectory)
             : null;
     }
-    
+
     /// <summary>
     ///     Preview async
     /// </summary>
@@ -549,7 +552,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         IsExporting = false;
         return true;
     }
-    
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

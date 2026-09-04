@@ -18,7 +18,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     private readonly IAppSettings _appSettings;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel" /> class.
     /// </summary>
     /// <param name="appSettings"></param>
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
@@ -37,7 +37,8 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The currently selected goal.
     /// </summary>
-    [ObservableProperty] public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
+    [ObservableProperty]
+    public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
     ///     Full goal list. Filtering is a view concern: the view applies <c>GoalFilter</c> to this
@@ -48,13 +49,15 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The decompiled scripts.
     /// </summary>
-    [ObservableProperty] public partial string? Scripts { get; private set; }
+    [ObservableProperty]
+    public partial string? Scripts { get; private set; }
 
     /// <summary>
     ///     The current search text.
     /// </summary>
     // ReSharper disable once UnusedMember.Local
-    [ObservableProperty] private partial string? SearchText { get; set; }
+    [ObservableProperty]
+    private partial string? SearchText { get; set; }
 
     /// <summary>
     ///     Predicate the view applies to <see cref="Goals" />; null shows every goal. Rebuilt whenever

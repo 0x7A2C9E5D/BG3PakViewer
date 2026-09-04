@@ -60,7 +60,7 @@ public sealed partial class LogDialogViewModel
                 LogEvents.Add(model);
         }
     }
-    
+
     /// <summary>
     ///     Open log folder.
     /// </summary>

@@ -6,7 +6,7 @@
 public partial class Previewer
 {
     /// <summary>
-    ///  initialize
+    ///     initialize
     /// </summary>
     public Previewer()
     {

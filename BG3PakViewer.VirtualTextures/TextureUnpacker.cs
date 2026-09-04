@@ -37,7 +37,8 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     }
 
     /// <summary>
-    ///     Tries to decompress and return a tile at (<paramref name="level" />, <paramref name="layer" />, <paramref name="x" />, <paramref name="y" />).
+    ///     Tries to decompress and return a tile at (<paramref name="level" />, <paramref name="layer" />,
+    ///     <paramref name="x" />, <paramref name="y" />).
     /// </summary>
     /// <param name="level"></param>
     /// <param name="layer"></param>
@@ -51,7 +52,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
         var pageFile = texturePageCache.Get(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
     }
-    
+
     /// <summary>
     ///     Decompresses a chunk and returns the raw pixel data.
     /// </summary>
@@ -67,7 +68,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
         return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), header.TileWidth,
             header.TileHeight);
     }
-    
+
     /// <summary>
     ///     Decompresses a chunk and returns the raw pixel data.
     /// </summary>
@@ -88,7 +89,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
             _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
         };
     }
-    
+
     /// <summary>
     ///     Decompresses a BC chunk.
     /// </summary>

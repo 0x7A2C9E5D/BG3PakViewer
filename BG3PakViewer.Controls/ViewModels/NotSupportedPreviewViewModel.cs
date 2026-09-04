@@ -11,5 +11,6 @@ public partial class NotSupportedPreviewViewModel : ObservableObject
     ///     The help text to display.
     /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    [ObservableProperty] public partial string? HelpText { get; set; }
+    [ObservableProperty]
+    public partial string? HelpText { get; set; }
 }

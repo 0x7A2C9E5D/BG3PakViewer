@@ -15,7 +15,7 @@ public class LarianResourceNodeViewModel(string name, Node? source)
     ///     The name of the node.
     /// </summary>
     public string Name { get; } = name;
-    
+
     /// <summary>
     ///     The source node, if any.
     /// </summary>
@@ -53,7 +53,7 @@ public class LarianResourceNodeViewModel(string name, Node? source)
             });
         return attributes;
     }
-    
+
     /// <summary>
     ///     Formats the value of an attribute.
     /// </summary>

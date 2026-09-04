@@ -29,7 +29,7 @@ public static class ImageLoader
             return await LoadStandardImageAsync(stream, extension);
         throw new NotSupportedException($"Unsupported image format: {extension}");
     }
-    
+
     /// <summary>
     ///     Decodes a DDS image from a stream.
     /// </summary>

@@ -31,7 +31,7 @@ public static class FileExtensions
     {
         return LarianResourceFormats.Contains(extension.ToLowerInvariant());
     }
-    
+
     /// <summary>
     ///     Determines whether the specified extension is a plain text.
     /// </summary>
@@ -41,7 +41,7 @@ public static class FileExtensions
     {
         return PlainTextFormats.Contains(extension.ToLowerInvariant());
     }
-    
+
     /// <summary>
     ///     Determines whether the specified extension is a localization.
     /// </summary>

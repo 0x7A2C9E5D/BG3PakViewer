@@ -20,7 +20,7 @@ public class PackageEntry
     public required string FullPath { get; init; }
 
     /// <summary>
-    ///     Gets or sets a value indicating whether this <see cref="PackageEntry"/> is folder.
+    ///     Gets or sets a value indicating whether this <see cref="PackageEntry" /> is folder.
     /// </summary>
     public bool IsFolder { get; set; }
 

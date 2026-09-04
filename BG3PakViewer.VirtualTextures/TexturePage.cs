@@ -13,7 +13,7 @@ public sealed class TexturePage : IDisposable
     private readonly BinaryReader _reader;
     private readonly Stream _stream;
     private readonly VirtualTileSet _tileSet;
-    
+
     /// <summary>
     ///     Constructs a new TexturePage from a stream.
     /// </summary>

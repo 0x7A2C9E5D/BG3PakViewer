@@ -17,13 +17,15 @@ public partial class Model3DPreviewViewModel : ObservableObject
     ///     The model to preview.
     /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    [ObservableProperty] public partial Root? Model { get; set; }
+    [ObservableProperty]
+    public partial Root? Model { get; set; }
 
     /// <summary>
     ///     The list of meshes in the model.
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    [ObservableProperty] public partial string[]? Meshes { get; private set; }
+    [ObservableProperty]
+    public partial string[]? Meshes { get; private set; }
 
     /// <summary>
     ///     The index of the currently selected mesh.
@@ -36,7 +38,8 @@ public partial class Model3DPreviewViewModel : ObservableObject
     /// <summary>
     ///     The 3D models to display in the viewport.
     /// </summary>
-    [ObservableProperty] public partial ObservableElement3DCollection Models { get; set; } = [];
+    [ObservableProperty]
+    public partial ObservableElement3DCollection Models { get; set; } = [];
 
     /// <summary>
     ///     Resets the view model when the model is changed.

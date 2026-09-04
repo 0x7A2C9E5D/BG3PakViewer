@@ -12,7 +12,7 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
     ///     Effective tile width after trimming the border.
     /// </summary>
     public int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
-    
+
     /// <summary>
     ///     Effective tile height after trimming the border.
     /// </summary>
@@ -85,7 +85,7 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         return (DivideCeiling(x, lv), DivideCeiling(y, lv),
             DivideCeiling(x + width, lv) - 1, DivideCeiling(y + height, lv) - 1);
     }
-    
+
     /// <summary>
     ///     Divides a value by a divisor and rounds up.
     /// </summary>
@@ -110,7 +110,7 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         if (maxX > levelWidth - 1) maxX = levelWidth - 1;
         if (maxY > levelHeight - 1) maxY = levelHeight - 1;
     }
-    
+
     /// <summary>
     ///     Checks if a region exists in a given layer.
     /// </summary>

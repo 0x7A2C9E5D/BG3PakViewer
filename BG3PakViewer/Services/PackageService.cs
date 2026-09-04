@@ -120,7 +120,7 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
 
         _disposedValue = true;
     }
-    
+
     ~PackageService()
     {
         Dispose(false);

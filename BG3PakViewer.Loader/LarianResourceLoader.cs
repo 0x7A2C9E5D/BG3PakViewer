@@ -34,7 +34,7 @@ public static class LarianResourceLoader
         return await Task.Run(() =>
             ResourceUtils.LoadResource(stream, format, ResourceLoadParameters.FromGameVersion(Game.BaldursGate3)));
     }
-    
+
     /// <summary>
     ///     Exports a resource to a string.
     /// </summary>

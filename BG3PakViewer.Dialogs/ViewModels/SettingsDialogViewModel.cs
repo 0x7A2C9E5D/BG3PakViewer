@@ -61,7 +61,7 @@ public partial class SettingsDialogViewModel(
     {
         Settings.DefaultOpenDirectory = string.Empty;
     }
-    
+
     /// <summary>
     ///     Reset default export directory.
     /// </summary>

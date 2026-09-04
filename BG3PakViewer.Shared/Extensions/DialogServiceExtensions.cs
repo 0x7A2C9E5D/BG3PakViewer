@@ -15,7 +15,7 @@ public enum MessageBoxIcon
     ///     Information
     /// </summary>
     Information,
-    
+
     /// <summary>
     ///     Success
     /// </summary>
@@ -46,7 +46,7 @@ public static class DialogServiceExtensions
     extension(IDialogService service)
     {
         /// <summary>
-        ///    Show a message box
+        ///     Show a message box
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="content"></param>
@@ -60,7 +60,7 @@ public static class DialogServiceExtensions
         {
             return Task.FromResult(Show(service, owner, content, title, MessageBoxButton.OK, severity));
         }
-        
+
         /// <summary>
         ///     Show a message box with Yes/No buttons
         /// </summary>
@@ -78,7 +78,7 @@ public static class DialogServiceExtensions
                                    MessageBoxResult.Yes);
         }
     }
-    
+
     /// <summary>
     ///     Show a message box
     /// </summary>

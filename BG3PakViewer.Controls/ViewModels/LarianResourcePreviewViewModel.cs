@@ -22,7 +22,8 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
     /// <summary>
     ///     The currently selected node, if any.
     /// </summary>
-    [ObservableProperty] public partial LarianResourceNodeViewModel? SelectedNode { get; private set; }
+    [ObservableProperty]
+    public partial LarianResourceNodeViewModel? SelectedNode { get; private set; }
 
     /// <summary>
     ///     Selects a node in the tree.

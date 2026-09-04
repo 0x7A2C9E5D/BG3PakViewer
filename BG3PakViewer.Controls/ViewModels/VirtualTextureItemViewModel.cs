@@ -31,7 +31,8 @@ public partial class VirtualTextureItemViewModel(FourCCTextureMeta meta) : Obser
     /// <summary>
     ///     Whether the name has been copied to the clipboard.
     /// </summary>
-    [ObservableProperty] public partial bool IsCopied { get; set; }
+    [ObservableProperty]
+    public partial bool IsCopied { get; set; }
 
     private static IClipboardService ClipboardService => Ioc.Default.GetRequiredService<IClipboardService>();
 

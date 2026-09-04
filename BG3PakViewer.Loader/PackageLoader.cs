@@ -9,7 +9,7 @@ namespace BG3PakViewer.Loader;
 public class PackageLoader
 {
     private readonly PackageReader _packageReader = new();
-    
+
     /// <summary>
     ///     Loads a package from a file.
     /// </summary>

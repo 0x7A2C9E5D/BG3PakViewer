@@ -204,7 +204,7 @@ public sealed partial class App : IDisposable
             Log.Error(ex, "Unobserved task exception: {ExceptionMessage}", ex.Message);
         };
     }
-    
+
     protected override void OnStartup(StartupEventArgs e)
     {
         // Set up logging before anything else: the full pipeline also feeds the in-app log view and

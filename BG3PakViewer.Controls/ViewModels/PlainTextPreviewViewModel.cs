@@ -10,5 +10,6 @@ public partial class PlainTextPreviewViewModel : ObservableObject
     /// <summary>
     ///     The text to display.
     /// </summary>
-    [ObservableProperty] public partial string? Text { get; set; }
+    [ObservableProperty]
+    public partial string? Text { get; set; }
 }

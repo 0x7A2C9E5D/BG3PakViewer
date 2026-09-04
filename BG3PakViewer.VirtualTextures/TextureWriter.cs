@@ -14,7 +14,7 @@ public sealed class TextureWriter : IDisposable
     private readonly BinaryWriter _bw;
     private readonly Action<int, int, int, BC5Image> _stitchRow;
     private readonly BC5Image _strip;
-    
+
     /// <summary>
     ///     Constructs a new TextureWriter.
     /// </summary>
@@ -37,7 +37,7 @@ public sealed class TextureWriter : IDisposable
     {
         _bw.Dispose();
     }
-    
+
     /// <summary>
     ///     Writes a single row of tiles to the output stream.
     /// </summary>
@@ -51,7 +51,7 @@ public sealed class TextureWriter : IDisposable
         _stitchRow(startX, y, cols, _strip);
         _bw.Write(_strip.Data, 0, _strip.Data.Length);
     }
-    
+
     /// <summary>
     ///     Writes a DDS header to the output stream.
     /// </summary>

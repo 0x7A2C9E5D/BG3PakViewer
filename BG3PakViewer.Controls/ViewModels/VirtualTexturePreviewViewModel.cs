@@ -21,7 +21,7 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     private CancellationTokenSource? _cts;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VirtualTexturePreviewViewModel"/> class.
+    ///     Initializes a new instance of the <see cref="VirtualTexturePreviewViewModel" /> class.
     /// </summary>
     /// <param name="loader"></param>
     public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
@@ -51,13 +51,15 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The currently selected texture.
     /// </summary>
-    [ObservableProperty] public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
+    [ObservableProperty]
+    public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
 
     /// <summary>
     ///     The current search text.
     /// </summary>
     // ReSharper disable once UnusedMember.Local
-    [ObservableProperty] private partial string? SearchText { get; set; }
+    [ObservableProperty]
+    private partial string? SearchText { get; set; }
 
     /// <summary>
     ///     Predicate the view applies to <see cref="Textures" />; null shows every texture. Rebuilt
@@ -69,7 +71,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The index of the currently selected layer.
     /// </summary>
-    [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
+    [ObservableProperty]
+    public partial int SelectedLayerIndex { get; set; }
 
     /// <summary>
     ///     The decoded preview image, platform-agnostic (no WPF types). The view converts it for
@@ -81,17 +84,20 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// <summary>
     ///     True if the view model is busy loading a preview.
     /// </summary>
-    [ObservableProperty] public partial bool IsBusy { get; set; }
+    [ObservableProperty]
+    public partial bool IsBusy { get; set; }
 
     /// <summary>
     ///     The status text.
     /// </summary>
-    [ObservableProperty] public partial string? StatusText { get; private set; }
+    [ObservableProperty]
+    public partial string? StatusText { get; private set; }
 
     /// <summary>
     ///     The progress of the current operation, from 0 to 1.
     /// </summary>
-    [ObservableProperty] public partial double Progress { get; set; }
+    [ObservableProperty]
+    public partial double Progress { get; set; }
 
     /// <summary>
     ///     Handles search messages.

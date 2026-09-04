@@ -10,6 +10,7 @@ using Microsoft.Xaml.Behaviors;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace BG3PakViewer.Behaviors;
+
 /// <summary>
 ///     MainWindow behavior
 /// </summary>

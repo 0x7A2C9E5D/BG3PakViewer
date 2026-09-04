@@ -4,7 +4,7 @@
 ///     Shell open service
 /// </summary>
 public interface IShellOpenService
-{ 
+{
     /// <summary>
     ///     Open file
     /// </summary>
