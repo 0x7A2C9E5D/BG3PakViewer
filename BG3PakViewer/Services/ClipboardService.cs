@@ -4,8 +4,16 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Clipboard service
+/// </summary>
 internal class ClipboardService : IClipboardService
 {
+    /// <summary>
+    ///     Try set text
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
     public bool TrySetText(string text)
     {
         try

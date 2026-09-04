@@ -23,6 +23,9 @@ using Serilog;
 
 namespace BG3PakViewer.ViewModels;
 
+/// <summary>
+///     Main window view model
+/// </summary>
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 {
     private readonly IDialogService _dialogService;
@@ -36,6 +39,17 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isLoading;
 
+    /// <summary>
+    ///     Main window view model
+    /// </summary>
+    /// <param name="dialogService"></param>
+    /// <param name="shellOpenService"></param>
+    /// <param name="exportService"></param>
+    /// <param name="logAccessService"></param>
+    /// <param name="packageService"></param>
+    /// <param name="previewService"></param>
+    /// <param name="recentFilesService"></param>
+    /// <param name="settingsManagerService"></param>
     public MainWindowViewModel(
         IDialogService dialogService,
         IShellOpenService shellOpenService,
@@ -59,21 +73,41 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
     private IAppSettings AppSettings => _settingsManagerService.CurrentSettings;
 
+    /// <summary>
+    ///     Is exporting
+    /// </summary>
     public bool IsExporting { get; private set; }
 
+    /// <summary>
+    ///     Package tree
+    /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty] public partial ObservableCollection<PackageEntry>? PackageTree { get; private set; }
 
+    /// <summary>
+    ///     Preview view model
+    /// </summary>
     [ObservableProperty] public partial object? PreviewVm { get; private set; }
 
+    /// <summary>
+    ///     Is update available
+    /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty] public partial bool IsUpdateAvailable { get; private set; }
 
+    /// <summary>
+    ///     Is loading
+    /// </summary>
+    /// <param name="dropInfo"></param>
     void IDropTarget.DragOver(IDropInfo dropInfo)
     {
         dropInfo.Effects = DragDropEffects.Copy;
     }
 
+    /// <summary>
+    ///     Drop
+    /// </summary>
+    /// <param name="dropInfo"></param>
     async void IDropTarget.Drop(IDropInfo dropInfo)
     {
         try
@@ -126,6 +160,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         Log.Information("Search query cleared.");
     }
 
+    /// <summary>
+    ///     Get default open location
+    /// </summary>
+    /// <returns></returns>
     private DesktopDialogStorageFolder? GetDefaultOpenLocation()
     {
         return !string.IsNullOrWhiteSpace(AppSettings.DefaultOpenDirectory)
@@ -133,6 +171,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             : null;
     }
 
+    /// <summary>
+    ///     Open pak async
+    /// </summary>
     [RelayCommand]
     private async Task OpenPakAsync()
     {
@@ -149,6 +190,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             Log.Information("PAK file selection was cancelled.");
     }
 
+    /// <summary>
+    ///     Validate and open package async
+    /// </summary>
+    /// <param name="path"></param>
     private async Task ValidateAndOpenPackageAsync(string path)
     {
         if (!(await HandleIsExportingFiles()
@@ -156,6 +201,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         await OpenPackageAsync(path);
     }
 
+    /// <summary>
+    ///     Open package async
+    /// </summary>
+    /// <param name="path"></param>
     private async Task OpenPackageAsync(string path)
     {
         _isLoading = true;
@@ -174,6 +223,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         _isLoading = false;
     }
 
+    /// <summary>
+    ///     Cleanup current package async
+    /// </summary>
     private async Task CleanupCurrentPackageAsync()
     {
         await DisposePreviewVmAsync();
@@ -182,12 +234,20 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         await _packageService.CleanupAsync();
     }
 
+    /// <summary>
+    ///     Dispose preview vm async
+    /// </summary>
     private async Task DisposePreviewVmAsync()
     {
         if (PreviewVm is IAsyncDisposable disposable)
             await disposable.DisposeAsync();
     }
 
+    /// <summary>
+    ///     Load and build tree async
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
     private async Task<bool> LoadAndBuildTreeAsync(string path)
     {
         var success = await _packageService.LoadPackageAsync(path);
@@ -196,6 +256,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         return true;
     }
 
+    /// <summary>
+    ///     Export async
+    /// </summary>
+    /// <param name="toSave"></param>
     [RelayCommand]
     private async Task ExportAsync(object toSave)
     {
@@ -215,6 +279,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Export file async
+    /// </summary>
+    /// <param name="node"></param>
     private async Task ExportFileAsync(PackageEntry node)
     {
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
@@ -237,6 +305,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         await HandleExportResultAsync(success);
     }
 
+    /// <summary>
+    ///     Export folder async
+    /// </summary>
+    /// <param name="node"></param>
     private async Task ExportFolderAsync(PackageEntry node)
     {
         var storageFolder = await _dialogService.ShowOpenFolderDialogAsync(this, new OpenFolderDialogSettings
@@ -258,7 +330,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             await HandleExportResultAsync(success);
     }
 
-
+    /// <summary>
+    ///     Handle export result async
+    /// </summary>
+    /// <param name="success"></param>
     private async Task HandleExportResultAsync(bool success)
     {
         if (success)
@@ -275,6 +350,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Get default export location
+    /// </summary>
+    /// <returns></returns>
     private DesktopDialogStorageFolder? GetDefaultExportLocation()
     {
         return !string.IsNullOrWhiteSpace(AppSettings.DefaultExportDirectory)
@@ -282,7 +361,11 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
                 AppSettings.DefaultExportDirectory)
             : null;
     }
-
+    
+    /// <summary>
+    ///     Preview async
+    /// </summary>
+    /// <param name="toPreview"></param>
     [RelayCommand]
     private async Task PreviewAsync(object toPreview)
     {
@@ -297,6 +380,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         await ShowPreviewAsync(node);
     }
 
+    /// <summary>
+    ///     Show preview async
+    /// </summary>
+    /// <param name="node"></param>
     private async Task ShowPreviewAsync(PackageEntry node)
     {
         try
@@ -314,12 +401,18 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Clear preview async
+    /// </summary>
     private async Task ClearPreviewAsync()
     {
         await DisposePreviewVmAsync();
         PreviewVm = null;
     }
 
+    /// <summary>
+    ///     Show log dialog
+    /// </summary>
     [RelayCommand]
     private async Task ShowLogDialog()
     {
@@ -334,6 +427,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Show recent dialog
+    /// </summary>
     [RelayCommand]
     private async Task ShowRecentDialog()
     {
@@ -348,6 +444,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Show settings dialog
+    /// </summary>
     [RelayCommand]
     private async Task ShowSettingsDialog()
     {
@@ -362,6 +461,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Show about dialog
+    /// </summary>
     [RelayCommand]
     private async Task ShowAbout()
     {
@@ -376,6 +478,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
     }
 
+    /// <summary>
+    ///     Build about data
+    /// </summary>
+    /// <returns></returns>
     private static Dictionary<string, object?> BuildAboutData()
     {
         return new Dictionary<string, object?>
@@ -392,6 +498,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         };
     }
 
+    /// <summary>
+    ///     Register file message handlers
+    /// </summary>
     private void RegisterFileMessageHandlers()
     {
         WeakReferenceMessenger.Default.Register<MainWindowViewModel, AsyncRequestMessage<string, bool>, string>(
@@ -410,6 +519,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             });
     }
 
+    /// <summary>
+    ///     Handle reopen file
+    /// </summary>
+    /// <returns></returns>
     private async Task<bool> HandleReOpenFile()
     {
         if (_isLoading)
@@ -423,6 +536,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         return await _dialogService.MessageBoxConfirmAsync(this, Strings.ReOpenFileMessage, Strings.ReOpenFileCaption);
     }
 
+    /// <summary>
+    ///     Handle is exporting files
+    /// </summary>
+    /// <returns></returns>
     private async Task<bool> HandleIsExportingFiles()
     {
         if (!IsExporting) return true;
@@ -432,7 +549,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         IsExporting = false;
         return true;
     }
-
+    
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
@@ -442,6 +559,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             disposable.Dispose();
     }
 
+    /// <summary>
+    ///     Open nexus mods
+    /// </summary>
     [RelayCommand]
     private void OpenNexusMods()
     {
@@ -449,6 +569,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         Log.Information("NexusMods opened.");
     }
 
+    /// <summary>
+    ///     Window loaded async
+    /// </summary>
     [RelayCommand]
     private async Task WindowLoadedAsync()
     {

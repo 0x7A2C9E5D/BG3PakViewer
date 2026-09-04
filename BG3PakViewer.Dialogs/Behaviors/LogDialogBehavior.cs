@@ -5,6 +5,9 @@ using Microsoft.Xaml.Behaviors;
 
 namespace BG3PakViewer.Dialogs.Behaviors;
 
+/// <summary>
+///     Behavior for the log dialog.
+/// </summary>
 internal class LogDialogBehavior : Behavior<LogDialog>
 {
     protected override void OnAttached()
@@ -19,16 +22,29 @@ internal class LogDialogBehavior : Behavior<LogDialog>
         AssociatedObject.SizeChanged -= AssociatedObjectOnSizeChanged;
     }
 
+    /// <summary>
+    ///     Set the regions for the custom title bar.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
     {
         if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
     }
 
+    /// <summary>
+    ///     Set the regions for the custom title bar.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObjectOnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
     }
 
+    /// <summary>
+    ///     Set the regions for the custom title bar.
+    /// </summary>
     private void SetRegionsForCustomTitleBar()
     {
         AssociatedObject.RightPaddingColumn.Width =

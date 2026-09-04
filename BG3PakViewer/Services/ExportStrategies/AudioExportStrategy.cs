@@ -54,7 +54,7 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
             _ => false
         };
     }
-    
+
     /// <summary>
     ///     Get operation
     /// </summary>
@@ -66,7 +66,7 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
         if (FileExtensions.IsVorbisAudio(sourceExtension))
             return FileExtensions.IsVorbisAudio(targetExtension)
                 ? ExportOperation.RawCopy
-                : ExportOperation.Forbidden; 
+                : ExportOperation.Forbidden;
         if (FileExtensions.IsWwiseAudio(targetExtension))
             return ExportOperation.RawCopy;
         return FileExtensions.IsVorbisAudio(targetExtension)

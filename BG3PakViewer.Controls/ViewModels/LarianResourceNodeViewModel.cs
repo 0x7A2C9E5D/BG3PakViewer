@@ -11,8 +11,14 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public class LarianResourceNodeViewModel(string name, Node? source)
 {
+    /// <summary>
+    ///     The name of the node.
+    /// </summary>
     public string Name { get; } = name;
-
+    
+    /// <summary>
+    ///     The source node, if any.
+    /// </summary>
     public ObservableCollection<LarianResourceNodeViewModel> Children { get; } = [];
 
     /// <summary>
@@ -31,6 +37,10 @@ public class LarianResourceNodeViewModel(string name, Node? source)
         return this;
     }
 
+    /// <summary>
+    ///     Builds the attributes for this node.
+    /// </summary>
+    /// <returns></returns>
     private ObservableCollection<LarianAttributeViewModel> BuildAttributes()
     {
         var attributes = new ObservableCollection<LarianAttributeViewModel>();
@@ -43,7 +53,12 @@ public class LarianResourceNodeViewModel(string name, Node? source)
             });
         return attributes;
     }
-
+    
+    /// <summary>
+    ///     Formats the value of an attribute.
+    /// </summary>
+    /// <param name="attribute"></param>
+    /// <returns></returns>
     private static string FormatAttributeValue(NodeAttribute attribute)
     {
         try
@@ -62,9 +77,18 @@ public class LarianResourceNodeViewModel(string name, Node? source)
 /// </summary>
 public class LarianAttributeViewModel
 {
+    /// <summary>
+    ///     The attribute key.
+    /// </summary>
     public required string Key { get; init; }
 
+    /// <summary>
+    ///     The attribute value.
+    /// </summary>
     public required string Value { get; init; }
 
+    /// <summary>
+    ///     The display text for the attribute.
+    /// </summary>
     public string DisplayText => $"{Key}: {Value}";
 }

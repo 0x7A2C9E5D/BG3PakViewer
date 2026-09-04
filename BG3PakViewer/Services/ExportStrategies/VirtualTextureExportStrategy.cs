@@ -8,13 +8,26 @@ using Serilog;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
+/// <summary>
+///     Virtual texture export strategy
+/// </summary>
+/// <param name="packageService"></param>
 internal class VirtualTextureExportStrategy(IPackageService packageService) : IExportStrategy
 {
+    /// <summary>
+    ///     File filters
+    /// </summary>
     public FileFilter[] Filters =>
     [
         new(Strings.VirtualTextureFile, ".gts")
     ];
 
+    /// <summary>
+    ///     Export async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
@@ -25,6 +38,11 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
         return true;
     }
 
+    /// <summary>
+    ///     Export virtual texture pages async
+    /// </summary>
+    /// <param name="sourcePath"></param>
+    /// <param name="targetPath"></param>
     private async Task ExportVirtualTexturePagesAsync(string sourcePath, string targetPath)
     {
         using var tileSet = new VirtualTileSet(targetPath);

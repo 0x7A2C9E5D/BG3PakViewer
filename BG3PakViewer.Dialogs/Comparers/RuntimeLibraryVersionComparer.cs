@@ -4,8 +4,17 @@ using Syncfusion.Data;
 
 namespace BG3PakViewer.Dialogs.Comparers;
 
+/// <summary>
+///     Comparer for runtime library versions.
+/// </summary>
 internal class RuntimeLibraryVersionComparer : IComparer<object>, ISortDirection
 {
+    /// <summary>
+    ///     Compare two runtime library versions.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public int Compare(object? x, object? y)
     {
         var versionStringX = ((RuntimeLibrary)x!).Version;
@@ -28,5 +37,8 @@ internal class RuntimeLibraryVersionComparer : IComparer<object>, ISortDirection
         }
     }
 
+    /// <summary>
+    ///     The sort direction.
+    /// </summary>
     public ListSortDirection SortDirection { get; set; }
 }

@@ -4,8 +4,17 @@ using LSLib.Granny.Model;
 
 namespace BG3PakViewer.Extensions;
 
+/// <summary>
+///     MeshGeometryExtensions
+/// </summary>
 public static class MeshGeometryExtensions
 {
+    /// <summary>
+    ///     Convert root to geometry 3d.
+    /// </summary>
+    /// <param name="root"></param>
+    /// <param name="number"></param>
+    /// <returns></returns>
     public static MeshGeometry3D ToGeometry3D(this Root root, int number)
     {
         var mesh = root.Meshes[number];

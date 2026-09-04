@@ -1,6 +1,13 @@
 ﻿namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Check update service
+/// </summary>
 internal interface ICheckUpdateService
 {
-    public Task<bool> CheckUpdate();
+    /// <summary>
+    ///     Check update
+    /// </summary>
+    /// <returns></returns>
+    Task<bool> CheckUpdate();
 }

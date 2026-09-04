@@ -42,6 +42,9 @@ public sealed partial class App : IDisposable
         Dispose(true);
     }
 
+    /// <summary>
+    ///     Configure services
+    /// </summary>
     private static void ConfigureServices()
     {
         Ioc.Default.ConfigureServices(new ServiceCollection()
@@ -84,6 +87,10 @@ public sealed partial class App : IDisposable
             .BuildServiceProvider());
     }
 
+    /// <summary>
+    ///     Create view locator
+    /// </summary>
+    /// <returns></returns>
     private static StrongViewLocator CreateViewLocator()
     {
         var viewLocator = new StrongViewLocator();
@@ -94,6 +101,9 @@ public sealed partial class App : IDisposable
         return viewLocator;
     }
 
+    /// <summary>
+    ///     Initialize main window
+    /// </summary>
     private static void InitializeMainWindow()
     {
         var mainWindow = new MainWindow
@@ -103,6 +113,9 @@ public sealed partial class App : IDisposable
         mainWindow.Show();
     }
 
+    /// <summary>
+    ///     Initialize application
+    /// </summary>
     private void InitializeApplication()
     {
         ConfigureServices();
@@ -115,16 +128,25 @@ public sealed partial class App : IDisposable
         InitializeMainWindow();
     }
 
+    /// <summary>
+    ///     Log startup information
+    /// </summary>
     private static void LogStartupInformation()
     {
         Ioc.Default.GetRequiredService<IAppDiagnostics>().LogStartupInfo();
     }
 
+    /// <summary>
+    ///     Initialize settings manager
+    /// </summary>
     private static void InitializeSettingsManager()
     {
         _ = Ioc.Default.GetRequiredService<ISettingsManagerService>();
     }
 
+    /// <summary>
+    ///     Initialize logging
+    /// </summary>
     private void InitializeLogging()
     {
         _logObserver = new AnonymousObserver<LogEvent>(Ioc.Default.GetRequiredService<ILogAccessService>().Logs.Add);
@@ -138,6 +160,9 @@ public sealed partial class App : IDisposable
             .CreateLogger();
     }
 
+    /// <summary>
+    ///     Initialize culture
+    /// </summary>
     private static void InitializeCulture()
     {
         var appSettings = Ioc.Default.GetRequiredService<IAppSettings>();
@@ -149,6 +174,9 @@ public sealed partial class App : IDisposable
         I18NExtension.Culture = cultureInfo;
     }
 
+    /// <summary>
+    ///     Register syncfusion license
+    /// </summary>
     private static void RegisterSyncfusionLicense()
     {
         using var stream = Assembly.GetExecutingAssembly()
@@ -157,6 +185,9 @@ public sealed partial class App : IDisposable
         SyncfusionLicenseProvider.RegisterLicense(reader.ReadToEnd());
     }
 
+    /// <summary>
+    ///     Setup exception handling
+    /// </summary>
     private void SetupExceptionHandling()
     {
         DispatcherUnhandledException += static (_, e) =>
@@ -173,7 +204,7 @@ public sealed partial class App : IDisposable
             Log.Error(ex, "Unobserved task exception: {ExceptionMessage}", ex.Message);
         };
     }
-
+    
     protected override void OnStartup(StartupEventArgs e)
     {
         // Set up logging before anything else: the full pipeline also feeds the in-app log view and
@@ -195,6 +226,9 @@ public sealed partial class App : IDisposable
         InitializeApplication();
     }
 
+    /// <summary>
+    ///     Initialize early logging
+    /// </summary>
     private static void InitializeEarlyLogging()
     {
         Log.Logger = new LoggerConfiguration()

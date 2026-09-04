@@ -14,6 +14,11 @@ public partial class ImagePreviewViewModel : DisposableViewModel
     [ObservableProperty]
     public partial Image? Preview { get; set; }
 
+    /// <summary>
+    ///     Dispose the old preview image when the new one is set.
+    /// </summary>
+    /// <param name="oldValue"></param>
+    /// <param name="newValue"></param>
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();

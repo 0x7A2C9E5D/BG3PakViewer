@@ -4,8 +4,19 @@ using System.Windows.Data;
 
 namespace BG3PakViewer.Dialogs.Converters;
 
+/// <summary>
+///     Converter for string to culture info.
+/// </summary>
 internal class StringToCultureInfoConverter : IValueConverter
 {
+    /// <summary>
+    ///     Convert string to culture info.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="targetType"></param>
+    /// <param name="parameter"></param>
+    /// <param name="culture"></param>
+    /// <returns></returns>
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         try
@@ -19,6 +30,14 @@ internal class StringToCultureInfoConverter : IValueConverter
         }
     }
 
+    /// <summary>
+    ///     Convert culture info to string.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="targetType"></param>
+    /// <param name="parameter"></param>
+    /// <param name="culture"></param>
+    /// <returns></returns>
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return value is CultureInfo ci ? ci.Name : DependencyProperty.UnsetValue;

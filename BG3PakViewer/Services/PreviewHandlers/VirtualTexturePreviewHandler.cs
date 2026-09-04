@@ -6,13 +6,28 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
+/// <summary>
+///     Virtual texture preview handler
+/// </summary>
+/// <param name="packageService"></param>
 internal class VirtualTexturePreviewHandler(IPackageService packageService) : IPreviewHandler
 {
+    /// <summary>
+    ///     Can handle
+    /// </summary>
+    /// <param name="fileExtension"></param>
+    /// <returns></returns>
     public bool CanHandle(string fileExtension)
     {
         return FileExtensions.IsVirtualTexture(fileExtension);
     }
 
+    /// <summary>
+    ///     Create preview view model async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    /// <exception cref="FileNotFoundException"></exception>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
         return await Task.Run(async () =>

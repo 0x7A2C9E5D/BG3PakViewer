@@ -9,8 +9,16 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public class LocalizationPreviewViewModel
 {
+    /// <summary>
+    ///     The localization entries.
+    /// </summary>
     public ObservableCollection<LocalizationEntryViewModel> Entries { get; } = [];
-
+    
+    /// <summary>
+    ///     Builds a view model from a localization resource.
+    /// </summary>
+    /// <param name="resource"></param>
+    /// <returns></returns>
     public static LocalizationPreviewViewModel FromResource(LocaResource resource)
     {
         var viewModel = new LocalizationPreviewViewModel();
@@ -30,12 +38,21 @@ public class LocalizationPreviewViewModel
 /// </summary>
 public class LocalizationEntryViewModel
 {
+    /// <summary>
+    ///     The localization key.
+    /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Key { get; init; }
-
+    
+    /// <summary>
+    ///     The localization version.
+    /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required ushort Version { get; init; }
-
+        
+    /// <summary>
+    ///     The localization text.
+    /// </summary>
     // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public required string Text { get; init; }
 }

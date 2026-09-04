@@ -5,6 +5,9 @@
 /// </summary>
 public partial class Previewer
 {
+    /// <summary>
+    ///  initialize
+    /// </summary>
     public Previewer()
     {
         InitializeComponent();

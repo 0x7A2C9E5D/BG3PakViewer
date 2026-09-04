@@ -6,6 +6,9 @@ using Microsoft.Xaml.Behaviors;
 
 namespace BG3PakViewer.Controls.Behaviors;
 
+/// <summary>
+///     Viewport3DX behavior
+/// </summary>
 internal class Viewport3DxBehavior : Behavior<Viewport3DX>
 {
     protected override void OnAttached()
@@ -21,6 +24,11 @@ internal class Viewport3DxBehavior : Behavior<Viewport3DX>
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
+    /// <summary>
+    ///     Dispose viewport
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
     {
         AssociatedObject.EffectsManager?.Dispose();

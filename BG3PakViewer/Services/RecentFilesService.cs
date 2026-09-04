@@ -5,10 +5,21 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Recent files service
+/// </summary>
+/// <param name="recentItems"></param>
 internal class RecentFilesService(ObservableCollection<IRecentFileEntry> recentItems) : IRecentFilesService
 {
+    /// <summary>
+    ///     Recent items
+    /// </summary>
     public ObservableCollection<IRecentFileEntry> RecentItems => recentItems;
 
+    /// <summary>
+    ///     Add or update recent file
+    /// </summary>
+    /// <param name="filePath"></param>
     public void AddOrUpdateRecentFile(string filePath)
     {
         var existingItem = recentItems.FirstOrDefault(x =>
@@ -26,6 +37,10 @@ internal class RecentFilesService(ObservableCollection<IRecentFileEntry> recentI
         }
     }
 
+    /// <summary>
+    ///     Remove recent file
+    /// </summary>
+    /// <param name="recentFileEntry"></param>
     public void RemoveRecentFile(IRecentFileEntry recentFileEntry)
     {
         if (recentItems.Remove(recentFileEntry))

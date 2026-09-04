@@ -15,9 +15,6 @@ namespace BG3PakViewer.Behaviors;
 /// </summary>
 internal class MainWindowBehavior : Behavior<MainWindow>
 {
-    /// <summary>
-    ///     Attach behaviors
-    /// </summary>
     protected override void OnAttached()
     {
         AssociatedObject.Closed += AssociatedObject_Closed;
@@ -26,9 +23,6 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         AssociatedObject.SizeChanged += AssociatedObjectOnSizeChanged;
     }
 
-    /// <summary>
-    ///     Detach behaviors
-    /// </summary>
     protected override void OnDetaching()
     {
         AssociatedObject.Closed -= AssociatedObject_Closed;

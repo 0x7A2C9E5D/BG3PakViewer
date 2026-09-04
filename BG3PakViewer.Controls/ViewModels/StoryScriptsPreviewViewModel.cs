@@ -10,20 +10,33 @@ using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
+/// <summary>
+///     View model for previewing story scripts.
+/// </summary>
 public partial class StoryScriptsPreviewViewModel : DisposableViewModel
 {
     private readonly IAppSettings _appSettings;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel"/> class.
+    /// </summary>
+    /// <param name="appSettings"></param>
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
         WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
     }
 
+    /// <summary>
+    ///     The story to preview.
+    /// </summary>
     [ObservableProperty]
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public partial Story? Story { get; set; }
 
+    /// <summary>
+    ///     The currently selected goal.
+    /// </summary>
     [ObservableProperty] public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
@@ -32,8 +45,14 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     /// </summary>
     public ObservableCollection<StoryScriptsGoalItemViewModel> Goals { get; } = [];
 
+    /// <summary>
+    ///     The decompiled scripts.
+    /// </summary>
     [ObservableProperty] public partial string? Scripts { get; private set; }
 
+    /// <summary>
+    ///     The current search text.
+    /// </summary>
     // ReSharper disable once UnusedMember.Local
     [ObservableProperty] private partial string? SearchText { get; set; }
 
@@ -44,6 +63,10 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     [ObservableProperty]
     public partial Predicate<object>? GoalFilter { get; private set; }
 
+    /// <summary>
+    ///     Resets the view model when the story is changed.
+    /// </summary>
+    /// <param name="value"></param>
     partial void OnStoryChanged(Story? value)
     {
         Goals.Clear();
@@ -52,11 +75,19 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
             Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
     }
 
+    /// <summary>
+    ///     Handles search messages.
+    /// </summary>
+    /// <param name="message"></param>
     private void OnSearchMessage(SearchMessage message)
     {
         SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
     }
 
+    /// <summary>
+    ///     Rebuilds the filter when the search text changes.
+    /// </summary>
+    /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSearchTextChanged(string? value)
     {
@@ -66,12 +97,19 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
                       goal.Name.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    ///     Decompiles the scripts when the selected goal changes.
+    /// </summary>
+    /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedGoalChanged(StoryScriptsGoalItemViewModel? value)
     {
         _ = DecompileScriptsAsync();
     }
 
+    /// <summary>
+    ///     Decompiles the scripts.
+    /// </summary>
     private async Task DecompileScriptsAsync()
     {
         if (SelectedGoal is null)

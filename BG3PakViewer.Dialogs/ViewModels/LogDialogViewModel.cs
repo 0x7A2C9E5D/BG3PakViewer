@@ -12,6 +12,9 @@ using Serilog.Events;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 
+/// <summary>
+///     LogDialogViewModel
+/// </summary>
 public sealed partial class LogDialogViewModel
     : DisposableViewModel, IModalDialogViewModel
 {
@@ -19,6 +22,11 @@ public sealed partial class LogDialogViewModel
     private readonly IShellOpenService _shellOpenService;
     private readonly ObservableCollection<LogEvent> _sourceLogEvents;
 
+    /// <summary>
+    ///     initialize
+    /// </summary>
+    /// <param name="logAccessService"></param>
+    /// <param name="shellOpenService"></param>
     public LogDialogViewModel(ILogAccessService logAccessService, IShellOpenService shellOpenService)
     {
         _shellOpenService = shellOpenService;
@@ -29,10 +37,19 @@ public sealed partial class LogDialogViewModel
         InitializeExistingLogs();
     }
 
+    /// <summary>
+    ///     Log events.
+    /// </summary>
     public ObservableCollection<LogEventItemModel> LogEvents { get; } = [];
 
+    /// <summary>
+    ///     Dialog result.
+    /// </summary>
     public bool? DialogResult => true;
 
+    /// <summary>
+    ///     Initialize existing logs.
+    /// </summary>
     private void InitializeExistingLogs()
     {
         lock (_logEventsLock)
@@ -43,13 +60,21 @@ public sealed partial class LogDialogViewModel
                 LogEvents.Add(model);
         }
     }
-
+    
+    /// <summary>
+    ///     Open log folder.
+    /// </summary>
     [RelayCommand]
     private void OpenLogFolder()
     {
         _shellOpenService.Open(AppPaths.LogDirectory);
     }
 
+    /// <summary>
+    ///     On source logs collection changed.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnSourceLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e is not { Action: NotifyCollectionChangedAction.Add, NewItems: not null }) return;
@@ -63,6 +88,11 @@ public sealed partial class LogDialogViewModel
             });
     }
 
+    /// <summary>
+    ///     On log events collection changed.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnLogEventsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e is not { Action: NotifyCollectionChangedAction.Remove, OldItems: not null }) return;

@@ -12,15 +12,33 @@ using Serilog;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 
+/// <summary>
+///     RecentDialogViewModel
+/// </summary>
+/// <param name="recentFilesService"></param>
+/// <param name="dialogService"></param>
 public partial class RecentDialogViewModel(IRecentFilesService recentFilesService, IDialogService dialogService)
     : DisposableViewModel, IModalDialogViewModel, ICloseable
 {
+    /// <summary>
+    ///     Recent items.
+    /// </summary>
     public ObservableCollection<IRecentFileEntry> RecentItems => recentFilesService.RecentItems;
 
+    /// <summary>
+    ///     Request close.
+    /// </summary>
     public event EventHandler? RequestClose;
 
+    /// <summary>
+    ///     Dialog result.
+    /// </summary>
     public bool? DialogResult => true;
 
+    /// <summary>
+    ///     Open
+    /// </summary>
+    /// <param name="recentFileEntry"></param>
     [RelayCommand]
     private async Task Open(IRecentFileEntry recentFileEntry)
     {
@@ -30,6 +48,10 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
             HandleExistingFile(recentFileEntry);
     }
 
+    /// <summary>
+    ///     Handle existing file.
+    /// </summary>
+    /// <param name="recentFileEntry"></param>
     private void HandleExistingFile(IRecentFileEntry recentFileEntry)
     {
         RequestClose?.Invoke(this, EventArgs.Empty);
@@ -37,6 +59,10 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
             MessageTokens.RecentFileOpened);
     }
 
+    /// <summary>
+    ///     Handle missing file.
+    /// </summary>
+    /// <param name="recentFileEntry"></param>
     private async Task HandleMissingFile(IRecentFileEntry recentFileEntry)
     {
         LogMissingFile(recentFileEntry.FilePath);
@@ -45,6 +71,10 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
             recentFilesService.RemoveRecentFile(recentFileEntry);
     }
 
+    /// <summary>
+    ///     Log missing file.
+    /// </summary>
+    /// <param name="filePath"></param>
     private static void LogMissingFile(string filePath)
     {
         // The user is asked whether to drop the entry, so this is an expected state, not a failure.

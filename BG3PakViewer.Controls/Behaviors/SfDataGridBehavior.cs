@@ -26,6 +26,10 @@ internal class SfDataGridBehavior : Behavior<SfDataGrid>
         WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
     }
 
+    /// <summary>
+    ///     Handle search message
+    /// </summary>
+    /// <param name="message"></param>
     private void OnSearchMessage(SearchMessage message)
     {
         var text = message.Text;
@@ -40,6 +44,11 @@ internal class SfDataGridBehavior : Behavior<SfDataGrid>
         }
     }
 
+    /// <summary>
+    ///     Dispose search helper
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
     {
         AssociatedObject.SearchHelper.Dispose();

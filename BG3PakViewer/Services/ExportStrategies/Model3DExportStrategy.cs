@@ -7,8 +7,15 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
+/// <summary>
+///     Model 3D export strategy
+/// </summary>
+/// <param name="packageService"></param>
 internal class Model3DExportStrategy(IPackageService packageService) : IExportStrategy
 {
+    /// <summary>
+    ///     File filters
+    /// </summary>
     public FileFilter[] Filters =>
     [
         new(Strings.Granny3DFile, ".gr2"),
@@ -16,6 +23,12 @@ internal class Model3DExportStrategy(IPackageService packageService) : IExportSt
         new(Strings.GLTransmissionFormat, ".gltf")
     ];
 
+    /// <summary>
+    ///     Export async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();

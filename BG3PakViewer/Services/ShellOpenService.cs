@@ -4,8 +4,15 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Shell open service
+/// </summary>
 internal class ShellOpenService : IShellOpenService
 {
+    /// <summary>
+    ///     Open
+    /// </summary>
+    /// <param name="path"></param>
     public void Open(string path)
     {
         try

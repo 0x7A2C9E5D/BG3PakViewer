@@ -5,6 +5,9 @@
 /// </summary>
 public partial class AboutDialog
 {
+    /// <summary>
+    ///     initialize
+    /// </summary>
     public AboutDialog()
     {
         InitializeComponent();

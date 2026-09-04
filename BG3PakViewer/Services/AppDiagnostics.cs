@@ -7,11 +7,19 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Application diagnostics
+/// </summary>
+/// <param name="appSettings"></param>
+/// <param name="cultureResolver"></param>
 internal class AppDiagnostics(
     IAppSettings appSettings,
     ICultureResolver cultureResolver)
     : IAppDiagnostics
 {
+    /// <summary>
+    ///     Log startup info
+    /// </summary>
     public void LogStartupInfo()
     {
         LogApplicationInfo();
@@ -19,6 +27,9 @@ internal class AppDiagnostics(
         LogLocalizationInfo();
     }
 
+    /// <summary>
+    ///     Log application info
+    /// </summary>
     private static void LogApplicationInfo()
     {
         Log.Information("Application started.");
@@ -26,6 +37,9 @@ internal class AppDiagnostics(
         Log.Information("Is Debug: {IsDebug}", !BuildInformation.IsReleaseBuild);
     }
 
+    /// <summary>
+    ///     Log environment info
+    /// </summary>
     private static void LogEnvironmentInfo()
     {
         Log.Information("OS Version: {Version}",
@@ -35,6 +49,9 @@ internal class AppDiagnostics(
         Log.Information("AppData Folder: {Folder}", AppPaths.AppDataDirectory);
     }
 
+    /// <summary>
+    ///     Log localization info
+    /// </summary>
     private void LogLocalizationInfo()
     {
         var supportedCultures = cultureResolver.SupportedCultures;

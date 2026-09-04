@@ -14,16 +14,31 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class LarianResourcePreviewViewModel : ObservableObject
 {
+    /// <summary>
+    ///     The root nodes of the resource tree.
+    /// </summary>
     public ObservableCollection<LarianResourceNodeViewModel> RootNodes { get; } = [];
 
+    /// <summary>
+    ///     The currently selected node, if any.
+    /// </summary>
     [ObservableProperty] public partial LarianResourceNodeViewModel? SelectedNode { get; private set; }
 
+    /// <summary>
+    ///     Selects a node in the tree.
+    /// </summary>
+    /// <param name="node"></param>
     [RelayCommand]
     private void SelectNode(LarianResourceNodeViewModel? node)
     {
         SelectedNode = node;
     }
 
+    /// <summary>
+    ///     Builds a view model from a resource.
+    /// </summary>
+    /// <param name="resource"></param>
+    /// <returns></returns>
     public static LarianResourcePreviewViewModel FromResource(Resource resource)
     {
         var viewModel = new LarianResourcePreviewViewModel();
@@ -45,6 +60,12 @@ public partial class LarianResourcePreviewViewModel : ObservableObject
         return viewModel;
     }
 
+    /// <summary>
+    ///     Builds a view model for a single node.
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="isRegion"></param>
+    /// <returns></returns>
     private static LarianResourceNodeViewModel BuildNode(Node node, bool isRegion)
     {
         var name = isRegion ? ((Region)node).RegionName : node.Name ?? string.Empty;

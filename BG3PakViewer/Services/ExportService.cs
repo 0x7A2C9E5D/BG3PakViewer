@@ -8,6 +8,11 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Export service
+/// </summary>
+/// <param name="packageService"></param>
+/// <param name="strategies"></param>
 internal class ExportService(
     IPackageService packageService,
     IEnumerable<IExportStrategy> strategies)
@@ -16,12 +21,26 @@ internal class ExportService(
     private readonly IExportStrategy _defaultStrategy = new RawFileExportStrategy(packageService);
     private readonly Dictionary<string, IExportStrategy> _exportStrategies = BuildStrategyDictionary(strategies);
 
+    /// <summary>
+    ///     Get export filters
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <param name="fileExtension"></param>
+    /// <returns></returns>
     public FileFilter[] GetExportFilters(string fileName, string fileExtension)
     {
         var strategy = _exportStrategies.TryGetValue(fileExtension, out var s) ? s : _defaultStrategy;
         return strategy.GetExportFilters(fileName, fileExtension);
     }
 
+    /// <summary>
+    ///     Export file async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="targetPath"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
     {
         ArgumentNullException.ThrowIfNull(node);
@@ -53,6 +72,15 @@ internal class ExportService(
         }
     }
 
+    /// <summary>
+    ///     Export folder async
+    /// </summary>
+    /// <param name="folderNode"></param>
+    /// <param name="targetFolder"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentException"></exception>
     public async Task<bool> ExportFolderAsync(PackageEntry folderNode, string targetFolder,
         CancellationToken ct = default)
     {
@@ -98,12 +126,23 @@ internal class ExportService(
         }
     }
 
+    /// <summary>
+    ///     Get folder files
+    /// </summary>
+    /// <param name="folderNode"></param>
+    /// <returns></returns>
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
     {
         return packageService.GetValidFiles()
             .Where(x => x.Name.StartsWith(folderNode.FullPath, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    ///     Export files to folder async
+    /// </summary>
+    /// <param name="files"></param>
+    /// <param name="folderPath"></param>
+    /// <param name="cancellationToken"></param>
     private static async Task ExportFilesToFolderAsync(List<PackagedFileInfo> files, string folderPath,
         CancellationToken cancellationToken)
     {
@@ -116,6 +155,11 @@ internal class ExportService(
             async (file, _) => { await ExportFileToFolderAsync(file, folderPath); });
     }
 
+    /// <summary>
+    ///     Export file to folder async
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="folder"></param>
     private static async Task ExportFileToFolderAsync(PackagedFileInfo file, string folder)
     {
         var targetPath = Path.Combine(folder, file.Name);
@@ -132,6 +176,11 @@ internal class ExportService(
         }
     }
 
+    /// <summary>
+    ///     Build strategy dictionary
+    /// </summary>
+    /// <param name="strategies"></param>
+    /// <returns></returns>
     private static Dictionary<string, IExportStrategy> BuildStrategyDictionary(IEnumerable<IExportStrategy> strategies)
     {
         return strategies

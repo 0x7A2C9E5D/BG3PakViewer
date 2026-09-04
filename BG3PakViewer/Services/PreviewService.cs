@@ -8,6 +8,11 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Preview service
+/// </summary>
+/// <param name="packageService"></param>
+/// <param name="previewHandlers"></param>
 internal class PreviewService(
     IPackageService packageService,
     IEnumerable<IPreviewHandler> previewHandlers)
@@ -16,6 +21,12 @@ internal class PreviewService(
     private readonly List<IPreviewHandler> _previewHandlers = [.. previewHandlers];
     private bool _disposed;
 
+    /// <summary>
+    ///     Create preview view model async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(PreviewService));
@@ -35,6 +46,9 @@ internal class PreviewService(
         return CreateNotSupportedViewModel(Strings.FileNotSupportedPreviewMessage);
     }
 
+    /// <summary>
+    ///     Dispose async
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (!_disposed)
@@ -45,6 +59,11 @@ internal class PreviewService(
         }
     }
 
+    /// <summary>
+    ///     Validate preview request
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
     private NotSupportedPreviewViewModel? ValidatePreviewRequest(PackageEntry node)
     {
         var fileName = Path.GetFileName(node.FullPath);
@@ -60,6 +79,11 @@ internal class PreviewService(
         return CreateNotSupportedViewModel(Strings.LoadResourceFailed);
     }
 
+    /// <summary>
+    ///     Create preview async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
     private async Task<object?> CreatePreviewAsync(PackageEntry node)
     {
         var handler = _previewHandlers.FirstOrDefault(h => h.CanHandle(node.FileExtension));
@@ -87,6 +111,11 @@ internal class PreviewService(
         }
     }
 
+    /// <summary>
+    ///     Create not supported view model
+    /// </summary>
+    /// <param name="helpText"></param>
+    /// <returns></returns>
     private static NotSupportedPreviewViewModel CreateNotSupportedViewModel(string helpText)
     {
         return new NotSupportedPreviewViewModel { HelpText = helpText };

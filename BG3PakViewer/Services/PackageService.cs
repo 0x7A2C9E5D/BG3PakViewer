@@ -6,14 +6,27 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Package service
+/// </summary>
+/// <param name="packageLoader"></param>
 internal sealed class PackageService(PackageLoader packageLoader) : IPackageService
 {
     private bool _disposedValue;
 
     private Package? CurrentPackage { get; set; }
 
+    /// <summary>
+    ///     Is package loaded
+    /// </summary>
     public bool IsLoaded => CurrentPackage != null;
 
+    /// <summary>
+    ///     Load package async
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
     public async Task<bool> LoadPackageAsync(string path)
     {
         ObjectDisposedException.ThrowIf(_disposedValue, nameof(PackageService));
@@ -40,6 +53,11 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
         }
     }
 
+    /// <summary>
+    ///     Build tree
+    /// </summary>
+    /// <param name="searchQuery"></param>
+    /// <returns></returns>
     public ObservableCollection<PackageEntry>? BuildTree(string? searchQuery = null)
     {
         if (CurrentPackage == null)
@@ -51,17 +69,29 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
         return PackageEntry.BuildTree(filePaths);
     }
 
+    /// <summary>
+    ///     Get file by path
+    /// </summary>
+    /// <param name="fullPath"></param>
+    /// <returns></returns>
     public PackagedFileInfo? GetFileByPath(string fullPath)
     {
         return CurrentPackage?.Files.FirstOrDefault(f =>
             f.Name.Equals(fullPath, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    ///     Get valid files
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<PackagedFileInfo> GetValidFiles()
     {
         return CurrentPackage == null ? [] : CurrentPackage.Files.Where(f => !f.IsDeletion());
     }
 
+    /// <summary>
+    ///     Cleanup async
+    /// </summary>
     public async Task CleanupAsync()
     {
         if (CurrentPackage != null)
@@ -90,12 +120,17 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
 
         _disposedValue = true;
     }
-
+    
     ~PackageService()
     {
         Dispose(false);
     }
 
+    /// <summary>
+    ///     Filter files
+    /// </summary>
+    /// <param name="searchQuery"></param>
+    /// <returns></returns>
     private IEnumerable<PackagedFileInfo> FilterFiles(string searchQuery)
     {
         if (CurrentPackage == null || string.IsNullOrWhiteSpace(searchQuery))

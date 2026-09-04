@@ -7,10 +7,18 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Settings manager service
+/// </summary>
 internal class SettingsManagerService : ISettingsManagerService
 {
     private readonly ICultureResolver _cultureResolver;
 
+    /// <summary>
+    ///     Settings manager service
+    /// </summary>
+    /// <param name="appSettings"></param>
+    /// <param name="cultureResolver"></param>
     public SettingsManagerService(IAppSettings appSettings, ICultureResolver cultureResolver)
     {
         CurrentSettings = appSettings;
@@ -19,10 +27,21 @@ internal class SettingsManagerService : ISettingsManagerService
             notifyPropertyChanged.PropertyChanged += OnAppSettingsPropertyChanged;
     }
 
+    /// <summary>
+    ///     Supported cultures
+    /// </summary>
     public IEnumerable<CultureInfo> SupportedCultures => _cultureResolver.SupportedCultures;
 
+    /// <summary>
+    ///     Current settings
+    /// </summary>
     public IAppSettings CurrentSettings { get; }
 
+    /// <summary>
+    ///     On app settings property changed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnAppSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
@@ -33,6 +52,10 @@ internal class SettingsManagerService : ISettingsManagerService
         }
     }
 
+    /// <summary>
+    ///     Apply language change
+    /// </summary>
+    /// <param name="language"></param>
     private static void ApplyLanguageChange(string language)
     {
         try

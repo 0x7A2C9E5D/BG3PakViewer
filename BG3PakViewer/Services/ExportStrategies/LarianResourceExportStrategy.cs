@@ -7,8 +7,15 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
+/// <summary>
+///     Larian resource export strategy
+/// </summary>
+/// <param name="packageService"></param>
 internal class LarianResourceExportStrategy(IPackageService packageService) : IExportStrategy
 {
+    /// <summary>
+    ///     File filters
+    /// </summary>
     public FileFilter[] Filters =>
     [
         new(Strings.LarianResourceFile, ".lsx"),
@@ -19,6 +26,12 @@ internal class LarianResourceExportStrategy(IPackageService packageService) : IE
         new(Strings.LarianResourceFile, ".lsbs")
     ];
 
+    /// <summary>
+    ///     Get export filters
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();

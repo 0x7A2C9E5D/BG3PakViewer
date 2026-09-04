@@ -8,11 +8,19 @@ namespace BG3PakViewer.Views;
 /// </summary>
 public partial class MainWindow
 {
+    /// <summary>
+    ///     Initializes a new instance of the MainWindow class.
+    /// </summary>
     public MainWindow()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    ///     Theme switch button on click
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ThemeSwitchBtn_OnClick(object sender, RoutedEventArgs e)
     {
         ThemeManager.Current.ApplicationTheme =

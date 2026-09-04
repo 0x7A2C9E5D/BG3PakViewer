@@ -8,10 +8,16 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Settings persistence service
+/// </summary>
 internal class SettingsPersistenceService : ISettingsPersistenceService
 {
     private readonly string _filePath;
 
+    /// <summary>
+    ///     JSON serializer options
+    /// </summary>
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         WriteIndented = true,
@@ -23,10 +29,17 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
         }
     };
 
+    /// <summary>
+    ///     Settings persistence service
+    /// </summary>
     public SettingsPersistenceService() : this(AppPaths.ConfigPath)
     {
     }
 
+    /// <summary>
+    ///     Settings persistence service
+    /// </summary>
+    /// <param name="filePath"></param>
     public SettingsPersistenceService(string filePath)
     {
         _filePath = filePath;
@@ -41,6 +54,11 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
         }
     }
 
+    /// <summary>
+    ///     Save settings
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <typeparam name="T"></typeparam>
     public void Save<T>(T settings)
     {
         try
@@ -55,6 +73,11 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
         }
     }
 
+    /// <summary>
+    ///     Load settings
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public T Load<T>() where T : new()
     {
         if (!File.Exists(_filePath))

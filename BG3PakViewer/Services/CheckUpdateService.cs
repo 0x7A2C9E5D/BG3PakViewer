@@ -5,10 +5,20 @@ using ZeroQL.Client;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Check update service
+/// </summary>
 internal class CheckUpdateService : ICheckUpdateService
 {
+    /// <summary>
+    ///     Update url
+    /// </summary>
     private readonly Uri _updateUrl = new("https://api.nexusmods.com/v2/graphql");
 
+    /// <summary>
+    ///     Check update
+    /// </summary>
+    /// <returns></returns>
     public async Task<bool> CheckUpdate()
     {
         try
@@ -29,6 +39,10 @@ internal class CheckUpdateService : ICheckUpdateService
         }
     }
 
+    /// <summary>
+    ///     Get current version
+    /// </summary>
+    /// <returns></returns>
     private static Version GetCurrentVersion()
     {
         Guard.IsTrue(Version.TryParse(ThisAssembly.AssemblyFileVersion,
@@ -37,6 +51,10 @@ internal class CheckUpdateService : ICheckUpdateService
         return currentVersion;
     }
 
+    /// <summary>
+    ///     Fetch latest version
+    /// </summary>
+    /// <returns></returns>
     private async Task<Version> FetchLatestVersion()
     {
         using var httpClient = new HttpClient();

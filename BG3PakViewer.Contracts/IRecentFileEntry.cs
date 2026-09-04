@@ -1,11 +1,23 @@
 ﻿namespace BG3PakViewer.Contracts;
 
+/// <summary>
+///     Recent file entry
+/// </summary>
 public interface IRecentFileEntry
 {
-    public string FilePath { get; }
+    /// <summary>
+    ///     File path
+    /// </summary>
+    string FilePath { get; }
 
+    /// <summary>
+    ///     Opened time
+    /// </summary>
     // ReSharper disable once UnusedMember.Global
-    public DateTime OpenedTime { get; set; }
+    DateTime OpenedTime { get; set; }
 
-    public bool IsMarked { get; set; }
+    /// <summary>
+    ///     Is marked
+    /// </summary>
+    bool IsMarked { get; set; }
 }

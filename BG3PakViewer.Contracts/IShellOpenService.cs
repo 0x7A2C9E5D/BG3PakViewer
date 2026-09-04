@@ -1,6 +1,13 @@
 ﻿namespace BG3PakViewer.Contracts;
 
+/// <summary>
+///     Shell open service
+/// </summary>
 public interface IShellOpenService
-{
-    public void Open(string path);
+{ 
+    /// <summary>
+    ///     Open file
+    /// </summary>
+    /// <param name="path"></param>
+    void Open(string path);
 }

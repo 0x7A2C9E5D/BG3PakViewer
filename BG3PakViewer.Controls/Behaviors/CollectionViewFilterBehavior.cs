@@ -19,7 +19,9 @@ internal class CollectionViewFilterBehavior : Behavior<ItemsControl>
         nameof(Filter), typeof(Predicate<object>), typeof(CollectionViewFilterBehavior),
         new PropertyMetadata(OnFilterChanged));
 
-    /// <summary>Predicate applied to the underlying collection view; null shows every item.</summary>
+    /// <summary>
+    ///     The filter to apply to the collection view.
+    /// </summary>
     public Predicate<object>? Filter
     {
         get => (Predicate<object>?)GetValue(FilterProperty);
@@ -42,18 +44,31 @@ internal class CollectionViewFilterBehavior : Behavior<ItemsControl>
         view.Refresh();
     }
 
+    /// <summary>
+    ///     Applies the filter to the collection view.
+    /// </summary>
+    /// <param name="d"></param>
+    /// <param name="e"></param>
     private static void OnFilterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var behavior = (CollectionViewFilterBehavior)d;
         if (behavior.AssociatedObject is { IsLoaded: true }) behavior.ApplyFilter();
     }
 
+    /// <summary>
+    ///     Applies the filter to the collection view.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnAssociatedObjectLoaded(object sender, RoutedEventArgs e)
     {
         AssociatedObject.Loaded -= OnAssociatedObjectLoaded;
         ApplyFilter();
     }
 
+    /// <summary>
+    ///     Applies the filter to the collection view.
+    /// </summary>
     private void ApplyFilter()
     {
         if (GetView() is not { } view) return;

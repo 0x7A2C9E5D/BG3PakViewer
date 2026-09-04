@@ -8,6 +8,10 @@ using Serilog;
 
 namespace BG3PakViewer.Services;
 
+/// <summary>
+///     Single instance manager
+/// </summary>
+/// <param name="isDebug"></param>
 internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
 {
     private readonly string _mutexName = isDebug ? "BG3PakViewer_Debug" : "BG3PakViewer";
@@ -20,6 +24,11 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Is another instance running
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ObjectDisposedException"></exception>
     public bool IsAnotherInstanceRunning()
     {
         ObjectDisposedException.ThrowIf(_disposedValue, this);
@@ -30,6 +39,10 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         return true;
     }
 
+    /// <summary>
+    ///     Activate existing instance
+    /// </summary>
+    /// <exception cref="ObjectDisposedException"></exception>
     public void ActivateExistingInstance()
     {
         ObjectDisposedException.ThrowIf(_disposedValue, this);
@@ -44,6 +57,10 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         ActivateExistingInstanceWindow(mainWindowHandle);
     }
 
+    /// <summary>
+    ///     Find existing process instance
+    /// </summary>
+    /// <returns></returns>
     private static Process? FindExistingProcessInstance()
     {
         using var currentProcess = Process.GetCurrentProcess();
@@ -51,6 +68,10 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         return processes.FirstOrDefault(p => p.Id != currentProcess.Id);
     }
 
+    /// <summary>
+    ///     Activate existing instance window
+    /// </summary>
+    /// <param name="mainWindowHandle"></param>
     private static void ActivateExistingInstanceWindow(HWND mainWindowHandle)
     {
         var placement = new WINDOWPLACEMENT();

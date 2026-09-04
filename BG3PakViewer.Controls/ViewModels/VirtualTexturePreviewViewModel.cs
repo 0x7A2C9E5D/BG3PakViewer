@@ -20,6 +20,10 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="VirtualTexturePreviewViewModel"/> class.
+    /// </summary>
+    /// <param name="loader"></param>
     public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
     {
         _loader = loader;
@@ -39,10 +43,19 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// </summary>
     public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
 
+    /// <summary>
+    ///     The list of layers.
+    /// </summary>
     public IReadOnlyList<string> Layers { get; }
 
+    /// <summary>
+    ///     The currently selected texture.
+    /// </summary>
     [ObservableProperty] public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
 
+    /// <summary>
+    ///     The current search text.
+    /// </summary>
     // ReSharper disable once UnusedMember.Local
     [ObservableProperty] private partial string? SearchText { get; set; }
 
@@ -53,6 +66,9 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     [ObservableProperty]
     public partial Predicate<object>? TextureFilter { get; private set; }
 
+    /// <summary>
+    ///     The index of the currently selected layer.
+    /// </summary>
     [ObservableProperty] public partial int SelectedLayerIndex { get; set; }
 
     /// <summary>
@@ -62,17 +78,34 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     [ObservableProperty]
     public partial Image? Preview { get; private set; }
 
+    /// <summary>
+    ///     True if the view model is busy loading a preview.
+    /// </summary>
     [ObservableProperty] public partial bool IsBusy { get; set; }
 
+    /// <summary>
+    ///     The status text.
+    /// </summary>
     [ObservableProperty] public partial string? StatusText { get; private set; }
 
+    /// <summary>
+    ///     The progress of the current operation, from 0 to 1.
+    /// </summary>
     [ObservableProperty] public partial double Progress { get; set; }
 
+    /// <summary>
+    ///     Handles search messages.
+    /// </summary>
+    /// <param name="message"></param>
     private void OnSearchMessage(SearchMessage message)
     {
         SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
     }
 
+    /// <summary>
+    ///     Rebuilds the texture filter when the search text changes.
+    /// </summary>
+    /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSearchTextChanged(string? value)
     {
@@ -82,18 +115,29 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
                       texture.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    ///     Loads the preview when the selected texture or layer changes.
+    /// </summary>
+    /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedTextureChanged(VirtualTextureItemViewModel? value)
     {
         _ = LoadPreviewAsync();
     }
 
+    /// <summary>
+    ///     Loads the preview when the selected layer changes.
+    /// </summary>
+    /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedLayerIndexChanged(int value)
     {
         _ = LoadPreviewAsync();
     }
 
+    /// <summary>
+    ///     Loads the preview.
+    /// </summary>
     private async Task LoadPreviewAsync()
     {
         var cts = await BeginLoadAsync();
@@ -120,6 +164,12 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         }
     }
 
+    /// <summary>
+    ///     Loads the preview core.
+    /// </summary>
+    /// <param name="meta"></param>
+    /// <param name="layer"></param>
+    /// <param name="cts"></param>
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
         await using var ddsStream = await _loader.ExtractAsync(meta, layer,
@@ -143,12 +193,19 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         ShowPreview(image);
     }
 
+    /// <summary>
+    ///     Shows no data.
+    /// </summary>
     private void ShowNoData()
     {
         Preview = null;
         StatusText = Strings.TitleNoDataForLayer;
     }
 
+    /// <summary>
+    ///     Begins a load operation.
+    /// </summary>
+    /// <returns></returns>
     private async Task<CancellationTokenSource> BeginLoadAsync()
     {
         if (_cts is not null)
@@ -162,6 +219,10 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         return cts;
     }
 
+    /// <summary>
+    ///     Shows the preview.
+    /// </summary>
+    /// <param name="image"></param>
     private void ShowPreview(Image? image)
     {
         Preview = image;
@@ -170,6 +231,11 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
             : $"{image.Width} × {image.Height}";
     }
 
+    /// <summary>
+    ///     Disposes the old preview when the new one is set.
+    /// </summary>
+    /// <param name="oldValue"></param>
+    /// <param name="newValue"></param>
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();

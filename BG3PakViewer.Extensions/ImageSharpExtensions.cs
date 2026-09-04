@@ -5,8 +5,16 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace BG3PakViewer.Extensions;
 
+/// <summary>
+///     ImageSharpExtensions
+/// </summary>
 public static class ImageSharpExtensions
 {
+    /// <summary>
+    ///     Convert image to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     public static BitmapSource ToBitmapSource(this Image image)
     {
         var source = image switch
@@ -24,6 +32,11 @@ public static class ImageSharpExtensions
         return source;
     }
 
+    /// <summary>
+    ///     Convert bgra32 image to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static BitmapSource ConvertBgra32(Image<Bgra32> image)
     {
         var width = image.Width;
@@ -38,6 +51,11 @@ public static class ImageSharpExtensions
             PixelFormats.Bgra32, null, data, stride);
     }
 
+    /// <summary>
+    ///     Convert bgr24 image to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static BitmapSource ConvertBgr24(Image<Bgr24> image)
     {
         var width = image.Width;
@@ -52,6 +70,11 @@ public static class ImageSharpExtensions
             PixelFormats.Bgr24, null, data, stride);
     }
 
+    /// <summary>
+    ///     Convert rgba32 image to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static BitmapSource ConvertRgba32(Image<Rgba32> image)
     {
         var width = image.Width;
@@ -66,6 +89,11 @@ public static class ImageSharpExtensions
             PixelFormats.Bgra32, null, data, stride);
     }
 
+    /// <summary>
+    ///     Convert l8 image to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static BitmapSource ConvertL8(Image<L8> image)
     {
         var width = image.Width;
@@ -79,6 +107,11 @@ public static class ImageSharpExtensions
             PixelFormats.Gray8, null, data, width);
     }
 
+    /// <summary>
+    ///     Convert image to bgra32 image and then to bitmap source.
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
     private static BitmapSource ConvertToBgra32(Image image)
     {
         using var converted = image.CloneAs<Bgra32>();

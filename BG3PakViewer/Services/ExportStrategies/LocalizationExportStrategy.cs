@@ -7,14 +7,27 @@ using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 
 namespace BG3PakViewer.Services.ExportStrategies;
 
+/// <summary>
+///     Localization export strategy
+/// </summary>
+/// <param name="packageService"></param>
 internal class LocalizationExportStrategy(IPackageService packageService) : IExportStrategy
 {
+    /// <summary>
+    ///     File filters
+    /// </summary>
     public FileFilter[] Filters =>
     [
         new(Strings.XmlFile, ".xml"),
         new(Strings.LarianResourceFile, ".loca")
     ];
 
+    /// <summary>
+    ///     Export async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
