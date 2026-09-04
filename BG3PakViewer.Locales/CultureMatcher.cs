@@ -2,8 +2,17 @@
 
 namespace BG3PakViewer.Locales;
 
+/// <summary>
+///     CultureMatcher
+/// </summary>
 public class CultureMatcher : ICultureMatcher
 {
+    /// <summary>
+    ///     Matches a target culture to available cultures.
+    /// </summary>
+    /// <param name="targetCulture"></param>
+    /// <param name="availableCultures"></param>
+    /// <returns></returns>
     public IEnumerable<CultureInfo> Matches(CultureInfo targetCulture, IReadOnlyList<CultureInfo> availableCultures)
     {
         var bestMatches = availableCultures
