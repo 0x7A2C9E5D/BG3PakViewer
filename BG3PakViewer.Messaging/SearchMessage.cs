@@ -7,5 +7,8 @@ namespace BG3PakViewer.Messaging;
 /// </summary>
 public sealed class SearchMessage(string? text)
 {
+    /// <summary>
+    ///     Gets the search text.
+    /// </summary>
     public string? Text { get; } = text;
 }
