@@ -5,6 +5,9 @@ namespace BG3PakViewer.Services.ExportStrategies;
 
 internal interface IExportStrategy
 {
+    /// <summary>
+    ///     File filters
+    /// </summary>
     FileFilter[] Filters { get; }
 
     /// <summary>
@@ -16,6 +19,12 @@ internal interface IExportStrategy
         return Filters;
     }
 
+    /// <summary>
+    ///     Export async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     Task<bool> ExportAsync(PackageEntry node, string path);
 }
 

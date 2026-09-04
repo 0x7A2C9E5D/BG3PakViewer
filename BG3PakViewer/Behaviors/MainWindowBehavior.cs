@@ -10,9 +10,14 @@ using Microsoft.Xaml.Behaviors;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace BG3PakViewer.Behaviors;
-
+/// <summary>
+///     MainWindow behavior
+/// </summary>
 internal class MainWindowBehavior : Behavior<MainWindow>
 {
+    /// <summary>
+    ///     Attach behaviors
+    /// </summary>
     protected override void OnAttached()
     {
         AssociatedObject.Closed += AssociatedObject_Closed;
@@ -21,6 +26,9 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         AssociatedObject.SizeChanged += AssociatedObjectOnSizeChanged;
     }
 
+    /// <summary>
+    ///     Detach behaviors
+    /// </summary>
     protected override void OnDetaching()
     {
         AssociatedObject.Closed -= AssociatedObject_Closed;
@@ -29,28 +37,51 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         AssociatedObject.SizeChanged -= AssociatedObjectOnSizeChanged;
     }
 
+    /// <summary>
+    ///     Unregister all messages
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObject_Closed(object? sender, EventArgs e)
     {
         WeakReferenceMessenger.Default.UnregisterAll(AssociatedObject);
         WeakReferenceMessenger.Default.UnregisterAll((MainWindowViewModel)AssociatedObject.DataContext);
     }
 
+    /// <summary>
+    ///     Set regions for custom title bar
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
     {
         if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
     }
 
+    /// <summary>
+    ///     Set regions for custom title bar
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObjectOnSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
     }
 
+    /// <summary>
+    ///     Set regions for custom title bar
+    /// </summary>
     private void SetRegionsForCustomTitleBar()
     {
         AssociatedObject.RightPaddingColumn.Width =
             new GridLength(TitleBar.GetSystemOverlayRightInset(AssociatedObject));
     }
 
+    /// <summary>
+    ///     Cancel closing when exporting
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void AssociatedObject_Closing(object? sender, EventArgs e)
     {
         if (((MainWindowViewModel)AssociatedObject.DataContext).IsExporting && MessageBox.Show(AssociatedObject,

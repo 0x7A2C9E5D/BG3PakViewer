@@ -3,8 +3,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BG3PakViewer.Models;
 
+/// <summary>
+///     Recent file entry
+/// </summary>
 internal partial class RecentFileEntry : ObservableObject, IRecentFileEntry
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="RecentFileEntry" /> class.
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="openedTime"></param>
+    /// <param name="isMarked"></param>
     public RecentFileEntry(string filePath, DateTime openedTime, bool isMarked = false)
     {
         IsMarked = isMarked;
@@ -12,11 +21,23 @@ internal partial class RecentFileEntry : ObservableObject, IRecentFileEntry
         OpenedTime = openedTime;
     }
 
+    /// <summary>
+    ///     File path
+    /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     // ReSharper disable once MemberCanBePrivate.Global
-    [ObservableProperty] public partial string FilePath { get; set; }
+    [ObservableProperty]
+    public partial string FilePath { get; set; }
 
-    [ObservableProperty] public partial bool IsMarked { get; set; }
+    /// <summary>
+    ///     Is marked
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsMarked { get; set; }
 
-    [ObservableProperty] public partial DateTime OpenedTime { get; set; }
+    /// <summary>
+    ///     Opened time
+    /// </summary>
+    [ObservableProperty]
+    public partial DateTime OpenedTime { get; set; }
 }
