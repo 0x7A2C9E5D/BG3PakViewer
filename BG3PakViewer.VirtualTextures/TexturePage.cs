@@ -4,13 +4,21 @@ using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
 
+/// <summary>
+///     TexturePage
+/// </summary>
 public sealed class TexturePage : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly BinaryReader _reader;
     private readonly Stream _stream;
     private readonly VirtualTileSet _tileSet;
-
+    
+    /// <summary>
+    ///     Constructs a new TexturePage from a stream.
+    /// </summary>
+    /// <param name="tileSet"></param>
+    /// <param name="stream"></param>
     public TexturePage(VirtualTileSet tileSet, Stream stream)
     {
         _tileSet = tileSet;

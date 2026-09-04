@@ -14,7 +14,16 @@ public sealed class TextureWriter : IDisposable
     private readonly BinaryWriter _bw;
     private readonly Action<int, int, int, BC5Image> _stitchRow;
     private readonly BC5Image _strip;
-
+    
+    /// <summary>
+    ///     Constructs a new TextureWriter.
+    /// </summary>
+    /// <param name="output"></param>
+    /// <param name="cols"></param>
+    /// <param name="rows"></param>
+    /// <param name="tileWidth"></param>
+    /// <param name="tileHeight"></param>
+    /// <param name="stitchRow"></param>
     public TextureWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
         Action<int, int, int, BC5Image> stitchRow)
     {
@@ -28,16 +37,27 @@ public sealed class TextureWriter : IDisposable
     {
         _bw.Dispose();
     }
-
-    /// <summary>Stitches and writes one horizontal band of tiles to the underlying stream.</summary>
+    
+    /// <summary>
+    ///     Writes a single row of tiles to the output stream.
+    /// </summary>
+    /// <param name="startX"></param>
+    /// <param name="y"></param>
+    /// <param name="cols"></param>
+    /// <param name="ct"></param>
     public void WriteRow(int startX, int y, int cols, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         _stitchRow(startX, y, cols, _strip);
         _bw.Write(_strip.Data, 0, _strip.Data.Length);
     }
-
-    /// <summary>Writes a single-mip DXT5 DDS header sized to the stitched output.</summary>
+    
+    /// <summary>
+    ///     Writes a DDS header to the output stream.
+    /// </summary>
+    /// <param name="bw"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
     private static void WriteDdsHeader(BinaryWriter bw, int width, int height)
     {
         var header = new DDSHeader

@@ -14,7 +14,15 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
 
     private int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
 
-    /// <summary>Stitches one horizontal band of tiles into <paramref name="strip" />, trimming tile borders.</summary>
+    /// <summary>
+    ///     Decompresses and stitches one horizontal band of tiles into a reusable strip buffer.
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="layer"></param>
+    /// <param name="startX"></param>
+    /// <param name="y"></param>
+    /// <param name="cols"></param>
+    /// <param name="strip"></param>
     public void StitchRow(int level, int layer, int startX, int y, int cols, BC5Image strip)
     {
         Array.Clear(strip.Data);
@@ -29,17 +37,28 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     }
 
     /// <summary>
-    ///     Decompresses the tile at (<paramref name="x" />, <paramref name="y" />) of the current level/layer,
-    ///     or returns null when that position has no tile.
+    ///     Tries to decompress and return a tile at (<paramref name="level" />, <paramref name="layer" />, <paramref name="x" />, <paramref name="y" />).
     /// </summary>
+    /// <param name="level"></param>
+    /// <param name="layer"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="tileInfo"></param>
+    /// <returns></returns>
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
         var pageFile = texturePageCache.Get(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
     }
-
-    /// <summary>Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into a BC5 image.</summary>
+    
+    /// <summary>
+    ///     Decompresses a chunk and returns the raw pixel data.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="pageIndex"></param>
+    /// <param name="chunkIndex"></param>
+    /// <returns></returns>
     private BC5Image UnpackChunkBc5(TexturePage page, int pageIndex, int chunkIndex)
     {
         var header = tileSet.Header;
@@ -48,7 +67,16 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
         return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), header.TileWidth,
             header.TileHeight);
     }
-
+    
+    /// <summary>
+    ///     Decompresses a chunk and returns the raw pixel data.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="pageIndex"></param>
+    /// <param name="chunkIndex"></param>
+    /// <param name="outputSize"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidDataException"></exception>
     private byte[] UnpackChunk(TexturePage page, int pageIndex, int chunkIndex, int outputSize)
     {
         var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
@@ -60,7 +88,14 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
             _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
         };
     }
-
+    
+    /// <summary>
+    ///     Decompresses a BC chunk.
+    /// </summary>
+    /// <param name="chunkHeader"></param>
+    /// <param name="compressed"></param>
+    /// <param name="outputSize"></param>
+    /// <returns></returns>
     private byte[] DecompressBc(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
     {
         var parameterBlock = (GTSBCParameterBlock)tileSet.ParameterBlocks[chunkHeader.ParameterBlockID];

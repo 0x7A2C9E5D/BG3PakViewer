@@ -15,7 +15,12 @@ public sealed class TexturePageCache(VirtualTileSet tileSet, Func<int, Stream> s
         foreach (var file in _open.Values) file.Dispose();
         _open.Clear();
     }
-
+    
+    /// <summary>
+    ///     Gets the page file at <paramref name="pageFileIndex" />, lazily opening it if not already open.
+    /// </summary>
+    /// <param name="pageFileIndex"></param>
+    /// <returns></returns>
     public TexturePage Get(int pageFileIndex)
     {
         if (_open.TryGetValue(pageFileIndex, out var file)) return file;

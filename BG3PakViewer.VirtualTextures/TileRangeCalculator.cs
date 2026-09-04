@@ -8,13 +8,25 @@ namespace BG3PakViewer.VirtualTextures;
 /// </summary>
 public sealed class TileRangeCalculator(VirtualTileSet tileSet)
 {
-    /// <summary>Effective tile width after trimming the border.</summary>
+    /// <summary>
+    ///     Effective tile width after trimming the border.
+    /// </summary>
     public int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
-
-    /// <summary>Effective tile height after trimming the border.</summary>
+    
+    /// <summary>
+    ///     Effective tile height after trimming the border.
+    /// </summary>
     public int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
 
-    /// <summary>Computes the tile grid dimensions of a range, rejecting empty ranges.</summary>
+    /// <summary>
+    ///     Gets the tile range size (cols, rows) for a given tile range.
+    /// </summary>
+    /// <param name="minX"></param>
+    /// <param name="minY"></param>
+    /// <param name="maxX"></param>
+    /// <param name="maxY"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public static (int Cols, int Rows) GetTileRangeSize(int minX, int minY, int maxX, int maxY)
     {
         var cols = maxX - minX + 1;
@@ -23,6 +35,16 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         return (cols, rows);
     }
 
+    /// <summary>
+    ///     Gets the tile range for a texture at a given mip level.
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="tex"></param>
+    /// <param name="minX"></param>
+    /// <param name="minY"></param>
+    /// <param name="maxX"></param>
+    /// <param name="maxY"></param>
+    /// <returns></returns>
     public bool TryGetTileRange(int level, FourCCTextureMeta tex,
         out int minX, out int minY, out int maxX, out int maxY)
     {
@@ -36,14 +58,26 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         return maxX >= minX && maxY >= minY;
     }
 
-    /// <summary>Returns the tile-grid span (start x/y and tile counts) covered by a texture at level 0.</summary>
+    /// <summary>
+    ///     Gets the tile span for a texture at level 0.
+    /// </summary>
+    /// <param name="tex"></param>
+    /// <returns></returns>
     private (int X, int Y, int Width, int Height) GetTextureTileSpan(FourCCTextureMeta tex)
     {
         return (tex.X / TileWidth, tex.Y / TileHeight,
             tex.Width / TileWidth, tex.Height / TileHeight);
     }
 
-    /// <summary>Scales a level-0 tile span down to the coarser grid of the given mip level.</summary>
+    /// <summary>
+    ///     Converts a texture span to a tile range at a given mip level.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="level"></param>
+    /// <returns></returns>
     private static (int MinX, int MinY, int MaxX, int MaxY) ToLevelRange(
         int x, int y, int width, int height, int level)
     {
@@ -51,12 +85,24 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         return (DivideCeiling(x, lv), DivideCeiling(y, lv),
             DivideCeiling(x + width, lv) - 1, DivideCeiling(y + height, lv) - 1);
     }
-
+    
+    /// <summary>
+    ///     Divides a value by a divisor and rounds up.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="divisor"></param>
+    /// <returns></returns>
     private static int DivideCeiling(int value, int divisor)
     {
         return value / divisor + (value % divisor > 0 ? 1 : 0);
     }
 
+    /// <summary>
+    ///     Clips a tile range to the tile grid of a given mip level.
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="maxX"></param>
+    /// <param name="maxY"></param>
     private void ClampToLevelGrid(int level, ref int maxX, ref int maxY)
     {
         var levelWidth = (int)tileSet.TileSetLevels[level].Width;
@@ -64,7 +110,17 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
         if (maxX > levelWidth - 1) maxX = levelWidth - 1;
         if (maxY > levelHeight - 1) maxY = levelHeight - 1;
     }
-
+    
+    /// <summary>
+    ///     Checks if a region exists in a given layer.
+    /// </summary>
+    /// <param name="level"></param>
+    /// <param name="layer"></param>
+    /// <param name="minX"></param>
+    /// <param name="minY"></param>
+    /// <param name="maxX"></param>
+    /// <param name="maxY"></param>
+    /// <returns></returns>
     public bool RegionExists(int level, int layer, int minX, int minY, int maxX, int maxY)
     {
         GTSFlatTileInfo tile = default;
