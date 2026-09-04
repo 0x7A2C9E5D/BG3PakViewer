@@ -3,9 +3,21 @@ using System.Text.Json.Serialization;
 
 namespace BG3PakViewer.Miscellaneous;
 
+/// <summary>
+///     InterfaceJsonConverter
+/// </summary>
+/// <typeparam name="TInterface"></typeparam>
+/// <typeparam name="TImpl"></typeparam>
 public class InterfaceJsonConverter<TInterface, TImpl> : JsonConverter<TInterface>
     where TImpl : TInterface
 {
+    /// <summary>
+    ///     Reads the JSON data.
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="typeToConvert"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public override TInterface? Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
@@ -14,6 +26,12 @@ public class InterfaceJsonConverter<TInterface, TImpl> : JsonConverter<TInterfac
         return JsonSerializer.Deserialize<TImpl>(ref reader, options);
     }
 
+    /// <summary>
+    ///     Writes the JSON data.
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
+    /// <param name="options"></param>
     public override void Write(
         Utf8JsonWriter writer,
         TInterface value,

@@ -4,8 +4,19 @@ using System.Text.Json.Serialization;
 
 namespace BG3PakViewer.Miscellaneous;
 
+/// <summary>
+///     ObservableCollectionJsonConverter
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class ObservableCollectionJsonConverter<T> : JsonConverter<ObservableCollection<T>>
 {
+    /// <summary>
+    ///     Reads the JSON data.
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="typeToConvert"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public override ObservableCollection<T> Read(ref Utf8JsonReader reader, Type typeToConvert,
         JsonSerializerOptions options)
     {
@@ -13,6 +24,12 @@ public class ObservableCollectionJsonConverter<T> : JsonConverter<ObservableColl
         return new ObservableCollection<T>(list!);
     }
 
+    /// <summary>
+    ///     Writes the JSON data.
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
+    /// <param name="options"></param>
     public override void Write(Utf8JsonWriter writer, ObservableCollection<T> value, JsonSerializerOptions options)
     {
         JsonSerializer.Serialize(writer, value.AsEnumerable(), options);
