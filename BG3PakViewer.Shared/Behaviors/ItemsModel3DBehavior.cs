@@ -2,12 +2,12 @@
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;
 
-namespace BG3PakViewer.Controls.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     ItemsModel3D behavior
 /// </summary>
-internal class ItemsModel3DBehavior : Behavior<ItemsModel3D>
+public class ItemsModel3DBehavior : Behavior<ItemsModel3D>
 {
     protected override void OnAttached()
     {

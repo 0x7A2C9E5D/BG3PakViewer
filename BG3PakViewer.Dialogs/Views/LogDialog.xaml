@@ -8,8 +8,8 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
         xmlns:vm="clr-namespace:BG3PakViewer.Dialogs.ViewModels"
-        xmlns:b="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
-        xmlns:s="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
+        xmlns:pb="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
+        xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
@@ -19,7 +19,7 @@
         WindowStartupLocation="CenterScreen"
         Title="{I18N {x:Static l:LangKeys.Log}}" Height="800" Width="1200">
     <i:Interaction.Behaviors>
-        <b:LogDialogBehavior />
+        <pb:LogDialogBehavior />
     </i:Interaction.Behaviors>
     <Grid>
         <Grid>
@@ -128,7 +128,7 @@
                 PageSize="30"
                 Source="{Binding LogEvents}">
                 <i:Interaction.Behaviors>
-                    <s:SfDataPagerBehavior />
+                    <b:SfDataPagerBehavior />
                 </i:Interaction.Behaviors>
             </sf:SfDataPager>
         </Grid>

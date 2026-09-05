@@ -4,10 +4,10 @@
                     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
                     xmlns:dx="clr-namespace:HelixToolkit.SharpDX;assembly=HelixToolkit.SharpDX"
                     xmlns:iwk="http://schemas.inkore.net/lib/ui/wpf"
-                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
+                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
+                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared">
     <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:Model3DPreviewViewModel}">
         <Grid>
             <Grid.RowDefinitions>

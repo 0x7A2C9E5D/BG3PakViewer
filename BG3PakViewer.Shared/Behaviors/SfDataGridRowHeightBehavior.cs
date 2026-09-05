@@ -3,12 +3,12 @@ using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.Grid.Helpers;
 
-namespace BG3PakViewer.Dialogs.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     Behavior for the SfDataGrid.
 /// </summary>
-internal class SfDataGridRowHeightBehavior : Behavior<SfDataGrid>
+public class SfDataGridRowHeightBehavior : Behavior<SfDataGrid>
 {
     /// <summary>
     ///     The minimum height of the rows.

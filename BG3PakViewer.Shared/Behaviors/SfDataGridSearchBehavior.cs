@@ -5,14 +5,14 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 
-namespace BG3PakViewer.Controls.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     Keeps the localization grid's <see cref="SfDataGrid.SearchHelper" /> in sync with
 ///     <see cref="ValueChangedMessage{T}" /> broadcasts: non-empty text performs a filtered search,
 ///     empty text clears it so the full content is restored.
 /// </summary>
-internal class SfDataGridSearchBehavior : Behavior<SfDataGrid>
+public class SfDataGridSearchBehavior : Behavior<SfDataGrid>
 {
     protected override void OnAttached()
     {

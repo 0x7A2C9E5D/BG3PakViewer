@@ -4,7 +4,7 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
+                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
                     xmlns:c="clr-namespace:BG3PakViewer.Controls.Converters">
     <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <!--

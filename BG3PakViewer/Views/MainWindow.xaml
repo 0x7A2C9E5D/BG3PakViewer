@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:vm="clr-namespace:BG3PakViewer.ViewModels"
-        xmlns:b="clr-namespace:BG3PakViewer.Behaviors"
+        xmlns:pb="clr-namespace:BG3PakViewer.Behaviors"
         xmlns:c="clr-namespace:BG3PakViewer.Controls.Views;assembly=BG3PakViewer.Controls"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
         xmlns:dd="clr-namespace:iNKORE.UI.WPF.DragDrop;assembly=iNKORE.UI.WPF"
@@ -18,7 +18,7 @@
         WindowChrome.IsHitTestVisibleInChrome="True"
         Title="{I18N {x:Static l:LangKeys.AppTitle}}" Height="450" Width="800" WindowState="Maximized">
     <i:Interaction.Behaviors>
-        <b:MainWindowBehavior />
+        <pb:MainWindowBehavior />
     </i:Interaction.Behaviors>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">

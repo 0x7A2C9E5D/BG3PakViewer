@@ -7,7 +7,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:sf="http://schemas.syncfusion.com/wpf"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:b="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
+        xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
         xmlns:c="clr-namespace:BG3PakViewer.Contracts;assembly=BG3PakViewer.Contracts"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
         xmlns:s="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"

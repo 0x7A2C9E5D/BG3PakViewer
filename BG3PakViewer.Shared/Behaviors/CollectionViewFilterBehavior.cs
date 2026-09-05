@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using Microsoft.Xaml.Behaviors;
 
-namespace BG3PakViewer.Controls.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     Applies a view-model supplied predicate to an <see cref="ItemsControl" />'s collection view.
@@ -13,7 +13,7 @@ namespace BG3PakViewer.Controls.Behaviors;
 ///     gets the native filtering behavior (no collection rebuild, virtualization and the current
 ///     selection are preserved).
 /// </summary>
-internal class CollectionViewFilterBehavior : Behavior<ItemsControl>
+public class CollectionViewFilterBehavior : Behavior<ItemsControl>
 {
     public static readonly DependencyProperty FilterProperty = DependencyProperty.Register(
         nameof(Filter), typeof(Predicate<object>), typeof(CollectionViewFilterBehavior),

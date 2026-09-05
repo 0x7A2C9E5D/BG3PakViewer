@@ -4,12 +4,12 @@ using CommunityToolkit.Mvvm.Messaging;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;
 
-namespace BG3PakViewer.Controls.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     Viewport3DX behavior
 /// </summary>
-internal class Viewport3DxBehavior : Behavior<Viewport3DX>
+public class Viewport3DxBehavior : Behavior<Viewport3DX>
 {
     protected override void OnAttached()
     {
