@@ -46,7 +46,7 @@ public static class DialogServiceExtensions
     extension(IDialogService service)
     {
         /// <summary>
-        ///     Show a message box
+        ///     ShowMessageBox a message box
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="content"></param>
@@ -58,11 +58,11 @@ public static class DialogServiceExtensions
             string title,
             MessageBoxIcon severity = MessageBoxIcon.Information)
         {
-            return Task.FromResult(Show(service, owner, content, title, MessageBoxButton.OK, severity));
+            return Task.FromResult(ShowMessageBox(service, owner, content, title, MessageBoxButton.OK, severity));
         }
 
         /// <summary>
-        ///     Show a message box with Yes/No buttons
+        ///     ShowMessageBox a message box with Yes/No buttons
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="content"></param>
@@ -74,13 +74,13 @@ public static class DialogServiceExtensions
             string title,
             MessageBoxIcon severity = MessageBoxIcon.Information)
         {
-            return Task.FromResult(Show(service, owner, content, title, MessageBoxButton.YesNo, severity) ==
+            return Task.FromResult(ShowMessageBox(service, owner, content, title, MessageBoxButton.YesNo, severity) ==
                                    MessageBoxResult.Yes);
         }
     }
 
     /// <summary>
-    ///     Show a message box
+    ///     ShowMessageBox a message box
     /// </summary>
     /// <param name="service"></param>
     /// <param name="owner"></param>
@@ -90,7 +90,7 @@ public static class DialogServiceExtensions
     /// <param name="severity"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    private static MessageBoxResult Show(
+    private static MessageBoxResult ShowMessageBox(
         IDialogService service,
         INotifyPropertyChanged owner,
         string content,
