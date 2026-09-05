@@ -3,7 +3,8 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:sf="http://schemas.syncfusion.com/wpf"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors">
+                    xmlns:b="clr-namespace:BG3PakViewer.Controls.Behaviors"
+                    xmlns:s="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared">
     <!--
       Preview for Larian localization files (.loca): a data grid with one row per
       localization entry (Key / Version / Text), paged with SfDataPager.
@@ -58,7 +59,7 @@
                             PageSize="100"
                             Source="{Binding Entries}">
                 <i:Interaction.Behaviors>
-                    <b:SfDataPagerBehavior />
+                    <s:SfDataPagerBehavior />
                 </i:Interaction.Behaviors>
             </sf:SfDataPager>
         </Grid>

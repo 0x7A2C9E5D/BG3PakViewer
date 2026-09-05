@@ -10,6 +10,7 @@
         xmlns:b="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
         xmlns:c="clr-namespace:BG3PakViewer.Contracts;assembly=BG3PakViewer.Contracts"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
+        xmlns:s="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
@@ -169,7 +170,7 @@
             PageSize="30"
             Source="{Binding RecentItems}">
             <i:Interaction.Behaviors>
-                <b:SfDataPagerBehavior />
+                <s:SfDataPagerBehavior />
             </i:Interaction.Behaviors>
         </sf:SfDataPager>
     </Grid>

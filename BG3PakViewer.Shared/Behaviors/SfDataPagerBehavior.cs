@@ -2,12 +2,9 @@
 using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Controls.DataPager;
 
-namespace BG3PakViewer.Controls.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
-/// <summary>
-///     SfDataPager behavior
-/// </summary>
-internal class SfDataPagerBehavior : Behavior<SfDataPager>
+public class SfDataPagerBehavior : Behavior<SfDataPager>
 {
     protected override void OnAttached()
     {
@@ -19,11 +16,6 @@ internal class SfDataPagerBehavior : Behavior<SfDataPager>
         AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
     }
 
-    /// <summary>
-    ///     Dispose data pager
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
     {
         AssociatedObject.Dispose();
