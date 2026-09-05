@@ -66,7 +66,7 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
     private async Task HandleMissingFile(IRecentFileEntry recentFileEntry)
     {
         LogMissingFile(recentFileEntry.FilePath);
-        if (await dialogService.MessageBoxConfirmAsync(this, Strings.FileOpenedNoFoundMessage,
+        if (await dialogService.ShowMessageBoxConfirmAsync(this, Strings.FileOpenedNoFoundMessage,
                 Strings.FileOpenedNoFoundCaption))
             recentFilesService.RemoveRecentFile(recentFileEntry);
     }

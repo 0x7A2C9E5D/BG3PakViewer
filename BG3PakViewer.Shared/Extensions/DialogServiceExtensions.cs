@@ -53,7 +53,7 @@ public static class DialogServiceExtensions
         /// <param name="title"></param>
         /// <param name="severity"></param>
         /// <returns></returns>
-        public Task MessageBoxNotifyAsync(INotifyPropertyChanged owner,
+        public Task ShowMessageBoxNotifyAsync(INotifyPropertyChanged owner,
             string content,
             string title,
             MessageBoxIcon severity = MessageBoxIcon.Information)
@@ -69,7 +69,7 @@ public static class DialogServiceExtensions
         /// <param name="title"></param>
         /// <param name="severity"></param>
         /// <returns></returns>
-        public Task<bool> MessageBoxConfirmAsync(INotifyPropertyChanged owner,
+        public Task<bool> ShowMessageBoxConfirmAsync(INotifyPropertyChanged owner,
             string content,
             string title,
             MessageBoxIcon severity = MessageBoxIcon.Information)

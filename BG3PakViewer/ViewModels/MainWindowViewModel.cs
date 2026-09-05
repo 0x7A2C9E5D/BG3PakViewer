@@ -220,7 +220,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (success)
             _recentFilesService.AddOrUpdateRecentFile(path);
         else
-            await _dialogService.MessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
                 Strings.OpenFileFailedCaption,
                 MessageBoxIcon.Error);
         _isLoading = false;
@@ -341,13 +341,13 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         if (success)
         {
-            await _dialogService.MessageBoxNotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted,
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted,
                 MessageBoxIcon.Success);
             Log.Information("Export completed.");
         }
         else
         {
-            await _dialogService.MessageBoxNotifyAsync(this, Strings.ExportFailedMessage, Strings.ExportFailedCaption,
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportFailedMessage, Strings.ExportFailedCaption,
                 MessageBoxIcon.Error);
             Log.Warning("Failed to export file.");
         }
@@ -530,13 +530,13 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     {
         if (_isLoading)
         {
-            await _dialogService.MessageBoxNotifyAsync(this, Strings.FileLoadingDuplicateMessage,
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.FileLoadingDuplicateMessage,
                 Strings.FileLoadingDuplicateCaption, MessageBoxIcon.Warning);
             return false;
         }
 
         if (PackageTree is null) return true;
-        return await _dialogService.MessageBoxConfirmAsync(this, Strings.ReOpenFileMessage, Strings.ReOpenFileCaption);
+        return await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.ReOpenFileMessage, Strings.ReOpenFileCaption);
     }
 
     /// <summary>
@@ -546,7 +546,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task<bool> HandleIsExportingFiles()
     {
         if (!IsExporting) return true;
-        if (!await _dialogService.MessageBoxConfirmAsync(this, Strings.CancelExportOperationMessage,
+        if (!await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.CancelExportOperationMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning)) return false;
         await _cancellationTokenSource?.CancelAsync()!;
         IsExporting = false;
