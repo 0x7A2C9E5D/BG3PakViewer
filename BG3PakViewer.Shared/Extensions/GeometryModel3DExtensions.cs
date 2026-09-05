@@ -2,7 +2,7 @@ using HelixToolkit.Maths;
 using HelixToolkit.SharpDX;
 using HelixToolkit.Wpf.SharpDX;
 
-namespace BG3PakViewer.Extensions;
+namespace BG3PakViewer.Shared.Extensions;
 
 /// <summary>
 ///     GeometryModel3DExtensions

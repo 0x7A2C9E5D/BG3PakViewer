@@ -11,9 +11,6 @@
     <Project Path="BG3PakViewer.Dialogs/BG3PakViewer.Dialogs.csproj" Id="e45421d1-1fd0-489a-90b7-49586442d6e2">
         <Platform Project="x64"/>
     </Project>
-    <Project Path="BG3PakViewer.Extensions/BG3PakViewer.Extensions.csproj" Id="2ddc5288-a2c8-413d-83b3-d411b91ff659">
-        <Platform Project="x64"/>
-    </Project>
     <Project Path="BG3PakViewer.Loader/BG3PakViewer.Loader.csproj" Id="4bd4af00-2055-4a65-a4b5-6161e3941bbd">
         <Platform Project="x64"/>
     </Project>

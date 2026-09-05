@@ -72,7 +72,6 @@
         <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Controls\BG3PakViewer.Controls.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Dialogs\BG3PakViewer.Dialogs.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Extensions\BG3PakViewer.Extensions.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Loader\BG3PakViewer.Loader.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>

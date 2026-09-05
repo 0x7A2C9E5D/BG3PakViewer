@@ -1,5 +1,5 @@
-using BG3PakViewer.Extensions;
 using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;

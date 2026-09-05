@@ -3,7 +3,7 @@ using System.Windows.Media.Imaging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace BG3PakViewer.Extensions;
+namespace BG3PakViewer.Shared.Extensions;
 
 /// <summary>
 ///     ImageSharpExtensions

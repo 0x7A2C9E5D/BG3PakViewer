@@ -22,6 +22,8 @@
         <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.4.0"/>
         <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="3.1.2"/>
         <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1"/>
+        <PackageReference Include="OpenTK.Mathematics" Version="4.9.4"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="4.1.1"/>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.33.0.1635">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,6 +36,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="LSLib">
+            <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

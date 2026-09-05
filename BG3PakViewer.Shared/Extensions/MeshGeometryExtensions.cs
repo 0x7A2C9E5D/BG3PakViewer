@@ -2,7 +2,7 @@ using HelixToolkit.Maths;
 using HelixToolkit.SharpDX;
 using LSLib.Granny.Model;
 
-namespace BG3PakViewer.Extensions;
+namespace BG3PakViewer.Shared.Extensions;
 
 /// <summary>
 ///     MeshGeometryExtensions

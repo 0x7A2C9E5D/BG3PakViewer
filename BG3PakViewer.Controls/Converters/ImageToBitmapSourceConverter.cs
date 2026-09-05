@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
-using BG3PakViewer.Extensions;
+using System.Windows.Media.Imaging;
+using BG3PakViewer.Shared.Extensions;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace BG3PakViewer.Controls.Converters;
