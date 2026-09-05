@@ -6,7 +6,7 @@ namespace BG3PakViewer.Shared.Extensions;
 /// <summary>
 ///     TriTopologyExtensions
 /// </summary>
-public static class TriTopologyExtensions
+internal static class TriTopologyExtensions
 {
     /// <summary>
     ///     Convert tri topology to int collection.

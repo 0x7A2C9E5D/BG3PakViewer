@@ -5,7 +5,7 @@ namespace BG3PakViewer.Shared.Extensions;
 /// <summary>
 ///     VectorConversionExtensions
 /// </summary>
-public static class VectorConversionExtensions
+internal static class VectorConversionExtensions
 {
     /// <summary>
     ///     Convert open t k vector 2 to vector 2.
