@@ -103,16 +103,16 @@ public static class DialogServiceExtensions
         // The owner is resolved through the dialog manager to keep the box on top of the window
         // that owns the calling view model, matching how the other framework dialogs behave.
         return service.DialogManager.FindViewByViewModel(owner)?.RefObj is not Window ownerWindow
-            ? MessageBox.Show(content, caption, button, MapIcon(severity))
-            : MessageBox.Show(ownerWindow, content, caption, button, MapIcon(severity));
+            ? MessageBox.Show(content, caption, button, ToMessageBoxImage(severity))
+            : MessageBox.Show(ownerWindow, content, caption, button, ToMessageBoxImage(severity));
     }
 
     /// <summary>
-    ///     Map the icon to the MessageBoxImage
+    ///     Converts a <see cref="MessageBoxIcon" /> to the equivalent WPF <see cref="MessageBoxImage" />.
     /// </summary>
     /// <param name="icon"></param>
     /// <returns></returns>
-    private static MessageBoxImage MapIcon(MessageBoxIcon icon)
+    private static MessageBoxImage ToMessageBoxImage(MessageBoxIcon icon)
     {
         return icon switch
         {
