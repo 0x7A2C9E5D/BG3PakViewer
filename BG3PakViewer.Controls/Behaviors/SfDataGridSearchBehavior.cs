@@ -12,7 +12,7 @@ namespace BG3PakViewer.Controls.Behaviors;
 ///     <see cref="ValueChangedMessage{T}" /> broadcasts: non-empty text performs a filtered search,
 ///     empty text clears it so the full content is restored.
 /// </summary>
-internal class SfDataGridBehavior : Behavior<SfDataGrid>
+internal class SfDataGridSearchBehavior : Behavior<SfDataGrid>
 {
     protected override void OnAttached()
     {

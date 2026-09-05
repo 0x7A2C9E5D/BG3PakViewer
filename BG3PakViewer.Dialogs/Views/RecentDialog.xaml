@@ -104,7 +104,7 @@
                 </ResourceDictionary>
             </sf:SfDataGrid.Resources>
             <i:Interaction.Behaviors>
-                <b:SfDataGridBehavior MinHeight="{Binding ElementName=SfDataGrid, Path=RowHeight}" />
+                <b:SfDataGridRowHeightBehavior MinHeight="{Binding ElementName=SfDataGrid, Path=RowHeight}" />
             </i:Interaction.Behaviors>
             <sf:SfDataGrid.Columns>
                 <sf:GridTextColumn

@@ -8,13 +8,13 @@ namespace BG3PakViewer.Dialogs.Behaviors;
 /// <summary>
 ///     Behavior for the SfDataGrid.
 /// </summary>
-internal class SfDataGridBehavior : Behavior<SfDataGrid>
+internal class SfDataGridRowHeightBehavior : Behavior<SfDataGrid>
 {
     /// <summary>
     ///     The minimum height of the rows.
     /// </summary>
     public static readonly DependencyProperty MinHeightProperty
-        = DependencyProperty.Register(nameof(MinHeight), typeof(double), typeof(SfDataGridBehavior),
+        = DependencyProperty.Register(nameof(MinHeight), typeof(double), typeof(SfDataGridRowHeightBehavior),
             new PropertyMetadata(25.0));
 
     private readonly GridRowSizingOptions _gridRowResizingOptions = new();

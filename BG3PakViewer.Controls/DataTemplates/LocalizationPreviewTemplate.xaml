@@ -46,7 +46,7 @@
                         TextWrapping="WrapWithOverflow" />
                 </sf:SfDataGrid.Columns>
                 <i:Interaction.Behaviors>
-                    <b:SfDataGridBehavior />
+                    <b:SfDataGridSearchBehavior />
                 </i:Interaction.Behaviors>
             </sf:SfDataGrid>
 
