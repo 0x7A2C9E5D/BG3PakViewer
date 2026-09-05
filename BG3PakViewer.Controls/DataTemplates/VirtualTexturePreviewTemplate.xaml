@@ -5,7 +5,7 @@
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
-                    xmlns:c="clr-namespace:BG3PakViewer.Controls.Converters">
+                    xmlns:c="clr-namespace:BG3PakViewer.Shared.Converters;assembly=BG3PakViewer.Shared">
     <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
     <!--
       Preview for virtual textures: texture list on the left, and the
