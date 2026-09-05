@@ -6,6 +6,7 @@ using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -24,7 +25,8 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
-        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
+            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
     }
 
     /// <summary>
@@ -55,8 +57,8 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The current search text.
     /// </summary>
-    // ReSharper disable once UnusedMember.Local
     [ObservableProperty]
+    // ReSharper disable once UnusedMember.Local
     private partial string? SearchText { get; set; }
 
     /// <summary>
@@ -82,9 +84,9 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     ///     Handles search messages.
     /// </summary>
     /// <param name="message"></param>
-    private void OnSearchMessage(SearchMessage message)
+    private void OnSearchMessage(ValueChangedMessage<string?> message)
     {
-        SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
+        SearchText = string.IsNullOrEmpty(message.Value) ? null : message.Value;
     }
 
     /// <summary>
@@ -128,7 +130,8 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
+            MessageTokens.SearchQueryChanged);
         base.Dispose(disposing);
     }
 }

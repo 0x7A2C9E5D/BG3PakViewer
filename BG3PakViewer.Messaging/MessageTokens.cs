@@ -14,4 +14,9 @@ public static class MessageTokens
     ///     RecentFileOpened
     /// </summary>
     public const string RecentFileOpened = "RecentFileOpened";
+
+    /// <summary>
+    ///     SearchQueryChanged
+    /// </summary>
+    public const string SearchQueryChanged = "SearchQueryChanged";
 }

@@ -21,8 +21,8 @@
     <ItemGroup>
         <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0"/>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
-        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.4.0" />
-        <PackageReference Include="HanumanInstitute.MvvmDialogs.Wpf" Version="2.4.0" />
+        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.4.0"/>
+        <PackageReference Include="HanumanInstitute.MvvmDialogs.Wpf" Version="2.4.0"/>
         <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1"/>
         <PackageReference Include="LinkDotNet.BuildInformation" Version="2.1.5"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11"/>

@@ -14,6 +14,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
@@ -135,7 +136,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [RelayCommand]
     private async Task SearchAsync(string query)
     {
-        WeakReferenceMessenger.Default.Send(new SearchMessage(query));
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(query), MessageTokens.SearchQueryChanged);
         if (PreviewVm is not null) return;
 
         if (!_packageService.IsLoaded) return;
@@ -155,7 +156,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task ClearSearchAsync(string query)
     {
         if (!string.IsNullOrWhiteSpace(query)) return;
-        WeakReferenceMessenger.Default.Send(new SearchMessage(null));
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(null), MessageTokens.SearchQueryChanged);
         if (PreviewVm is not null) return;
 
         if (!_packageService.IsLoaded) return;
@@ -347,7 +348,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
         else
         {
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportFailedMessage, Strings.ExportFailedCaption,
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportFailedMessage,
+                Strings.ExportFailedCaption,
                 MessageBoxIcon.Error);
             Log.Warning("Failed to export file.");
         }
@@ -536,7 +538,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
 
         if (PackageTree is null) return true;
-        return await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.ReOpenFileMessage, Strings.ReOpenFileCaption);
+        return await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.ReOpenFileMessage,
+            Strings.ReOpenFileCaption);
     }
 
     /// <summary>

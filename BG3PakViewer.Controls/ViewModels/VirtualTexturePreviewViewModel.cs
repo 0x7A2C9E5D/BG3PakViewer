@@ -5,6 +5,7 @@ using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using LSLib.VirtualTextures;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
@@ -34,7 +35,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         ];
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
-        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
+            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
     }
 
     /// <summary>
@@ -57,8 +59,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The current search text.
     /// </summary>
-    // ReSharper disable once UnusedMember.Local
     [ObservableProperty]
+    // ReSharper disable once UnusedMember.Local
     private partial string? SearchText { get; set; }
 
     /// <summary>
@@ -103,9 +105,9 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     ///     Handles search messages.
     /// </summary>
     /// <param name="message"></param>
-    private void OnSearchMessage(SearchMessage message)
+    private void OnSearchMessage(ValueChangedMessage<string?> message)
     {
-        SearchText = string.IsNullOrEmpty(message.Text) ? null : message.Text;
+        SearchText = string.IsNullOrEmpty(message.Value) ? null : message.Value;
     }
 
     /// <summary>
@@ -249,7 +251,8 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
+            MessageTokens.SearchQueryChanged);
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using BG3PakViewer.Messaging;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 
@@ -8,7 +9,7 @@ namespace BG3PakViewer.Controls.Behaviors;
 
 /// <summary>
 ///     Keeps the localization grid's <see cref="SfDataGrid.SearchHelper" /> in sync with
-///     <see cref="SearchMessage" /> broadcasts: non-empty text performs a filtered search,
+///     <see cref="ValueChangedMessage{T}" /> broadcasts: non-empty text performs a filtered search,
 ///     empty text clears it so the full content is restored.
 /// </summary>
 internal class SfDataGridBehavior : Behavior<SfDataGrid>
@@ -17,22 +18,24 @@ internal class SfDataGridBehavior : Behavior<SfDataGrid>
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
         AssociatedObject.SearchHelper.CanHighlightSearchText = false;
-        WeakReferenceMessenger.Default.Register<SearchMessage>(this, (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
+            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
     }
 
     protected override void OnDetaching()
     {
         AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
-        WeakReferenceMessenger.Default.Unregister<SearchMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
+            MessageTokens.SearchQueryChanged);
     }
 
     /// <summary>
     ///     Handle search message
     /// </summary>
     /// <param name="message"></param>
-    private void OnSearchMessage(SearchMessage message)
+    private void OnSearchMessage(ValueChangedMessage<string?> message)
     {
-        var text = message.Text;
+        var text = message.Value;
         if (string.IsNullOrEmpty(text))
         {
             AssociatedObject.SearchHelper.ClearSearch();
