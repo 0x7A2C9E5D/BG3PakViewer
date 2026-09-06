@@ -22,7 +22,7 @@
                      ScrollViewer.CanContentScroll="True"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <i:Interaction.Behaviors>
-                    <b:CollectionViewFilterBehavior Filter="{Binding GoalFilter}" />
+                    <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
                 </i:Interaction.Behaviors>
             </ListBox>
 

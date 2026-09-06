@@ -1,12 +1,9 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging.Messages;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -14,7 +11,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// <summary>
 ///     View model for previewing story scripts.
 /// </summary>
-public partial class StoryScriptsPreviewViewModel : DisposableViewModel
+public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
 {
     private readonly IAppSettings _appSettings;
 
@@ -25,8 +22,6 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     public StoryScriptsPreviewViewModel(IAppSettings appSettings)
     {
         _appSettings = appSettings;
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
-            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
     }
 
     /// <summary>
@@ -43,7 +38,7 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
-    ///     Full goal list. Filtering is a view concern: the view applies <c>GoalFilter</c> to this
+    ///     Full goal list. Filtering is a view concern: the view applies <c>ItemFilter</c> to this
     ///     collection's collection view, which keeps WPF's ICollectionView out of the view model.
     /// </summary>
     public ObservableCollection<StoryScriptsGoalItemViewModel> Goals { get; } = [];
@@ -53,20 +48,6 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     /// </summary>
     [ObservableProperty]
     public partial string? Scripts { get; private set; }
-
-    /// <summary>
-    ///     The current search text.
-    /// </summary>
-    [ObservableProperty]
-    // ReSharper disable once UnusedMember.Local
-    private partial string? SearchText { get; set; }
-
-    /// <summary>
-    ///     Predicate the view applies to <see cref="Goals" />; null shows every goal. Rebuilt whenever
-    ///     <c>SearchText</c> changes, which the view picks up and re-applies.
-    /// </summary>
-    [ObservableProperty]
-    public partial Predicate<object>? GoalFilter { get; private set; }
 
     /// <summary>
     ///     Resets the view model when the story is changed.
@@ -81,25 +62,16 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
     }
 
     /// <summary>
-    ///     Handles search messages.
+    ///     Builds the goal filter for the given search text.
     /// </summary>
-    /// <param name="message"></param>
-    private void OnSearchMessage(ValueChangedMessage<string?> message)
+    /// <param name="searchText"></param>
+    /// <returns></returns>
+    protected override Predicate<object>? BuildFilter(string? searchText)
     {
-        SearchText = string.IsNullOrEmpty(message.Value) ? null : message.Value;
-    }
-
-    /// <summary>
-    ///     Rebuilds the filter when the search text changes.
-    /// </summary>
-    /// <param name="value"></param>
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSearchTextChanged(string? value)
-    {
-        GoalFilter = string.IsNullOrWhiteSpace(value)
+        return string.IsNullOrWhiteSpace(searchText)
             ? null
             : item => item is StoryScriptsGoalItemViewModel goal &&
-                      goal.Name.Contains(value, StringComparison.OrdinalIgnoreCase);
+                      goal.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -128,10 +100,4 @@ public partial class StoryScriptsPreviewViewModel : DisposableViewModel
         Scripts = await TextOperations.TruncateToLinesAsync(writer.ToString(), _appSettings.MaxPreviewLines);
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
-            MessageTokens.SearchQueryChanged);
-        base.Dispose(disposing);
-    }
 }

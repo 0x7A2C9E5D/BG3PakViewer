@@ -1,11 +1,8 @@
 using System.Collections.ObjectModel;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
-using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging.Messages;
 using LSLib.VirtualTextures;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
@@ -16,7 +13,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     virtual texture preview: lists textures on the left; selecting one extracts and decodes
 ///     the selected layer to a bitmap in the background, with cancellation and progress reporting.
 /// </summary>
-public partial class VirtualTexturePreviewViewModel : DisposableViewModel
+public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
 {
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
@@ -35,12 +32,10 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
         ];
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
-            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
     }
 
     /// <summary>
-    ///     Full texture list. Filtering is a view concern: the view applies <c>TextureFilter</c>
+    ///     Full texture list. Filtering is a view concern: the view applies <c>ItemFilter</c>
     ///     to this collection's collection view, which keeps WPF's ICollectionView out of the view model.
     /// </summary>
     public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
@@ -55,20 +50,6 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     /// </summary>
     [ObservableProperty]
     public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
-
-    /// <summary>
-    ///     The current search text.
-    /// </summary>
-    [ObservableProperty]
-    // ReSharper disable once UnusedMember.Local
-    private partial string? SearchText { get; set; }
-
-    /// <summary>
-    ///     Predicate the view applies to <see cref="Textures" />; null shows every texture. Rebuilt
-    ///     whenever <c>SearchText</c> changes, which the view picks up and re-applies.
-    /// </summary>
-    [ObservableProperty]
-    public partial Predicate<object>? TextureFilter { get; private set; }
 
     /// <summary>
     ///     The index of the currently selected layer.
@@ -102,25 +83,16 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
     public partial double Progress { get; set; }
 
     /// <summary>
-    ///     Handles search messages.
+    ///     Builds the texture filter for the given search text.
     /// </summary>
-    /// <param name="message"></param>
-    private void OnSearchMessage(ValueChangedMessage<string?> message)
+    /// <param name="searchText"></param>
+    /// <returns></returns>
+    protected override Predicate<object>? BuildFilter(string? searchText)
     {
-        SearchText = string.IsNullOrEmpty(message.Value) ? null : message.Value;
-    }
-
-    /// <summary>
-    ///     Rebuilds the texture filter when the search text changes.
-    /// </summary>
-    /// <param name="value"></param>
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSearchTextChanged(string? value)
-    {
-        TextureFilter = string.IsNullOrWhiteSpace(value)
+        return string.IsNullOrWhiteSpace(searchText)
             ? null
             : item => item is VirtualTextureItemViewModel texture &&
-                      texture.DisplayName.Contains(value, StringComparison.OrdinalIgnoreCase);
+                      texture.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -251,8 +223,6 @@ public partial class VirtualTexturePreviewViewModel : DisposableViewModel
 
     protected override void Dispose(bool disposing)
     {
-        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
-            MessageTokens.SearchQueryChanged);
         base.Dispose(disposing);
         if (!disposing) return;
         _ = _cts?.CancelAsync();

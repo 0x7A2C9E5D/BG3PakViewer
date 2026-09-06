@@ -27,7 +27,7 @@
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <i:Interaction.Behaviors>
-                    <b:CollectionViewFilterBehavior Filter="{Binding TextureFilter}" />
+                    <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
                 </i:Interaction.Behaviors>
                 <!--
                   Every row must lay out at the same width, otherwise the copy button of a
