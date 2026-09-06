@@ -129,8 +129,7 @@ public sealed class VirtualTextureLoader : IDisposable
         var (cols, rows) = TileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
 
         using var writer = new TextureWriter(output, cols, rows, TileSet.EffectiveTileWidth,
-            TileSet.EffectiveTileHeight,
-            (startX, y, colCount, strip) => _unpacker.StitchRow(level, layer, startX, y, colCount, strip));
+            TileSet.EffectiveTileHeight, _unpacker, level, layer);
         for (var row = 0; row < rows; row++)
         {
             writer.WriteRow(minX, minY + row, cols, ct);

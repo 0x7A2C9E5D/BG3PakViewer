@@ -6,13 +6,15 @@ namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
 ///     Writes a single-mip DXT5 DDS to a stream: emits the header up front, then stitches
-///     one horizontal tile band into a reusable strip buffer per row. Row stitching is
-///     delegated to a callback so the writer stays independent of the tile source.
+///     one horizontal tile band into a reusable strip buffer per row, using the configured
+///     tile unpacker for a fixed (level, layer) combination.
 /// </summary>
 public sealed class TextureWriter : IDisposable
 {
     private readonly BinaryWriter _bw;
-    private readonly Action<int, int, int, BC5Image> _stitchRow;
+    private readonly TextureUnpacker _unpacker;
+    private readonly int _level;
+    private readonly int _layer;
     private readonly BC5Image _strip;
 
     /// <summary>
@@ -23,14 +25,18 @@ public sealed class TextureWriter : IDisposable
     /// <param name="rows"></param>
     /// <param name="tileWidth"></param>
     /// <param name="tileHeight"></param>
-    /// <param name="stitchRow"></param>
+    /// <param name="unpacker"></param>
+    /// <param name="level"></param>
+    /// <param name="layer"></param>
     public TextureWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
-        Action<int, int, int, BC5Image> stitchRow)
+        TextureUnpacker unpacker, int level, int layer)
     {
         _bw = new BinaryWriter(output, Encoding.UTF8, true);
         WriteDdsHeader(_bw, cols * tileWidth, rows * tileHeight);
         _strip = new BC5Image(cols * tileWidth, tileHeight);
-        _stitchRow = stitchRow;
+        _unpacker = unpacker;
+        _level = level;
+        _layer = layer;
     }
 
     public void Dispose()
@@ -48,7 +54,7 @@ public sealed class TextureWriter : IDisposable
     public void WriteRow(int startX, int y, int cols, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        _stitchRow(startX, y, cols, _strip);
+        _unpacker.StitchRow(_level, _layer, startX, y, cols, _strip);
         _bw.Write(_strip.Data, 0, _strip.Data.Length);
     }
 
