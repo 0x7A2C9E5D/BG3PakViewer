@@ -5,7 +5,7 @@ namespace BG3PakViewer.Services;
 /// <summary>
 ///     Preview service
 /// </summary>
-internal interface IPreviewService : IAsyncDisposable
+internal interface IPreviewService
 {
     /// <summary>
     ///     Create preview view model async
