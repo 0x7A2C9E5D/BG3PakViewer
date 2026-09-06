@@ -3,7 +3,7 @@ using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 
-namespace BG3PakViewer.Dialogs.Behaviors;
+namespace BG3PakViewer.Shared.Behaviors;
 
 /// <summary>
 ///     Wires an <see cref="AutoSuggestBox" /> search box to an <see cref="SfDataGrid" />'s
@@ -13,7 +13,7 @@ namespace BG3PakViewer.Dialogs.Behaviors;
 ///     <see cref="BG3PakViewer.Shared.Behaviors.SfDataGridSearchBehavior" />, which is attached to a
 ///     grid and driven by search messages, this one is driven by the box's own events.
 /// </summary>
-internal sealed class AutoSuggestBoxSearchBehavior : Behavior<AutoSuggestBox>
+public sealed class AutoSuggestBoxSearchBehavior : Behavior<AutoSuggestBox>
 {
     /// <summary>
     ///     Identifies the <see cref="SearchGrid" /> dependency property.
