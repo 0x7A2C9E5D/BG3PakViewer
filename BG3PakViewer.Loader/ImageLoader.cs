@@ -152,18 +152,15 @@ public static class ImageLoader
     /// <returns></returns>
     private static async Task<bool> ExportStandardImageAsync(Image image, string path)
     {
-        return await Task.Run(async () =>
+        try
         {
-            try
-            {
-                await image.SaveAsync(path);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to export standard image.");
-                return false;
-            }
-        });
+            await image.SaveAsync(path);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to export standard image.");
+            return false;
+        }
     }
 }
