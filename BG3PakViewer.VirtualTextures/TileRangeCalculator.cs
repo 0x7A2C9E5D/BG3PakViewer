@@ -9,16 +9,6 @@ namespace BG3PakViewer.VirtualTextures;
 public sealed class TileRangeCalculator(VirtualTileSet tileSet)
 {
     /// <summary>
-    ///     Effective tile width after trimming the border.
-    /// </summary>
-    public int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
-
-    /// <summary>
-    ///     Effective tile height after trimming the border.
-    /// </summary>
-    public int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
-
-    /// <summary>
     ///     Gets the tile range size (cols, rows) for a given tile range.
     /// </summary>
     /// <param name="minX"></param>
@@ -65,8 +55,8 @@ public sealed class TileRangeCalculator(VirtualTileSet tileSet)
     /// <returns></returns>
     private (int X, int Y, int Width, int Height) GetTextureTileSpan(FourCCTextureMeta tex)
     {
-        return (tex.X / TileWidth, tex.Y / TileHeight,
-            tex.Width / TileWidth, tex.Height / TileHeight);
+        return (tex.X / tileSet.EffectiveTileWidth, tex.Y / tileSet.EffectiveTileHeight,
+            tex.Width / tileSet.EffectiveTileWidth, tex.Height / tileSet.EffectiveTileHeight);
     }
 
     /// <summary>

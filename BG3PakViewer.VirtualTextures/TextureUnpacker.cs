@@ -10,10 +10,6 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
 {
     private readonly TileCompressor _compressor = new();
 
-    private int TileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;
-
-    private int TileHeight => tileSet.Header.TileHeight - tileSet.Header.TileBorder * 2;
-
     /// <summary>
     ///     Decompresses and stitches one horizontal band of tiles into a reusable strip buffer.
     /// </summary>
@@ -25,6 +21,8 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     /// <param name="strip"></param>
     public void StitchRow(int level, int layer, int startX, int y, int cols, BC5Image strip)
     {
+        var tileWidth = tileSet.EffectiveTileWidth;
+        var tileHeight = tileSet.EffectiveTileHeight;
         Array.Clear(strip.Data);
         GTSFlatTileInfo tileInfo = default;
         for (var col = 0; col < cols; col++)
@@ -32,7 +30,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
             var tile = TryUnpackTile(level, layer, startX + col, y, ref tileInfo);
             // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
             tile?.CopyTo(strip, tileSet.Header.TileBorder, tileSet.Header.TileBorder,
-                col * TileWidth, 0, TileWidth, TileHeight);
+                col * tileWidth, 0, tileWidth, tileHeight);
         }
     }
 
