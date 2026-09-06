@@ -12,10 +12,10 @@ namespace BG3PakViewer.VirtualTextures;
 public sealed class TextureWriter : IDisposable
 {
     private readonly BinaryWriter _bw;
-    private readonly TextureUnpacker _unpacker;
-    private readonly int _level;
     private readonly int _layer;
+    private readonly int _level;
     private readonly BC5Image _strip;
+    private readonly TextureUnpacker _unpacker;
 
     /// <summary>
     ///     Constructs a new TextureWriter.
