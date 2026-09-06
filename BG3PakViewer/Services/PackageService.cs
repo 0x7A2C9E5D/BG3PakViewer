@@ -92,15 +92,14 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
     /// <summary>
     ///     Cleanup async
     /// </summary>
-    public async Task CleanupAsync()
+    public Task CleanupAsync()
     {
-        if (CurrentPackage != null)
-        {
-            Log.Debug("Cleaning up current package");
-            CurrentPackage.Dispose();
-            CurrentPackage = null;
-            await Task.CompletedTask;
-        }
+        if (CurrentPackage == null)
+            return Task.CompletedTask;
+        Log.Debug("Cleaning up current package");
+        CurrentPackage.Dispose();
+        CurrentPackage = null;
+        return Task.CompletedTask;
     }
 
     public void Dispose()
