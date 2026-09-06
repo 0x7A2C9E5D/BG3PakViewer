@@ -166,11 +166,18 @@ public sealed partial class App : IDisposable
     private static void InitializeCulture()
     {
         var appSettings = Ioc.Default.GetRequiredService<IAppSettings>();
-        var cultureInfo = appSettings.Language == string.Empty
-            ? Ioc.Default.GetRequiredService<ICultureResolver>().ResolveSupportedCulture()
-            : new CultureInfo(appSettings.Language);
-        if (appSettings.Language == string.Empty)
+        var language = appSettings.Language;
+        CultureInfo cultureInfo;
+        if (language == string.Empty)
+        {
+            cultureInfo = Ioc.Default.GetRequiredService<ICultureResolver>().ResolveSupportedCulture();
             appSettings.Language = cultureInfo.Name;
+        }
+        else
+        {
+            cultureInfo = new CultureInfo(language);
+        }
+
         I18NExtension.Culture = cultureInfo;
     }
 
