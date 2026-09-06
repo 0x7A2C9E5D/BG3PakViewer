@@ -12,14 +12,14 @@ internal class LogDialogBehavior : Behavior<LogDialog>
 {
     protected override void OnAttached()
     {
-        AssociatedObject.Loaded += AssociatedObjectOnLoaded;
-        AssociatedObject.SizeChanged += AssociatedObjectOnSizeChanged;
+        AssociatedObject.Loaded += UpdateTitleBarRegions;
+        AssociatedObject.SizeChanged += UpdateTitleBarRegions;
     }
 
     protected override void OnDetaching()
     {
-        AssociatedObject.Loaded -= AssociatedObjectOnLoaded;
-        AssociatedObject.SizeChanged -= AssociatedObjectOnSizeChanged;
+        AssociatedObject.Loaded -= UpdateTitleBarRegions;
+        AssociatedObject.SizeChanged -= UpdateTitleBarRegions;
     }
 
     /// <summary>
@@ -27,17 +27,7 @@ internal class LogDialogBehavior : Behavior<LogDialog>
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void AssociatedObjectOnLoaded(object sender, RoutedEventArgs e)
-    {
-        if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
-    }
-
-    /// <summary>
-    ///     Set the regions for the custom title bar.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void AssociatedObjectOnSizeChanged(object sender, SizeChangedEventArgs e)
+    private void UpdateTitleBarRegions(object sender, RoutedEventArgs e)
     {
         if (TitleBar.GetExtendViewIntoTitleBar(AssociatedObject)) SetRegionsForCustomTitleBar();
     }
