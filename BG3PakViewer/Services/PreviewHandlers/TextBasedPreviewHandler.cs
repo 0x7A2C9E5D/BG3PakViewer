@@ -36,7 +36,7 @@ internal abstract class TextBasedPreviewHandler(IPackageService packageService, 
         if (string.IsNullOrEmpty(text))
             return null;
 
-        var truncated = await TextOperations.TruncateToLinesAsync(text, appSettings.MaxPreviewLines);
+        var truncated = await Task.Run(() => TextOperations.TruncateToLines(text, appSettings.MaxPreviewLines));
 
         return new PlainTextPreviewViewModel { Text = truncated };
     }

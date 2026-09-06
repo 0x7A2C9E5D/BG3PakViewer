@@ -1,6 +1,4 @@
-﻿using Cysharp.Text;
-
-namespace BG3PakViewer.Utils;
+﻿namespace BG3PakViewer.Utils;
 
 /// <summary>
 ///     TextOperations
@@ -13,16 +11,9 @@ public static class TextOperations
     /// <param name="text"></param>
     /// <param name="maxLines"></param>
     /// <returns></returns>
-    public static async Task<string> TruncateToLinesAsync(string text, int maxLines)
+    public static string TruncateToLines(string text, int maxLines)
     {
-        return await Task.Run(() =>
-        {
-            var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
-            if (lines.Length <= maxLines) return text;
-            lines = [.. lines.Take(maxLines)];
-            using var stringBuilder = ZString.CreateStringBuilder();
-            foreach (var line in lines) stringBuilder.AppendLine(line);
-            return stringBuilder.ToString();
-        });
+        var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
+        return lines.Length <= maxLines ? text : string.Join(Environment.NewLine, lines.Take(maxLines));
     }
 }

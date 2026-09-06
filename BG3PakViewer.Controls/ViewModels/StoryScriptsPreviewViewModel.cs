@@ -97,7 +97,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
 
         await using var writer = new StringWriter();
         SelectedGoal.Goal?.MakeScript(writer, Story);
-        Scripts = await TextOperations.TruncateToLinesAsync(writer.ToString(), _appSettings.MaxPreviewLines);
+        Scripts = await Task.Run(() => TextOperations.TruncateToLines(writer.ToString(), _appSettings.MaxPreviewLines));
     }
 
 }
