@@ -419,67 +419,72 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     ///     Show log dialog
     /// </summary>
     [RelayCommand]
-    private async Task ShowLogDialog()
+    private Task ShowLogDialog()
     {
-        try
-        {
-            using var viewModel = new LogDialogViewModel(_logAccessService, _shellOpenService);
-            await _dialogService.ShowDialogAsync(this, viewModel);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to show the log dialog.");
-        }
+        return ShowDialogWithLoggingAsync(
+            () => new LogDialogViewModel(_logAccessService, _shellOpenService),
+            "Failed to show the log dialog.");
     }
 
     /// <summary>
     ///     Show recent dialog
     /// </summary>
     [RelayCommand]
-    private async Task ShowRecentDialog()
+    private Task ShowRecentDialog()
     {
-        try
-        {
-            using var viewModel = new RecentDialogViewModel(_recentFilesService, _dialogService);
-            await _dialogService.ShowDialogAsync(this, viewModel);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to show the recent files dialog.");
-        }
+        return ShowDialogWithLoggingAsync(
+            () => new RecentDialogViewModel(_recentFilesService, _dialogService),
+            "Failed to show the recent files dialog.");
     }
 
     /// <summary>
     ///     Show settings dialog
     /// </summary>
     [RelayCommand]
-    private async Task ShowSettingsDialog()
+    private Task ShowSettingsDialog()
     {
-        try
-        {
-            var viewModel = new SettingsDialogViewModel(_settingsManagerService, _dialogService);
-            await _dialogService.ShowDialogAsync(this, viewModel);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to show the settings dialog.");
-        }
+        return ShowDialogWithLoggingAsync(
+            () => new SettingsDialogViewModel(_settingsManagerService, _dialogService),
+            "Failed to show the settings dialog.");
     }
 
     /// <summary>
     ///     Show about dialog
     /// </summary>
     [RelayCommand]
-    private async Task ShowAbout()
+    private Task ShowAbout()
     {
+        return ShowDialogWithLoggingAsync(
+            () => new AboutDialogViewModel(BuildAboutData()),
+            "Failed to show the about dialog.");
+    }
+
+    /// <summary>
+    ///     Shows a dialog created by the given factory, disposing its view model when it supports
+    ///     <see cref="IDisposable" />, and logs any failure with the given message.
+    /// </summary>
+    /// <typeparam name="TViewModel"></typeparam>
+    /// <param name="viewModelFactory"></param>
+    /// <param name="errorMessage"></param>
+    /// <returns></returns>
+    private async Task ShowDialogWithLoggingAsync<TViewModel>(
+        Func<TViewModel> viewModelFactory,
+        string errorMessage)
+        where TViewModel : class, IModalDialogViewModel
+    {
+        TViewModel? viewModel = null;
         try
         {
-            var viewModel = new AboutDialogViewModel(BuildAboutData());
+            viewModel = viewModelFactory();
             await _dialogService.ShowDialogAsync(this, viewModel);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to show the about dialog.");
+            Log.Error(ex, "{Message}", errorMessage);
+        }
+        finally
+        {
+            if (viewModel is IDisposable disposable) disposable.Dispose();
         }
     }
 
