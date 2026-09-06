@@ -43,12 +43,13 @@
                 <ui:AutoSuggestBox
                     Grid.Column="1"
                     VerticalAlignment="Center"
-                    PlaceholderText="{I18N {x:Static l:LangKeys.Search}}"
-                    QuerySubmitted="AutoSuggestBox_OnQuerySubmitted"
-                    TextChanged="AutoSuggestBox_OnTextChanged">
+                    PlaceholderText="{I18N {x:Static l:LangKeys.Search}}">
                     <ui:AutoSuggestBox.QueryIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
                     </ui:AutoSuggestBox.QueryIcon>
+                    <i:Interaction.Behaviors>
+                        <pb:AutoSuggestBoxSearchBehavior SearchGrid="{Binding ElementName=SfDataGrid}" />
+                    </i:Interaction.Behaviors>
                 </ui:AutoSuggestBox>
                 <Button Grid.Column="2" Height="48" Width="48" Background="Transparent" BorderThickness="0"
                         HorizontalAlignment="Right" Command="{Binding OpenLogFolderCommand}">

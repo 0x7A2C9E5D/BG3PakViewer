@@ -11,6 +11,7 @@
         xmlns:c="clr-namespace:BG3PakViewer.Contracts;assembly=BG3PakViewer.Contracts"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
         xmlns:s="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
+        xmlns:pb="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
@@ -58,12 +59,13 @@
             <ui:AutoSuggestBox
                 Grid.Column="1"
                 VerticalAlignment="Center"
-                PlaceholderText="{I18N {x:Static l:LangKeys.Search}}"
-                QuerySubmitted="SearchBox_QuerySubmitted"
-                TextChanged="SearchBox_TextChanged">
+                PlaceholderText="{I18N {x:Static l:LangKeys.Search}}">
                 <ui:AutoSuggestBox.QueryIcon>
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
                 </ui:AutoSuggestBox.QueryIcon>
+                <i:Interaction.Behaviors>
+                    <pb:AutoSuggestBoxSearchBehavior SearchGrid="{Binding ElementName=SfDataGrid}" />
+                </i:Interaction.Behaviors>
             </ui:AutoSuggestBox>
         </Grid>
         <sf:SfDataGrid
