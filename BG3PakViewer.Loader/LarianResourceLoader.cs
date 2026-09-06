@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text;
 using LSLib.LS;
 using LSLib.LS.Enums;
 using Serilog;
@@ -33,35 +32,6 @@ public static class LarianResourceLoader
     {
         return await Task.Run(() =>
             ResourceUtils.LoadResource(stream, format, ResourceLoadParameters.FromGameVersion(Game.BaldursGate3)));
-    }
-
-    /// <summary>
-    ///     Exports a resource to a string.
-    /// </summary>
-    /// <param name="resource"></param>
-    /// <returns></returns>
-    // ReSharper disable once UnusedMember.Global
-    public static async Task<string> ExportAsync(Resource resource)
-    {
-        try
-        {
-            return await Task.Run(() =>
-            {
-                using var ms = new MemoryStream();
-                var writer = new LSXWriter(ms)
-                {
-                    Version = LSXVersion.V4,
-                    PrettyPrint = true
-                };
-                writer.Write(resource);
-                return Encoding.UTF8.GetString(ms.ToArray());
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to export resource.");
-            return string.Empty;
-        }
     }
 
     /// <summary>
