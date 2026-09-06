@@ -31,16 +31,6 @@ public static class ImageLoader
     }
 
     /// <summary>
-    ///     Decodes a DDS image from a stream.
-    /// </summary>
-    /// <param name="ddsStream"></param>
-    /// <returns></returns>
-    public static async Task<Image?> DecodeDdsAsync(Stream ddsStream)
-    {
-        return await LoadAsync(ddsStream, ".dds");
-    }
-
-    /// <summary>
     ///     Exports an image to a file.
     /// </summary>
     /// <param name="images"></param>

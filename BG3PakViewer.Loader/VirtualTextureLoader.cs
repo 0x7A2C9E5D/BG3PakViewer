@@ -8,7 +8,7 @@ namespace BG3PakViewer.Loader;
 /// <summary>
 ///     Fully stream-based virtual texture extractor: loads a title set directly from a stream (no temp files),
 ///     exposes its layers and texture metadata, and extracts a selected layer into a DDS stream that can
-///     be decoded by <c>ImageLoader.DecodeDdsAsync</c>. GTP page files are opened lazily per pageFileIndex
+///     be decoded by <c>ImageLoader.LoadAsync</c>. GTP page files are opened lazily per pageFileIndex
 ///     via a stream provider delegate (e.g. read from inside a PAK).
 /// </summary>
 public sealed class VirtualTextureLoader : IDisposable

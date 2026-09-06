@@ -163,7 +163,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         }
 
         // Ownership of the image is transferred to Preview; it is disposed when replaced or disposed.
-        var image = await ImageLoader.DecodeDdsAsync(ddsStream);
+        var image = await ImageLoader.LoadAsync(ddsStream, ".dds");
         if (cts.IsCancellationRequested)
         {
             image?.Dispose();
