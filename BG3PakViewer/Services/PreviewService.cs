@@ -19,18 +19,14 @@ internal class PreviewService(
     : IPreviewService
 {
     private readonly List<IPreviewHandler> _previewHandlers = [.. previewHandlers];
-    private bool _disposed;
 
     /// <summary>
     ///     Create preview view model async
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        ObjectDisposedException.ThrowIf(_disposed, nameof(PreviewService));
-
         if (node.IsFolder) return null;
 
         var validation = ValidatePreviewRequest(node);
@@ -44,19 +40,6 @@ internal class PreviewService(
 
         Log.Information("No preview handler found for extension: {Extension}", node.FileExtension);
         return CreateNotSupportedViewModel(Strings.FileNotSupportedPreviewMessage);
-    }
-
-    /// <summary>
-    ///     Dispose async
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        if (!_disposed)
-        {
-            Log.Debug("Disposing PreviewService");
-            _disposed = true;
-            await ValueTask.CompletedTask;
-        }
     }
 
     /// <summary>
