@@ -16,21 +16,10 @@ public static class LarianResourceLoader
     /// <param name="stream"></param>
     /// <param name="extensions"></param>
     /// <returns></returns>
-    public static async Task<Resource?> LoadAsync(Stream stream, string extensions)
+    public static Task<Resource> LoadAsync(Stream stream, string extensions)
     {
         var format = ResourceUtils.ExtensionToResourceFormat(extensions);
-        return await Task.Run(() => LoadAsync(stream, format));
-    }
-
-    /// <summary>
-    ///     Loads a resource from a stream.
-    /// </summary>
-    /// <param name="stream"></param>
-    /// <param name="format"></param>
-    /// <returns></returns>
-    private static async Task<Resource?> LoadAsync(Stream stream, ResourceFormat format)
-    {
-        return await Task.Run(() =>
+        return Task.Run(() =>
             ResourceUtils.LoadResource(stream, format, ResourceLoadParameters.FromGameVersion(Game.BaldursGate3)));
     }
 
