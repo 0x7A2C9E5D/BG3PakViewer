@@ -86,7 +86,7 @@ public sealed class VirtualTextureLoader : IDisposable
     }
 
     /// <summary>
-    ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into <paramref name="output" />,
+    ///     Extracts <paramref name="layer" /> of <paramref name="tex" /> into <paramref name="output" />,
     /// </summary>
     /// <param name="layer"></param>
     /// <param name="tex"></param>
