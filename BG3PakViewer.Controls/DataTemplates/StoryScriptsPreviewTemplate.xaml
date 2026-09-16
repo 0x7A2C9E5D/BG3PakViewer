@@ -11,7 +11,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ListBox Grid.Column="0"
+            <ListView Grid.Column="0"
                      ItemsSource="{Binding Goals}"
                      DisplayMemberPath="Name"
                      SelectedItem="{Binding SelectedGoal}"
@@ -24,7 +24,7 @@
                 <i:Interaction.Behaviors>
                     <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
                 </i:Interaction.Behaviors>
-            </ListBox>
+            </ListView>
 
             <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
                           VerticalAlignment="Stretch" Background="Transparent"
