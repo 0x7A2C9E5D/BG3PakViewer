@@ -78,6 +78,6 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
     private static void LogMissingFile(string filePath)
     {
         // The user is asked whether to drop the entry, so this is an expected state, not a failure.
-        Log.Warning("The file {Path} of the recent item being opened no longer exists.", filePath);
+        Log.Warning("The file {Path} of the recent item being opened no longer exists", filePath);
     }
 }

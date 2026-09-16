@@ -16,7 +16,6 @@ public partial class Model3DPreviewViewModel : ObservableObject
     /// <summary>
     ///     The model to preview.
     /// </summary>
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     [ObservableProperty]
     public partial Root? Model { get; set; }
 

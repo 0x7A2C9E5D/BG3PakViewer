@@ -58,7 +58,7 @@ public static class ImageLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load image of type {Extension}.", extension);
+            Log.Error(e, "Failed to load image of type {Extension}", extension);
             return null;
         }
     }
@@ -79,7 +79,7 @@ public static class ImageLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load texture of type {Extension}.", extension);
+            Log.Error(e, "Failed to load texture of type {Extension}", extension);
             return null;
         }
     }
@@ -159,7 +159,7 @@ public static class ImageLoader
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to export standard image.");
+            Log.Error(ex, "Failed to export standard image");
             return false;
         }
     }

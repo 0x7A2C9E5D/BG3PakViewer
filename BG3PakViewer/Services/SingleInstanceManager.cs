@@ -35,7 +35,7 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         _mutex = new Mutex(true, _mutexName, out var createdNew);
         if (createdNew) return false;
 
-        Log.Information("Another instance is already running (mutex: {MutexName}).", _mutexName);
+        Log.Information("Another instance is already running (mutex: {MutexName})", _mutexName);
         return true;
     }
 
@@ -49,7 +49,7 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         using var existingProcess = FindExistingProcessInstance();
         if (existingProcess == null)
         {
-            Log.Warning("Another instance was detected, but its process could not be found.");
+            Log.Warning("Another instance was detected, but its process could not be found");
             return;
         }
 
@@ -78,7 +78,7 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         placement.length = (uint)Marshal.SizeOf(placement);
         if (PInvoke.GetWindowPlacement(mainWindowHandle, ref placement).Value == 0)
         {
-            Log.Warning("Could not query the window placement of the running instance (handle: {Handle}).",
+            Log.Warning("Could not query the window placement of the running instance (handle: {Handle})",
                 mainWindowHandle.ToHexString());
             return;
         }

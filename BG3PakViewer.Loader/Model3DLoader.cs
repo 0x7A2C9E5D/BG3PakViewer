@@ -31,7 +31,7 @@ public static class Model3DLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load model.");
+            Log.Error(e, "Failed to load model");
             return null;
         }
     }

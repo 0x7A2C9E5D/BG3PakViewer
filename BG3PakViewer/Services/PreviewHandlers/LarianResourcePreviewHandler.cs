@@ -32,7 +32,6 @@ internal class LarianResourcePreviewHandler(IPackageService packageService) : IP
         if (stream is null) return null;
 
         var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
-        if (resource == null) return null;
 
         // Build the tree off the UI thread so large resources don't block the UI.
         // Attributes are formatted lazily per selected node. No LSX string is

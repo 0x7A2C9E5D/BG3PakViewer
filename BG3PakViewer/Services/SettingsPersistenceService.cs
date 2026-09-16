@@ -82,7 +82,7 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
     {
         if (!File.Exists(_filePath))
         {
-            Log.Debug("No settings file at {FilePath}; using defaults.", _filePath);
+            Log.Debug("No settings file at {FilePath}; using defaults", _filePath);
             return new T();
         }
 
@@ -92,7 +92,7 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
             var result = JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions);
             if (result is null)
             {
-                Log.Warning("Settings file {FilePath} held no usable content; using defaults.", _filePath);
+                Log.Warning("Settings file {FilePath} held no usable content; using defaults", _filePath);
                 return new T();
             }
 
@@ -102,7 +102,7 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
         catch (Exception ex)
         {
             // A corrupted or unreadable settings file must not keep the application from starting.
-            Log.Error(ex, "Failed to load settings from {FilePath}; using defaults.", _filePath);
+            Log.Error(ex, "Failed to load settings from {FilePath}; using defaults", _filePath);
             return new T();
         }
     }

@@ -39,6 +39,6 @@ internal class LarianResourceExportStrategy(IPackageService packageService) : IE
         if (node.FileExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
             return await FileOperations.SaveStreamToFileAsync(stream, path);
         var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
-        return resource != null && await LarianResourceLoader.ExportAsync(resource, path);
+        return await LarianResourceLoader.ExportAsync(resource, path);
     }
 }

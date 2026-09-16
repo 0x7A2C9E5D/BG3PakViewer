@@ -23,7 +23,7 @@ public static class LocalizationLoader
         }
         catch (Exception e)
         {
-            Log.Error(e, "Failed to load localization.");
+            Log.Error(e, "Failed to load localization");
             return null;
         }
     }

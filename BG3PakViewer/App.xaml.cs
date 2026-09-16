@@ -221,11 +221,11 @@ public sealed partial class App : IDisposable
         _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
         if (_singleInstanceManager.IsAnotherInstanceRunning())
         {
-            Log.Information("Another instance is already running; prompting the user.");
+            Log.Information("Another instance is already running; prompting the user");
             if (MessageBox.Show(Strings.MultipleInstanceMessage, Strings.MultipleInstanceCaption,
                     MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                 _singleInstanceManager.ActivateExistingInstance();
-            Log.Information("Shutting down this instance.");
+            Log.Information("Shutting down this instance");
             Shutdown();
             return;
         }

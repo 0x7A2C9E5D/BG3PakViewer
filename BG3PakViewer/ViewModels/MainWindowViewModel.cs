@@ -125,7 +125,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error loading PAK file.");
+            Log.Error(ex, "Error loading PAK file");
         }
     }
 
@@ -145,7 +145,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         {
             Log.Information("Searching for '{Query}'...", query);
             PackageTree = _packageService.BuildTree(query);
-            Log.Information("Search completed.");
+            Log.Information("Search completed");
         }, CancellationToken.None);
     }
 
@@ -161,7 +161,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 
         if (!_packageService.IsLoaded) return;
         await Task.Run(() => { PackageTree = _packageService.BuildTree(); }, CancellationToken.None);
-        Log.Information("Search query cleared.");
+        Log.Information("Search query cleared");
     }
 
     /// <summary>
@@ -191,7 +191,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         if (storageFile != null)
             await ValidateAndOpenPackageAsync(storageFile.LocalPath);
         else
-            Log.Information("PAK file selection was cancelled.");
+            Log.Information("PAK file selection was cancelled");
     }
 
     /// <summary>
@@ -301,7 +301,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         });
         if (storageFile == null)
         {
-            Log.Information("Export file selection was cancelled.");
+            Log.Information("Export file selection was cancelled");
             return;
         }
 
@@ -321,7 +321,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         });
         if (storageFolder == null)
         {
-            Log.Information("Export folder selection was cancelled.");
+            Log.Information("Export folder selection was cancelled");
             return;
         }
 
@@ -329,7 +329,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         var success =
             await _exportService.ExportFolderAsync(node, storageFolder.LocalPath, _cancellationTokenSource.Token);
         if (_cancellationTokenSource.IsCancellationRequested)
-            Log.Information("Folder export was cancelled.");
+            Log.Information("Folder export was cancelled");
         else
             await HandleExportResultAsync(success);
     }
@@ -344,14 +344,14 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         {
             await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted,
                 MessageBoxIcon.Success);
-            Log.Information("Export completed.");
+            Log.Information("Export completed");
         }
         else
         {
             await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportFailedMessage,
                 Strings.ExportFailedCaption,
                 MessageBoxIcon.Error);
-            Log.Warning("Failed to export file.");
+            Log.Warning("Failed to export file");
         }
     }
 
@@ -577,7 +577,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private void OpenNexusMods()
     {
         _shellOpenService.Open(AppSettings.NexusModUrl);
-        Log.Information("NexusMods opened.");
+        Log.Information("NexusMods opened");
     }
 
     /// <summary>
