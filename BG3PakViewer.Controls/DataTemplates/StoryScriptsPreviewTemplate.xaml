@@ -12,15 +12,15 @@
             </Grid.ColumnDefinitions>
 
             <ListView Grid.Column="0"
-                     ItemsSource="{Binding Goals}"
-                     DisplayMemberPath="Name"
-                     SelectedItem="{Binding SelectedGoal}"
-                     BorderBrush="Gray" BorderThickness="1" Padding="4"
-                     VirtualizingStackPanel.IsVirtualizing="True"
-                     VirtualizingStackPanel.VirtualizationMode="Recycling"
-                     VirtualizingStackPanel.CacheLength="50"
-                     ScrollViewer.CanContentScroll="True"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                      ItemsSource="{Binding Goals}"
+                      DisplayMemberPath="Name"
+                      SelectedItem="{Binding SelectedGoal}"
+                      BorderBrush="Gray" BorderThickness="1" Padding="4"
+                      VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                      VirtualizingStackPanel.CacheLength="50"
+                      ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <i:Interaction.Behaviors>
                     <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
                 </i:Interaction.Behaviors>
