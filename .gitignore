@@ -359,7 +359,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-# Fody - auto-generated XML schema
-FodyWeavers.xsd
-/.idea/.idea.LarianPakViewer/.idea/workspace.xml
+#Syncfusion License
 /BG3PakViewer/License.txt
