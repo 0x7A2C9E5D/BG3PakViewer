@@ -15,6 +15,11 @@ internal class PreviewTemplateSelector : DataTemplateSelector
     public DataTemplate? ImageFilePreviewTemplate { get; set; }
 
     /// <summary>
+    ///     Icon atlas preview template
+    /// </summary>
+    public DataTemplate? IconAtlasPreviewTemplate { get; set; }
+
+    /// <summary>
     ///     Model file preview template
     /// </summary>
     public DataTemplate? ModelFilePreviewTemplate { get; set; }
@@ -60,6 +65,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
         return item switch
         {
             ImagePreviewViewModel => ImageFilePreviewTemplate,
+            IconAtlasPreviewViewModel => IconAtlasPreviewTemplate,
             Model3DPreviewViewModel => ModelFilePreviewTemplate,
             PlainTextPreviewViewModel => PlainTextFilePreviewTemplate,
             NotSupportedPreviewViewModel => NotSupportedPreviewFileDataTemplate,

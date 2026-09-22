@@ -4,18 +4,13 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/ImagePreviewTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/PlainTextPreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/Model3DPreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/StoryScriptsPreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/LarianResourcePreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewTemplate.xaml" />
-        <ResourceDictionary
-            Source="/BG3PakViewer.Controls;component/DataTemplates/VirtualTexturePreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/Model3DPreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/NotSupportedPreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/StoryScriptsPreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/LarianResourcePreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/VirtualTexturePreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/IconAtlasPreviewTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
                                 PlainTextFilePreviewTemplate="{StaticResource PlainTextFilePreviewTemplate}"
@@ -25,5 +20,6 @@
                                 StoryScriptsPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
                                 LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
                                 LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}"
-                                VirtualTexturePreviewTemplate="{StaticResource VirtualTexturePreviewDataTemplate}" />
+                                VirtualTexturePreviewTemplate="{StaticResource VirtualTexturePreviewDataTemplate}"
+                                IconAtlasPreviewTemplate="{StaticResource IconAtlasPreviewTemplate}" />
 </ResourceDictionary>

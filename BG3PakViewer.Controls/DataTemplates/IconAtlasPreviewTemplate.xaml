@@ -1,0 +1,69 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
+    <!--
+      Preview for icon atlases. The atlas is sliced into its icon grid and every cell is shown at the
+      size it has in the atlas.
+      The icons are a flat list and the wrap panel puts as many of them on a line as the width of the
+      preview allows, so a sheet is never previewed as a strip that has to be scrolled sideways.
+    -->
+    <DataTemplate x:Key="IconAtlasPreviewTemplate" DataType="{x:Type vm:IconAtlasPreviewViewModel}">
+        <Border BorderBrush="Gray" BorderThickness="1" ClipToBounds="True">
+            <!--
+              A list box is used for its built in scrolling. Nothing in this grid is selectable, so the
+              item container is reduced to a bare content presenter and brings no selection or hover
+              chrome of its own.
+              Scrolling is kept on pixels instead of items so the wheel scrolls the grid smoothly, and
+              the horizontal scroll bar is disabled so the wrap panel is measured with the width of the
+              preview and can therefore wrap.
+            -->
+            <ListBox ItemsSource="{Binding Items}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="0"
+                     ScrollViewer.CanContentScroll="False"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:IconAtlasCellViewModel}">
+                        <Border Width="{Binding DisplayWidth}"
+                                Height="{Binding DisplayHeight}"
+                                BorderThickness="1" Background="Transparent">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#33808080" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="BorderBrush" Value="#FF4CC2FF" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Image Width="{Binding DisplayWidth}"
+                                   Height="{Binding DisplayHeight}"
+                                   Source="{Binding Image}"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>
