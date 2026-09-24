@@ -24,17 +24,18 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         if (image is null) return null;
 
-        if (!IconAtlasDetector.IsIconAtlas(node.FullPath)) return new ImagePreviewViewModel { Preview = image };
+        if (!IconAtlasDetector.IsIconAtlas(node.FullPath)) 
+            return new ImagePreviewViewModel { Preview = image };
 
         // A file whose name looks like an atlas does not have to be one, so the grid is only used when
-        // the content actually shows one; otherwise the plain preview is kept.
+        // the content actually shows one. A sheet without a grid still goes through the slicer: it holds
+        // a single icon, and slicing it is what keeps its padding out of the preview.
         var grid = await Task.Run(() => IconAtlasDetector.DetectGrid(image));
-        if (grid is null) return new ImagePreviewViewModel { Preview = image };
 
-        // Icon atlases are previewed as a sliced icon grid. The slicing happens in the loader, on the
-        // decoded image itself; blank cells are dropped there, which is what keeps a half used sheet
-        // from previewing as a wall of empty icons.
-        var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, grid.Value));
+        // Icon atlases are previewed as a sliced icon grid. The slicing happens on the decoded image
+        // itself; blank cells are dropped there, which is what keeps a half used sheet from previewing
+        // as a wall of empty icons.
+        var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, grid));
         image.Dispose();
 
         // `icons` is a list of the sliced images, which are only the source of the bitmaps, so they are
