@@ -32,7 +32,7 @@ public sealed class TextureWriter : IDisposable
         TextureUnpacker unpacker, int level, int layer)
     {
         _bw = new BinaryWriter(output, Encoding.UTF8, true);
-        WriteDdsHeader(_bw, cols * tileWidth, rows * tileHeight);
+        WriteHeader(_bw, cols * tileWidth, rows * tileHeight);
         _strip = new BC5Image(cols * tileWidth, tileHeight);
         _unpacker = unpacker;
         _level = level;
@@ -64,7 +64,7 @@ public sealed class TextureWriter : IDisposable
     /// <param name="bw"></param>
     /// <param name="width"></param>
     /// <param name="height"></param>
-    private static void WriteDdsHeader(BinaryWriter bw, int width, int height)
+    private static void WriteHeader(BinaryWriter bw, int width, int height)
     {
         var header = new DDSHeader
         {
