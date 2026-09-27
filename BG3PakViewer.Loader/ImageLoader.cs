@@ -50,7 +50,7 @@ public static class ImageLoader
     }
 
     /// <summary>
-    ///     Exports an image to a BC7-compressed DDS texture with a full mipmap chain.
+    ///     Exports an image to a BC7-compressed DDS texture.
     /// </summary>
     /// <param name="image"></param>
     /// <param name="path"></param>
@@ -70,7 +70,7 @@ public static class ImageLoader
     }
 
     /// <summary>
-    ///     Encodes an image as a BC7-compressed DDS texture with a full mipmap chain.
+    ///     Encodes an image as a BC7-compressed DDS texture.
     /// </summary>
     /// <param name="image"></param>
     /// <param name="path"></param>
@@ -78,24 +78,16 @@ public static class ImageLoader
     {
         using var rgba = image.CloneAs<Rgba32>();
         var source = DirectXTex.CreateScratchImage();
-        var mipChain = DirectXTex.CreateScratchImage();
         var compressed = DirectXTex.CreateScratchImage();
         try
         {
             source.Initialize2D((int)Format.R8G8B8A8_UNorm,
                 (nuint)rgba.Width, (nuint)rgba.Height, 1, 1, CPFlags.None);
             rgba.CopyPixelDataTo(new Span<byte>(source.GetPixels(), (int)source.GetPixelsSize()));
-
             var sourceMetadata = source.GetMetadata();
-            var mipLevels = (nuint)(1 + (int)Math.Floor(Math.Log2(Math.Max(rgba.Width, rgba.Height))));
-            DirectXTex.GenerateMipMaps2(source.GetImages(), source.GetImageCount(), ref sourceMetadata,
-                TexFilterFlags.Default, mipLevels, ref mipChain);
-
-            var mipMetadata = mipChain.GetMetadata();
-            DirectXTex.Compress2(mipChain.GetImages(), mipChain.GetImageCount(), ref mipMetadata,
+            DirectXTex.Compress2(source.GetImages(), source.GetImageCount(), ref sourceMetadata,
                 (int)Format.BC7_UNorm, TexCompressFlags.Bc7Quick | TexCompressFlags.Parallel, 0.5f,
                 ref compressed);
-
             var compressedMetadata = compressed.GetMetadata();
             DirectXTex.SaveToDDSFile2(compressed.GetImages(), compressed.GetImageCount(),
                 ref compressedMetadata, DDSFlags.None, path);
@@ -103,7 +95,6 @@ public static class ImageLoader
         finally
         {
             compressed.Release();
-            mipChain.Release();
             source.Release();
         }
     }
