@@ -75,10 +75,6 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
     /// <returns></returns>
     private static ExportOperation GetOperation(string fileName, string sourceExtension, string targetExtension)
     {
-        if (FileExtensions.IsTextureFormat(targetExtension))
-            return FileExtensions.IsTextureFormat(sourceExtension)
-                ? ExportOperation.RawCopy
-                : ExportOperation.Convert;
         if (FileExtensions.IsLowTexTexture(fileName))
             return ExportOperation.Forbidden;
         return sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase)

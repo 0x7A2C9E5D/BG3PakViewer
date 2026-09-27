@@ -63,14 +63,10 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
     /// <returns></returns>
     private static ExportOperation GetOperation(string sourceExtension, string targetExtension)
     {
-        if (FileExtensions.IsVorbisAudio(sourceExtension))
-            return FileExtensions.IsVorbisAudio(targetExtension)
-                ? ExportOperation.RawCopy
-                : ExportOperation.Forbidden;
-        if (FileExtensions.IsWwiseAudio(targetExtension))
-            return ExportOperation.RawCopy;
-        return FileExtensions.IsVorbisAudio(targetExtension)
-            ? ExportOperation.Convert
-            : ExportOperation.Forbidden;
+        if (FileExtensions.IsVorbisAudio(sourceExtension) && FileExtensions.IsWwiseAudio(targetExtension))
+            return ExportOperation.Forbidden;
+        return sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase)
+            ? ExportOperation.RawCopy
+            : ExportOperation.Convert;
     }
 }
