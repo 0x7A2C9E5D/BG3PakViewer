@@ -88,7 +88,7 @@ public static class ImageLoader
             rgba.CopyPixelDataTo(new Span<byte>(source.GetPixels(), (int)source.GetPixelsSize()));
             var sourceMetadata = source.GetMetadata();
             DirectXTex.Compress2(source.GetImages(), source.GetImageCount(), ref sourceMetadata,
-                (int)Format.BC7_UNorm, TexCompressFlags.Bc7Quick | TexCompressFlags.Parallel, 0.5f,
+                (int)Format.BC7_UNorm, TexCompressFlags.Bc7Use3Subsets | TexCompressFlags.Parallel, 0.5f,
                 ref compressed);
             var compressedMetadata = compressed.GetMetadata();
             DirectXTex.SaveToDDSFile2(compressed.GetImages(), compressed.GetImageCount(),
