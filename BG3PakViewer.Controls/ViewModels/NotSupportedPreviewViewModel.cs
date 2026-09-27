@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -11,5 +11,6 @@ public partial class NotSupportedPreviewViewModel : ObservableObject
     ///     The help text to display.
     /// </summary>
     [ObservableProperty]
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public partial string? HelpText { get; set; }
 }
