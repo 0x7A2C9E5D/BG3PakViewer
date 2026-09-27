@@ -74,7 +74,9 @@ public static class ImageLoader
     /// </summary>
     /// <param name="image"></param>
     /// <param name="path"></param>
+#pragma warning disable S6640
     private static unsafe void ExportTexture(Image image, string path)
+#pragma warning restore S6640
     {
         using var rgba = image.CloneAs<Rgba32>();
         var source = DirectXTex.CreateScratchImage();
