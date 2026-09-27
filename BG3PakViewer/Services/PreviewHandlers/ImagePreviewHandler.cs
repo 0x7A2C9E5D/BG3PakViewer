@@ -24,7 +24,7 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         if (image is null) return null;
 
-        if (!IconAtlasDetector.IsIconAtlas(node.FullPath)) 
+        if (!IconAtlasDetector.IsIconAtlas(node.FullPath))
             return new ImagePreviewViewModel { Preview = image };
 
         // A file whose name looks like an atlas does not have to be one, so the grid is only used when
