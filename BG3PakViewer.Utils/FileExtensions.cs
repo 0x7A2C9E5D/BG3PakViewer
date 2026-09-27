@@ -15,7 +15,7 @@ public static class FileExtensions
 
     private static readonly ImmutableHashSet<string> LocalizationFormats = ImmutableHashSet.Create(".loca");
 
-    private static readonly ImmutableHashSet<string> Model3DFormats = ImmutableHashSet.Create(".gr2", ".glb", ".gltf");
+    private static readonly ImmutableHashSet<string> Model3DFormats = ImmutableHashSet.Create(".gr2");
 
     private static readonly ImmutableHashSet<string> TextureFormats = ImmutableHashSet.Create(".dds");
 
