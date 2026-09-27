@@ -11,6 +11,7 @@ namespace BG3PakViewer.Services.ExportStrategies;
 ///     Image export strategy
 /// </summary>
 /// <param name="packageService"></param>
+// ReSharper disable once ClassNeverInstantiated.Global
 internal class ImageExportStrategy(IPackageService packageService) : IExportStrategy
 {
     /// <summary>
