@@ -46,12 +46,12 @@ public static class IconAtlasDetector
     private const int MinGridLines = 2;
 
     /// <summary>
-    ///     Hysteresis thresholds handed to <see cref="Cv2.Canny" />.
+    ///     Hysteresis thresholds handed to <see cref="Cv2.Canny(InputArray, InputArray, OutputArray, double, double, bool)" />.
     /// </summary>
     private const double CannyLowThreshold = 50;
 
     /// <summary>
-    ///     Hysteresis thresholds handed to <see cref="Cv2.Canny" />.
+    ///     Hysteresis thresholds handed to <see cref="Cv2.Canny(InputArray, InputArray, OutputArray, double, double, bool)" />.
     /// </summary>
     private const double CannyHighThreshold = 150;
 
