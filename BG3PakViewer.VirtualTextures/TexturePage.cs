@@ -24,8 +24,6 @@ public sealed class TexturePage : IDisposable
         _tileSet = tileSet;
         _stream = stream;
         _reader = new BinaryReader(_stream, Encoding.UTF8, false);
-
-        BinUtils.ReadStruct<GTPHeader>(_reader);
         _chunkOffsets = ReadChunkOffsetTables();
     }
 
@@ -40,6 +38,7 @@ public sealed class TexturePage : IDisposable
     /// </summary>
     private List<uint[]> ReadChunkOffsetTables()
     {
+        BinUtils.ReadStruct<GTPHeader>(_reader);
         var pageSize = _tileSet.Header.PageSize;
         var numPages = (int)(_stream.Length / pageSize);
         var tables = new List<uint[]>(numPages);
