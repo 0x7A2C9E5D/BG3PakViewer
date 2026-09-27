@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Models;
@@ -78,7 +78,7 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
         if (FileExtensions.IsTextureFormat(targetExtension))
             return FileExtensions.IsTextureFormat(sourceExtension)
                 ? ExportOperation.RawCopy
-                : ExportOperation.Forbidden;
+                : ExportOperation.Convert;
         if (FileExtensions.IsLowTexTexture(fileName))
             return ExportOperation.Forbidden;
         return sourceExtension.Equals(targetExtension, StringComparison.OrdinalIgnoreCase)
