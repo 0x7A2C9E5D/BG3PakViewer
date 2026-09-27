@@ -13,12 +13,6 @@ public static class FileExtensions
     private static readonly ImmutableHashSet<string> PlainTextFormats =
         ImmutableHashSet.Create(".xml", ".json", ".lua", ".txt", ".xaml", ".ann", ".anc", ".khn");
 
-    private static readonly ImmutableHashSet<string> LocalizationFormats = ImmutableHashSet.Create(".loca");
-
-    private static readonly ImmutableHashSet<string> Model3DFormats = ImmutableHashSet.Create(".gr2");
-
-    private static readonly ImmutableHashSet<string> TextureFormats = ImmutableHashSet.Create(".dds");
-
     private static readonly ImmutableHashSet<string> BitmapImageFormats =
         ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".tga", ".cur");
 
@@ -49,7 +43,7 @@ public static class FileExtensions
     /// <returns></returns>
     public static bool IsLocalizationFormat(string extension)
     {
-        return LocalizationFormats.Contains(extension.ToLowerInvariant());
+        return extension.Equals(".loca", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -59,7 +53,7 @@ public static class FileExtensions
     /// <returns></returns>
     public static bool IsModel3DFormat(string extension)
     {
-        return Model3DFormats.Contains(extension.ToLowerInvariant());
+        return extension.Equals(".gr2", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -69,7 +63,7 @@ public static class FileExtensions
     /// <returns></returns>
     public static bool IsTextureFormat(string extension)
     {
-        return TextureFormats.Contains(extension.ToLowerInvariant());
+        return extension.Equals(".dds", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
