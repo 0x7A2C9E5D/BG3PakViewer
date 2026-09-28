@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO;
 using System.Reactive;
 using System.Reflection;
@@ -187,7 +187,7 @@ public sealed partial class App : IDisposable
     private static void RegisterSyncfusionLicense()
     {
         using var stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("BG3PakViewer.License.txt")!;
+            .GetManifestResourceStream("BG3PakViewer.Syncfusion.lic")!;
         using var reader = new StreamReader(stream);
         SyncfusionLicenseProvider.RegisterLicense(reader.ReadToEnd());
     }
