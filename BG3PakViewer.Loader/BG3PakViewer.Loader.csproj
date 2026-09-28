@@ -7,7 +7,6 @@
         <UseWPF>true</UseWPF>
         <Platforms>x64</Platforms>
         <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -19,10 +18,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hexa.NET.DirectXTex" Version="2.0.4"/>
+        <PackageReference Include="BCnEncoder.Net" Version="2.3.0"/>
         <PackageReference Include="Pfim" Version="0.11.4"/>
         <PackageReference Include="Serilog" Version="4.4.0"/>
-        <PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
         <PackageReference Include="SixLabors.ImageSharp" Version="4.1.2"/>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385">
             <PrivateAssets>all</PrivateAssets>

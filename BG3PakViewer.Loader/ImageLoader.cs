@@ -1,9 +1,9 @@
 using System.IO;
+using BCnEncoder.Encoder;
+using BCnEncoder.Shared;
 using BG3PakViewer.Utils;
-using Hexa.NET.DirectXTex;
 using Pfim;
 using Serilog;
-using SharpDX.DXGI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Image = SixLabors.ImageSharp.Image;
@@ -74,31 +74,26 @@ public static class ImageLoader
     /// </summary>
     /// <param name="image"></param>
     /// <param name="path"></param>
-#pragma warning disable S6640
-    private static unsafe void ExportTexture(Image image, string path)
-#pragma warning restore S6640
+    private static void ExportTexture(Image image, string path)
     {
         using var rgba = image.CloneAs<Rgba32>();
-        var source = DirectXTex.CreateScratchImage();
-        var compressed = DirectXTex.CreateScratchImage();
-        try
+        var pixels = new byte[rgba.Width * rgba.Height * 4];
+        rgba.CopyPixelDataTo(pixels);
+
+        var encoder = new BcEncoder
         {
-            source.Initialize2D((int)Format.R8G8B8A8_UNorm,
-                (nuint)rgba.Width, (nuint)rgba.Height, 1, 1, CPFlags.None);
-            rgba.CopyPixelDataTo(new Span<byte>(source.GetPixels(), (int)source.GetPixelsSize()));
-            var sourceMetadata = source.GetMetadata();
-            DirectXTex.Compress2(source.GetImages(), source.GetImageCount(), ref sourceMetadata,
-                (int)Format.BC7_UNorm, TexCompressFlags.Bc7Use3Subsets | TexCompressFlags.Parallel, 0.5f,
-                ref compressed);
-            var compressedMetadata = compressed.GetMetadata();
-            DirectXTex.SaveToDDSFile2(compressed.GetImages(), compressed.GetImageCount(),
-                ref compressedMetadata, DDSFlags.None, path);
-        }
-        finally
-        {
-            compressed.Release();
-            source.Release();
-        }
+            OutputOptions =
+            {
+                GenerateMipMaps = false,
+                Format = CompressionFormat.Bc7,
+                Quality = CompressionQuality.BestQuality,
+                FileFormat = OutputFileFormat.Dds,
+                DdsPreferDxt10Header = true
+            }
+        };
+
+        using var stream = File.Create(path);
+        encoder.EncodeToStream(pixels, rgba.Width, rgba.Height, PixelFormat.Rgba32, stream);
     }
 
     /// <summary>
