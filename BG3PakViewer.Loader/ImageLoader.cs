@@ -1,5 +1,6 @@
 using System.IO;
 using BCnEncoder.Encoder;
+using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
 using BG3PakViewer.Utils;
 using Pfim;
@@ -59,41 +60,28 @@ public static class ImageLoader
     {
         try
         {
-            await Task.Run(() => ExportTexture(image, path));
+            using var rgba = image.CloneAs<Rgba32>();
+            var encoder = new BcEncoder
+            {
+                OutputOptions =
+                {
+                    GenerateMipMaps = false,
+                    Format = CompressionFormat.Bc7,
+                    Quality = CompressionQuality.BestQuality,
+                    FileFormat = OutputFileFormat.Dds,
+                    DdsPreferDxt10Header = true
+                }
+            };
+
+            await using var stream = File.Create(path);
+            await encoder.EncodeToStreamAsync(rgba, stream);
             return true;
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to export texture image");
+            Log.Error(ex, "Failed to export texture image: {Path}", path);
             return false;
         }
-    }
-
-    /// <summary>
-    ///     Encodes an image as a BC7-compressed DDS texture.
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="path"></param>
-    private static void ExportTexture(Image image, string path)
-    {
-        using var rgba = image.CloneAs<Rgba32>();
-        var pixels = new byte[rgba.Width * rgba.Height * 4];
-        rgba.CopyPixelDataTo(pixels);
-
-        var encoder = new BcEncoder
-        {
-            OutputOptions =
-            {
-                GenerateMipMaps = false,
-                Format = CompressionFormat.Bc7,
-                Quality = CompressionQuality.BestQuality,
-                FileFormat = OutputFileFormat.Dds,
-                DdsPreferDxt10Header = true
-            }
-        };
-
-        using var stream = File.Create(path);
-        encoder.EncodeToStream(pixels, rgba.Width, rgba.Height, PixelFormat.Rgba32, stream);
     }
 
     /// <summary>
