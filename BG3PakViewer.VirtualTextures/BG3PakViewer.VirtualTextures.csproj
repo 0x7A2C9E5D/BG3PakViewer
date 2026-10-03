@@ -17,6 +17,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="BCnEncoder.Net" Version="2.3.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <Reference Include="LSLib">
             <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
         </Reference>

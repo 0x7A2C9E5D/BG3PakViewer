@@ -1,3 +1,5 @@
+using BCnEncoder.Encoder;
+using BCnEncoder.Shared;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures;
@@ -82,10 +84,48 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return chunkHeader.Codec switch
         {
-            GTSCodec.Uniform => new byte[tileSet.Header.TileWidth * tileSet.Header.TileHeight],
+            GTSCodec.Uniform => CreateUniformTile(compressed),
             GTSCodec.BC => DecompressBc(chunkHeader, compressed, outputSize),
             _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
         };
+    }
+
+    /// <summary>
+    ///     Expands a uniform chunk into the BC3 blocks covering a whole tile. The payload of such a
+    ///     chunk is the tile's single RGBA8 texel (the uniform parameter block declares a 4x1 image),
+    ///     so the tile is one flat colour and every block repeats it.
+    /// </summary>
+    /// <param name="payload"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidDataException"></exception>
+    private byte[] CreateUniformTile(byte[] payload)
+    {
+        if (payload.Length < 4)
+            throw new InvalidDataException(
+                $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
+
+        var block = EncodeConstantColor(payload[0], payload[1], payload[2], payload[3]);
+        var blockCount = ((tileSet.Header.TileWidth + 3) / 4) * ((tileSet.Header.TileHeight + 3) / 4);
+        var data = new byte[blockCount * 16];
+        for (var i = 0; i < blockCount; i++) block.CopyTo(data, i * 16);
+        return data;
+    }
+
+    /// <summary>
+    ///     Encodes one colour as a BC3 (DXT5) block in which every texel resolves to that colour.
+    ///     This mirrors LSLib, which runs sixteen identical pixels through the BCnEncoder block encoder
+    ///     instead of quantizing the endpoints by hand, so uniform tiles come out byte for byte alike.
+    /// </summary>
+    /// <param name="r"></param>
+    /// <param name="g"></param>
+    /// <param name="b"></param>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    private static byte[] EncodeConstantColor(byte r, byte g, byte b, byte a)
+    {
+        var source = new ColorRgba32[16];
+        Array.Fill(source, new ColorRgba32(r, g, b, a));
+        return new BcEncoder(CompressionFormat.Bc3).EncodeBlock(source);
     }
 
     /// <summary>
