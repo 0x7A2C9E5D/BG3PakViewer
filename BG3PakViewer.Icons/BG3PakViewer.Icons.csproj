@@ -17,8 +17,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenCvSharp5" Version="5.0.0.20260905"/>
-        <PackageReference Include="OpenCvSharp5.runtime.win.slim" Version="5.0.0.20260905"/>
+        <PackageReference Include="OpenCvSharp5" Version="5.0.0.20261003" />
+        <PackageReference Include="OpenCvSharp5.runtime.win.slim" Version="5.0.0.20261003" />
         <PackageReference Include="SixLabors.ImageSharp" Version="4.1.2"/>
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138">
             <PrivateAssets>all</PrivateAssets>
