@@ -18,12 +18,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0"/>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
-        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.4.0"/>
-        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.12"/>
-        <PackageReference Include="Serilog" Version="4.4.0"/>
+        <PackageReference Include="Antelcat.I18N.WPF" Version="1.1.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+        <PackageReference Include="HanumanInstitute.MvvmDialogs" Version="2.4.0" />
+        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.13" />
+        <PackageReference Include="Serilog" Version="4.4.0" />
         <PackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -35,11 +35,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Miscellaneous\BG3PakViewer.Miscellaneous.csproj"/>
-        <ProjectReference Include="..\BG3PakViewer.Shared\BG3PakViewer.Shared.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.Contracts\BG3PakViewer.Contracts.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Locales\BG3PakViewer.Locales.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Miscellaneous\BG3PakViewer.Miscellaneous.csproj" />
+        <ProjectReference Include="..\BG3PakViewer.Shared\BG3PakViewer.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
