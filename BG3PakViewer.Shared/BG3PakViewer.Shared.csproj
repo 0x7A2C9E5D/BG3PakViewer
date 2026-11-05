@@ -31,7 +31,7 @@
         <PackageReference Update="Nerdbank.GitVersioning">
             <Version>3.10.94</Version>
         </PackageReference>
-        <PackageReference Include="Syncfusion.SfGrid.WPF" Version="35.1.42" />
+        <PackageReference Include="Syncfusion.SfGrid.WPF" Version="35.1.43" />
     </ItemGroup>
 
     <ItemGroup>
