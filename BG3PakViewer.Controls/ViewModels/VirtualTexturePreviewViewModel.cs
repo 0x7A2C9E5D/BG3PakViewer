@@ -15,11 +15,6 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
 {
-    /// <summary>
-    ///     Known channel names of the first virtual texture layers.
-    /// </summary>
-    private static readonly string[] LayerNames = ["Albedo", "Normal", "Physical"];
-
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
@@ -30,11 +25,11 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
     {
         _loader = loader;
-        Layers =
-        [
-            .. Enumerable.Range(0, loader.LayerCount)
-                .Select(i => i < LayerNames.Length ? LayerNames[i] : $"Layer {i}")
-        ];
+        Layers = ["Albedo", "Normal", "Physical"];
+        if (loader.LayerCount > Layers.Count)
+            throw new InvalidOperationException(
+                $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
+                $"but at most {Layers.Count} (Albedo, Normal, Physical) are supported.");
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
     }
