@@ -26,6 +26,31 @@
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <!--
+                  The theme's ListView template hard-codes CanContentScroll=False on its
+                  ScrollViewer, which silently disables virtualization (all rows get
+                  realized). Replace it with an equivalent template that scrolls by item.
+                -->
+                <ListView.Template>
+                    <ControlTemplate TargetType="ListView">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer Focusable="False" CanContentScroll="True"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </ListView.Template>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
                 <i:Interaction.Behaviors>
                     <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
                 </i:Interaction.Behaviors>
