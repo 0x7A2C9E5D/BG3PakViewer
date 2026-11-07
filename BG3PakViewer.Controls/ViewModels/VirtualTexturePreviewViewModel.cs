@@ -28,7 +28,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         Layers =
         [
             .. Enumerable.Range(0, loader.LayerCount)
-                .Select(i => $"Layer {i}")
+                .Select(i => i < LayerNames.Length ? LayerNames[i] : $"Layer {i}")
         ];
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
