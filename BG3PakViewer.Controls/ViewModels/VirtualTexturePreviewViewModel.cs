@@ -15,6 +15,11 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
 {
+    /// <summary>
+    ///     Virtual texture layers are fixed: Albedo, Normal and Physical.
+    /// </summary>
+    private const int SupportedLayerCount = 3;
+
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
@@ -25,11 +30,10 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
     {
         _loader = loader;
-        Layers = ["Albedo", "Normal", "Physical"];
-        if (loader.LayerCount > Layers.Count)
+        if (loader.LayerCount > SupportedLayerCount)
             throw new InvalidOperationException(
                 $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
-                $"but at most {Layers.Count} (Albedo, Normal, Physical) are supported.");
+                $"but at most {SupportedLayerCount} (Albedo, Normal, Physical) are supported.");
         foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
     }
@@ -39,11 +43,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     ///     to this collection's collection view, which keeps WPF's ICollectionView out of the view model.
     /// </summary>
     public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
-
-    /// <summary>
-    ///     The list of layers.
-    /// </summary>
-    public IReadOnlyList<string> Layers { get; }
 
     /// <summary>
     ///     The currently selected texture.

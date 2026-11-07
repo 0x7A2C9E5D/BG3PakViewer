@@ -188,8 +188,11 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Text="{I18N {x:Static l:LangKeys.TitleLayerLabel}}" VerticalAlignment="Center" />
                         <ComboBox Width="120" Margin="8,0,0,0" VerticalAlignment="Center"
-                                  ItemsSource="{Binding Layers}"
-                                  SelectedIndex="{Binding SelectedLayerIndex}" />
+                                  SelectedIndex="{Binding SelectedLayerIndex}">
+                            <ComboBoxItem Content="Albedo" />
+                            <ComboBoxItem Content="Normal" />
+                            <ComboBoxItem Content="Physical" />
+                        </ComboBox>
                         <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
                                    Margin="16,0,0,0" Foreground="Gray" />
                     </StackPanel>
