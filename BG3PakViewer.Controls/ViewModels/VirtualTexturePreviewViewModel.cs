@@ -15,6 +15,11 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
 {
+    /// <summary>
+    ///     Known channel names of the first virtual texture layers.
+    /// </summary>
+    private static readonly string[] LayerNames = ["Albedo", "Normal", "Physical"];
+
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
