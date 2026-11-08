@@ -55,12 +55,18 @@
                                         <TextBlock Text="{Binding Uv[2], Mode=OneWay, StringFormat='U2: {0}'}" />
                                         <TextBlock Text="{Binding Uv[1], Mode=OneWay, StringFormat='V1: {0}'}" />
                                         <TextBlock Text="{Binding Uv[3], Mode=OneWay, StringFormat='V2: {0}'}" />
+                                        <TextBlock>
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="Size: {0} × {1}">
+                                                    <Binding Path=" Width" Mode="OneWay" />
+                                                    <Binding Path="Height" Mode="OneWay" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
                             </Border.ToolTip>
-                            <Image Width="{Binding Width}"
-                                   Height="{Binding Height}"
-                                   Source="{Binding Image}"
+                            <Image Source="{Binding Image}"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
                     </DataTemplate>
