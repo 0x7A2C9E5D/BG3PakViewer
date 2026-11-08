@@ -1,7 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
-                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
     <!--
       Preview for icon atlases. The atlas is sliced into its icon grid and every cell is shown at the
       size it has in the atlas.
@@ -52,18 +51,10 @@
                             <Border.ToolTip>
                                 <ToolTip>
                                     <StackPanel>
-                                        <TextBlock>
-                                            <Run Text="{I18N {x:Static l:LangKeys.IconAtlasPositionLabel}}" />
-                                            <Run Text="{Binding PositionText, Mode=OneWay}" />
-                                        </TextBlock>
-                                        <TextBlock>
-                                            <Run Text="{I18N {x:Static l:LangKeys.IconAtlasCoordinatesLabel}}" />
-                                            <Run Text="{Binding CoordinatesText, Mode=OneWay}" />
-                                        </TextBlock>
-                                        <TextBlock>
-                                            <Run Text="{I18N {x:Static l:LangKeys.IconAtlasSizeLabel}}" />
-                                            <Run Text="{Binding SizeText, Mode=OneWay}" />
-                                        </TextBlock>
+                                        <TextBlock Text="{Binding UV[0], Mode=OneWay, StringFormat='U1: {0}'}" />
+                                        <TextBlock Text="{Binding UV[1], Mode=OneWay, StringFormat='V1: {0}'}" />
+                                        <TextBlock Text="{Binding UV[2], Mode=OneWay, StringFormat='U2: {0}'}" />
+                                        <TextBlock Text="{Binding UV[3], Mode=OneWay, StringFormat='V2: {0}'}" />
                                     </StackPanel>
                                 </ToolTip>
                             </Border.ToolTip>

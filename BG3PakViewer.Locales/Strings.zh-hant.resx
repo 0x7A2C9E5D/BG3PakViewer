@@ -264,13 +264,4 @@
     <data name="CopyName" xml:space="preserve">
         <value>複製名稱</value>
     </data>
-    <data name="IconAtlasPositionLabel" xml:space="preserve">
-        <value>位置：</value>
-    </data>
-    <data name="IconAtlasCoordinatesLabel" xml:space="preserve">
-        <value>座標：</value>
-    </data>
-    <data name="IconAtlasSizeLabel" xml:space="preserve">
-        <value>尺寸：</value>
-    </data>
 </root>

@@ -1,3 +1,4 @@
+using System.Numerics;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Icons;
 using BG3PakViewer.Loader;
@@ -36,21 +37,29 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         // itself; blank cells are dropped there, which is what keeps a half used sheet from previewing
         // as a wall of empty icons.
         var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, grid));
+
+        // The size of the sheet is what the UVs of the cells are normalized against, so it is captured
+        // before the atlas itself is released.
+        var atlasWidth = image.Width;
+        var atlasHeight = image.Height;
         image.Dispose();
 
-        return CreateIconAtlasPreview(icons);
+        return CreateIconAtlasPreview(icons, atlasWidth, atlasHeight);
     }
 
     /// <summary>
     ///     Turns the sliced icons of an atlas into a preview grid.
     /// </summary>
     /// <param name="icons">The sliced icons and the cells they were cut from.</param>
+    /// <param name="atlasWidth">The width of the sheet the icons were cut from, in pixels.</param>
+    /// <param name="atlasHeight">The height of the sheet the icons were cut from, in pixels.</param>
     /// <returns>The preview of the icons.</returns>
     /// <remarks>
     ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
     ///     soon as each one has been converted and are never held by the preview.
     /// </remarks>
-    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons)
+    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons,
+        int atlasWidth, int atlasHeight)
     {
         return new IconAtlasPreviewViewModel([
             .. icons.Select(cell =>
@@ -59,8 +68,11 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
                 cell.Image.Dispose();
 
                 // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
-                return new IconAtlasCellViewModel(bitmap, cell.Row, cell.Column,
-                    cell.Bounds.X, cell.Bounds.Y, bitmap.PixelWidth, bitmap.PixelHeight);
+                return new IconAtlasCellViewModel(bitmap, new Vector4(
+                    cell.Bounds.X / (float)atlasWidth,
+                    cell.Bounds.Y / (float)atlasHeight,
+                    (cell.Bounds.X + cell.Bounds.Width) / (float)atlasWidth,
+                    (cell.Bounds.Y + cell.Bounds.Height) / (float)atlasHeight));
             })
         ]);
     }

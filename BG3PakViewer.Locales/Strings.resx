@@ -273,13 +273,4 @@
     <data name="CopyName" xml:space="preserve">
         <value>Copy name</value>
     </data>
-    <data name="IconAtlasPositionLabel" xml:space="preserve">
-        <value>Position: </value>
-    </data>
-    <data name="IconAtlasCoordinatesLabel" xml:space="preserve">
-        <value>Coordinates: </value>
-    </data>
-    <data name="IconAtlasSizeLabel" xml:space="preserve">
-        <value>Size: </value>
-    </data>
 </root>

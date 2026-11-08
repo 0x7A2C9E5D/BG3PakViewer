@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Windows.Media.Imaging;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -7,11 +8,11 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     sheet.
 /// </summary>
 /// <remarks>
-///     The atlas does not name its icons, so the cell the icon was cut from is the only identity it has;
-///     it is what lets a user find the icon again in the sheet or match it against external data.
+///     The atlas does not name its icons, so the UV range of the cell the icon was cut from is the only
+///     identity it has; it is what lets a user find the icon again in the sheet or match it against
+///     external data.
 /// </remarks>
-public sealed class IconAtlasCellViewModel(BitmapSource image, int row, int column,
-    int x, int y, int width, int height)
+public sealed class IconAtlasCellViewModel(BitmapSource image, Vector4 uv)
 {
     /// <summary>
     ///     The sliced bitmap of this icon.
@@ -19,30 +20,20 @@ public sealed class IconAtlasCellViewModel(BitmapSource image, int row, int colu
     public BitmapSource Image { get; } = image;
 
     /// <summary>
-    ///     The place of the cell in the atlas grid, formatted for the tooltip of the cell. The row and the
-    ///     column are one based, and a sheet without a grid has neither.
+    ///     The UV range of the icon in the atlas, as (min u, min v, max u, max v). The UVs are normalized
+    ///     against the size of the sheet, with the origin at its top left corner.
     /// </summary>
-    public string PositionText => $"R{row}C{column}";
-
-    /// <summary>
-    ///     The offset of the icon in the atlas, formatted for the tooltip of the cell.
-    /// </summary>
-    public string CoordinatesText => $"({x}, {y})";
+    public Vector4 UV { get; } = uv;
 
     /// <summary>
     ///     Width of the cell in the grid, in device independent pixels. The icon keeps the size it has in
     ///     the atlas instead of being stretched to a fixed one.
     /// </summary>
-    public double Width { get; } = width;
+    public double Width { get; } = image.PixelWidth;
 
     /// <summary>
     ///     Height of the cell in the grid, in device independent pixels. The icon keeps the size it has in
     ///     the atlas instead of being stretched to a fixed one.
     /// </summary>
-    public double Height { get; } = height;
-
-    /// <summary>
-    ///     The size of the cell in the grid, formatted for the tooltip of the cell.
-    /// </summary>
-    public string SizeText => $"{Width:0} × {Height:0}";
+    public double Height { get; } = image.PixelHeight;
 }
