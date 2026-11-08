@@ -51,10 +51,10 @@
                             <Border.ToolTip>
                                 <ToolTip>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding UV[0], Mode=OneWay, StringFormat='U1: {0}'}" />
-                                        <TextBlock Text="{Binding UV[1], Mode=OneWay, StringFormat='V1: {0}'}" />
-                                        <TextBlock Text="{Binding UV[2], Mode=OneWay, StringFormat='U2: {0}'}" />
-                                        <TextBlock Text="{Binding UV[3], Mode=OneWay, StringFormat='V2: {0}'}" />
+                                        <TextBlock Text="{Binding Uv[0], Mode=OneWay, StringFormat='U1: {0}'}" />
+                                        <TextBlock Text="{Binding Uv[1], Mode=OneWay, StringFormat='V1: {0}'}" />
+                                        <TextBlock Text="{Binding Uv[2], Mode=OneWay, StringFormat='U2: {0}'}" />
+                                        <TextBlock Text="{Binding Uv[3], Mode=OneWay, StringFormat='V2: {0}'}" />
                                     </StackPanel>
                                 </ToolTip>
                             </Border.ToolTip>

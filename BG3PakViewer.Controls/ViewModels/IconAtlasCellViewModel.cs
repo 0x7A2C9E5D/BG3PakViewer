@@ -23,7 +23,7 @@ public sealed class IconAtlasCellViewModel(BitmapSource image, Vector4 uv)
     ///     The UV range of the icon in the atlas, as (min u, min v, max u, max v). The UVs are normalized
     ///     against the size of the sheet, with the origin at its top left corner.
     /// </summary>
-    public Vector4 UV { get; } = uv;
+    public Vector4 Uv { get; } = uv;
 
     /// <summary>
     ///     Width of the cell in the grid, in device independent pixels. The icon keeps the size it has in
