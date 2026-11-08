@@ -22,12 +22,12 @@ public sealed class IconAtlasCellViewModel(BitmapSource image, int row, int colu
     ///     The place of the cell in the atlas grid, formatted for the tooltip of the cell. The row and the
     ///     column are one based, and a sheet without a grid has neither.
     /// </summary>
-    public string PositionText => $"L{row}, C{column}";
+    public string PositionText => $"R{row}C{column}";
 
     /// <summary>
     ///     The offset of the icon in the atlas, formatted for the tooltip of the cell.
     /// </summary>
-    public string CoordinatesText => $"{x}, {y}";
+    public string CoordinatesText => $"({x}, {y})";
 
     /// <summary>
     ///     Width of the cell in the grid, in device independent pixels. The icon keeps the size it has in
