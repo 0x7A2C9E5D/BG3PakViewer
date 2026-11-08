@@ -264,4 +264,7 @@
     <data name="CopyName" xml:space="preserve">
         <value>复制名称</value>
     </data>
+    <data name="IconAtlasSizeLabel" xml:space="preserve">
+        <value>尺寸：</value>
+    </data>
 </root>

@@ -339,6 +339,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Size: .
+        /// </summary>
+        public static string IconAtlasSizeLabel {
+            get {
+                return ResourceManager.GetString("IconAtlasSizeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Is Exporting.
         /// </summary>
         public static string IsExporting {
