@@ -6,6 +6,15 @@ using Image = SixLabors.ImageSharp.Image;
 namespace BG3PakViewer.Icons;
 
 /// <summary>
+///     An icon cut out of an atlas, together with the rectangle of the atlas it was cut from.
+/// </summary>
+/// <param name="Image">The icon. The caller owns and disposes it.</param>
+/// <param name="Bounds">The rectangle of the atlas the icon was cut from, in pixels.</param>
+/// <param name="Row">The one based row of the cell in the atlas grid, or 0 when the sheet has no grid.</param>
+/// <param name="Column">The one based column of the cell in the atlas grid, or 0 when the sheet has no grid.</param>
+public sealed record IconAtlasCell(Image Image, Rectangle Bounds, int Row, int Column);
+
+/// <summary>
 ///     Cuts the icons of an icon atlas out of the sheet.
 /// </summary>
 /// <remarks>
@@ -30,12 +39,12 @@ public static class IconAtlasSlicer
     /// </summary>
     /// <param name="atlas">The decoded atlas. It is not disposed by this method.</param>
     /// <param name="grid">The cell size detected from the atlas content, or <c>null</c> when the sheet shows no grid.</param>
-    /// <returns>The icons. The caller owns and disposes them.</returns>
+    /// <returns>The icons and the rectangles they were cut from. The caller owns and disposes them.</returns>
     /// <remarks>
     ///     A sheet without a grid holds a single icon instead of a row of them, so it is cut down to the
     ///     pixels that icon is drawn on, which is what keeps its padding out of the preview.
     /// </remarks>
-    public static IReadOnlyList<Image> Slice(Image atlas, IconAtlasGrid? grid)
+    public static IReadOnlyList<IconAtlasCell> Slice(Image atlas, IconAtlasGrid? grid)
     {
         // Atlases reach here as Bgra32, Bgr24 or gray; normalizing once keeps both the scan and the cuts
         // on a single layout, and a plain Bgra32 atlas is used as it is.
@@ -55,13 +64,13 @@ public static class IconAtlasSlicer
         }
     }
 
-    private static List<Image> Slice(Image<Bgra32> atlas, int cellWidth, int cellHeight)
+    private static List<IconAtlasCell> Slice(Image<Bgra32> atlas, int cellWidth, int cellHeight)
     {
         // The detected pitch rarely divides the atlas exactly - a portrait sheet has a half used column
         // and row at its edge - so the remainder is dropped instead of being stretched into the last cell.
         var columns = Math.Max(1, atlas.Width / cellWidth);
         var rows = Math.Max(1, atlas.Height / cellHeight);
-        var icons = new List<Image>();
+        var icons = new List<IconAtlasCell>();
 
         for (var row = 0; row < rows; row++)
         {
@@ -76,7 +85,7 @@ public static class IconAtlasSlicer
                 // granularity then leaves the padding of a whole cell looking like an icon.
                 if (FindContentBoundingBox(atlas, cell) is null) continue;
 
-                icons.Add(atlas.Clone(context => context.Crop(cell)));
+                icons.Add(new IconAtlasCell(atlas.Clone(context => context.Crop(cell)), cell, row + 1, column + 1));
             }
         }
 
@@ -88,10 +97,12 @@ public static class IconAtlasSlicer
     /// </summary>
     /// <param name="atlas">The atlas to cut.</param>
     /// <returns>The icon, or an empty list when the sheet holds nothing visible.</returns>
-    private static List<Image> CropSingleIconToContentBounds(Image<Bgra32> atlas)
+    private static List<IconAtlasCell> CropSingleIconToContentBounds(Image<Bgra32> atlas)
     {
         var whole = new Rectangle(0, 0, atlas.Width, atlas.Height);
-        return FindContentBoundingBox(atlas, whole) is { } icon ? [atlas.Clone(context => context.Crop(icon))] : [];
+        return FindContentBoundingBox(atlas, whole) is { } icon
+            ? [new IconAtlasCell(atlas.Clone(context => context.Crop(icon)), icon, 0, 0)]
+            : [];
     }
 
     /// <summary>

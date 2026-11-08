@@ -38,15 +38,29 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, grid));
         image.Dispose();
 
-        // `icons` is a list of the sliced images, which are only the source of the bitmaps, so they are
-        // released as soon as they have been converted and are never held by the view model.
-        // The view model only holds the bitmaps, so it is safe to dispose the icons.
+        return CreateIconAtlasPreview(icons);
+    }
+
+    /// <summary>
+    ///     Turns the sliced icons of an atlas into a preview grid.
+    /// </summary>
+    /// <param name="icons">The sliced icons and the cells they were cut from.</param>
+    /// <returns>The preview of the icons.</returns>
+    /// <remarks>
+    ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
+    ///     soon as each one has been converted and are never held by the preview.
+    /// </remarks>
+    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons)
+    {
         return new IconAtlasPreviewViewModel([
-            .. icons.Select(icon =>
+            .. icons.Select(cell =>
             {
-                var bitmap = icon.ToBitmapSource();
-                icon.Dispose();
-                return bitmap;
+                var bitmap = cell.Image.ToBitmapSource();
+                cell.Image.Dispose();
+
+                // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
+                return new IconAtlasCellViewModel(bitmap, cell.Row, cell.Column,
+                    cell.Bounds.X, cell.Bounds.Y, bitmap.PixelWidth, bitmap.PixelHeight);
             })
         ]);
     }

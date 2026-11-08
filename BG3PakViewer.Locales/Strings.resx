@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <root>
     <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
@@ -272,5 +272,14 @@
     </data>
     <data name="CopyName" xml:space="preserve">
         <value>Copy name</value>
+    </data>
+    <data name="IconAtlasPositionLabel" xml:space="preserve">
+        <value>Position: </value>
+    </data>
+    <data name="IconAtlasCoordinatesLabel" xml:space="preserve">
+        <value>Coordinates: </value>
+    </data>
+    <data name="IconAtlasSizeLabel" xml:space="preserve">
+        <value>Size: </value>
     </data>
 </root>

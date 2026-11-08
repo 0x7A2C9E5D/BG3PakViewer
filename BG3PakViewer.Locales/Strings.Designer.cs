@@ -339,6 +339,33 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Position: .
+        /// </summary>
+        public static string IconAtlasPositionLabel {
+            get {
+                return ResourceManager.GetString("IconAtlasPositionLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Coordinates: .
+        /// </summary>
+        public static string IconAtlasCoordinatesLabel {
+            get {
+                return ResourceManager.GetString("IconAtlasCoordinatesLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Size: .
+        /// </summary>
+        public static string IconAtlasSizeLabel {
+            get {
+                return ResourceManager.GetString("IconAtlasSizeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Is Exporting.
         /// </summary>
         public static string IsExporting {

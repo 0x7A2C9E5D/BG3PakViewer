@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Syncfusion.Data.Extensions;
 
@@ -19,12 +18,12 @@ public class IconAtlasPreviewViewModel : ObservableObject
     /// <summary>
     ///     Initializes a new instance of the <see cref="IconAtlasPreviewViewModel" /> class.
     /// </summary>
-    /// <param name="icons"></param>
+    /// <param name="items">The icons of the atlas, with the rectangles they were cut from.</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public IconAtlasPreviewViewModel(IEnumerable<BitmapSource> icons)
+    public IconAtlasPreviewViewModel(IEnumerable<IconAtlasCellViewModel> items)
     {
-        ArgumentNullException.ThrowIfNull(icons);
-        Items = icons.Select(x => new IconAtlasCellViewModel(x)).ToObservableCollection();
+        ArgumentNullException.ThrowIfNull(items);
+        Items = items.ToObservableCollection();
     }
 
     /// <summary>
