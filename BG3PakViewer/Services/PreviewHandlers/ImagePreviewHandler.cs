@@ -28,38 +28,33 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         if (!IconAtlasDetector.IsIconAtlas(node.FullPath))
             return new ImagePreviewViewModel { Preview = image };
 
-        // A file whose name looks like an atlas does not have to be one, so the grid is only used when
-        // the content actually shows one. A sheet without a grid still goes through the slicer: it holds
-        // a single icon, and slicing it is what keeps its padding out of the preview.
-        var grid = await Task.Run(() => IconAtlasDetector.DetectGrid(image));
-
-        // Icon atlases are previewed as a sliced icon grid. The slicing happens on the decoded image
-        // itself; blank cells are dropped there, which is what keeps a half used sheet from previewing
-        // as a wall of empty icons.
-        var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, grid));
+        // Icon atlases are previewed as a sliced icon grid. A file whose name looks like an atlas does
+        // not have to be one, so the grid is only used when the content actually shows one; a sheet
+        // without a grid still goes through the slicer holding a single icon, which is what keeps its
+        // padding out of the preview. The slicing happens on the decoded image itself, and blank cells
+        // are dropped there, which is what keeps a half used sheet from previewing as a wall of empty
+        // icons.
+        var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, IconAtlasDetector.DetectGrid(image)));
 
         // The size of the sheet is what the UVs of the cells are normalized against, so it is captured
         // before the atlas itself is released.
-        var atlasWidth = image.Width;
-        var atlasHeight = image.Height;
+        var size = new Vector2(image.Width, image.Height);
         image.Dispose();
 
-        return CreateIconAtlasPreview(icons, atlasWidth, atlasHeight);
+        return CreateIconAtlasPreview(icons, size);
     }
 
     /// <summary>
     ///     Turns the sliced icons of an atlas into a preview grid.
     /// </summary>
     /// <param name="icons">The sliced icons and the cells they were cut from.</param>
-    /// <param name="atlasWidth">The width of the sheet the icons were cut from, in pixels.</param>
-    /// <param name="atlasHeight">The height of the sheet the icons were cut from, in pixels.</param>
+    /// <param name="size">The size of the sheet the icons were cut from.</param>
     /// <returns>The preview of the icons.</returns>
     /// <remarks>
     ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
     ///     soon as each one has been converted and are never held by the preview.
     /// </remarks>
-    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons,
-        int atlasWidth, int atlasHeight)
+    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons,Vector2 size)
     {
         return new IconAtlasPreviewViewModel([
             .. icons.Select(cell =>
@@ -69,10 +64,10 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
 
                 // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
                 return new IconAtlasCellViewModel(bitmap, new Vector4(
-                    cell.Bounds.X / (float)atlasWidth,
-                    cell.Bounds.Y / (float)atlasHeight,
-                    (cell.Bounds.X + cell.Bounds.Width) / (float)atlasWidth,
-                    (cell.Bounds.Y + cell.Bounds.Height) / (float)atlasHeight));
+                    cell.Bounds.X / size.Y,
+                    cell.Bounds.Y / size.X,
+                    (cell.Bounds.X + cell.Bounds.Width) / size.X,
+                    (cell.Bounds.Y + cell.Bounds.Height) / size.Y));
             })
         ]);
     }
