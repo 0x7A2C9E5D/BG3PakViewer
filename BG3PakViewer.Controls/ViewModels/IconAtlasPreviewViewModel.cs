@@ -55,7 +55,8 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
 
         // The selection is changed on the cells, so it has to be watched to keep the command state in
         // sync with the icons the user has picked.
-        foreach (var item in Items) item.PropertyChanged += OnItemPropertyChanged;
+        foreach (var item in Items) 
+            item.PropertyChanged += OnItemPropertyChanged;
     }
 
     /// <summary>
