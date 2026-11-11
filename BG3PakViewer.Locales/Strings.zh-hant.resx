@@ -300,4 +300,7 @@
     <data name="ExportAllIcons" xml:space="preserve">
         <value>匯出全部</value>
     </data>
+    <data name="ExportCurrentTexture" xml:space="preserve">
+        <value>匯出紋理組</value>
+    </data>
 </root>

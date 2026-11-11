@@ -212,17 +212,35 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock Text="{I18N {x:Static l:LangKeys.TitleLayerLabel}}" VerticalAlignment="Center" />
-                        <ComboBox Width="120" Margin="8,0,0,0" VerticalAlignment="Center"
-                                  SelectedIndex="{Binding SelectedLayerIndex}">
-                            <ComboBoxItem Content="Albedo" />
-                            <ComboBoxItem Content="Normal" />
-                            <ComboBoxItem Content="Physical" />
-                        </ComboBox>
-                        <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
-                                   Margin="16,0,0,0" Foreground="Gray" />
-                    </StackPanel>
+                    <!-- The layer selector stays on the left, the export action sits in the top-right corner. -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{I18N {x:Static l:LangKeys.TitleLayerLabel}}" VerticalAlignment="Center" />
+                            <ComboBox Width="120" Margin="8,0,0,0" VerticalAlignment="Center"
+                                      SelectedIndex="{Binding SelectedLayerIndex}">
+                                <ComboBoxItem Content="Albedo" />
+                                <ComboBoxItem Content="Normal" />
+                                <ComboBoxItem Content="Physical" />
+                            </ComboBox>
+                            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
+                                       Margin="16,0,0,0" Foreground="Gray" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Margin="8,0,0,0" Padding="10,4"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Command="{Binding ExportCommand}"
+                                AutomationProperties.Name="{I18N {x:Static l:LangKeys.ExportCurrentTexture}}"
+                                ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.ExportCurrentTexture}}">
+                            <StackPanel Orientation="Horizontal">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" FontSize="14" />
+                                <TextBlock Margin="6,0,0,0" VerticalAlignment="Center"
+                                           Text="{I18N {x:Static l:LangKeys.ExportCurrentTexture}}" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
 
                     <Border Grid.Row="1" Margin="0,0,0,8"
                             BorderBrush="Gray" BorderThickness="1">

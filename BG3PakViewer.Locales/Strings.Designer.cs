@@ -249,6 +249,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export texture set.
+        /// </summary>
+        public static string ExportCurrentTexture {
+            get {
+                return ResourceManager.GetString("ExportCurrentTexture", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export Failed.
         /// </summary>
         public static string ExportFailedCaption {

@@ -1,8 +1,17 @@
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
+using System.Windows;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using HanumanInstitute.MvvmDialogs;
+using HanumanInstitute.MvvmDialogs.FileSystem;
+using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using LSLib.VirtualTextures;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
@@ -20,6 +29,16 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     /// </summary>
     private const int SupportedLayerCount = 3;
 
+    /// <summary>
+    ///     Layer names, kept in sync with the layer selector of the view; used to name exported files.
+    /// </summary>
+    private static readonly string[] LayerNames = ["Albedo", "Normal", "Physical"];
+
+    private readonly IAppSettings _appSettings;
+    private readonly IDialogService _dialogService;
+    private readonly IPreviewExportService _exportService;
+    private readonly SemaphoreSlim _extractLock = new(1, 1);
+
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
@@ -27,9 +46,16 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     ///     Initializes a new instance of the <see cref="VirtualTexturePreviewViewModel" /> class.
     /// </summary>
     /// <param name="loader"></param>
-    public VirtualTexturePreviewViewModel(VirtualTextureLoader loader)
+    /// <param name="dialogService">The service used to pick the export folder and report the result.</param>
+    /// <param name="appSettings">The settings holding the default export directory.</param>
+    /// <param name="exportService">The service that writes the exported layer files.</param>
+    public VirtualTexturePreviewViewModel(VirtualTextureLoader loader, IDialogService dialogService,
+        IAppSettings appSettings, IPreviewExportService exportService)
     {
         _loader = loader;
+        _dialogService = dialogService;
+        _appSettings = appSettings;
+        _exportService = exportService;
         if (loader.LayerCount > SupportedLayerCount)
             throw new InvalidOperationException(
                 $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
@@ -101,6 +127,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedTextureChanged(VirtualTextureItemViewModel? value)
     {
+        NotifyExportCanExecuteChanged();
         _ = LoadPreviewAsync();
     }
 
@@ -151,7 +178,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     /// <param name="cts"></param>
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        await using var ddsStream = await _loader.ExtractAsync(meta, layer,
+        await using var ddsStream = await ExtractLayerAsync(meta, layer,
             new Progress<double>(p => Progress = p), cts.Token);
         if (cts.IsCancellationRequested) return;
 
@@ -170,6 +197,28 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         }
 
         ShowPreview(image);
+    }
+
+    /// <summary>
+    ///     Extracts one layer of a texture into a DDS stream. The loader's page cache is not
+    ///     thread-safe, so preview loading and exporting must not extract at the same time.
+    /// </summary>
+    /// <param name="meta"></param>
+    /// <param name="layer"></param>
+    /// <param name="progress"></param>
+    /// <param name="ct"></param>
+    private async Task<Stream?> ExtractLayerAsync(FourCCTextureMeta meta, int layer,
+        IProgress<double>? progress, CancellationToken ct)
+    {
+        await _extractLock.WaitAsync(ct);
+        try
+        {
+            return await _loader.ExtractAsync(meta, layer, progress, ct);
+        }
+        finally
+        {
+            _extractLock.Release();
+        }
     }
 
     /// <summary>
@@ -211,6 +260,152 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     }
 
     /// <summary>
+    ///     Whether the selected texture can be exported.
+    /// </summary>
+    private bool CanExport()
+    {
+        return SelectedTexture is not null && !IsBusy;
+    }
+
+    /// <summary>
+    ///     Exports every layer of the selected texture as one set of DDS files.
+    ///     DDS is the only export format here: the raw layer data is written without re-encoding.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanExport))]
+    private Task ExportAsync()
+    {
+        var texture = SelectedTexture;
+        if (texture is null) return Task.CompletedTask;
+
+        var meta = texture.Meta;
+        var name = Path.GetFileNameWithoutExtension(texture.DisplayName);
+        var layerCount = Math.Min(_loader.LayerCount, LayerNames.Length);
+        if (layerCount == 0) return Task.CompletedTask;
+        return ExportFilesAsync([.. Enumerable.Range(0, layerCount).Select(layer => ToExportFile(name, meta, layer))]);
+    }
+
+    /// <summary>
+    ///     Asks the user for a target folder and exports the files there.
+    /// </summary>
+    /// <param name="files">The files to export.</param>
+    private async Task ExportFilesAsync(IReadOnlyList<PreviewExportFile> files)
+    {
+        var folder = await PickFolderAsync();
+        if (folder is not null)
+        {
+            var exported = 0;
+            var failures = new List<PreviewExportResult>();
+            await foreach (var result in _exportService.ExportAsync(folder, files))
+                if (result.Success)
+                    exported++;
+                else
+                    failures.Add(result);
+
+            await ReportExportResultAsync(exported, files.Count, failures, folder);
+        }
+        else
+        {
+            Log.Information("Preview export folder selection was cancelled");
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportCancelledMessage,
+                Strings.CancelExportOperationCaption);
+        }
+    }
+
+    /// <summary>
+    ///     Tells the user what was written, and which files failed together with the reason.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="total">How many files the export attempted.</param>
+    /// <param name="failures">The files that could not be written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportExportResultAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
+        string folder)
+    {
+        if (failures.Count == 0)
+            await ReportSuccessAsync(exported, folder);
+        else
+            await ReportFailuresAsync(exported, total, failures, folder);
+    }
+
+    /// <summary>
+    ///     Tells the user that every file was written.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportSuccessAsync(int exported, string folder)
+    {
+        Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
+        await _dialogService.ShowMessageBoxNotifyAsync(this,
+            string.Format(Strings.PreviewExportCompletedMessage, exported),
+            Strings.ExportCompleted, MessageBoxIcon.Success);
+    }
+
+    /// <summary>
+    ///     Tells the user how many files were written and which ones failed, together with the reason.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="total">How many files the export attempted.</param>
+    /// <param name="failures">The files that could not be written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportFailuresAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
+        string folder)
+    {
+        Log.Warning("Exported {Exported} of {Total} preview files to: {Folder}", exported, total, folder);
+
+        var message = new StringBuilder();
+        message.AppendLine(exported == 0
+            ? Strings.PreviewExportNothingMessage
+            : string.Format(Strings.PreviewExportPartialMessage, exported, total));
+        message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
+        foreach (var failure in failures)
+            message.AppendLine($"{failure.Name}: {failure.Reason}");
+
+        await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
+            exported == 0 ? Strings.ExportFailedCaption : Strings.PreviewExportPartiallyFailedCaption,
+            MessageBoxIcon.Error);
+    }
+
+    /// <summary>
+    ///     Asks the user where the files should be written.
+    /// </summary>
+    /// <returns>The chosen folder, or <see langword="null" /> when the user cancels.</returns>
+    private async Task<string?> PickFolderAsync()
+    {
+        var storageFolder = await _dialogService.ShowOpenFolderDialogAsync(null, new OpenFolderDialogSettings
+        {
+            SuggestedStartLocation = Directory.Exists(_appSettings.DefaultExportDirectory)
+                ? new DesktopDialogStorageFolder(_appSettings.DefaultExportDirectory)
+                : null
+        });
+        return storageFolder?.LocalPath;
+    }
+
+    /// <summary>
+    ///     Turns one layer of the selected texture into the DDS file it is exported to.
+    /// </summary>
+    /// <param name="textureName">The texture name, without extension.</param>
+    /// <param name="meta">The texture metadata.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <returns>The file to write.</returns>
+    private PreviewExportFile ToExportFile(string textureName, FourCCTextureMeta meta, int layer)
+    {
+        return new PreviewExportFile($"{textureName}_{LayerNames[layer]}.dds",
+            () => OpenLayerAsync(meta, layer));
+    }
+
+    /// <summary>
+    ///     Opens the raw DDS data of one layer. Ownership of the stream is transferred to the
+    ///     export service, which copies it to the target file and disposes it afterward.
+    /// </summary>
+    /// <param name="meta"></param>
+    /// <param name="layer"></param>
+    private async Task<Stream> OpenLayerAsync(FourCCTextureMeta meta, int layer)
+    {
+        return await ExtractLayerAsync(meta, layer, null, CancellationToken.None)
+               ?? throw new InvalidDataException(Strings.TitleNoDataForLayer);
+    }
+
+    /// <summary>
     ///     Disposes the old preview when the new one is set.
     /// </summary>
     /// <param name="oldValue"></param>
@@ -218,6 +413,41 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();
+    }
+
+    /// <summary>
+    ///     Keeps the export command's enabled state in sync with the preview.
+    /// </summary>
+    /// <param name="value"></param>
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnPreviewChanged(Image? value)
+    {
+        NotifyExportCanExecuteChanged();
+    }
+
+    /// <summary>
+    ///     Keeps the export command's enabled state in sync with preview loading.
+    /// </summary>
+    /// <param name="value"></param>
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnIsBusyChanged(bool value)
+    {
+        NotifyExportCanExecuteChanged();
+    }
+
+    /// <summary>
+    ///     WPF's command manager observes CanExecuteChanged on the UI thread, while the preview is
+    ///     loaded on a worker thread (the view model is created inside Task.Run). Raising the event
+    ///     there throws InvalidOperationException and makes the preview report a failure, so the
+    ///     notification is marshaled to the dispatcher instead.
+    /// </summary>
+    private void NotifyExportCanExecuteChanged()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+            ExportCommand.NotifyCanExecuteChanged();
+        else
+            dispatcher.InvokeAsync(ExportCommand.NotifyCanExecuteChanged);
     }
 
     protected override void Dispose(bool disposing)

@@ -1,8 +1,10 @@
 using System.IO;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
+using HanumanInstitute.MvvmDialogs;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -10,7 +12,14 @@ namespace BG3PakViewer.Services.PreviewHandlers;
 ///     Virtual texture preview handler
 /// </summary>
 /// <param name="packageService"></param>
-internal class VirtualTexturePreviewHandler(IPackageService packageService) : IPreviewHandler
+/// <param name="dialogService">The service used by the preview to pick an export folder.</param>
+/// <param name="appSettings">The settings holding the default export directory.</param>
+/// <param name="exportService">The service that writes the exported layer files.</param>
+internal class VirtualTexturePreviewHandler(
+    IPackageService packageService,
+    IDialogService dialogService,
+    IAppSettings appSettings,
+    IPreviewExportService exportService) : IPreviewHandler
 {
     /// <summary>
     ///     Can handle
@@ -51,7 +60,7 @@ internal class VirtualTexturePreviewHandler(IPackageService packageService) : IP
                            ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
                 });
                 pageFileNames = loader.TextureNames;
-                return new VirtualTexturePreviewViewModel(loader);
+                return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService);
             }
             catch
             {
