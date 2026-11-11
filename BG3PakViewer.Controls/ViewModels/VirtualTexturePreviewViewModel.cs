@@ -46,8 +46,9 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     /// <param name="dialogService">The service used to pick the export folder and report the result.</param>
     /// <param name="appSettings">The settings holding the default export directory.</param>
     /// <param name="exportService">The service that writes the exported layer files.</param>
+    /// <param name="clipboardService">The service used to copy texture names.</param>
     public VirtualTexturePreviewViewModel(VirtualTextureLoader loader, IDialogService dialogService,
-        IAppSettings appSettings, IPreviewExportService exportService)
+        IAppSettings appSettings, IPreviewExportService exportService, IClipboardService clipboardService)
     {
         _loader = loader;
         _dialogService = dialogService;
@@ -58,7 +59,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
                 $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
                 $"but at most {SupportedLayerCount} (Albedo, Normal, Physical) are supported.");
         foreach (var meta in loader.GetTextures())
-            Textures.Add(new VirtualTextureItemViewModel(meta));
+            Textures.Add(new VirtualTextureItemViewModel(meta, clipboardService));
         SelectedTexture = Textures.FirstOrDefault();
     }
 

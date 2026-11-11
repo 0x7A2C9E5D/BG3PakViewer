@@ -1,7 +1,6 @@
 using System.IO;
 using BG3PakViewer.Contracts;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using LSLib.VirtualTextures;
 
@@ -11,7 +10,9 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     View model for a single virtual texture.
 /// </summary>
 /// <param name="meta"></param>
-public partial class VirtualTextureItemViewModel(FourCCTextureMeta meta) : ObservableObject
+/// <param name="clipboardService">The service used to copy the texture name.</param>
+public partial class VirtualTextureItemViewModel(FourCCTextureMeta meta, IClipboardService clipboardService)
+    : ObservableObject
 {
     /// <summary>
     ///     The virtual texture metadata.
@@ -34,15 +35,13 @@ public partial class VirtualTextureItemViewModel(FourCCTextureMeta meta) : Obser
     [ObservableProperty]
     public partial bool IsCopied { get; set; }
 
-    private static IClipboardService ClipboardService => Ioc.Default.GetRequiredService<IClipboardService>();
-
     /// <summary>
     ///     Copies the name of the virtual texture to the clipboard.
     /// </summary>
     [RelayCommand]
     private async Task CopyNameAsync()
     {
-        if (!ClipboardService.TrySetText(DisplayName)) return;
+        if (!clipboardService.TrySetText(DisplayName)) return;
 
         IsCopied = true;
         await Task.Delay(1500);

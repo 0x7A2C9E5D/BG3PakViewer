@@ -15,12 +15,14 @@ namespace BG3PakViewer.Services.PreviewHandlers;
 /// <param name="dialogService">The service used by the preview to pick an export folder.</param>
 /// <param name="appSettings">The settings holding the default export directory.</param>
 /// <param name="exportService">The service that writes the exported layer files.</param>
+/// <param name="clipboardService">The service used to copy texture names.</param>
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class VirtualTexturePreviewHandler(
     IPackageService packageService,
     IPreviewExportService exportService,
     IDialogService dialogService,
-    IAppSettings appSettings) : IPreviewHandler
+    IAppSettings appSettings,
+    IClipboardService clipboardService) : IPreviewHandler
 {
     /// <summary>
     ///     Can handle
@@ -61,7 +63,8 @@ internal class VirtualTexturePreviewHandler(
                        ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
             }));
             pageFileNames = loader.TextureNames;
-            return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService);
+            return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService,
+                clipboardService);
         }
         catch
         {
