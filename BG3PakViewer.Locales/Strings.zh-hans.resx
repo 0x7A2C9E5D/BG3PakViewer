@@ -204,6 +204,24 @@
     <data name="ExportFailedCaption" xml:space="preserve">
         <value>导出失败</value>
     </data>
+    <data name="PreviewExportCompletedMessage" xml:space="preserve">
+        <value>已导出 {0} 个文件到：
+{1}</value>
+    </data>
+    <data name="PreviewExportPartialMessage" xml:space="preserve">
+        <value>已导出 {1} 个文件中的 {0} 个到：
+{2}</value>
+    </data>
+    <data name="PreviewExportNothingMessage" xml:space="preserve">
+        <value>没有任何文件导出到：
+{0}</value>
+    </data>
+    <data name="PreviewExportFailedFilesHeader" xml:space="preserve">
+        <value>失败的文件：</value>
+    </data>
+    <data name="PreviewExportPartiallyFailedCaption" xml:space="preserve">
+        <value>部分导出失败</value>
+    </data>
     <data name="PreviewSettingHeader" xml:space="preserve">
         <value>预览设置</value>
     </data>

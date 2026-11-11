@@ -213,6 +213,24 @@
     <data name="ExportFailedCaption" xml:space="preserve">
         <value>Export Failed</value>
     </data>
+    <data name="PreviewExportCompletedMessage" xml:space="preserve">
+        <value>Exported {0} files to:
+{1}</value>
+    </data>
+    <data name="PreviewExportPartialMessage" xml:space="preserve">
+        <value>Exported {0} of {1} files to:
+{2}</value>
+    </data>
+    <data name="PreviewExportNothingMessage" xml:space="preserve">
+        <value>None of the files could be exported to:
+{0}</value>
+    </data>
+    <data name="PreviewExportFailedFilesHeader" xml:space="preserve">
+        <value>Failed files:</value>
+    </data>
+    <data name="PreviewExportPartiallyFailedCaption" xml:space="preserve">
+        <value>Export Partially Failed</value>
+    </data>
     <data name="PreviewSettingHeader" xml:space="preserve">
         <value>Preview Settings</value>
     </data>

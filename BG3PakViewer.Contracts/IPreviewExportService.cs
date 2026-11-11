@@ -8,12 +8,19 @@ namespace BG3PakViewer.Contracts;
 public interface IPreviewExportService
 {
     /// <summary>
-    ///     Writes the given files to the given folder.
+    ///     Writes the given files to the given folder, telling how each file went as soon as it is known.
     /// </summary>
+    /// <remarks>
+    ///     The export is lazy: nothing happens until the returned sequence is enumerated, and stopping
+    ///     the enumeration leaves the files that were not reached alone. A file that cannot be opened or
+    ///     written does not stop the remaining ones and leaves nothing behind; it is reported as a
+    ///     failed result instead, so a folder that cannot be written to shows up as failures rather than
+    ///     as an exception.
+    /// </remarks>
     /// <param name="folder">The folder the files are written to.</param>
-    /// <param name="files">The files to export.</param>
-    /// <param name="progress">Receives how many files were written as the export advances.</param>
-    Task ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files, IProgress<int>? progress = null);
+    /// <param name="files">The files to write, in the order they are attempted.</param>
+    /// <returns>One result per file, in the order they were attempted.</returns>
+    IAsyncEnumerable<PreviewExportResult> ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files);
 }
 
 /// <summary>
@@ -21,4 +28,12 @@ public interface IPreviewExportService
 /// </summary>
 /// <param name="FileName">The name of the file, including its extension.</param>
 /// <param name="OpenAsync">Opens the content of the file to be written.</param>
-public record PreviewExportFile(string FileName, Func<Task<Stream>> OpenAsync);
+public sealed record PreviewExportFile(string FileName, Func<Task<Stream>> OpenAsync);
+
+/// <summary>
+///     The outcome of writing one file of a preview export.
+/// </summary>
+/// <param name="Name">The name of the file that was attempted.</param>
+/// <param name="Success">Whether the file was written completely.</param>
+/// <param name="Reason">Why the file could not be written, or <see langword="null" /> when it was.</param>
+public sealed record PreviewExportResult(string Name, bool Success, string? Reason);

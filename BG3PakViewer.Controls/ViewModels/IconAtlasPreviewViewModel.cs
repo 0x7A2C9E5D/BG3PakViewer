@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Text;
 using System.Windows.Media.Imaging;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
@@ -96,14 +97,51 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         var folder = await PickFolderAsync();
         if (folder is null) return;
 
-        var progress = new PreviewExportProgressReporter();
-        await _exportService.ExportAsync(folder, files, progress);
-        if (progress.Exported == files.Count)
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportCompleted, Strings.ExportCompleted,
-                MessageBoxIcon.Success);
-        else
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportFailedMessage,
-                Strings.ExportFailedCaption, MessageBoxIcon.Error);
+        var exported = 0;
+        var failures = new List<PreviewExportResult>();
+        await foreach (var result in _exportService.ExportAsync(folder, files))
+        {
+            if (result.Success)
+                exported++;
+            else
+                failures.Add(result);
+        }
+
+        await ReportExportAsync(exported, files.Count, failures, folder);
+    }
+
+    /// <summary>
+    ///     Tells the user what was written, and which files failed together with the reason.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="total">How many files the export attempted.</param>
+    /// <param name="failures">The files that could not be written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportExportAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
+        string folder)
+    {
+        if (failures.Count == 0)
+        {
+            Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
+            await _dialogService.ShowMessageBoxNotifyAsync(this,
+                string.Format(Strings.PreviewExportCompletedMessage, exported, folder),
+                Strings.ExportCompleted, MessageBoxIcon.Success);
+            return;
+        }
+
+        Log.Warning("Exported {Exported} of {Total} preview files to: {Folder}", exported, total, folder);
+
+        var message = new StringBuilder();
+        message.AppendLine(exported == 0
+            ? string.Format(Strings.PreviewExportNothingMessage, folder)
+            : string.Format(Strings.PreviewExportPartialMessage, exported, total, folder));
+        message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
+        foreach (var failure in failures)
+            message.AppendLine($"{failure.Name}: {failure.Reason}");
+
+        await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
+            exported == 0 ? Strings.ExportFailedCaption : Strings.PreviewExportPartiallyFailedCaption,
+            MessageBoxIcon.Error);
     }
 
     /// <summary>
@@ -150,22 +188,5 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     {
         if (e.PropertyName == nameof(IconAtlasCellViewModel.IsSelected))
             ExportSelectedCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
-    ///     Collects the progress reported by a preview export.
-    /// </summary>
-    private sealed class PreviewExportProgressReporter : IProgress<int>
-    {
-        /// <summary>
-        ///     Gets how many files have been written.
-        /// </summary>
-        public int Exported { get; private set; }
-
-        /// <inheritdoc />
-        public void Report(int value)
-        {
-            Exported = value;
-        }
     }
 }

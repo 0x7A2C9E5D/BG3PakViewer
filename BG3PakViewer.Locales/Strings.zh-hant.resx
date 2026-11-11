@@ -72,6 +72,24 @@
     <data name="ExportFailedCaption" xml:space="preserve">
         <value>匯出失敗</value>
     </data>
+    <data name="PreviewExportCompletedMessage" xml:space="preserve">
+        <value>已匯出 {0} 個檔案到：
+{1}</value>
+    </data>
+    <data name="PreviewExportPartialMessage" xml:space="preserve">
+        <value>已匯出 {1} 個檔案中的 {0} 個到：
+{2}</value>
+    </data>
+    <data name="PreviewExportNothingMessage" xml:space="preserve">
+        <value>沒有任何檔案匯出到：
+{0}</value>
+    </data>
+    <data name="PreviewExportFailedFilesHeader" xml:space="preserve">
+        <value>失敗的檔案：</value>
+    </data>
+    <data name="PreviewExportPartiallyFailedCaption" xml:space="preserve">
+        <value>部分匯出失敗</value>
+    </data>
     <data name="ExportFailedMessage" xml:space="preserve">
         <value>匯出檔案失敗。請查看日誌以獲取詳細資訊。</value>
     </data>

@@ -10,35 +10,55 @@ namespace BG3PakViewer.Services;
 internal sealed class PreviewExportService : IPreviewExportService
 {
     /// <summary>
-    ///     Writes the given files to the given folder.
+    ///     Writes the given files to the given folder, telling how each file went as soon as it is known.
     /// </summary>
     /// <param name="folder">The folder the files are written to.</param>
-    /// <param name="files">The files to export.</param>
-    /// <param name="progress">Receives how many files were written as the export advances.</param>
-    public async Task ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files,
-        IProgress<int>? progress = null)
+    /// <param name="files">The files to write, in the order they are attempted.</param>
+    /// <returns>One result per file, in the order they were attempted.</returns>
+    public async IAsyncEnumerable<PreviewExportResult> ExportAsync(string folder,
+        IReadOnlyList<PreviewExportFile> files)
     {
-        if (files.Count == 0) return;
-
         var exported = 0;
         foreach (var file in files)
         {
             var path = Path.Combine(folder, file.FileName);
+            PreviewExportResult result;
             try
             {
                 await using var source = await file.OpenAsync();
                 await using var target = File.Create(path);
                 await source.CopyToAsync(target);
                 exported++;
+                result = new PreviewExportResult(file.FileName, true, null);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Failed to export file to: {Path}", path);
+                result = new PreviewExportResult(file.FileName, false, ex.Message);
+
+                // A half written file would look exported, so the outcome could not be trusted.
+                RemovePartialFile(path);
             }
 
-            progress?.Report(exported);
+            yield return result;
         }
 
-        Log.Information("Exported {Exported} of {Total} files", exported, files.Count);
+        Log.Information("Exported {Exported} of {Total} files to: {Folder}", exported, files.Count, folder);
+    }
+
+    /// <summary>
+    ///     Removes what a failed export may have written, so a failure never leaves a broken file.
+    /// </summary>
+    /// <param name="path">The path the file was being written to.</param>
+    private static void RemovePartialFile(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to remove the partially written file: {Path}", path);
+        }
     }
 }

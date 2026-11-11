@@ -312,6 +312,24 @@
     <data name="ExportFailedCaption" xml:space="preserve">
     <value>Esportazione non riuscita</value>
   </data>
+    <data name="PreviewExportCompletedMessage" xml:space="preserve">
+    <value>Esportati {0} file in:
+{1}</value>
+  </data>
+    <data name="PreviewExportPartialMessage" xml:space="preserve">
+    <value>Esportati {0} file su {1} in:
+{2}</value>
+  </data>
+    <data name="PreviewExportNothingMessage" xml:space="preserve">
+    <value>Nessun file è stato esportato in:
+{0}</value>
+  </data>
+    <data name="PreviewExportFailedFilesHeader" xml:space="preserve">
+    <value>File non esportati:</value>
+  </data>
+    <data name="PreviewExportPartiallyFailedCaption" xml:space="preserve">
+    <value>Esportazione parzialmente non riuscita</value>
+  </data>
     <data name="PreviewSettingHeader" xml:space="preserve">
       <value>Impostazioni di anteprima</value>
     </data>
