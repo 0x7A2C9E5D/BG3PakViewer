@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
+using System.Windows.Media.Imaging;
 using BG3PakViewer.Contracts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,24 +21,24 @@ namespace BG3PakViewer.Controls.ViewModels;
 public partial class IconAtlasPreviewViewModel : ObservableObject
 {
     private readonly string _atlasName;
-    private readonly IIconExportService _iconExportService;
+    private readonly IPreviewExportService _exportService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="IconAtlasPreviewViewModel" /> class.
     /// </summary>
     /// <param name="items">The icons of the atlas, with the rectangles they were cut from.</param>
-    /// <param name="iconExportService">The service the export commands hand the icons to.</param>
+    /// <param name="exportService">The service the export commands hand the icons to.</param>
     /// <param name="atlasName">The name of the atlas, without its extension, used to name exported files.</param>
     /// <exception cref="ArgumentNullException"></exception>
     public IconAtlasPreviewViewModel(
         IEnumerable<IconAtlasCellViewModel> items,
-        IIconExportService iconExportService,
+        IPreviewExportService exportService,
         string atlasName)
     {
         ArgumentNullException.ThrowIfNull(items);
-        ArgumentNullException.ThrowIfNull(iconExportService);
+        ArgumentNullException.ThrowIfNull(exportService);
         ArgumentNullException.ThrowIfNull(atlasName);
-        _iconExportService = iconExportService;
+        _exportService = exportService;
         _atlasName = atlasName;
         Items = items.ToObservableCollection();
 
@@ -56,7 +58,7 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanExportSelected))]
     private Task ExportSelectedAsync()
     {
-        return _iconExportService.ExportAsync([.. Items.Where(item => item.IsSelected).Select(ToExportItem)]);
+        return _exportService.ExportAsync([.. Items.Where(item => item.IsSelected).Select(ToExportFile)]);
     }
 
     /// <summary>
@@ -65,15 +67,25 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     [RelayCommand]
     private Task ExportAllAsync()
     {
-        return _iconExportService.ExportAsync([.. Items.Select(ToExportItem)]);
+        return _exportService.ExportAsync([.. Items.Select(ToExportFile)]);
     }
 
-    private IconExportItem ToExportItem(IconAtlasCellViewModel icon)
+    private PreviewExportFile ToExportFile(IconAtlasCellViewModel icon)
     {
         var fileName = icon.Row == 0
             ? $"{_atlasName}.png"
             : $"{_atlasName}_{icon.Row}_{icon.Column}.png";
-        return new IconExportItem(icon.Image, fileName);
+        return new PreviewExportFile(fileName, () => Task.Run(Stream () => EncodePng(icon.Image)));
+    }
+
+    private static MemoryStream EncodePng(BitmapSource image)
+    {
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(image));
+        var stream = new MemoryStream();
+        encoder.Save(stream);
+        stream.Position = 0;
+        return stream;
     }
 
     private bool CanExportSelected()

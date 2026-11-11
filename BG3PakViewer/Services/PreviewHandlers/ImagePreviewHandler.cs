@@ -10,7 +10,7 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class ImagePreviewHandler(IPackageService packageService, IIconExportService iconExportService)
+internal class ImagePreviewHandler(IPackageService packageService, IPreviewExportService exportService)
     : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
@@ -72,13 +72,13 @@ internal class ImagePreviewHandler(IPackageService packageService, IIconExportSe
 
                 // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
                 return new IconAtlasCellViewModel(bitmap, new Vector4(
-                    cell.Bounds.X / size.Y,
-                    cell.Bounds.Y / size.X,
-                    (cell.Bounds.X + cell.Bounds.Width) / size.X,
-                    (cell.Bounds.Y + cell.Bounds.Height) / size.Y),
+                        cell.Bounds.X / size.Y,
+                        cell.Bounds.Y / size.X,
+                        (cell.Bounds.X + cell.Bounds.Width) / size.X,
+                        (cell.Bounds.Y + cell.Bounds.Height) / size.Y),
                     cell.Row,
                     cell.Column);
             })
-        ], iconExportService, Path.GetFileNameWithoutExtension(name));
+        ], exportService, Path.GetFileNameWithoutExtension(name));
     }
 }
