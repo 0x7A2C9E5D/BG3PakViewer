@@ -105,7 +105,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
 
         var block = EncodeConstantColor(payload[0], payload[1], payload[2], payload[3]);
-        var blockCount = ((tileSet.Header.TileWidth + 3) / 4) * ((tileSet.Header.TileHeight + 3) / 4);
+        var blockCount = (tileSet.Header.TileWidth + 3) / 4 * ((tileSet.Header.TileHeight + 3) / 4);
         var data = new byte[blockCount * 16];
         for (var i = 0; i < blockCount; i++) block.CopyTo(data, i * 16);
         return data;

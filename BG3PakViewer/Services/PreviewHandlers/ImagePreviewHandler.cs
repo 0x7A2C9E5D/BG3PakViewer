@@ -54,7 +54,7 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
     ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
     ///     soon as each one has been converted and are never held by the preview.
     /// </remarks>
-    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons,Vector2 size)
+    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons, Vector2 size)
     {
         return new IconAtlasPreviewViewModel([
             .. icons.Select(cell =>

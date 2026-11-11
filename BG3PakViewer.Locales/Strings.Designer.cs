@@ -150,6 +150,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clear selection.
+        /// </summary>
+        public static string ClearSelection {
+            get {
+                return ResourceManager.GetString("ClearSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copy name.
         /// </summary>
         public static string CopyName {
@@ -335,6 +344,15 @@ namespace BG3PakViewer.Locales {
         public static string HomePage {
             get {
                 return ResourceManager.GetString("HomePage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invert selection.
+        /// </summary>
+        public static string InvertSelection {
+            get {
+                return ResourceManager.GetString("InvertSelection", resourceCulture);
             }
         }
         
@@ -632,6 +650,15 @@ namespace BG3PakViewer.Locales {
         public static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select all.
+        /// </summary>
+        public static string SelectAll {
+            get {
+                return ResourceManager.GetString("SelectAll", resourceCulture);
             }
         }
         

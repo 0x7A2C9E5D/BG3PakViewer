@@ -273,4 +273,13 @@
     <data name="CopyName" xml:space="preserve">
         <value>Copy name</value>
     </data>
+    <data name="SelectAll" xml:space="preserve">
+        <value>Select all</value>
+    </data>
+    <data name="InvertSelection" xml:space="preserve">
+        <value>Invert selection</value>
+    </data>
+    <data name="ClearSelection" xml:space="preserve">
+        <value>Clear selection</value>
+    </data>
 </root>

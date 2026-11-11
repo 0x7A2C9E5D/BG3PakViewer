@@ -264,4 +264,13 @@
     <data name="CopyName" xml:space="preserve">
         <value>复制名称</value>
     </data>
+    <data name="SelectAll" xml:space="preserve">
+        <value>全选</value>
+    </data>
+    <data name="InvertSelection" xml:space="preserve">
+        <value>反选</value>
+    </data>
+    <data name="ClearSelection" xml:space="preserve">
+        <value>清除选择</value>
+    </data>
 </root>
