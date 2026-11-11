@@ -116,18 +116,38 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     /// <param name="total">How many files the export attempted.</param>
     /// <param name="failures">The files that could not be written.</param>
     /// <param name="folder">The folder the files were written to.</param>
-    private async Task ReportExportResultAsync(int exported, int total, List<PreviewExportResult> failures,
+    private async Task ReportExportResultAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
         string folder)
     {
         if (failures.Count == 0)
-        {
-            Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
-            await _dialogService.ShowMessageBoxNotifyAsync(this,
-                string.Format(Strings.PreviewExportCompletedMessage, exported),
-                Strings.ExportCompleted, MessageBoxIcon.Success);
-            return;
-        }
+            await ReportSuccessAsync(exported, folder);
+        else
+            await ReportFailuresAsync(exported, total, failures, folder);
+    }
 
+    /// <summary>
+    ///     Tells the user that every file was written.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportSuccessAsync(int exported, string folder)
+    {
+        Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
+        await _dialogService.ShowMessageBoxNotifyAsync(this,
+            string.Format(Strings.PreviewExportCompletedMessage, exported),
+            Strings.ExportCompleted, MessageBoxIcon.Success);
+    }
+
+    /// <summary>
+    ///     Tells the user how many files were written and which ones failed, together with the reason.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="total">How many files the export attempted.</param>
+    /// <param name="failures">The files that could not be written.</param>
+    /// <param name="folder">The folder the files were written to.</param>
+    private async Task ReportFailuresAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
+        string folder)
+    {
         Log.Warning("Exported {Exported} of {Total} preview files to: {Folder}", exported, total, folder);
 
         var message = new StringBuilder();
