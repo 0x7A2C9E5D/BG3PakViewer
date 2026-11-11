@@ -1,6 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
-using BG3PakViewer.Controls.Contracts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Syncfusion.Data.Extensions;
@@ -16,7 +14,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     The icons are one flat list; how many of them share a line is decided by the wrap panel of the
 ///     view, which puts as many on a line as its width allows.
 /// </remarks>
-public partial class IconAtlasPreviewViewModel : ObservableObject, IPreviewKeyHandler
+public partial class IconAtlasPreviewViewModel : ObservableObject
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="IconAtlasPreviewViewModel" /> class.
@@ -33,26 +31,6 @@ public partial class IconAtlasPreviewViewModel : ObservableObject, IPreviewKeyHa
     ///     The icons of the atlas that hold something visible, in the order of the atlas.
     /// </summary>
     public ObservableCollection<IconAtlasCellViewModel> Items { get; }
-
-    /// <summary>
-    ///     Maps the shortcut keys of the preview to the selection commands.
-    /// </summary>
-    /// <param name="e">The key event forwarded by the previewer.</param>
-    /// <returns>Whether the key was handled.</returns>
-    public bool HandleKeyDown(KeyEventArgs e)
-    {
-        ICommand? command = (e.Key, Keyboard.Modifiers) switch
-        {
-            (Key.A, ModifierKeys.Control) => SelectAllCommand,
-            (Key.I, ModifierKeys.Control | ModifierKeys.Shift) => InvertSelectionCommand,
-            (Key.D, ModifierKeys.Control) => ClearSelectionCommand,
-            _ => null
-        };
-        if (command is null) return false;
-
-        command.Execute(null);
-        return true;
-    }
 
     /// <summary>
     ///     Selects every icon of the atlas.

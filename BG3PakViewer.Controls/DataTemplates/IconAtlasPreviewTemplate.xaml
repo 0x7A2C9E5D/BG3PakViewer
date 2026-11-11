@@ -25,13 +25,10 @@
                     <ListBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="{I18N {x:Static l:LangKeys.SelectAll}}"
-                                      InputGestureText="Ctrl+A"
                                       Command="{Binding SelectAllCommand}" />
                             <MenuItem Header="{I18N {x:Static l:LangKeys.InvertSelection}}"
-                                      InputGestureText="Ctrl+Shift+I"
                                       Command="{Binding InvertSelectionCommand}" />
                             <MenuItem Header="{I18N {x:Static l:LangKeys.ClearSelection}}"
-                                      InputGestureText="Ctrl+D"
                                       Command="{Binding ClearSelectionCommand}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>

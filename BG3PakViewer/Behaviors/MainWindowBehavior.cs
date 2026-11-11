@@ -1,6 +1,5 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Input;
 using BG3PakViewer.Locales;
 using BG3PakViewer.ViewModels;
 using BG3PakViewer.Views;
@@ -23,7 +22,6 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         AssociatedObject.Loaded += AssociatedObjectOnLoaded;
         AssociatedObject.Closing += AssociatedObject_Closing;
         AssociatedObject.SizeChanged += AssociatedObjectOnSizeChanged;
-        AssociatedObject.PreviewKeyDown += AssociatedObjectOnPreviewKeyDown;
     }
 
     protected override void OnDetaching()
@@ -32,7 +30,6 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         AssociatedObject.Loaded -= AssociatedObjectOnLoaded;
         AssociatedObject.Closing -= AssociatedObject_Closing;
         AssociatedObject.SizeChanged -= AssociatedObjectOnSizeChanged;
-        AssociatedObject.PreviewKeyDown -= AssociatedObjectOnPreviewKeyDown;
     }
 
     /// <summary>
@@ -85,15 +82,5 @@ internal class MainWindowBehavior : Behavior<MainWindow>
         if (((MainWindowViewModel)AssociatedObject.DataContext).IsExporting && MessageBox.Show(AssociatedObject,
                 Strings.WhenIsExportingExitMessage, Strings.IsExporting, MessageBoxButton.OKCancel,
                 SegoeFluentIcons.Warning) == MessageBoxResult.Cancel) ((CancelEventArgs)e).Cancel = true;
-    }
-
-    /// <summary>
-    ///     Forwards the shortcuts to the previewer, which knows whether the shown preview handles them.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void AssociatedObjectOnPreviewKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (AssociatedObject.Previewer.HandleKeyDown(e)) e.Handled = true;
     }
 }
