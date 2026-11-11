@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Syncfusion.Data.Extensions;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -14,7 +13,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     The icons are one flat list; how many of them share a line is decided by the wrap panel of the
 ///     view, which puts as many on a line as its width allows.
 /// </remarks>
-public partial class IconAtlasPreviewViewModel : ObservableObject
+public class IconAtlasPreviewViewModel : ObservableObject
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="IconAtlasPreviewViewModel" /> class.
@@ -31,34 +30,4 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     ///     The icons of the atlas that hold something visible, in the order of the atlas.
     /// </summary>
     public ObservableCollection<IconAtlasCellViewModel> Items { get; }
-
-    /// <summary>
-    ///     Selects every icon of the atlas.
-    /// </summary>
-    [RelayCommand]
-    private void SelectAll()
-    {
-        foreach (var item in Items)
-            item.IsSelected = true;
-    }
-
-    /// <summary>
-    ///     Inverts the selection of every icon of the atlas.
-    /// </summary>
-    [RelayCommand]
-    private void InvertSelection()
-    {
-        foreach (var item in Items)
-            item.IsSelected = !item.IsSelected;
-    }
-
-    /// <summary>
-    ///     Clears the selection of every icon of the atlas.
-    /// </summary>
-    [RelayCommand]
-    private void ClearSelection()
-    {
-        foreach (var item in Items)
-            item.IsSelected = false;
-    }
 }

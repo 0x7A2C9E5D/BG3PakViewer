@@ -1,7 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
-                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
+                    xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
     <!--
       Preview for icon atlases. The atlas is sliced into its icon grid and every cell is shown at the
       size it has in the atlas.
@@ -18,20 +17,6 @@
                          ScrollViewer.CanContentScroll="False"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <!--
-                      Right-click menu for the whole preview. The menu is not part of the visual tree,
-                      so its data context is taken from the list box it is opened on.
-                    -->
-                    <ListBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="{I18N {x:Static l:LangKeys.SelectAll}}"
-                                      Command="{Binding SelectAllCommand}" />
-                            <MenuItem Header="{I18N {x:Static l:LangKeys.InvertSelection}}"
-                                      Command="{Binding InvertSelectionCommand}" />
-                            <MenuItem Header="{I18N {x:Static l:LangKeys.ClearSelection}}"
-                                      Command="{Binding ClearSelectionCommand}" />
-                        </ContextMenu>
-                    </ListBox.ContextMenu>
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel Orientation="Horizontal" />
