@@ -26,22 +26,43 @@ internal sealed class PreviewExportService(IAppSettings appSettings, IDialogServ
     {
         if (files.Count == 0) return;
 
+        var folder = PickFolder();
+        if (folder is null) return;
+
+        var exported = await WriteAsync(folder, files);
+        Log.Information("Exported {Exported} of {Total} files", exported, files.Count);
+        await ReportAsync(exported, files.Count);
+    }
+
+    /// <summary>
+    ///     Asks the user where the files should be written.
+    /// </summary>
+    /// <returns>The chosen folder, or <see langword="null" /> when the user cancels.</returns>
+    private string? PickFolder()
+    {
         var dialog = new OpenFolderDialog
         {
             InitialDirectory = Directory.Exists(appSettings.DefaultExportDirectory)
                 ? appSettings.DefaultExportDirectory
                 : string.Empty
         };
-        if (dialog.ShowDialog() != true)
-        {
-            Log.Information("Preview export folder selection was cancelled");
-            return;
-        }
+        if (dialog.ShowDialog() == true) return dialog.FolderName;
+        Log.Information("Preview export folder selection was cancelled");
+        return null;
+    }
 
+    /// <summary>
+    ///     Writes the files to the given folder.
+    /// </summary>
+    /// <param name="folder">The folder the files are written to.</param>
+    /// <param name="files">The files to write.</param>
+    /// <returns>How many files were written.</returns>
+    private static async Task<int> WriteAsync(string folder, IReadOnlyList<PreviewExportFile> files)
+    {
         var exported = 0;
         foreach (var file in files)
         {
-            var path = Path.Combine(dialog.FolderName, file.FileName);
+            var path = Path.Combine(folder, file.FileName);
             try
             {
                 await using var source = await file.OpenAsync();
@@ -55,9 +76,18 @@ internal sealed class PreviewExportService(IAppSettings appSettings, IDialogServ
             }
         }
 
-        Log.Information("Exported {Exported} of {Total} files", exported, files.Count);
+        return exported;
+    }
+
+    /// <summary>
+    ///     Tells the user how the export went.
+    /// </summary>
+    /// <param name="exported">How many files were written.</param>
+    /// <param name="total">How many files were meant to be written.</param>
+    private async Task ReportAsync(int exported, int total)
+    {
         if (Application.Current.MainWindow?.DataContext is not INotifyPropertyChanged owner) return;
-        if (exported == files.Count)
+        if (exported == total)
             await dialogService.ShowMessageBoxNotifyAsync(owner, Strings.ExportCompleted, Strings.ExportCompleted,
                 MessageBoxIcon.Success);
         else
