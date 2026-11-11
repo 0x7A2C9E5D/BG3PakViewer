@@ -5,7 +5,8 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
 using HanumanInstitute.MvvmDialogs;
-using Microsoft.Win32;
+using HanumanInstitute.MvvmDialogs.FileSystem;
+using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using Serilog;
 
 namespace BG3PakViewer.Services;
@@ -25,28 +26,30 @@ internal sealed class PreviewExportService(IAppSettings appSettings, IDialogServ
     public async Task ExportAsync(IReadOnlyList<PreviewExportFile> files)
     {
         if (files.Count == 0) return;
+        if (Application.Current.MainWindow?.DataContext is not INotifyPropertyChanged owner) return;
 
-        var folder = PickFolder();
+        var folder = await PickFolderAsync(owner);
         if (folder is null) return;
 
         var exported = await WriteAsync(folder, files);
         Log.Information("Exported {Exported} of {Total} files", exported, files.Count);
-        await ReportAsync(exported, files.Count);
+        await ReportAsync(owner, exported, files.Count);
     }
 
     /// <summary>
     ///     Asks the user where the files should be written.
     /// </summary>
+    /// <param name="owner">The view model that owns the dialog.</param>
     /// <returns>The chosen folder, or <see langword="null" /> when the user cancels.</returns>
-    private string? PickFolder()
+    private async Task<string?> PickFolderAsync(INotifyPropertyChanged owner)
     {
-        var dialog = new OpenFolderDialog
+        var storageFolder = await dialogService.ShowOpenFolderDialogAsync(owner, new OpenFolderDialogSettings
         {
-            InitialDirectory = Directory.Exists(appSettings.DefaultExportDirectory)
-                ? appSettings.DefaultExportDirectory
-                : string.Empty
-        };
-        if (dialog.ShowDialog() == true) return dialog.FolderName;
+            SuggestedStartLocation = Directory.Exists(appSettings.DefaultExportDirectory)
+                ? new DesktopDialogStorageFolder(appSettings.DefaultExportDirectory)
+                : null
+        });
+        if (storageFolder is not null) return storageFolder.LocalPath;
         Log.Information("Preview export folder selection was cancelled");
         return null;
     }
@@ -82,11 +85,11 @@ internal sealed class PreviewExportService(IAppSettings appSettings, IDialogServ
     /// <summary>
     ///     Tells the user how the export went.
     /// </summary>
+    /// <param name="owner">The view model that owns the dialog.</param>
     /// <param name="exported">How many files were written.</param>
     /// <param name="total">How many files were meant to be written.</param>
-    private async Task ReportAsync(int exported, int total)
+    private async Task ReportAsync(INotifyPropertyChanged owner, int exported, int total)
     {
-        if (Application.Current.MainWindow?.DataContext is not INotifyPropertyChanged owner) return;
         if (exported == total)
             await dialogService.ShowMessageBoxNotifyAsync(owner, Strings.ExportCompleted, Strings.ExportCompleted,
                 MessageBoxIcon.Success);
