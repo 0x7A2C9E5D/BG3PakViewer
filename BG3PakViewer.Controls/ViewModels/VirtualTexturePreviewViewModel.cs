@@ -207,7 +207,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     private void ShowNoData()
     {
         Preview = null;
-        StatusText = Strings.TitleNoDataForLayer;
+        StatusText = Strings.TitleNoData;
     }
 
     /// <summary>
@@ -384,7 +384,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     private async Task<Stream> OpenLayerAsync(FourCCTextureMeta meta, int layer)
     {
         return await _loader.ExtractAsync(meta, layer, null, CancellationToken.None)
-               ?? throw new InvalidDataException(Strings.TitleNoDataForLayer);
+               ?? throw new InvalidDataException(Strings.TitleNoData);
     }
 
     /// <summary>

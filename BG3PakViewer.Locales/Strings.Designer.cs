@@ -807,11 +807,11 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No data for this layer.
+        ///   Looks up a localized string similar to No texture data.
         /// </summary>
-        public static string TitleNoDataForLayer {
+        public static string TitleNoData {
             get {
-                return ResourceManager.GetString("TitleNoDataForLayer", resourceCulture);
+                return ResourceManager.GetString("TitleNoData", resourceCulture);
             }
         }
         
