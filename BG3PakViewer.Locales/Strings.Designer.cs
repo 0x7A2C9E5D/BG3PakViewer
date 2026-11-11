@@ -276,6 +276,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export cancelled. No files were written..
+        /// </summary>
+        public static string PreviewExportCancelledMessage {
+            get {
+                return ResourceManager.GetString("PreviewExportCancelledMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exported {0} of {1} files to:.
         /// </summary>
         public static string PreviewExportPartialMessage {

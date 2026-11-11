@@ -76,6 +76,9 @@
         <value>已匯出 {0} 個檔案到：
 {1}</value>
     </data>
+    <data name="PreviewExportCancelledMessage" xml:space="preserve">
+        <value>已取消匯出，沒有寫入任何檔案。</value>
+    </data>
     <data name="PreviewExportPartialMessage" xml:space="preserve">
         <value>已匯出 {1} 個檔案中的 {0} 個到：
 {2}</value>

@@ -95,7 +95,13 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         if (files.Count == 0) return;
 
         var folder = await PickFolderAsync();
-        if (folder is null) return;
+        if (folder is null)
+        {
+            Log.Information("Preview export folder selection was cancelled");
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportCancelledMessage,
+                Strings.CancelExportOperationCaption);
+            return;
+        }
 
         var exported = 0;
         var failures = new List<PreviewExportResult>();
@@ -156,9 +162,7 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
                 ? new DesktopDialogStorageFolder(_appSettings.DefaultExportDirectory)
                 : null
         });
-        if (storageFolder is not null) return storageFolder.LocalPath;
-        Log.Information("Preview export folder selection was cancelled");
-        return null;
+        return storageFolder?.LocalPath;
     }
 
     private PreviewExportFile ToExportFile(IconAtlasCellViewModel icon)

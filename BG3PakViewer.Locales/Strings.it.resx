@@ -316,6 +316,9 @@
     <value>Esportati {0} file in:
 {1}</value>
   </data>
+    <data name="PreviewExportCancelledMessage" xml:space="preserve">
+    <value>Esportazione annullata. Nessun file è stato scritto.</value>
+  </data>
     <data name="PreviewExportPartialMessage" xml:space="preserve">
     <value>Esportati {0} file su {1} in:
 {2}</value>
