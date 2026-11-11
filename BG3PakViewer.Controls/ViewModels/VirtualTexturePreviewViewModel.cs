@@ -37,8 +37,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     private readonly IAppSettings _appSettings;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
-    private readonly SemaphoreSlim _extractLock = new(1, 1);
-
     private readonly VirtualTextureLoader _loader;
     private CancellationTokenSource? _cts;
 
@@ -178,7 +176,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     /// <param name="cts"></param>
     private async Task LoadPreviewCoreAsync(FourCCTextureMeta meta, int layer, CancellationTokenSource cts)
     {
-        await using var ddsStream = await ExtractLayerAsync(meta, layer,
+        await using var ddsStream = await _loader.ExtractAsync(meta, layer,
             new Progress<double>(p => Progress = p), cts.Token);
         if (cts.IsCancellationRequested) return;
 
@@ -197,28 +195,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         }
 
         ShowPreview(image);
-    }
-
-    /// <summary>
-    ///     Extracts one layer of a texture into a DDS stream. The loader's page cache is not
-    ///     thread-safe, so preview loading and exporting must not extract at the same time.
-    /// </summary>
-    /// <param name="meta"></param>
-    /// <param name="layer"></param>
-    /// <param name="progress"></param>
-    /// <param name="ct"></param>
-    private async Task<Stream?> ExtractLayerAsync(FourCCTextureMeta meta, int layer,
-        IProgress<double>? progress, CancellationToken ct)
-    {
-        await _extractLock.WaitAsync(ct);
-        try
-        {
-            return await _loader.ExtractAsync(meta, layer, progress, ct);
-        }
-        finally
-        {
-            _extractLock.Release();
-        }
     }
 
     /// <summary>
@@ -401,7 +377,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     /// <param name="layer"></param>
     private async Task<Stream> OpenLayerAsync(FourCCTextureMeta meta, int layer)
     {
-        return await ExtractLayerAsync(meta, layer, null, CancellationToken.None)
+        return await _loader.ExtractAsync(meta, layer, null, CancellationToken.None)
                ?? throw new InvalidDataException(Strings.TitleNoDataForLayer);
     }
 
