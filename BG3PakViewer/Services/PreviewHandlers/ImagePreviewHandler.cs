@@ -7,10 +7,15 @@ using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
+using HanumanInstitute.MvvmDialogs;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class ImagePreviewHandler(IPackageService packageService, IPreviewExportService exportService)
+internal class ImagePreviewHandler(
+    IPackageService packageService,
+    IPreviewExportService exportService,
+    IDialogService dialogService,
+    IAppSettings appSettings)
     : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
@@ -63,8 +68,7 @@ internal class ImagePreviewHandler(IPackageService packageService, IPreviewExpor
         Vector2 size,
         string name)
     {
-        return new IconAtlasPreviewViewModel(
-        [
+        return new IconAtlasPreviewViewModel(Path.GetFileNameWithoutExtension(name), [
             .. icons.Select(cell =>
             {
                 var bitmap = cell.Image.ToBitmapSource();
@@ -79,6 +83,6 @@ internal class ImagePreviewHandler(IPackageService packageService, IPreviewExpor
                     cell.Row,
                     cell.Column);
             })
-        ], exportService, Path.GetFileNameWithoutExtension(name));
+        ], exportService, dialogService, appSettings);
     }
 }
