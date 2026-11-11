@@ -306,7 +306,7 @@
     <data name="ExportAllIcons" xml:space="preserve">
         <value>Export all</value>
     </data>
-    <data name="ExportCurrentTexture" xml:space="preserve">
-        <value>Export texture set</value>
+    <data name="ExportTexture" xml:space="preserve">
+        <value>Export Texture</value>
     </data>
 </root>

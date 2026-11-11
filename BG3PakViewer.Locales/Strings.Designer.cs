@@ -249,11 +249,11 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Export texture set.
+        ///   Looks up a localized string similar to Export Texture.
         /// </summary>
-        public static string ExportCurrentTexture {
+        public static string ExportTexture {
             get {
-                return ResourceManager.GetString("ExportCurrentTexture", resourceCulture);
+                return ResourceManager.GetString("ExportTexture", resourceCulture);
             }
         }
         
