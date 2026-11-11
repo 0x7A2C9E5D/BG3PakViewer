@@ -231,6 +231,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export all.
+        /// </summary>
+        public static string ExportAllIcons {
+            get {
+                return ResourceManager.GetString("ExportAllIcons", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export Completed.
         /// </summary>
         public static string ExportCompleted {
@@ -263,6 +272,15 @@ namespace BG3PakViewer.Locales {
         public static string ExportPakBtnLabel {
             get {
                 return ResourceManager.GetString("ExportPakBtnLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export selected.
+        /// </summary>
+        public static string ExportSelectedIcons {
+            get {
+                return ResourceManager.GetString("ExportSelectedIcons", resourceCulture);
             }
         }
         

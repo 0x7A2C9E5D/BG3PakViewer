@@ -273,4 +273,10 @@
     <data name="ClearSelection" xml:space="preserve">
         <value>清除选择</value>
     </data>
+    <data name="ExportSelectedIcons" xml:space="preserve">
+        <value>导出选中</value>
+    </data>
+    <data name="ExportAllIcons" xml:space="preserve">
+        <value>导出全部</value>
+    </data>
 </root>

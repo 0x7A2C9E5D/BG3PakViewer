@@ -381,4 +381,10 @@
     <data name="ClearSelection" xml:space="preserve">
       <value>Cancella selezione</value>
     </data>
+    <data name="ExportSelectedIcons" xml:space="preserve">
+      <value>Esporta selezionati</value>
+    </data>
+    <data name="ExportAllIcons" xml:space="preserve">
+      <value>Esporta tutto</value>
+    </data>
 </root>

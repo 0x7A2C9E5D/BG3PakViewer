@@ -1,4 +1,6 @@
+using System.IO;
 using System.Numerics;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Icons;
 using BG3PakViewer.Loader;
@@ -8,7 +10,8 @@ using BG3PakViewer.Utils;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
-internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHandler
+internal class ImagePreviewHandler(IPackageService packageService, IIconExportService iconExportService)
+    : IPreviewHandler
 {
     public bool CanHandle(string fileExtension)
     {
@@ -41,7 +44,7 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
         var size = new Vector2(image.Width, image.Height);
         image.Dispose();
 
-        return CreateIconAtlasPreview(icons, size);
+        return CreateIconAtlasPreview(icons, size, node.Name);
     }
 
     /// <summary>
@@ -49,14 +52,19 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
     /// </summary>
     /// <param name="icons">The sliced icons and the cells they were cut from.</param>
     /// <param name="size">The size of the sheet the icons were cut from.</param>
+    /// <param name="name">The name of the sheet, used to name the files the icons are exported to.</param>
     /// <returns>The preview of the icons.</returns>
     /// <remarks>
     ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
     ///     soon as each one has been converted and are never held by the preview.
     /// </remarks>
-    private static IconAtlasPreviewViewModel CreateIconAtlasPreview(IReadOnlyList<IconAtlasCell> icons, Vector2 size)
+    private IconAtlasPreviewViewModel CreateIconAtlasPreview(
+        IReadOnlyList<IconAtlasCell> icons,
+        Vector2 size,
+        string name)
     {
-        return new IconAtlasPreviewViewModel([
+        return new IconAtlasPreviewViewModel(
+        [
             .. icons.Select(cell =>
             {
                 var bitmap = cell.Image.ToBitmapSource();
@@ -67,8 +75,10 @@ internal class ImagePreviewHandler(IPackageService packageService) : IPreviewHan
                     cell.Bounds.X / size.Y,
                     cell.Bounds.Y / size.X,
                     (cell.Bounds.X + cell.Bounds.Width) / size.X,
-                    (cell.Bounds.Y + cell.Bounds.Height) / size.Y));
+                    (cell.Bounds.Y + cell.Bounds.Height) / size.Y),
+                    cell.Row,
+                    cell.Column);
             })
-        ]);
+        ], iconExportService, Path.GetFileNameWithoutExtension(name));
     }
 }
