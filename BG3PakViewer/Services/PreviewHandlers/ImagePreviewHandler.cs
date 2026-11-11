@@ -69,7 +69,7 @@ internal class ImagePreviewHandler(
         string name)
     {
         return new IconAtlasPreviewViewModel(Path.GetFileNameWithoutExtension(name), [
-            .. icons.Select(cell =>
+            .. icons.Select((cell, index) =>
             {
                 var bitmap = cell.Image.ToBitmapSource();
                 cell.Image.Dispose();
@@ -80,8 +80,7 @@ internal class ImagePreviewHandler(
                         cell.Bounds.Y / size.X,
                         (cell.Bounds.X + cell.Bounds.Width) / size.X,
                         (cell.Bounds.Y + cell.Bounds.Height) / size.Y),
-                    cell.Row,
-                    cell.Column);
+                    index + 1);
             })
         ], exportService, dialogService, appSettings);
     }

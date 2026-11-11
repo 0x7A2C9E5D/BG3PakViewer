@@ -178,12 +178,15 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         return storageFolder?.LocalPath;
     }
 
+    /// <summary>
+    ///     Turns an icon into the file it is exported to, named after its position in the atlas.
+    /// </summary>
+    /// <param name="icon">The icon to export.</param>
+    /// <returns>The file to write.</returns>
     private PreviewExportFile ToExportFile(IconAtlasCellViewModel icon)
     {
-        var fileName = icon.Row == 0
-            ? $"{_atlasName}.png"
-            : $"{_atlasName}_{icon.Row}_{icon.Column}.png";
-        return new PreviewExportFile(fileName, () => Task.Run(Stream () => EncodePng(icon.Image)));
+        return new PreviewExportFile($"{_atlasName}_{icon.Number}.png",
+            () => Task.Run(Stream () => EncodePng(icon.Image)));
     }
 
     private static MemoryStream EncodePng(BitmapSource image)

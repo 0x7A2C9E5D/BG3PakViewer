@@ -13,7 +13,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     identity it has; it is what lets a user find the icon again in the sheet or match it against
 ///     external data.
 /// </remarks>
-public sealed partial class IconAtlasCellViewModel(BitmapSource image, Vector4 uv, int row, int column)
+public sealed partial class IconAtlasCellViewModel(BitmapSource image, Vector4 uv, int number)
     : ObservableObject
 {
     /// <summary>
@@ -34,14 +34,10 @@ public sealed partial class IconAtlasCellViewModel(BitmapSource image, Vector4 u
     public Vector4 Uv { get; } = uv;
 
     /// <summary>
-    ///     The one based row of the cell in the atlas grid, or 0 when the sheet has no grid.
+    ///     The one based position of the icon in the atlas, which is also the only name the icons can be
+    ///     told apart by when they are exported.
     /// </summary>
-    public int Row { get; } = row;
-
-    /// <summary>
-    ///     The one based column of the cell in the atlas grid, or 0 when the sheet has no grid.
-    /// </summary>
-    public int Column { get; } = column;
+    public int Number { get; } = number;
 
     /// <summary>
     ///     Width of the cell in the grid, in device independent pixels. The icon keeps the size it has in
