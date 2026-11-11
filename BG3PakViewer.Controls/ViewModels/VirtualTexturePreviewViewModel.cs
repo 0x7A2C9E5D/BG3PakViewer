@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-using System.Windows;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
@@ -58,7 +57,8 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
             throw new InvalidOperationException(
                 $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
                 $"but at most {SupportedLayerCount} (Albedo, Normal, Physical) are supported.");
-        foreach (var meta in loader.GetTextures()) Textures.Add(new VirtualTextureItemViewModel(meta));
+        foreach (var meta in loader.GetTextures())
+            Textures.Add(new VirtualTextureItemViewModel(meta));
         SelectedTexture = Textures.FirstOrDefault();
     }
 
@@ -125,7 +125,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedTextureChanged(VirtualTextureItemViewModel? value)
     {
-        NotifyExportCanExecuteChanged();
         _ = LoadPreviewAsync();
     }
 
@@ -236,18 +235,10 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     }
 
     /// <summary>
-    ///     Whether the selected texture can be exported.
-    /// </summary>
-    private bool CanExport()
-    {
-        return SelectedTexture is not null && !IsBusy;
-    }
-
-    /// <summary>
     ///     Exports every layer of the selected texture as one set of DDS files.
     ///     DDS is the only export format here: the raw layer data is written without re-encoding.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanExport))]
+    [RelayCommand]
     private Task ExportAsync()
     {
         var texture = SelectedTexture;
@@ -256,8 +247,10 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         var meta = texture.Meta;
         var name = Path.GetFileNameWithoutExtension(texture.DisplayName);
         var layerCount = Math.Min(_loader.LayerCount, LayerNames.Length);
-        if (layerCount == 0) return Task.CompletedTask;
-        return ExportFilesAsync([.. Enumerable.Range(0, layerCount).Select(layer => ToExportFile(name, meta, layer))]);
+        return layerCount == 0
+            ? Task.CompletedTask
+            : ExportFilesAsync([.. Enumerable.Range(0, layerCount)
+                .Select(layer => ToExportFile(name, meta, layer))]);
     }
 
     /// <summary>
@@ -282,8 +275,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         else
         {
             Log.Information("Preview export folder selection was cancelled");
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportCancelledMessage,
-                Strings.CancelExportOperationCaption);
         }
     }
 
@@ -389,41 +380,6 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     partial void OnPreviewChanging(Image? oldValue, Image? newValue)
     {
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();
-    }
-
-    /// <summary>
-    ///     Keeps the export command's enabled state in sync with the preview.
-    /// </summary>
-    /// <param name="value"></param>
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnPreviewChanged(Image? value)
-    {
-        NotifyExportCanExecuteChanged();
-    }
-
-    /// <summary>
-    ///     Keeps the export command's enabled state in sync with preview loading.
-    /// </summary>
-    /// <param name="value"></param>
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnIsBusyChanged(bool value)
-    {
-        NotifyExportCanExecuteChanged();
-    }
-
-    /// <summary>
-    ///     WPF's command manager observes CanExecuteChanged on the UI thread, while the preview is
-    ///     loaded on a worker thread (the view model is created inside Task.Run). Raising the event
-    ///     there throws InvalidOperationException and makes the preview report a failure, so the
-    ///     notification is marshaled to the dispatcher instead.
-    /// </summary>
-    private void NotifyExportCanExecuteChanged()
-    {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null || dispatcher.CheckAccess())
-            ExportCommand.NotifyCanExecuteChanged();
-        else
-            dispatcher.InvokeAsync(ExportCommand.NotifyCanExecuteChanged);
     }
 
     protected override void Dispose(bool disposing)

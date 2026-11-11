@@ -104,8 +104,6 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         else
         {
             Log.Information("Preview export folder selection was cancelled");
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportCancelledMessage,
-                Strings.CancelExportOperationCaption);
         }
     }
 

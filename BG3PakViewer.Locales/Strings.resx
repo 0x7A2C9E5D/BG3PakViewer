@@ -216,9 +216,6 @@
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
         <value>Exported {0} files.</value>
     </data>
-    <data name="PreviewExportCancelledMessage" xml:space="preserve">
-        <value>Export cancelled. No files were written.</value>
-    </data>
     <data name="PreviewExportPartialMessage" xml:space="preserve">
         <value>Exported {0} of {1} files.</value>
     </data>

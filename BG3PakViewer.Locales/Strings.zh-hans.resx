@@ -207,9 +207,6 @@
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
         <value>已导出 {0} 个文件。</value>
     </data>
-    <data name="PreviewExportCancelledMessage" xml:space="preserve">
-        <value>已取消导出，没有写入任何文件。</value>
-    </data>
     <data name="PreviewExportPartialMessage" xml:space="preserve">
         <value>已导出 {1} 个文件中的 {0} 个。</value>
     </data>
