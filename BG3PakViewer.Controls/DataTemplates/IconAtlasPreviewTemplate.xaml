@@ -9,127 +9,170 @@
     -->
     <DataTemplate x:Key="IconAtlasPreviewTemplate" DataType="{x:Type vm:IconAtlasPreviewViewModel}">
         <Border BorderBrush="Gray" BorderThickness="1" ClipToBounds="True">
-            <ListBox ItemsSource="{Binding Items}"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     Padding="0"
-                     ScrollViewer.CanContentScroll="False"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Focusable" Value="False" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <ContentPresenter />
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:IconAtlasCellViewModel}">
-                        <!--
-                          The selection is a checkbox so a click on the icon toggles IsSelected directly;
-                          the template drops the check box chrome and only keeps its content.
-                        -->
-                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                  Focusable="False"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  Padding="0"
-                                  Margin="0"
-                                  MinWidth="0"
-                                  MinHeight="0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top">
-                            <CheckBox.Template>
-                                <ControlTemplate TargetType="CheckBox">
-                                    <ContentPresenter />
-                                </ControlTemplate>
-                            </CheckBox.Template>
-                            <CheckBox.ToolTip>
-                                <ToolTip>
-                                    <StackPanel>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Mode="OneWay" StringFormat="U: [{0:f4}, {1:f4}]">
-                                                    <Binding Path="Uv[0]" Mode="OneWay" />
-                                                    <Binding Path="Uv[2]" Mode="OneWay" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding Mode="OneWay" StringFormat="V: [{0:f4}, {1:f4}]">
-                                                    <Binding Path="Uv[1]" Mode="OneWay" />
-                                                    <Binding Path="Uv[3]" Mode="OneWay" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                        <TextBlock>
-                                            <TextBlock.Text>
-                                                <MultiBinding StringFormat="S: {0}(W) × {1}(H)">
-                                                    <Binding Path="Width" Mode="OneWay" />
-                                                    <Binding Path="Height" Mode="OneWay" />
-                                                </MultiBinding>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </ToolTip>
-                            </CheckBox.ToolTip>
-                            <Border Width="{Binding Width}"
-                                    Height="{Binding Height}"
-                                    BorderThickness="1"
-                                    CornerRadius="4"
-                                    Background="Transparent">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="BorderBrush" Value="#33808080" />
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="BorderBrush" Value="#664CC2FF" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <Grid>
-                                    <Image Source="{Binding Image}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" />
-                                    <!-- Fluent style selection outline, drawn on top of the icon so it does not resize it. -->
-                                    <Border BorderThickness="2"
-                                            CornerRadius="4"
-                                            BorderBrush="#FF4CC2FF"
-                                            IsHitTestVisible="False"
-                                            Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <!-- Accent check badge of the selected icon. -->
-                                    <Viewbox Width="18" Height="18"
-                                             Margin="3"
-                                             HorizontalAlignment="Left" VerticalAlignment="Top"
-                                             IsHitTestVisible="False"
-                                             Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Canvas Width="20" Height="20">
-                                            <Ellipse Width="20" Height="20" Fill="#FF4CC2FF" />
-                                            <Path Data="M5.5,10.5 L9,14 L15,7.5"
-                                                  Stroke="White"
-                                                  StrokeThickness="2.2"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round" />
-                                        </Canvas>
-                                    </Viewbox>
-                                </Grid>
+            <Grid>
+                <ListBox ItemsSource="{Binding Items}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="0"
+                         ScrollViewer.CanContentScroll="False"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Focusable" Value="False" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:IconAtlasCellViewModel}">
+                            <!--
+                              The selection is a checkbox so a click on the icon toggles IsSelected directly;
+                              the template drops the checkbox chrome and only keeps its content.
+                            -->
+                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Focusable="False"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      Padding="0"
+                                      Margin="0"
+                                      MinWidth="0"
+                                      MinHeight="0"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Top">
+                                <CheckBox.Template>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <ContentPresenter />
+                                    </ControlTemplate>
+                                </CheckBox.Template>
+                                <CheckBox.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Mode="OneWay" StringFormat="U: [{0:f4}, {1:f4}]">
+                                                        <Binding Path="Uv[0]" Mode="OneWay" />
+                                                        <Binding Path="Uv[2]" Mode="OneWay" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Mode="OneWay" StringFormat="V: [{0:f4}, {1:f4}]">
+                                                        <Binding Path="Uv[1]" Mode="OneWay" />
+                                                        <Binding Path="Uv[3]" Mode="OneWay" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="S: {0}(W) × {1}(H)">
+                                                        <Binding Path="Width" Mode="OneWay" />
+                                                        <Binding Path="Height" Mode="OneWay" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </CheckBox.ToolTip>
+                                <Border Width="{Binding Width}"
+                                        Height="{Binding Height}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Background="Transparent">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="#33808080" />
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#664CC2FF" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid>
+                                        <Image Source="{Binding Image}"
+                                               RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <!-- Fluent style selection outline, drawn on top of the icon so it does not resize it. -->
+                                        <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+                                        <Border BorderThickness="2"
+                                                CornerRadius="4"
+                                                BorderBrush="#FF4CC2FF"
+                                                IsHitTestVisible="False"
+                                                Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <!-- Accent check badge of the selected icon. -->
+                                        <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
+                                        <Viewbox Width="18" Height="18"
+                                                 Margin="3"
+                                                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                 IsHitTestVisible="False"
+                                                 Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Canvas Width="20" Height="20">
+                                                <Ellipse Width="20" Height="20" Fill="#FF4CC2FF" />
+                                                <Path Data="M5.5,10.5 L9,14 L15,7.5"
+                                                      Stroke="White"
+                                                      StrokeThickness="2.2"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round"
+                                                      StrokeLineJoin="Round" />
+                                            </Canvas>
+                                        </Viewbox>
+                                    </Grid>
+                                </Border>
+                            </CheckBox>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <!--
+                  Floating circular action button at the bottom right of the preview. The colors come
+                  from the theme brushes so it follows both the light and the dark theme.
+                -->
+                <Button Width="40" Height="40"
+                        Margin="16"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        ToolTip="更多操作">
+                    <Button.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.3" Color="Black" />
+                    </Button.Effect>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
-                        </CheckBox>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource ControlFillColorTertiaryBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="&#xE712;"
+                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                               FontSize="14" />
+                </Button>
+            </Grid>
         </Border>
     </DataTemplate>
 </ResourceDictionary>
