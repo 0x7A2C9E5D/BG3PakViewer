@@ -31,7 +31,7 @@
         <value>Open Package</value>
     </data>
     <data name="ExportPakBtnLabel" xml:space="preserve">
-        <value>Export Package</value>
+        <value>Export Resources</value>
     </data>
     <data name="Recent" xml:space="preserve">
         <value>Recent</value>

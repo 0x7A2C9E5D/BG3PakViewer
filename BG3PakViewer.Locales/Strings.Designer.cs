@@ -321,7 +321,7 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Export Package.
+        ///   Looks up a localized string similar to Export Resources.
         /// </summary>
         public static string ExportPakBtnLabel {
             get {
