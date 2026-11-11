@@ -72,6 +72,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     ///     The currently selected texture.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     public partial VirtualTextureItemViewModel? SelectedTexture { get; set; }
 
     /// <summary>
@@ -85,12 +86,14 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     ///     display; this view model owns it and disposes it when replaced or disposed.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     public partial Image? Preview { get; private set; }
 
     /// <summary>
     ///     True if the view model is busy loading a preview.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     public partial bool IsBusy { get; set; }
 
     /// <summary>
@@ -159,6 +162,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to preview virtual texture: {Name}", meta.Name);
+            Preview = null;
             StatusText = Strings.TitlePreviewFailed;
         }
         finally
@@ -186,7 +190,8 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         }
 
         // Ownership of the image is transferred to Preview; it is disposed when replaced or disposed.
-        var image = await ImageLoader.LoadAsync(ddsStream, ".dds");
+        // Decoding is CPU bound, so keep it off the UI thread the view model now lives on.
+        var image = await Task.Run(() => ImageLoader.LoadAsync(ddsStream, ".dds"), cts.Token);
         if (cts.IsCancellationRequested)
         {
             image?.Dispose();
@@ -235,10 +240,18 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     }
 
     /// <summary>
+    ///     Whether there is a decoded layer that can be exported.
+    /// </summary>
+    private bool CanExport()
+    {
+        return SelectedTexture is not null && Preview is not null && !IsBusy;
+    }
+
+    /// <summary>
     ///     Exports every layer of the selected texture as one set of DDS files.
     ///     DDS is the only export format here: the raw layer data is written without re-encoding.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExport))]
     private Task ExportAsync()
     {
         var texture = SelectedTexture;
@@ -249,8 +262,10 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         var layerCount = Math.Min(_loader.LayerCount, LayerNames.Length);
         return layerCount == 0
             ? Task.CompletedTask
-            : ExportFilesAsync([.. Enumerable.Range(0, layerCount)
-                .Select(layer => ToExportFile(name, meta, layer))]);
+            : ExportFilesAsync([
+                .. Enumerable.Range(0, layerCount)
+                    .Select(layer => ToExportFile(name, meta, layer))
+            ]);
     }
 
     /// <summary>
