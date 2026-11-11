@@ -103,13 +103,6 @@
                                     <Grid>
                                         <Image Source="{Binding Image}"
                                                RenderOptions.BitmapScalingMode="HighQuality" />
-                                        <!-- Fluent style selection outline, drawn on top of the icon so it does not resize it. -->
-                                        <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
-                                        <Border BorderThickness="2"
-                                                CornerRadius="4"
-                                                BorderBrush="#FF4CC2FF"
-                                                IsHitTestVisible="False"
-                                                Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         <!-- Accent check badge of the selected icon. -->
                                         <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
                                         <Viewbox Width="18" Height="18"
