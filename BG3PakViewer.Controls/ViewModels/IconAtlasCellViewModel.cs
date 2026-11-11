@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Windows.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -12,8 +13,14 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     identity it has; it is what lets a user find the icon again in the sheet or match it against
 ///     external data.
 /// </remarks>
-public sealed class IconAtlasCellViewModel(BitmapSource image, Vector4 uv)
+public sealed partial class IconAtlasCellViewModel(BitmapSource image, Vector4 uv) : ObservableObject
 {
+    /// <summary>
+    ///     Whether this icon is currently selected in the atlas preview.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+
     /// <summary>
     ///     The sliced bitmap of this icon.
     /// </summary>

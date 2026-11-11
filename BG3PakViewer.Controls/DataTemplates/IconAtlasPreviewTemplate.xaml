@@ -35,20 +35,26 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:IconAtlasCellViewModel}">
-                        <Border Width="{Binding Width}"
-                                Height="{Binding Height}"
-                                BorderThickness="1" Background="Transparent">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="BorderBrush" Value="#33808080" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="BorderBrush" Value="#FF4CC2FF" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <Border.ToolTip>
+                        <!--
+                          The selection is a checkbox so a click on the icon toggles IsSelected directly;
+                          the template drops the check box chrome and only keeps its content.
+                        -->
+                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                  Focusable="False"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Padding="0"
+                                  Margin="0"
+                                  MinWidth="0"
+                                  MinHeight="0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top">
+                            <CheckBox.Template>
+                                <ControlTemplate TargetType="CheckBox">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </CheckBox.Template>
+                            <CheckBox.ToolTip>
                                 <ToolTip>
                                     <StackPanel>
                                         <TextBlock>
@@ -77,10 +83,43 @@
                                         </TextBlock>
                                     </StackPanel>
                                 </ToolTip>
-                            </Border.ToolTip>
-                            <Image Source="{Binding Image}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
-                        </Border>
+                            </CheckBox.ToolTip>
+                            <Border Width="{Binding Width}"
+                                    Height="{Binding Height}"
+                                    BorderThickness="1" Background="Transparent">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="#33808080" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" Value="#FF4CC2FF" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BorderBrush" Value="#FF4CC2FF" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Image Source="{Binding Image}"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
+                                    <!-- Checked badge of the selected icon. -->
+                                    <Viewbox Width="18" Height="18"
+                                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                                             Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Canvas Width="20" Height="20">
+                                            <Path Data="M0,0 L20,0 L0,20 Z" Fill="#FF4CC2FF" />
+                                            <Path Data="M4.5,5.5 L8,9 L14.5,3.5"
+                                                  Stroke="White"
+                                                  StrokeThickness="2"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Grid>
+                            </Border>
+                        </CheckBox>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
