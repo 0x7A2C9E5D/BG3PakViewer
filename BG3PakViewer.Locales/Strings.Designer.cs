@@ -339,6 +339,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to More actions.
+        /// </summary>
+        public static string MoreActions {
+            get {
+                return ResourceManager.GetString("MoreActions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading.
         /// </summary>
         public static string FileLoadingDuplicateCaption {

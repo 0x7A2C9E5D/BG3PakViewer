@@ -405,6 +405,9 @@
     <data name="ExportSelectedIcons" xml:space="preserve">
       <value>Esporta selezionati</value>
     </data>
+    <data name="MoreActions" xml:space="preserve">
+      <value>Altre azioni</value>
+    </data>
     <data name="ExportAllIcons" xml:space="preserve">
       <value>Esporta tutto</value>
     </data>

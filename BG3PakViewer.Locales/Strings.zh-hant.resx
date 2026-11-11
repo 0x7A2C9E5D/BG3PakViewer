@@ -297,6 +297,9 @@
     <data name="ExportSelectedIcons" xml:space="preserve">
         <value>匯出選取</value>
     </data>
+    <data name="MoreActions" xml:space="preserve">
+        <value>更多操作</value>
+    </data>
     <data name="ExportAllIcons" xml:space="preserve">
         <value>匯出全部</value>
     </data>
