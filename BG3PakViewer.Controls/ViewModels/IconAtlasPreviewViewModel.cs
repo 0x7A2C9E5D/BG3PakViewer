@@ -47,11 +47,6 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         IDialogService dialogService,
         IAppSettings appSettings)
     {
-        ArgumentNullException.ThrowIfNull(items);
-        ArgumentNullException.ThrowIfNull(exportService);
-        ArgumentNullException.ThrowIfNull(dialogService);
-        ArgumentNullException.ThrowIfNull(appSettings);
-        ArgumentNullException.ThrowIfNull(atlasName);
         _exportService = exportService;
         _dialogService = dialogService;
         _appSettings = appSettings;
@@ -95,25 +90,26 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         if (files.Count == 0) return;
 
         var folder = await PickFolderAsync();
-        if (folder is null)
+        if (folder is not null)
+        {
+            var exported = 0;
+            var failures = new List<PreviewExportResult>();
+            await foreach (var result in _exportService.ExportAsync(folder, files))
+            {
+                if (result.Success)
+                    exported++;
+                else
+                    failures.Add(result);
+            }
+
+            await ReportExportAsync(exported, files.Count, failures, folder);
+        }
+        else
         {
             Log.Information("Preview export folder selection was cancelled");
             await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportCancelledMessage,
                 Strings.CancelExportOperationCaption);
-            return;
         }
-
-        var exported = 0;
-        var failures = new List<PreviewExportResult>();
-        await foreach (var result in _exportService.ExportAsync(folder, files))
-        {
-            if (result.Success)
-                exported++;
-            else
-                failures.Add(result);
-        }
-
-        await ReportExportAsync(exported, files.Count, failures, folder);
     }
 
     /// <summary>
