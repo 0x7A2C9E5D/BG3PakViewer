@@ -13,17 +13,8 @@ public interface IPreviewExportService
     /// <param name="folder">The folder the files are written to.</param>
     /// <param name="files">The files to export.</param>
     /// <param name="progress">Receives how many files were written as the export advances.</param>
-    Task ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files,
-        IProgress<PreviewExportProgress<int>>? progress = null);
+    Task ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files, IProgress<int>? progress = null);
 }
-
-/// <summary>
-///     How far a preview export has come.
-/// </summary>
-/// <param name="Exported">How many files have been written.</param>
-/// <param name="Total">How many files are being exported.</param>
-/// <typeparam name="T">The type of the file counts.</typeparam>
-public record PreviewExportProgress<T>(T Exported, T Total);
 
 /// <summary>
 ///     A single file of a preview export together with the name it is written to.

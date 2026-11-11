@@ -155,7 +155,7 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     /// <summary>
     ///     Collects the progress reported by a preview export.
     /// </summary>
-    private sealed class PreviewExportProgressReporter : IProgress<PreviewExportProgress<int>>
+    private sealed class PreviewExportProgressReporter : IProgress<int>
     {
         /// <summary>
         ///     Gets how many files have been written.
@@ -163,9 +163,9 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         public int Exported { get; private set; }
 
         /// <inheritdoc />
-        public void Report(PreviewExportProgress<int> value)
+        public void Report(int value)
         {
-            Exported = value.Exported;
+            Exported = value;
         }
     }
 }

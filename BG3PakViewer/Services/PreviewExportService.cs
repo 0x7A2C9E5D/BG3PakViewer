@@ -16,7 +16,7 @@ internal sealed class PreviewExportService : IPreviewExportService
     /// <param name="files">The files to export.</param>
     /// <param name="progress">Receives how many files were written as the export advances.</param>
     public async Task ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files,
-        IProgress<PreviewExportProgress<int>>? progress = null)
+        IProgress<int>? progress = null)
     {
         if (files.Count == 0) return;
 
@@ -36,7 +36,7 @@ internal sealed class PreviewExportService : IPreviewExportService
                 Log.Error(ex, "Failed to export file to: {Path}", path);
             }
 
-            progress?.Report(new PreviewExportProgress<int>(exported, files.Count));
+            progress?.Report(exported);
         }
 
         Log.Information("Exported {Exported} of {Total} files", exported, files.Count);
