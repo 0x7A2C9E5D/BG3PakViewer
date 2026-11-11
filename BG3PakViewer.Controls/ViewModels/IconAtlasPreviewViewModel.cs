@@ -55,7 +55,7 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
 
         // The selection is changed on the cells, so it has to be watched to keep the command state in
         // sync with the icons the user has picked.
-        foreach (var item in Items) 
+        foreach (var item in Items)
             item.PropertyChanged += OnItemPropertyChanged;
     }
 
@@ -88,20 +88,16 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     /// <param name="files">The files to export.</param>
     private async Task ExportAsync(IReadOnlyList<PreviewExportFile> files)
     {
-        if (files.Count == 0) return;
-
         var folder = await PickFolderAsync();
         if (folder is not null)
         {
             var exported = 0;
             var failures = new List<PreviewExportResult>();
             await foreach (var result in _exportService.ExportAsync(folder, files))
-            {
                 if (result.Success)
                     exported++;
                 else
                     failures.Add(result);
-            }
 
             await ReportExportAsync(exported, files.Count, failures, folder);
         }
