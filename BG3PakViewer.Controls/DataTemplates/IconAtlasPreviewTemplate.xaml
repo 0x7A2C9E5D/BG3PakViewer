@@ -132,7 +132,8 @@
                                             <Setter Property="BorderBrush" Value="#33808080" />
                                             <Style.Triggers>
                                                 <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="BorderBrush" Value="#664CC2FF" />
+                                                    <Setter Property="BorderBrush"
+                                                            Value="{DynamicResource AccentFillColorDefaultBrush}" />
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
@@ -148,9 +149,10 @@
                                                  IsHitTestVisible="False"
                                                  Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <Canvas Width="20" Height="20">
-                                                <Ellipse Width="20" Height="20" Fill="#FF4CC2FF" />
+                                                <Ellipse Width="20" Height="20"
+                                                         Fill="{DynamicResource AccentFillColorDefaultBrush}" />
                                                 <Path Data="M5.5,10.5 L9,14 L15,7.5"
-                                                      Stroke="White"
+                                                      Stroke="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
                                                       StrokeThickness="2.2"
                                                       StrokeStartLineCap="Round"
                                                       StrokeEndLineCap="Round"
