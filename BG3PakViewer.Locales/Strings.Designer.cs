@@ -267,7 +267,7 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Exported {0} files to:.
+        ///   Looks up a localized string similar to Exported {0} files..
         /// </summary>
         public static string PreviewExportCompletedMessage {
             get {
@@ -285,7 +285,7 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Exported {0} of {1} files to:.
+        ///   Looks up a localized string similar to Exported {0} of {1} files..
         /// </summary>
         public static string PreviewExportPartialMessage {
             get {
@@ -294,7 +294,7 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to None of the files could be exported to:.
+        ///   Looks up a localized string similar to None of the files could be exported..
         /// </summary>
         public static string PreviewExportNothingMessage {
             get {

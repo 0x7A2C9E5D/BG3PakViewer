@@ -214,19 +214,16 @@
         <value>Export Failed</value>
     </data>
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
-        <value>Exported {0} files to:
-{1}</value>
+        <value>Exported {0} files.</value>
     </data>
     <data name="PreviewExportCancelledMessage" xml:space="preserve">
         <value>Export cancelled. No files were written.</value>
     </data>
     <data name="PreviewExportPartialMessage" xml:space="preserve">
-        <value>Exported {0} of {1} files to:
-{2}</value>
+        <value>Exported {0} of {1} files.</value>
     </data>
     <data name="PreviewExportNothingMessage" xml:space="preserve">
-        <value>None of the files could be exported to:
-{0}</value>
+        <value>None of the files could be exported.</value>
     </data>
     <data name="PreviewExportFailedFilesHeader" xml:space="preserve">
         <value>Failed files:</value>

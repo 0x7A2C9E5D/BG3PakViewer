@@ -123,7 +123,7 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
         {
             Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
             await _dialogService.ShowMessageBoxNotifyAsync(this,
-                string.Format(Strings.PreviewExportCompletedMessage, exported, folder),
+                string.Format(Strings.PreviewExportCompletedMessage, exported),
                 Strings.ExportCompleted, MessageBoxIcon.Success);
             return;
         }
@@ -132,8 +132,8 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
 
         var message = new StringBuilder();
         message.AppendLine(exported == 0
-            ? string.Format(Strings.PreviewExportNothingMessage, folder)
-            : string.Format(Strings.PreviewExportPartialMessage, exported, total, folder));
+            ? Strings.PreviewExportNothingMessage
+            : string.Format(Strings.PreviewExportPartialMessage, exported, total));
         message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
         foreach (var failure in failures)
             message.AppendLine($"{failure.Name}: {failure.Reason}");
