@@ -37,10 +37,20 @@ public partial class VirtualTexturePreviewViewModel
     /// </summary>
     private async Task LoadPreviewAsync()
     {
-        var cts = await BeginLoadAsync();
-        if (SelectedTexture is null) return;
-        var meta = SelectedTexture.Meta;
+        var texture = SelectedTexture;
         var layer = SelectedLayerIndex;
+
+        // No selection (for example the filter matched no texture) is not a load: cancel the
+        // running extraction and clear the preview, otherwise the status line stays on the
+        // "extracting" resource key forever.
+        if (texture is null)
+        {
+            await ClearPreviewAsync();
+            return;
+        }
+
+        var cts = await BeginLoadAsync();
+        var meta = texture.Meta;
 
         try
         {
@@ -52,9 +62,9 @@ public partial class VirtualTexturePreviewViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to preview virtual texture: {Name}", meta.Name);
             Preview = null;
             StatusKey = LangKeys.TitlePreviewFailed;
+            Log.Error(ex, "Failed to preview virtual texture: {Name}", meta.Name);
         }
         finally
         {
@@ -99,6 +109,20 @@ public partial class VirtualTexturePreviewViewModel
     {
         Preview = null;
         StatusKey = LangKeys.TitleNoData;
+    }
+
+    /// <summary>
+    ///     Cancels the running load, if any, and clears the preview and the status line.
+    /// </summary>
+    private async Task ClearPreviewAsync()
+    {
+        if (_cts is not null)
+            await _cts.CancelAsync();
+        _cts = null;
+        Preview = null;
+        IsBusy = false;
+        Progress = 0;
+        StatusKey = string.Empty;
     }
 
     /// <summary>
