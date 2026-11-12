@@ -77,16 +77,10 @@ public static class ImageSharpExtensions
     /// <returns></returns>
     private static BitmapSource ConvertRgba32(Image<Rgba32> image)
     {
-        var width = image.Width;
-        var height = image.Height;
-        var stride = width * 4;
-        var data = new byte[height * stride];
-
-        image.CopyPixelDataTo(data);
-
-        return BitmapSource.Create(
-            width, height, 96, 96,
-            PixelFormats.Bgra32, null, data, stride);
+        // WPF has no non-premultiplied Rgba32 format, so the channels have to be
+        // reordered to the Bgra32 layout before handing the pixels over.
+        using var converted = image.CloneAs<Bgra32>();
+        return ConvertBgra32(converted);
     }
 
     /// <summary>
