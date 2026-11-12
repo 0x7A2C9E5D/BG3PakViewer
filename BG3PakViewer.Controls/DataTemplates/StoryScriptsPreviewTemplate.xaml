@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared">
@@ -18,9 +19,35 @@
                       BorderBrush="Gray" BorderThickness="1" Padding="4"
                       VirtualizingStackPanel.IsVirtualizing="True"
                       VirtualizingStackPanel.VirtualizationMode="Recycling"
-                      VirtualizingStackPanel.CacheLength="50"
-                      ScrollViewer.CanContentScroll="True"
+                      VirtualizingPanel.ScrollUnit="Pixel"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <!--
+                  The theme's ListView template hard-codes CanContentScroll=False on its
+                  ScrollViewerEx, which silently disables virtualization: every goal of the
+                  story gets a row realized, and a large story freezes the preview for
+                  seconds. Keep the theme's animated scroll viewer but allow logical
+                  scrolling so only visible rows are generated.
+                -->
+                <ListView.Template>
+                    <ControlTemplate TargetType="ListView">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ui:ScrollViewerEx CanContentScroll="True"
+                                               HorizontalScrollBarVisibility="Disabled"
+                                               VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter />
+                            </ui:ScrollViewerEx>
+                        </Border>
+                    </ControlTemplate>
+                </ListView.Template>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
                 <i:Interaction.Behaviors>
                     <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" AutoSelectFirstItem="True" />
                 </i:Interaction.Behaviors>
