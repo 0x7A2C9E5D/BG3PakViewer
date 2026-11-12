@@ -45,37 +45,56 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
     /// <param name="targetPath"></param>
     private async Task ExportVirtualTexturePagesAsync(string sourcePath, string targetPath)
     {
-        using var tileSet = new VirtualTileSet(targetPath);
-        var pageFileNames = tileSet.PageFileInfos.Select(x => x.FileName).ToList();
+        var pageFileNames = GetVirtualTexturePageFileNames(targetPath);
         var sourceFolderPath = Path.GetDirectoryName(sourcePath)!;
         var targetFolderPath = Path.GetDirectoryName(targetPath)!;
         var parallelOptions = new ParallelOptions
         {
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
-        await Parallel.ForEachAsync(pageFileNames, parallelOptions, async (pageFileName, _) =>
-        {
-            try
-            {
-                var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
-                var pageFile = packageService.GetFileByPath(sourceFilePath);
-                if (pageFile == null)
-                {
-                    Log.Warning("Page file not found: {Path}", sourceFilePath);
-                    return;
-                }
-
-                var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
-                await using var pageStream = pageFile.CreateContentReader();
-                await FileOperations.SaveStreamToFileAsync(pageStream, targetFilePath);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Error exporting page file: {Path}", pageFileName);
-            }
-        });
-
+        await Parallel.ForEachAsync(pageFileNames, parallelOptions, (pageFileName, _)
+            => ExportVirtualTexturePageAsync(pageFileName, sourceFolderPath, targetFolderPath));
         Log.Information("Exported {Count} virtual texture page file(s) next to {TargetPath}",
             pageFileNames.Count, targetPath);
+    }
+
+    /// <summary>
+    ///     Read the page file names referenced by a virtual texture tile set
+    /// </summary>
+    /// <param name="tileSetPath"></param>
+    /// <returns></returns>
+    private static List<string> GetVirtualTexturePageFileNames(string tileSetPath)
+    {
+        using var tileSet = new VirtualTileSet(tileSetPath);
+        return tileSet.PageFileInfos.Select(x => x.FileName).ToList();
+    }
+
+    /// <summary>
+    ///     Export a single virtual texture page file
+    /// </summary>
+    /// <param name="pageFileName"></param>
+    /// <param name="sourceFolderPath"></param>
+    /// <param name="targetFolderPath"></param>
+    private async ValueTask ExportVirtualTexturePageAsync(string pageFileName, string sourceFolderPath,
+        string targetFolderPath)
+    {
+        try
+        {
+            var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
+            var pageFile = packageService.GetFileByPath(sourceFilePath);
+            if (pageFile == null)
+            {
+                Log.Warning("Page file not found: {Path}", sourceFilePath);
+                return;
+            }
+
+            var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
+            await using var pageStream = pageFile.CreateContentReader();
+            await FileOperations.SaveStreamToFileAsync(pageStream, targetFilePath);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Error exporting page file: {Path}", pageFileName);
+        }
     }
 }
