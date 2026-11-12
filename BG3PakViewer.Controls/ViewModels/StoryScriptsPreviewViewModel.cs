@@ -56,9 +56,10 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     partial void OnStoryChanged(Story? value)
     {
         Goals.Clear();
-        if (value is null) return;
-        foreach (var goal in value.Goals.Values)
-            Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
+        if (value is not null)
+            foreach (var goal in value.Goals.Values)
+                Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
+        SelectedGoal = Goals.FirstOrDefault();
     }
 
     /// <summary>
