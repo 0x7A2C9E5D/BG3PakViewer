@@ -30,34 +30,15 @@ internal class ImagePreviewHandler(
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return null;
-
-        // Ownership of the image is transferred to the view model, which disposes it.
         var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         if (image is null) return null;
-
         if (!IconAtlasDetector.IsIconAtlas(node.FullPath))
             return new ImagePreviewViewModel { Preview = image };
-
-        // Icon atlases are previewed as a sliced icon grid. A file whose name looks like an atlas does
-        // not have to be one, so the grid is only used when the content actually shows one; a sheet
-        // without a grid still goes through the slicer holding a single icon, which is what keeps its
-        // padding out of the preview. The slicing happens on the decoded image itself, and blank cells
-        // are dropped there, which is what keeps a half used sheet from previewing as a wall of empty
-        // icons.
-        //
-        // Detection, slicing and the per-cell bitmap conversion all stay off the UI thread: an atlas
-        // holds hundreds of cells, and converting them on the UI thread froze the window for seconds
-        // (which is also what kept the preview command busy and made selection changes get dropped).
-        try
-        {
-            var name = Path.GetFileNameWithoutExtension(node.Name);
-            var cells = await Task.Run(() => SliceAtlas(image));
-            return new IconAtlasPreviewViewModel(name, cells, exportService, dialogService, appSettings);
-        }
-        finally
-        {
-            image.Dispose();
-        }
+        var name = Path.GetFileNameWithoutExtension(node.Name);
+        var cells = await Task.Run(() => SliceAtlas(image));
+        var viewModel = new IconAtlasPreviewViewModel(name, cells, exportService, dialogService, appSettings);
+        image.Dispose();
+        return viewModel;
     }
 
     /// <summary>
