@@ -33,9 +33,6 @@ internal class LocalizationPreviewHandler(IPackageService packageService) : IPre
 
         var resource = await LocalizationLoader.LoadAsync(stream);
         if (resource == null) return null;
-
-        // Build the table rows off the UI thread so large localizations don't
-        // block the UI.
         return await Task.Run(() => LocalizationPreviewViewModel.FromResource(resource));
     }
 }
