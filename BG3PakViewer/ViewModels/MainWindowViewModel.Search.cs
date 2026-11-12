@@ -17,8 +17,11 @@ internal partial class MainWindowViewModel
     ///     Broadcasts the search query so the active preview handles it via the messenger. The
     ///     package tree is left untouched: it belongs to the tree search box.
     /// </summary>
+    // The method names carry no "Async" suffix: the generator derives the command property from
+    // the name (stripping "Async" only for Task-returning methods), and the view binds
+    // SearchCommand / ClearSearchCommand. A stray suffix silently breaks those bindings.
     [RelayCommand]
-    private void SearchAsync(string query)
+    private void Search(string query)
     {
         Log.Information("Searching the preview for '{Query}'...", query);
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(query), MessageTokens.SearchQueryChanged);
@@ -28,7 +31,7 @@ internal partial class MainWindowViewModel
     ///     Clears the preview filter when the title bar box is emptied.
     /// </summary>
     [RelayCommand]
-    private void ClearSearchAsync(string query)
+    private void ClearSearch(string query)
     {
         if (!string.IsNullOrWhiteSpace(query)) return;
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(null), MessageTokens.SearchQueryChanged);
