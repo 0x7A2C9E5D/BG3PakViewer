@@ -165,6 +165,37 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     }
 
     /// <summary>
+    ///     Filters the package tree from the search box above the tree. It deliberately ignores the
+    ///     active preview: that box always searches the tree, the window title bar box is the one
+    ///     that targets the preview.
+    /// </summary>
+    [RelayCommand]
+    private async Task SearchTreeAsync(string query)
+    {
+        if (!_packageService.IsLoaded) return;
+
+        await Task.Run(() =>
+        {
+            Log.Information("Searching package tree for '{Query}'...", query);
+            PackageTree = _packageService.BuildTree(query);
+            Log.Information("Package tree search completed");
+        }, CancellationToken.None);
+    }
+
+    /// <summary>
+    ///     Restores the full package tree when the tree search box is emptied.
+    /// </summary>
+    [RelayCommand]
+    private async Task ClearTreeSearchAsync(string query)
+    {
+        if (!string.IsNullOrWhiteSpace(query)) return;
+        if (!_packageService.IsLoaded) return;
+
+        await Task.Run(() => { PackageTree = _packageService.BuildTree(); }, CancellationToken.None);
+        Log.Information("Package tree search query cleared");
+    }
+
+    /// <summary>
     ///     Get default open location
     /// </summary>
     /// <returns></returns>

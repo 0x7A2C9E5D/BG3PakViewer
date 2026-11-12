@@ -164,11 +164,11 @@
                 </ui:AutoSuggestBox.QueryIcon>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="QuerySubmitted">
-                        <i:InvokeCommandAction Command="{Binding SearchCommand}"
+                        <i:InvokeCommandAction Command="{Binding SearchTreeCommand}"
                                                CommandParameter="{Binding Text, ElementName=AutoSuggestBox}" />
                     </i:EventTrigger>
                     <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding ClearSearchCommand}"
+                        <i:InvokeCommandAction Command="{Binding ClearTreeSearchCommand}"
                                                CommandParameter="{Binding Text, ElementName=AutoSuggestBox}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
