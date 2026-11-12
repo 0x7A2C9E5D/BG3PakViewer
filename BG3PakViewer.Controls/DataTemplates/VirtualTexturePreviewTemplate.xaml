@@ -226,7 +226,12 @@
                                 <ComboBoxItem Content="Normal" />
                                 <ComboBoxItem Content="Physical" />
                             </ComboBox>
-                            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center"
+                            <!--
+                              StatusKey is a LangKeys resource key or an untranslated source string
+                              (image dimensions). I18N resolves both and refreshes them on culture
+                              changes, so the whole status line comes from one binding.
+                            -->
+                            <TextBlock Text="{I18N {Binding StatusKey}}" VerticalAlignment="Center"
                                        Margin="16,0,0,0" Foreground="Gray" />
                         </StackPanel>
                         <Button Grid.Column="1" Margin="8,0,0,0" Padding="10,4"

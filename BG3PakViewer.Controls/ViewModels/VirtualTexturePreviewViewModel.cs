@@ -98,10 +98,12 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     public partial bool IsBusy { get; set; }
 
     /// <summary>
-    ///     The status text.
+    ///     The resource key, or an untranslated source string (the image dimensions), that the view
+    ///     resolves through I18N. The view model never holds localized UI text, so a culture change
+    ///     refreshes the whole status line from one binding.
     /// </summary>
     [ObservableProperty]
-    public partial string? StatusText { get; private set; }
+    public partial string? StatusKey { get; private set; } = string.Empty;
 
     /// <summary>
     ///     The progress of the current operation, from 0 to 1.
@@ -164,7 +166,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         {
             Log.Error(ex, "Failed to preview virtual texture: {Name}", meta.Name);
             Preview = null;
-            StatusText = Strings.TitlePreviewFailed;
+            StatusKey = LangKeys.TitlePreviewFailed;
         }
         finally
         {
@@ -203,12 +205,12 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     }
 
     /// <summary>
-    ///     Shows no data.
+    ///     Clears the preview and points the status line at the no-data resource key.
     /// </summary>
     private void ShowNoData()
     {
         Preview = null;
-        StatusText = Strings.TitleNoData;
+        StatusKey = LangKeys.TitleNoData;
     }
 
     /// <summary>
@@ -223,7 +225,7 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         _cts = cts;
 
         IsBusy = true;
-        StatusText = Strings.TitleExtracting;
+        StatusKey = LangKeys.TitleExtracting;
         Progress = 0;
         return cts;
     }
@@ -235,8 +237,8 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
     private void ShowPreview(Image? image)
     {
         Preview = image;
-        StatusText = image is null
-            ? Strings.TitleDecodeFailed
+        StatusKey = image is null
+            ? LangKeys.TitleDecodeFailed
             : $"{image.Width} × {image.Height}";
     }
 
