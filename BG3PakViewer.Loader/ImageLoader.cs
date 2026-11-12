@@ -27,9 +27,9 @@ public static class ImageLoader
     public static async Task<Image?> LoadAsync(Stream stream, string extension)
     {
         if (FileExtensions.IsTextureFormat(extension))
-            return await LoadTextureImageAsync(stream, extension);
+            return await LoadTextureAsync(stream, extension);
         if (FileExtensions.IsBitmapImage(extension))
-            return await LoadStandardImageAsync(stream, extension);
+            return await LoadBitmapAsync(stream, extension);
         throw new NotSupportedException($"Unsupported image format: {extension}");
     }
 
@@ -47,7 +47,7 @@ public static class ImageLoader
             return await ExportTextureAsync(image, path);
         if (!FileExtensions.IsBitmapImage(extension))
             throw new NotSupportedException($"Unsupported image format: {extension}");
-        return await ExportStandardImageAsync(image, path);
+        return await ExportBitmapAsync(image, path);
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public static class ImageLoader
     /// <param name="stream"></param>
     /// <param name="extension"></param>
     /// <returns></returns>
-    private static async Task<Image?> LoadStandardImageAsync(Stream stream, string extension)
+    private static async Task<Image?> LoadBitmapAsync(Stream stream, string extension)
     {
         try
         {
@@ -109,7 +109,7 @@ public static class ImageLoader
     /// <param name="stream"></param>
     /// <param name="extension"></param>
     /// <returns></returns>
-    private static async Task<Image?> LoadTextureImageAsync(Stream stream, string extension)
+    private static async Task<Image?> LoadTextureAsync(Stream stream, string extension)
     {
         try
         {
@@ -190,7 +190,7 @@ public static class ImageLoader
     /// <param name="image"></param>
     /// <param name="path"></param>
     /// <returns></returns>
-    private static async Task<bool> ExportStandardImageAsync(Image image, string path)
+    private static async Task<bool> ExportBitmapAsync(Image image, string path)
     {
         try
         {
