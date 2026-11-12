@@ -17,7 +17,6 @@ internal partial class ExportService(
 {
     private readonly IExportStrategy _defaultStrategy = new RawFileExportStrategy(packageService);
     private readonly Dictionary<string, IExportStrategy> _exportStrategies = BuildStrategyDictionary(strategies);
-    private readonly IPackageService _packageService = packageService;
 
     /// <summary>
     ///     Get export filters
@@ -44,7 +43,7 @@ internal partial class ExportService(
         ArgumentNullException.ThrowIfNull(node);
         if (string.IsNullOrWhiteSpace(targetPath))
             throw new ArgumentException(@"Target path cannot be null or empty.", nameof(targetPath));
-        var file = _packageService.GetFileByPath(node.FullPath);
+        var file = packageService.GetFileByPath(node.FullPath);
         if (file == null)
         {
             Log.Warning("Export file not found: {Path}", node.FullPath);
