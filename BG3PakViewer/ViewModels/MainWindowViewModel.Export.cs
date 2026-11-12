@@ -12,7 +12,7 @@ namespace BG3PakViewer.ViewModels;
 
 /// <summary>
 ///     Exporting the selected file or folder, including the export state and the confirmation that
-///     lets a running folder export be cancelled.
+///     lets a running folder export be canceled.
 /// </summary>
 internal partial class MainWindowViewModel
 {
