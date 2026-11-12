@@ -56,9 +56,8 @@ internal partial class MainWindowViewModel
     /// </summary>
     private async Task DisposePreviewVmAsync()
     {
-        var previous = PreviewVm;
+        await DisposePreviewAsync(PreviewVm);
         PreviewVm = null;
-        await DisposePreviewAsync(previous);
     }
 
     /// <summary>
