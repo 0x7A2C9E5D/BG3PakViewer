@@ -264,18 +264,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private async Task CleanupCurrentPackageAsync()
     {
         await DisposePreviewVmAsync();
-        PreviewVm = null;
         PackageTree = null;
         await _packageService.CleanupAsync();
-    }
-
-    /// <summary>
-    ///     Dispose preview vm async
-    /// </summary>
-    private async Task DisposePreviewVmAsync()
-    {
-        if (PreviewVm is IAsyncDisposable disposable)
-            await disposable.DisposeAsync();
     }
 
     /// <summary>
@@ -402,16 +392,19 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     ///     Preview async
     /// </summary>
     /// <param name="toPreview"></param>
+    // Preview is deliberately serial: the command is not allowed to run concurrently, so a preview
+    // that is still being built keeps the next one from starting instead of racing it. What keeps
+    // the window responsive is the handlers doing the expensive work off the UI thread, not
+    // overlapping previews. Disposing first means the pane empties as soon as the selection moves.
     [RelayCommand]
     private async Task PreviewAsync(object toPreview)
     {
         if (toPreview is not PackageEntry node || !_packageService.IsLoaded)
             return;
-        if (node.IsFolder)
-        {
-            await ClearPreviewAsync();
-            return;
-        }
+
+        await DisposePreviewVmAsync();
+
+        if (node.IsFolder) return;
 
         await ShowPreviewAsync(node);
     }
@@ -426,24 +419,42 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         {
             Log.Information("Creating preview for: {Path}", node.FullPath);
             var viewModel = await _previewService.CreatePreviewViewModelAsync(node);
-            await DisposePreviewVmAsync();
             PreviewVm = viewModel;
             if (viewModel != null) Log.Debug("Preview displayed successfully");
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error showing preview for: {Path}", node.FullPath);
-            await ClearPreviewAsync();
+            await DisposePreviewVmAsync();
         }
     }
 
     /// <summary>
-    ///     Clear preview async
+    ///     Clears the preview binding first so the pane empties immediately, then releases the view
+    ///     model (async or sync disposable).
     /// </summary>
-    private async Task ClearPreviewAsync()
+    private async Task DisposePreviewVmAsync()
     {
-        await DisposePreviewVmAsync();
+        var previous = PreviewVm;
         PreviewVm = null;
+        await DisposePreviewAsync(previous);
+    }
+
+    /// <summary>
+    ///     Releases a preview view model.
+    /// </summary>
+    /// <param name="viewModel"></param>
+    private static async Task DisposePreviewAsync(object? viewModel)
+    {
+        switch (viewModel)
+        {
+            case IAsyncDisposable asyncDisposable:
+                await asyncDisposable.DisposeAsync();
+                break;
+            case IDisposable disposable:
+                disposable.Dispose();
+                break;
+        }
     }
 
     /// <summary>
@@ -534,7 +545,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
             {
                 "Package", DependencyContext.Default?
                     .RuntimeLibraries.Where(x => x.Type == "package")
-                    .OrderBy(x => x.Name)
+                    .OrderBy(x => x.Name, StringComparer.InvariantCulture)
             }
         };
     }
