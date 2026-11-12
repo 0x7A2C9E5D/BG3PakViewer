@@ -54,7 +54,7 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
                 <i:Interaction.Behaviors>
-                    <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" />
+                    <b:CollectionViewFilterBehavior Filter="{Binding ItemFilter}" AutoSelectFirstItem="True" />
                 </i:Interaction.Behaviors>
                 <!--
                   Every row must lay out at the same width, otherwise the copy button of a
