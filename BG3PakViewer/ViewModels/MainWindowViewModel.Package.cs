@@ -87,28 +87,33 @@ internal partial class MainWindowViewModel
     {
         _isLoading = true;
         Log.Information("Opening PAK file: {Path}", path);
-        var success = await Task.Run(async () =>
+        try
         {
-            await CleanupCurrentPackageAsync();
-            return await LoadAndBuildTreeAsync(path);
-        }, CancellationToken.None);
-        if (success)
-            _recentFilesService.AddOrUpdateRecentFile(path);
-        else
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
-                Strings.OpenFileFailedCaption,
-                MessageBoxIcon.Error);
-        _isLoading = false;
-    }
+            // The preview view model notifies the UI (its export command raises CanExecuteChanged),
+            // so it is released here on the UI thread instead of inside the background work below.
+            await DisposePreviewVmAsync();
 
-    /// <summary>
-    ///     Cleanup current package async
-    /// </summary>
-    private async Task CleanupCurrentPackageAsync()
-    {
-        await DisposePreviewVmAsync();
-        PackageTree = null;
-        await _packageService.CleanupAsync();
+            var success = await Task.Run(async () =>
+            {
+                PackageTree = null;
+                await _packageService.CleanupAsync();
+                return await LoadAndBuildTreeAsync(path);
+            }, CancellationToken.None);
+
+            if (success)
+                _recentFilesService.AddOrUpdateRecentFile(path);
+            else
+                await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
+                    Strings.OpenFileFailedCaption,
+                    MessageBoxIcon.Error);
+        }
+        finally
+        {
+            // A failed open must not leave the flag set: HandleReOpenFile would otherwise answer
+            // every later attempt with "file loading, please do not repeat the operation" for the
+            // rest of the session.
+            _isLoading = false;
+        }
     }
 
     /// <summary>
