@@ -408,6 +408,9 @@
     <data name="ExportCurrentScript" xml:space="preserve">
       <value>Esporta script corrente</value>
     </data>
+    <data name="ExportSearchResults" xml:space="preserve">
+      <value>Esporta risultati ricerca</value>
+    </data>
     <data name="ExportAllScripts" xml:space="preserve">
       <value>Esporta tutti gli script</value>
     </data>

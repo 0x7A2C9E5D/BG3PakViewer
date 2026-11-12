@@ -312,6 +312,9 @@
     <data name="ExportCurrentScript" xml:space="preserve">
         <value>Export current script</value>
     </data>
+    <data name="ExportSearchResults" xml:space="preserve">
+        <value>Export search results</value>
+    </data>
     <data name="ExportAllScripts" xml:space="preserve">
         <value>Export all scripts</value>
     </data>

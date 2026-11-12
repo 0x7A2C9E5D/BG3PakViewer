@@ -8,8 +8,8 @@ using Serilog;
 namespace BG3PakViewer.Controls.ViewModels;
 
 /// <summary>
-///     Exporting the decompiled scripts of the story: the script of the selected goal, or the
-///     script of every goal at once.
+///     Exporting the decompiled scripts of the story: the script of the selected goal, the scripts
+///     of the goals that match the current search, or the script of every goal at once.
 /// </summary>
 public partial class StoryScriptsPreviewViewModel
 {
@@ -23,6 +23,16 @@ public partial class StoryScriptsPreviewViewModel
     }
 
     /// <summary>
+    ///     Whether the search matches at least one goal, which is what exporting the search results
+    ///     handles.
+    /// </summary>
+    /// <returns></returns>
+    private bool CanExportSearchResults()
+    {
+        return ItemFilter is { } filter && Goals.Any(item => filter(item));
+    }
+
+    /// <summary>
     ///     Exports the decompiled script of the selected goal.
     /// </summary>
     [RelayCommand(CanExecute = nameof(CanExportSelected))]
@@ -30,6 +40,18 @@ public partial class StoryScriptsPreviewViewModel
     {
         var goal = SelectedGoal;
         return goal is null ? Task.CompletedTask : ExportAsync([ToExportFile(goal)]);
+    }
+
+    /// <summary>
+    ///     Exports the decompiled scripts of the goals that match the current search.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanExportSearchResults))]
+    private Task ExportSearchResultsAsync()
+    {
+        var filter = ItemFilter;
+        return filter is null
+            ? Task.CompletedTask
+            : ExportAsync([.. Goals.Where(item => filter(item)).Select(ToExportFile)]);
     }
 
     /// <summary>

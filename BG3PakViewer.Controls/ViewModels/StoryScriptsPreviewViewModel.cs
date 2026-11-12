@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Shared.ViewModels;
@@ -62,6 +63,17 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     /// </summary>
     [ObservableProperty]
     public partial string? Scripts { get; private set; }
+
+    /// <summary>
+    ///     Keeps the search-results export command in sync with the goals the current search matches.
+    /// </summary>
+    /// <param name="e"></param>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(ItemFilter))
+            ExportSearchResultsCommand.NotifyCanExecuteChanged();
+    }
 
     /// <summary>
     ///     Resets the view model when the story is changed.

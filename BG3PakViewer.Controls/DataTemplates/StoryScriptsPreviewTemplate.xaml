@@ -172,6 +172,9 @@
                             <Button Command="{Binding ExportSelectedCommand}"
                                     Content="{I18N {x:Static l:LangKeys.ExportCurrentScript}}"
                                     Style="{StaticResource ExportMenuButtonStyle}" />
+                            <Button Command="{Binding ExportSearchResultsCommand}"
+                                    Content="{I18N {x:Static l:LangKeys.ExportSearchResults}}"
+                                    Style="{StaticResource ExportMenuButtonStyle}" />
                             <Button Command="{Binding ExportAllCommand}"
                                     Content="{I18N {x:Static l:LangKeys.ExportAllScripts}}"
                                     Style="{StaticResource ExportMenuButtonStyle}" />

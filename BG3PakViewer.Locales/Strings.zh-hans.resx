@@ -303,6 +303,9 @@
     <data name="ExportCurrentScript" xml:space="preserve">
         <value>导出当前脚本</value>
     </data>
+    <data name="ExportSearchResults" xml:space="preserve">
+        <value>导出搜索结果</value>
+    </data>
     <data name="ExportAllScripts" xml:space="preserve">
         <value>导出全部脚本</value>
     </data>
