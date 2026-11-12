@@ -7,44 +7,32 @@ using Serilog;
 namespace BG3PakViewer.ViewModels;
 
 /// <summary>
-///     Search commands: the title bar box that can target the active preview as well as the package
-///     tree, and the box above the tree that always filters the tree.
+///     Search commands, one pair per search box. The title bar box filters the active preview only
+///     (virtual texture list, localization grid); the box above the tree filters the package tree
+///     only. Neither box may touch what the other one owns.
 /// </summary>
 internal partial class MainWindowViewModel
 {
     /// <summary>
-    ///     Broadcasts the search query so the active preview (virtual texture list / localization
-    ///     grid) handles it via the messenger; with no preview open it searches the package tree.
+    ///     Broadcasts the search query so the active preview handles it via the messenger. The
+    ///     package tree is left untouched: it belongs to the tree search box.
     /// </summary>
     [RelayCommand]
-    private async Task SearchAsync(string query)
+    private void SearchAsync(string query)
     {
+        Log.Information("Searching the preview for '{Query}'...", query);
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(query), MessageTokens.SearchQueryChanged);
-        if (PreviewVm is not null) return;
-
-        if (!_packageService.IsLoaded) return;
-
-        await Task.Run(() =>
-        {
-            Log.Information("Searching for '{Query}'...", query);
-            PackageTree = _packageService.BuildTree(query);
-            Log.Information("Search completed");
-        }, CancellationToken.None);
     }
 
     /// <summary>
-    ///     Only clears the search state (full list / full tree) when the text was emptied.
+    ///     Clears the preview filter when the title bar box is emptied.
     /// </summary>
     [RelayCommand]
-    private async Task ClearSearchAsync(string query)
+    private void ClearSearchAsync(string query)
     {
         if (!string.IsNullOrWhiteSpace(query)) return;
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(null), MessageTokens.SearchQueryChanged);
-        if (PreviewVm is not null) return;
-
-        if (!_packageService.IsLoaded) return;
-        await Task.Run(() => { PackageTree = _packageService.BuildTree(); }, CancellationToken.None);
-        Log.Information("Search query cleared");
+        Log.Information("Preview search query cleared");
     }
 
     /// <summary>
