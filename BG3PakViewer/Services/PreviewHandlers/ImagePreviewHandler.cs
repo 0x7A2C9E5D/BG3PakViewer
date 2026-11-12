@@ -8,6 +8,8 @@ using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs;
+using SixLabors.ImageSharp;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
@@ -42,46 +44,62 @@ internal class ImagePreviewHandler(
         // padding out of the preview. The slicing happens on the decoded image itself, and blank cells
         // are dropped there, which is what keeps a half used sheet from previewing as a wall of empty
         // icons.
-        var icons = await Task.Run(() => IconAtlasSlicer.Slice(image, IconAtlasDetector.DetectGrid(image)));
-
-        // The size of the sheet is what the UVs of the cells are normalized against, so it is captured
-        // before the atlas itself is released.
-        var size = new Vector2(image.Width, image.Height);
-        image.Dispose();
-
-        return CreateIconAtlasPreview(icons, size, node.Name);
+        //
+        // Detection, slicing and the per-cell bitmap conversion all stay off the UI thread: an atlas
+        // holds hundreds of cells, and converting them on the UI thread froze the window for seconds
+        // (which is also what kept the preview command busy and made selection changes get dropped).
+        try
+        {
+            var cells = await Task.Run(() => SliceAtlas(image));
+            return new IconAtlasPreviewViewModel(Path.GetFileNameWithoutExtension(node.Name), cells,
+                exportService, dialogService, appSettings);
+        }
+        finally
+        {
+            image.Dispose();
+        }
     }
 
     /// <summary>
-    ///     Turns the sliced icons of an atlas into a preview grid.
+    ///     Cuts an atlas into the icons of the preview.
     /// </summary>
-    /// <param name="icons">The sliced icons and the cells they were cut from.</param>
-    /// <param name="size">The size of the sheet the icons were cut from.</param>
-    /// <param name="name">The name of the sheet, used to name the files the icons are exported to.</param>
-    /// <returns>The preview of the icons.</returns>
+    /// <param name="image">The decoded atlas. It stays owned by the caller.</param>
+    /// <returns>The icons of the atlas, in sheet order.</returns>
     /// <remarks>
     ///     The sliced images are only the source of the bitmaps of the preview, so they are released as
-    ///     soon as each one has been converted and are never held by the preview.
+    ///     soon as each one has been converted and are never held by the preview. The conversion freezes
+    ///     the bitmap, which is what makes it safe to hand over from a worker thread to the UI.
     /// </remarks>
-    private IconAtlasPreviewViewModel CreateIconAtlasPreview(
-        IReadOnlyList<IconAtlasCell> icons,
-        Vector2 size,
-        string name)
+    private static IconAtlasCellViewModel[] SliceAtlas(Image image)
     {
-        return new IconAtlasPreviewViewModel(Path.GetFileNameWithoutExtension(name), [
-            .. icons.Select((cell, index) =>
-            {
-                var bitmap = cell.Image.ToBitmapSource();
-                cell.Image.Dispose();
+        var icons = IconAtlasSlicer.Slice(image, IconAtlasDetector.DetectGrid(image));
+        var sheet = new Vector2(image.Width, image.Height);
+        var cells = new IconAtlasCellViewModel[icons.Count];
 
-                // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
-                return new IconAtlasCellViewModel(bitmap, new Vector4(
-                        cell.Bounds.X / size.Y,
-                        cell.Bounds.Y / size.X,
-                        (cell.Bounds.X + cell.Bounds.Width) / size.X,
-                        (cell.Bounds.Y + cell.Bounds.Height) / size.Y),
-                    index + 1);
-            })
-        ], exportService, dialogService, appSettings);
+        for (var index = 0; index < icons.Count; index++)
+        {
+            var cell = icons[index];
+            // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
+            cells[index] = new IconAtlasCellViewModel(cell.Image.ToBitmapSource(),
+                ToTextureCoordinates(cell.Bounds, sheet), index + 1);
+            cell.Image.Dispose();
+        }
+
+        return cells;
+    }
+
+    /// <summary>
+    ///     Normalizes the bounds of a cell against the size of the sheet it was cut from.
+    /// </summary>
+    /// <param name="bounds">The bounds of the cell, in sheet pixels.</param>
+    /// <param name="sheet">The size of the sheet, in pixels.</param>
+    /// <returns>The texture coordinates of the cell, in the 0..1 range.</returns>
+    private static Vector4 ToTextureCoordinates(Rectangle bounds, Vector2 sheet)
+    {
+        return new Vector4(
+            bounds.X / sheet.X,
+            bounds.Y / sheet.Y,
+            (bounds.X + bounds.Width) / sheet.X,
+            (bounds.Y + bounds.Height) / sheet.Y);
     }
 }
