@@ -24,8 +24,6 @@ internal partial class RecentFileEntry : ObservableObject, IRecentFileEntry
     /// <summary>
     ///     File path
     /// </summary>
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    // ReSharper disable once MemberCanBePrivate.Global
     [ObservableProperty]
     // ReSharper disable once PropertyCanBeMadeInitOnly.Local
     public partial string FilePath { get; private set; }
