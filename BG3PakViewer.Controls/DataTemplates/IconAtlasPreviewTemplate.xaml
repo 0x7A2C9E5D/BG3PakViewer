@@ -234,9 +234,8 @@
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </ToggleButton.Template>
-                        <TextBlock Text="&#xE712;"
-                                   FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                   FontSize="16" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}"
+                                     FontSize="16" />
                     </ToggleButton>
                     <!--
                       Export menu. The items are plain buttons so the popup keeps working without a
