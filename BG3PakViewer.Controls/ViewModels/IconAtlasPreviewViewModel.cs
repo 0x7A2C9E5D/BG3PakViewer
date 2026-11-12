@@ -1,17 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Text;
-using System.Windows.Media.Imaging;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Locales;
-using BG3PakViewer.Shared.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
-using HanumanInstitute.MvvmDialogs.FileSystem;
-using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
-using Serilog;
 using Syncfusion.Data.Extensions;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -24,6 +15,8 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     of the cells comes from the sliced bitmaps themselves.
 ///     The icons are one flat list; how many of them share a line is decided by the wrap panel of the
 ///     view, which puts as many on a line as its width allows.
+///     The class is split by responsibility: this file holds the icons and their selection, the
+///     sibling files export them and talk to the user.
 /// </remarks>
 public partial class IconAtlasPreviewViewModel : ObservableObject
 {
@@ -65,143 +58,18 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     public ObservableCollection<IconAtlasCellViewModel> Items { get; }
 
     /// <summary>
-    ///     Exports the icons the user has selected.
+    ///     Whether at least one icon is selected, which is what the export command handles.
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanExportSelected))]
-    private Task ExportSelectedAsync()
-    {
-        return ExportAsync([.. Items.Where(item => item.IsSelected).Select(ToExportFile)]);
-    }
-
-    /// <summary>
-    ///     Exports every icon of the atlas.
-    /// </summary>
-    [RelayCommand]
-    private Task ExportAllAsync()
-    {
-        return ExportAsync([.. Items.Select(ToExportFile)]);
-    }
-
-    /// <summary>
-    ///     Asks the user for a target folder and exports the files there.
-    /// </summary>
-    /// <param name="files">The files to export.</param>
-    private async Task ExportAsync(IReadOnlyList<PreviewExportFile> files)
-    {
-        var folder = await PickFolderAsync();
-        if (folder is not null)
-        {
-            var exported = 0;
-            var failures = new List<PreviewExportResult>();
-            await foreach (var result in _exportService.ExportAsync(folder, files))
-                if (result.Success)
-                    exported++;
-                else
-                    failures.Add(result);
-
-            await ReportExportResultAsync(exported, files.Count, failures, folder);
-        }
-        else
-        {
-            Log.Information("Preview export folder selection was cancelled");
-        }
-    }
-
-    /// <summary>
-    ///     Tells the user what was written, and which files failed together with the reason.
-    /// </summary>
-    /// <param name="exported">How many files were written.</param>
-    /// <param name="total">How many files the export attempted.</param>
-    /// <param name="failures">The files that could not be written.</param>
-    /// <param name="folder">The folder the files were written to.</param>
-    private async Task ReportExportResultAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
-        string folder)
-    {
-        if (failures.Count == 0)
-            await ReportSuccessAsync(exported, folder);
-        else
-            await ReportFailuresAsync(exported, total, failures, folder);
-    }
-
-    /// <summary>
-    ///     Tells the user that every file was written.
-    /// </summary>
-    /// <param name="exported">How many files were written.</param>
-    /// <param name="folder">The folder the files were written to.</param>
-    private async Task ReportSuccessAsync(int exported, string folder)
-    {
-        Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
-        await _dialogService.ShowMessageBoxNotifyAsync(this,
-            string.Format(Strings.PreviewExportCompletedMessage, exported),
-            Strings.ExportCompleted, MessageBoxIcon.Success);
-    }
-
-    /// <summary>
-    ///     Tells the user how many files were written and which ones failed, together with the reason.
-    /// </summary>
-    /// <param name="exported">How many files were written.</param>
-    /// <param name="total">How many files the export attempted.</param>
-    /// <param name="failures">The files that could not be written.</param>
-    /// <param name="folder">The folder the files were written to.</param>
-    private async Task ReportFailuresAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
-        string folder)
-    {
-        Log.Warning("Exported {Exported} of {Total} preview files to: {Folder}", exported, total, folder);
-
-        var message = new StringBuilder();
-        message.AppendLine(exported == 0
-            ? Strings.PreviewExportNothingMessage
-            : string.Format(Strings.PreviewExportPartialMessage, exported, total));
-        message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
-        foreach (var failure in failures)
-            message.AppendLine($"{failure.Name}: {failure.Reason}");
-
-        await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
-            exported == 0 ? Strings.ExportFailedCaption : Strings.PreviewExportPartiallyFailedCaption,
-            MessageBoxIcon.Error);
-    }
-
-    /// <summary>
-    ///     Asks the user where the files should be written.
-    /// </summary>
-    /// <returns>The chosen folder, or <see langword="null" /> when the user cancels.</returns>
-    private async Task<string?> PickFolderAsync()
-    {
-        var storageFolder = await _dialogService.ShowOpenFolderDialogAsync(null, new OpenFolderDialogSettings
-        {
-            SuggestedStartLocation = Directory.Exists(_appSettings.DefaultExportDirectory)
-                ? new DesktopDialogStorageFolder(_appSettings.DefaultExportDirectory)
-                : null
-        });
-        return storageFolder?.LocalPath;
-    }
-
-    /// <summary>
-    ///     Turns an icon into the file it is exported to, named after its position in the atlas.
-    /// </summary>
-    /// <param name="icon">The icon to export.</param>
-    /// <returns>The file to write.</returns>
-    private PreviewExportFile ToExportFile(IconAtlasCellViewModel icon)
-    {
-        return new PreviewExportFile($"{_atlasName}_{icon.Number}.png",
-            () => Task.Run(Stream () => EncodePng(icon.Image)));
-    }
-
-    private static MemoryStream EncodePng(BitmapSource image)
-    {
-        var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(image));
-        var stream = new MemoryStream();
-        encoder.Save(stream);
-        stream.Position = 0;
-        return stream;
-    }
-
     private bool CanExportSelected()
     {
         return Items.Any(item => item.IsSelected);
     }
 
+    /// <summary>
+    ///     Keeps the export command state in sync with the selection of the icons.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(IconAtlasCellViewModel.IsSelected))
