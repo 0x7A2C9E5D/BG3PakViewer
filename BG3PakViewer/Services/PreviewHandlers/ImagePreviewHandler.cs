@@ -50,9 +50,9 @@ internal class ImagePreviewHandler(
         // (which is also what kept the preview command busy and made selection changes get dropped).
         try
         {
+            var name = Path.GetFileNameWithoutExtension(node.Name);
             var cells = await Task.Run(() => SliceAtlas(image));
-            return new IconAtlasPreviewViewModel(Path.GetFileNameWithoutExtension(node.Name), cells,
-                exportService, dialogService, appSettings);
+            return new IconAtlasPreviewViewModel(name, cells, exportService, dialogService, appSettings);
         }
         finally
         {
@@ -79,9 +79,9 @@ internal class ImagePreviewHandler(
         for (var index = 0; index < icons.Count; index++)
         {
             var cell = icons[index];
-            // The cell keeps the size the icon has in the atlas, which is the size of the cut bitmap.
-            cells[index] = new IconAtlasCellViewModel(cell.Image.ToBitmapSource(),
-                ToTextureCoordinates(cell.Bounds, sheet), index + 1);
+            var bitmap = cell.Image.ToBitmapSource();
+            var coordinates = ToTextureCoordinates(cell.Bounds, sheet);
+            cells[index] = new IconAtlasCellViewModel(bitmap, coordinates, index + 1);
             cell.Image.Dispose();
         }
 
