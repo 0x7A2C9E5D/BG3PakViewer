@@ -3,8 +3,46 @@
                     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared">
+                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
+                    xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales">
     <DataTemplate x:Key="StoryScriptPreviewDataTemplate" DataType="{x:Type vm:StoryScriptsPreviewViewModel}">
+        <DataTemplate.Resources>
+            <!-- Menu item of the floating action button: a subtle button that spans the popup. -->
+            <Style x:Key="ExportMenuButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="12,8" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource TextFillColorDisabledBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </DataTemplate.Resources>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="400" MinWidth="300" />
@@ -66,6 +104,82 @@
                      TextWrapping="NoWrap"
                      FontFamily="Consolas" FontSize="15"
                      Text="{Binding Scripts, Mode=OneWay}" />
+
+            <!--
+              Floating circular action button at the bottom right of the preview, spanning the whole
+              grid so it sits over the script pane. The 32px inset keeps it clear of the pane border
+              and of the scroll bars at the pane edge. Clicking it opens the export menu; the popup
+              closes itself when the user clicks elsewhere.
+            -->
+            <Grid Grid.ColumnSpan="3" Grid.Column="0" Margin="32"
+                  HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <ToggleButton x:Name="ActionsToggle"
+                              Width="40" Height="40"
+                              Background="{DynamicResource AccentFillColorDefaultBrush}"
+                              BorderThickness="0"
+                              Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
+                              ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.MoreActions}}">
+                    <ToggleButton.Effect>
+                        <DropShadowEffect BlurRadius="16" ShadowDepth="4" Opacity="0.45" Color="Black" />
+                    </ToggleButton.Effect>
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource AccentFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource AccentFillColorTertiaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource AccentFillColorSecondaryBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                    <TextBlock Text="&#xE712;"
+                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                               FontSize="16" />
+                </ToggleButton>
+                <!--
+                  Export menu. The items are plain buttons so the popup keeps working without a
+                  context menu, which cannot be opened from a left click in a template alone.
+                -->
+                <Popup IsOpen="{Binding IsChecked, ElementName=ActionsToggle, Mode=TwoWay}"
+                       PlacementTarget="{Binding ElementName=ActionsToggle}"
+                       Placement="Top"
+                       VerticalOffset="-8"
+                       AllowsTransparency="True"
+                       StaysOpen="False"
+                       PopupAnimation="Fade">
+                    <Border Background="{DynamicResource FlyoutPresenterBackground}"
+                            BorderBrush="{DynamicResource FlyoutPresenterBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="4">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.3" Color="Black" />
+                        </Border.Effect>
+                        <StackPanel MinWidth="120">
+                            <Button Command="{Binding ExportSelectedCommand}"
+                                    Content="{I18N {x:Static l:LangKeys.ExportCurrentScript}}"
+                                    Style="{StaticResource ExportMenuButtonStyle}" />
+                            <Button Command="{Binding ExportAllCommand}"
+                                    Content="{I18N {x:Static l:LangKeys.ExportAllScripts}}"
+                                    Style="{StaticResource ExportMenuButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

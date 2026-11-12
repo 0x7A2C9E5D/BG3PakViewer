@@ -300,4 +300,10 @@
     <data name="ExportTexture" xml:space="preserve">
         <value>导出材质</value>
     </data>
+    <data name="ExportCurrentScript" xml:space="preserve">
+        <value>导出当前脚本</value>
+    </data>
+    <data name="ExportAllScripts" xml:space="preserve">
+        <value>导出全部脚本</value>
+    </data>
 </root>

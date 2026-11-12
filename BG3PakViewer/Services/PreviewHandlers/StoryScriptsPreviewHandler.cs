@@ -1,7 +1,8 @@
-﻿using BG3PakViewer.Contracts;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
+using HanumanInstitute.MvvmDialogs;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
@@ -10,8 +11,15 @@ namespace BG3PakViewer.Services.PreviewHandlers;
 ///     Story scripts preview handler
 /// </summary>
 /// <param name="packageService"></param>
-/// <param name="appSettings"></param>
-public class StoryScriptsPreviewHandler(IPackageService packageService, IAppSettings appSettings) : IPreviewHandler
+/// <param name="dialogService">The service used by the preview to pick an export folder.</param>
+/// <param name="appSettings">The settings holding the default export directory.</param>
+/// <param name="exportService">The service that writes the exported script files.</param>
+// ReSharper disable once ClassNeverInstantiated.Global
+public class StoryScriptsPreviewHandler(
+    IPackageService packageService,
+    IPreviewExportService exportService,
+    IDialogService dialogService,
+    IAppSettings appSettings) : IPreviewHandler
 {
     /// <summary>
     ///     Can handle
@@ -37,7 +45,8 @@ public class StoryScriptsPreviewHandler(IPackageService packageService, IAppSett
         {
             var reader = new StoryReader();
             var story = reader.Read(stream);
-            return new StoryScriptsPreviewViewModel(appSettings) { Story = story };
+            return new StoryScriptsPreviewViewModel(appSettings, exportService, dialogService)
+                { Story = story };
         });
     }
 }

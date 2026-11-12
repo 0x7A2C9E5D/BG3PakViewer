@@ -405,4 +405,10 @@
     <data name="ExportAllIcons" xml:space="preserve">
       <value>Esporta tutto</value>
     </data>
+    <data name="ExportCurrentScript" xml:space="preserve">
+      <value>Esporta script corrente</value>
+    </data>
+    <data name="ExportAllScripts" xml:space="preserve">
+      <value>Esporta tutti gli script</value>
+    </data>
 </root>

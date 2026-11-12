@@ -4,6 +4,7 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
+using HanumanInstitute.MvvmDialogs;
 using LSLib.LS.Story;
 
 namespace BG3PakViewer.Controls.ViewModels;
@@ -11,17 +12,29 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// <summary>
 ///     View model for previewing story scripts.
 /// </summary>
+/// <remarks>
+///     The class is split by responsibility: this file holds the goals and the decompiled script
+///     of the selected one, the sibling files export the scripts and talk to the user.
+/// </remarks>
 public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
 {
     private readonly IAppSettings _appSettings;
+    private readonly IDialogService _dialogService;
+    private readonly IPreviewExportService _exportService;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel" /> class.
     /// </summary>
-    /// <param name="appSettings"></param>
-    public StoryScriptsPreviewViewModel(IAppSettings appSettings)
+    /// <param name="appSettings">The settings holding the default export directory.</param>
+    /// <param name="exportService">The service the export commands hand the decompiled scripts to.</param>
+    /// <param name="dialogService">The service used to ask for the target folder and report the result.</param>
+    public StoryScriptsPreviewViewModel(IAppSettings appSettings,
+        IPreviewExportService exportService,
+        IDialogService dialogService)
     {
         _appSettings = appSettings;
+        _exportService = exportService;
+        _dialogService = dialogService;
     }
 
     /// <summary>
@@ -35,6 +48,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     ///     The currently selected goal.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
     public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
