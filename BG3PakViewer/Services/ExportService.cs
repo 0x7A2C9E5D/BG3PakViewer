@@ -36,13 +36,8 @@ internal partial class ExportService(
     /// <param name="node"></param>
     /// <param name="targetPath"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
     {
-        ArgumentNullException.ThrowIfNull(node);
-        if (string.IsNullOrWhiteSpace(targetPath))
-            throw new ArgumentException(@"Target path cannot be null or empty.", nameof(targetPath));
         var file = packageService.GetFileByPath(node.FullPath);
         if (file == null)
         {

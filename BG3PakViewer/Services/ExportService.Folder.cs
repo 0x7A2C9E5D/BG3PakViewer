@@ -18,20 +18,9 @@ internal partial class ExportService
     /// <param name="targetFolder"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
     public async Task<bool> ExportFolderAsync(PackageEntry folderNode, string targetFolder,
         CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(folderNode);
-        if (string.IsNullOrWhiteSpace(targetFolder))
-            throw new ArgumentException(@"Target folder cannot be null or empty.", nameof(targetFolder));
-        if (!folderNode.IsFolder)
-        {
-            Log.Warning("ExportFolderAsync called with non-folder node: {Path}", folderNode.FullPath);
-            return false;
-        }
-
         Log.Information("Exporting folder: {FolderPath} -> {TargetFolder}", folderNode.FullPath, targetFolder);
         try
         {
@@ -44,11 +33,6 @@ internal partial class ExportService
 
             Log.Information("Found {Count} files to export", files.Count);
             await ExportFilesToFolderAsync(files, targetFolder, ct);
-            if (ct.IsCancellationRequested)
-            {
-                Log.Information("Folder export was cancelled");
-                return false;
-            }
 
             Log.Information("Folder export completed: {TargetFolder}", targetFolder);
             return true;
