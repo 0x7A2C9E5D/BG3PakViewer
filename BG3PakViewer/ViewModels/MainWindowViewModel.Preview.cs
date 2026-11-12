@@ -40,8 +40,8 @@ internal partial class MainWindowViewModel
         {
             Log.Information("Creating preview for: {Path}", node.FullPath);
             var viewModel = await _previewService.CreatePreviewViewModelAsync(node);
-            PreviewVm = viewModel;
             if (viewModel != null) Log.Debug("Preview displayed successfully");
+            PreviewVm = viewModel;
         }
         catch (Exception ex)
         {
