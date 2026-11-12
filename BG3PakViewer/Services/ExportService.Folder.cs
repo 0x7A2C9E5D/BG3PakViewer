@@ -72,7 +72,7 @@ internal partial class ExportService
     /// <returns></returns>
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
     {
-        return _packageService.GetValidFiles()
+        return packageService.GetValidFiles()
             .Where(x => x.Name.StartsWith(folderNode.FullPath, StringComparison.OrdinalIgnoreCase));
     }
 
