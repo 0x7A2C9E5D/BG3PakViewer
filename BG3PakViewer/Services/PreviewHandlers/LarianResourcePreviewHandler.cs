@@ -30,12 +30,7 @@ internal class LarianResourcePreviewHandler(IPackageService packageService) : IP
     {
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return null;
-
         var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
-
-        // Build the tree off the UI thread so large resources don't block the UI.
-        // Attributes are formatted lazily per selected node. No LSX string is
-        // materialized for previewing.
         return await Task.Run(() => LarianResourcePreviewViewModel.FromResource(resource));
     }
 }
