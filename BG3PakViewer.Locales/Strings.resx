@@ -336,4 +336,10 @@
     <data name="IndexingLabel" xml:space="preserve">
         <value>Indexing</value>
     </data>
+    <data name="StartupFailedCaption" xml:space="preserve">
+        <value>Startup Failed</value>
+    </data>
+    <data name="StartupFailedMessage" xml:space="preserve">
+        <value>The application failed to start: {0}. See the log for details.</value>
+    </data>
 </root>

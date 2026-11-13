@@ -219,7 +219,6 @@ public sealed partial class App : IDisposable
 
         TaskScheduler.UnobservedTaskException += static (_, e) =>
         {
-            e.SetObserved();
             var ex = e.Exception;
             Log.Error(ex, "Unobserved task exception: {ExceptionMessage}", ex.Message);
         };
@@ -234,19 +233,68 @@ public sealed partial class App : IDisposable
         // depends on the service container, so failures before that point would otherwise be lost.
         InitializeEarlyLogging();
 
-        _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
-        if (_singleInstanceManager.IsAnotherInstanceRunning())
+        if (TryRedirectToRunningInstance())
         {
-            Log.Information("Another instance is already running; prompting the user");
-            if (MessageBox.Show(Strings.MultipleInstanceMessage, Strings.MultipleInstanceCaption,
-                    MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
-                _singleInstanceManager.ActivateExistingInstance();
-            Log.Information("Shutting down this instance");
             Shutdown();
             return;
         }
 
-        InitializeApplication();
+        StartApplication();
+    }
+
+    /// <summary>
+    ///     Prompts the user when another instance is already running and activates the existing one
+    ///     on request.
+    /// </summary>
+    /// <returns>True when this instance must shut down.</returns>
+    private bool TryRedirectToRunningInstance()
+    {
+        _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
+        if (!_singleInstanceManager.IsAnotherInstanceRunning()) return false;
+
+        Log.Information("Another instance is already running; prompting the user");
+        if (MessageBox.Show(Strings.MultipleInstanceMessage, Strings.MultipleInstanceCaption,
+                MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+            _singleInstanceManager.ActivateExistingInstance();
+        Log.Information("Shutting down this instance");
+        return true;
+    }
+
+    /// <summary>
+    ///     Initializes the application, reporting a failure to the user instead of leaving a running
+    ///     process without a window.
+    /// </summary>
+    private void StartApplication()
+    {
+        // The dispatcher exception handler installed by InitializeApplication swallows anything thrown
+        // from it, so a startup failure has to be caught here: otherwise WPF keeps running the message
+        // loop while InitializeMainWindow never ran, and the user is left with a windowless process.
+        try
+        {
+            InitializeApplication();
+        }
+        catch (Exception ex)
+        {
+            ReportStartupFailure(ex);
+        }
+    }
+
+    /// <summary>
+    ///     Reports a startup failure and shuts the application down with a failing exit code.
+    /// </summary>
+    /// <param name="exception">The exception that stopped the startup.</param>
+    private void ReportStartupFailure(Exception exception)
+    {
+        Log.Error(exception, "Application failed to start");
+        // The message box is the only window on this path: with the default OnLastWindowClose, closing
+        // it would start a shutdown with exit code 0, and the Shutdown(1) below would then hit the
+        // "already shutting down" early return in CriticalShutdown and lose the exit code. Pin the mode
+        // so this method owns the shutdown and the failing code is the one that reaches the process.
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        MessageBox.Show(
+            string.Format(CultureInfo.CurrentCulture, Strings.StartupFailedMessage, exception.Message),
+            Strings.StartupFailedCaption, MessageBoxButton.OK, MessageBoxImage.Error);
+        Shutdown(1);
     }
 
     /// <summary>

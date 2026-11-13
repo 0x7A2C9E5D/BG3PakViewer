@@ -435,4 +435,10 @@
     <data name="ExportTexture" xml:space="preserve">
         <value>Esporta texture</value>
     </data>
+    <data name="StartupFailedCaption" xml:space="preserve">
+    <value>Avvio non riuscito</value>
+  </data>
+    <data name="StartupFailedMessage" xml:space="preserve">
+    <value>Avvio dell'applicazione non riuscito: {0}. Per i dettagli consultare il log.</value>
+  </data>
 </root>

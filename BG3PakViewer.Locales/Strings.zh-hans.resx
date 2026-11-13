@@ -327,4 +327,10 @@
     <data name="IndexingLabel" xml:space="preserve">
         <value>正在索引</value>
     </data>
+    <data name="StartupFailedCaption" xml:space="preserve">
+        <value>启动失败</value>
+    </data>
+    <data name="StartupFailedMessage" xml:space="preserve">
+        <value>应用启动失败：{0}。详见日志。</value>
+    </data>
 </root>
