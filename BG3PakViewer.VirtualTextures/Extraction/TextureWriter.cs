@@ -2,7 +2,7 @@ using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Writes a single-mip DXT5 DDS to a stream: emits the header up front, then stitches

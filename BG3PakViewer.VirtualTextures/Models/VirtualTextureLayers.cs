@@ -1,4 +1,4 @@
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Models;
 
 /// <summary>
 ///     The layers every virtual texture is previewed and exported as.

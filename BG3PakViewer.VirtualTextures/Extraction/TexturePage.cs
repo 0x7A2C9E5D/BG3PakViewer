@@ -2,7 +2,7 @@ using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     TexturePage

@@ -1,6 +1,7 @@
 using LSLib.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Extraction;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
 ///     One open tile set of the package, ready to extract its textures.

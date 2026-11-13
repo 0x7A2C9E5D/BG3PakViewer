@@ -2,8 +2,10 @@ using System.Diagnostics;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Utils;
 using Serilog;
+using BG3PakViewer.VirtualTextures.Models;
+using BG3PakViewer.VirtualTextures.Extraction;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
 ///     Indexes every virtual texture tile set (.gts) of the loaded package and extracts layers from them.

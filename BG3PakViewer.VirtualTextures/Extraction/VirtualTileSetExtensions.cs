@@ -1,6 +1,6 @@
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Effective tile dimensions of a <see cref="VirtualTileSet" />: the tile width/height after the

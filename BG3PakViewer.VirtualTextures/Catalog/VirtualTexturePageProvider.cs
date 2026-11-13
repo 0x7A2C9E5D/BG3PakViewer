@@ -1,6 +1,6 @@
 using BG3PakViewer.Contracts;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
 ///     Resolves the GTP page files of a virtual texture tile set that lives inside the package.

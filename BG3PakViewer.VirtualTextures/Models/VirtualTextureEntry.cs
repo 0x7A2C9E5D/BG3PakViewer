@@ -1,4 +1,4 @@
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Models;
 
 /// <summary>
 ///     One texture of a virtual texture tile set, as listed by the catalog.

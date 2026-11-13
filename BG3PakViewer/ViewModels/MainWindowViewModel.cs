@@ -3,7 +3,7 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Shared.ViewModels;
-using BG3PakViewer.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Catalog;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HanumanInstitute.MvvmDialogs;
 using iNKORE.UI.WPF.DragDrop;

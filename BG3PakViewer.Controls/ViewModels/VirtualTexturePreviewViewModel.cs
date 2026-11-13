@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Shared.ViewModels;
-using BG3PakViewer.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Extraction;
+using BG3PakViewer.VirtualTextures.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HanumanInstitute.MvvmDialogs;
 using Image = SixLabors.ImageSharp.Image;

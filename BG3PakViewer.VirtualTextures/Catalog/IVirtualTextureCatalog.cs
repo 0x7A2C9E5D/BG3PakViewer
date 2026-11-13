@@ -1,4 +1,6 @@
-namespace BG3PakViewer.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Models;
+
+namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
 ///     The virtual textures of the loaded package, indexed across every tile set (.gts) it contains.

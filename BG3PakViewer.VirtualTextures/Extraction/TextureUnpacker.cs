@@ -2,7 +2,7 @@ using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band

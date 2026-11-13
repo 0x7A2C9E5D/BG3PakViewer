@@ -1,7 +1,7 @@
 using System.Text;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Fully stream-based virtual texture extractor: loads a title set directly from a stream (no temp files),

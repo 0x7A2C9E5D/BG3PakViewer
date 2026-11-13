@@ -4,7 +4,7 @@ using System.Text;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
-using BG3PakViewer.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Models;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;

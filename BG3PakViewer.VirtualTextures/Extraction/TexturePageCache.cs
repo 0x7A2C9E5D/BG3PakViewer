@@ -1,6 +1,6 @@
 ﻿using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Cache of open GTP page files, lazily opened per pageFileIndex via the stream provider delegate

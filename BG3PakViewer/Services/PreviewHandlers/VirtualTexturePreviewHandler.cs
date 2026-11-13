@@ -3,7 +3,8 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
-using BG3PakViewer.VirtualTextures;
+using BG3PakViewer.VirtualTextures.Catalog;
+using BG3PakViewer.VirtualTextures.Extraction;
 using HanumanInstitute.MvvmDialogs;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
