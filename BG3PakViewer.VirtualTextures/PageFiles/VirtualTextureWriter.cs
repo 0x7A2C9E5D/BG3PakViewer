@@ -31,7 +31,7 @@ internal sealed class VirtualTextureWriter
     /// <param name="tile">The pixel size of one tile, including its border.</param>
     /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
     /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
-    /// <param name="stream">The stream the DDS is written to; the caller keeps it open.</param>
+    /// <param name="stream">The stream the DDS is written to; the caller keeps it opens.</param>
     public VirtualTextureWriter(Size grid, Size tile, int tileBorder, VirtualTextureUnpacker unpacker,
         Stream stream)
     {
