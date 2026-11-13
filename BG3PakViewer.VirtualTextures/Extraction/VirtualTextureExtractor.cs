@@ -1,3 +1,4 @@
+using BG3PakViewer.Contracts;
 using BG3PakViewer.VirtualTextures.Models;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
@@ -10,8 +11,8 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     tile set it needs, opens only the page file it is reading, and releases both when it ends, so
 ///     nothing opened from the package outlives the call that opened it.
 /// </remarks>
-/// <param name="fileSource">The files of the loaded package the tile sets and their page files are read from.</param>
-public sealed class VirtualTextureExtractor(VirtualTextureFileSource fileSource) : IVirtualTextureExtractor
+/// <param name="packageService">The loaded package the tile sets and their page files are read from.</param>
+public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
 
@@ -33,11 +34,11 @@ public sealed class VirtualTextureExtractor(VirtualTextureFileSource fileSource)
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var file = await Task.Run(() => new VirtualTileSetFile(fileSource.Open(entry.GtsPath)),
+            using var file = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(entry.GtsPath)),
                     CancellationToken.None)
                 .ConfigureAwait(false);
             var layerExtractor = new VirtualTextureLayerExtractor(file,
-                pageFileName => fileSource.Open(
+                pageFileName => OpenPackageFile(
                     VirtualTexturePackagePath.GetPageFilePath(entry.GtsPath, pageFileName)));
             return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
@@ -46,5 +47,17 @@ public sealed class VirtualTextureExtractor(VirtualTextureFileSource fileSource)
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>
+    ///     Opens one file of the package.
+    /// </summary>
+    /// <param name="packagePath">The package path of the file.</param>
+    /// <returns>The content of the file.</returns>
+    /// <exception cref="FileNotFoundException">The package does not contain the file.</exception>
+    private Stream OpenPackageFile(string packagePath)
+    {
+        return packageService.GetFileByPath(packagePath)?.CreateContentReader()
+               ?? throw new FileNotFoundException($"Package file not found: {packagePath}");
     }
 }
