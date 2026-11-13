@@ -11,18 +11,18 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 internal sealed class VirtualTexturePage : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
+    private readonly int _pageSize;
     private readonly BinaryReader _reader;
     private readonly Stream _stream;
-    private readonly VirtualTileSet _tileSet;
 
     /// <summary>
     ///     Constructs a new VirtualTexturePage from a stream.
     /// </summary>
-    /// <param name="tileSet">The tile set the page belongs to, which provides the page size and layout.</param>
+    /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
     /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
-    public VirtualTexturePage(VirtualTileSet tileSet, Stream stream)
+    public VirtualTexturePage(int pageSize, Stream stream)
     {
-        _tileSet = tileSet;
+        _pageSize = pageSize;
         _stream = stream;
         _reader = new BinaryReader(_stream, Encoding.UTF8, false);
         _chunkOffsets = ReadChunkOffsetTables();
@@ -38,13 +38,12 @@ internal sealed class VirtualTexturePage : IDisposable
 
     /// <summary>
     ///     Reads the chunk offset table of every page: each page stores its own count of offsets
-    ///     followed by that many uint offsets, and pages are aligned to VirtualTileSet.Header.PageSize.
+    ///     followed by that many uint offsets, and pages are aligned to the page size.
     /// </summary>
     private List<uint[]> ReadChunkOffsetTables()
     {
         BinUtils.ReadStruct<GTPHeader>(_reader);
-        var pageSize = _tileSet.Header.PageSize;
-        var numPages = (int)(_stream.Length / pageSize);
+        var numPages = (int)(_stream.Length / _pageSize);
         var tables = new List<uint[]>(numPages);
         for (var page = 0; page < numPages; page++)
         {
@@ -52,7 +51,7 @@ internal sealed class VirtualTexturePage : IDisposable
             var offsets = new uint[numOffsets];
             BinUtils.ReadStructs(_reader, offsets);
             tables.Add(offsets);
-            _stream.Position = (page + 1) * pageSize;
+            _stream.Position = (page + 1) * _pageSize;
         }
 
         return tables;
@@ -67,7 +66,7 @@ internal sealed class VirtualTexturePage : IDisposable
     /// <returns>The chunk header and the bytes it describes, still compressed.</returns>
     public (GTPChunkHeader Header, byte[] Data) ReadChunk(int pageIndex, int chunkIndex)
     {
-        _stream.Position = _chunkOffsets[pageIndex][chunkIndex] + pageIndex * _tileSet.Header.PageSize;
+        _stream.Position = _chunkOffsets[pageIndex][chunkIndex] + pageIndex * _pageSize;
         var header = BinUtils.ReadStruct<GTPChunkHeader>(_reader);
         return (header, _reader.ReadBytes((int)header.Size));
     }

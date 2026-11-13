@@ -7,14 +7,17 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// </summary>
 /// <remarks>
 ///     The layer is written from the first mip level whose tile region exists, one tile band per row. The
-///     tiles are read through the page stream provider, and only the page file a band is reading stays
-///     open. The extractor owns the tile set it was created with, so disposing it releases that tile set.
+///     tiles are looked up in the tile set here, read through the page stream provider, and only the page
+///     file a band is reading stays open. The extractor owns the tile set it was created with, so
+///     disposing it releases that tile set, and it keeps the decompressor every band of that tile set
+///     needs.
 /// </remarks>
 /// <param name="file">The parsed tile set the texture belongs to; disposing the extractor disposes it.</param>
 /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
 internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func<string, Stream> pageStreamProvider)
     : IDisposable
 {
+    private readonly TileCompressor _compressor = new();
     private readonly VirtualTextureTileRangeCalculator _tileRanges = new(file.TileSet);
 
     /// <summary>
@@ -102,15 +105,39 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
+        var tileSet = file.TileSet;
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
-        using var unpacker = new VirtualTextureUnpacker(file.TileSet, pageStreamProvider);
-        using var writer = new VirtualTextureWriter(output, cols, rows, file.TileSet.EffectiveTileWidth,
-            file.TileSet.EffectiveTileHeight, unpacker, level, layer);
+        using var unpacker = new VirtualTextureUnpacker((int)tileSet.Header.PageSize, tileSet.Header.TileWidth,
+            tileSet.Header.TileHeight,
+            pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
+            tileSet.ParameterBlocks, _compressor);
+        using var writer = new VirtualTextureWriter(output, cols, rows, tileSet.EffectiveTileWidth,
+            tileSet.EffectiveTileHeight, tileSet.Header.TileBorder, unpacker);
+        var rowTiles = new GTSFlatTileInfo?[cols];
         for (var row = 0; row < rows; row++)
         {
-            writer.WriteRow(minX, minY + row, cols, ct);
+            ResolveRow(level, layer, minX, minY + row, rowTiles);
+            writer.WriteRow(rowTiles, ct);
             progress?.Report((row + 1, rows));
+        }
+    }
+
+    /// <summary>
+    ///     Looks up the tiles of one band in the tile set, leaving a column empty when the tile set has no
+    ///     tile there.
+    /// </summary>
+    /// <param name="level">The index of the mip level the tiles are read from.</param>
+    /// <param name="layer">The index of the layer the tiles are read from.</param>
+    /// <param name="startX">The tile column the band starts at.</param>
+    /// <param name="y">The tile row the band is read from.</param>
+    /// <param name="rowTiles">The buffer the band is resolved into, one entry per column.</param>
+    private void ResolveRow(int level, int layer, int startX, int y, Span<GTSFlatTileInfo?> rowTiles)
+    {
+        for (var col = 0; col < rowTiles.Length; col++)
+        {
+            GTSFlatTileInfo tile = default;
+            rowTiles[col] = file.TileSet.GetTileInfo(level, layer, startX + col, y, ref tile) ? tile : null;
         }
     }
 

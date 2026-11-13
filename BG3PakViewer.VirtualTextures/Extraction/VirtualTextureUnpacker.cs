@@ -5,18 +5,29 @@ using LSLib.VirtualTextures;
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
-///     Decompresses individual tiles from GTP page files and stitches one horizontal band
-///     of tiles into a reusable strip buffer, trimming tile borders.
+///     Decompresses single tiles from the GTP page files.
 /// </summary>
 /// <remarks>
 ///     The unpacker holds at most one-page file open: when the next tile lives in another page file, the
 ///     open one is closed before the new one is opened, so the number of open GTP streams never grows
-///     with the size of the tile set.
+///     with the size of the tile set. It knows nothing about tile sets: a tile arrives as the chunk
+///     coordinates it occupies inside the page files, and how to reach those page files is an argument.
 /// </remarks>
-internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string, Stream> pageStreamProvider)
+/// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
+/// <param name="tileWidth">The pixel width of one tile, without its border.</param>
+/// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+/// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
+/// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
+/// <param name="compressor">The decompressor the chunks are unpacked with.</param>
+internal sealed class VirtualTextureUnpacker(
+    int pageSize,
+    int tileWidth,
+    int tileHeight,
+    Func<int, Stream> pageStreamProvider,
+    IReadOnlyDictionary<uint, object> parameterBlocks,
+    TileCompressor compressor)
     : IDisposable
 {
-    private readonly TileCompressor _compressor = new();
     private int _openPageFileIndex = -1;
     private VirtualTexturePage? _page;
 
@@ -29,49 +40,14 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
     }
 
     /// <summary>
-    ///     Decompresses and stitches one horizontal band of tiles into a reusable strip buffer.
+    ///     Decompresses the tile the given chunk coordinates point at.
     /// </summary>
-    /// <param name="level">The index of the mip level the tiles are read from.</param>
-    /// <param name="layer">The index of the layer the tiles are read from.</param>
-    /// <param name="startX">The tile column the band starts at.</param>
-    /// <param name="y">The tile row the band is read from.</param>
-    /// <param name="cols">How many tiles the band holds.</param>
-    /// <param name="strip">
-    ///     The strip buffer the band is stitched into; it is cleared first and ends up holding the BC3
-    ///     blocks of the whole band.
-    /// </param>
-    public void StitchRow(int level, int layer, int startX, int y, int cols, BC5Image strip)
+    /// <param name="tile">The page file, page and chunk the tile occupies.</param>
+    /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
+    public BC5Image ReadTile(in GTSFlatTileInfo tile)
     {
-        var tileWidth = tileSet.EffectiveTileWidth;
-        var tileHeight = tileSet.EffectiveTileHeight;
-        Array.Clear(strip.Data);
-        GTSFlatTileInfo tileInfo = default;
-        for (var col = 0; col < cols; col++)
-        {
-            var tile = TryUnpackTile(level, layer, startX + col, y, ref tileInfo);
-            // Skip the tile border and stitch into the strip row band via LSLib's BC5Image.CopyTo (4x4 blocks)
-            tile?.CopyTo(strip, tileSet.Header.TileBorder, tileSet.Header.TileBorder,
-                col * tileWidth, 0, tileWidth, tileHeight);
-        }
-    }
-
-    /// <summary>
-    ///     Tries to decompress and return a tile at (<paramref name="level" />, <paramref name="layer" />,
-    ///     <paramref name="x" />, <paramref name="y" />).
-    /// </summary>
-    /// <param name="level">The index of the mip level to read.</param>
-    /// <param name="layer">The index of the layer to read.</param>
-    /// <param name="x">The tile column.</param>
-    /// <param name="y">The tile row.</param>
-    /// <param name="tileInfo">
-    ///     The tile info the tile set fills in; reused across calls so a band does not allocate one per tile.
-    /// </param>
-    /// <returns>The decompressed tile, or <see langword="null" /> when the tile set has no tile there.</returns>
-    private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
-    {
-        if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
-        var pageFile = GetPage(tileInfo.PageFileIndex);
-        return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
+        var page = GetPage(tile.PageFileIndex);
+        return UnpackChunkBc5(page, tile.PageIndex, tile.ChunkIndex);
     }
 
     /// <summary>
@@ -86,7 +62,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
 
         ClosePage();
 
-        var stream = pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName);
+        var stream = pageStreamProvider(pageFileIndex);
         if (!stream.CanSeek)
         {
             var buffer = new MemoryStream();
@@ -95,7 +71,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
             stream = buffer;
         }
 
-        _page = new VirtualTexturePage(tileSet, stream);
+        _page = new VirtualTexturePage(pageSize, stream);
         _openPageFileIndex = pageFileIndex;
         return _page;
     }
@@ -111,7 +87,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
     }
 
     /// <summary>
-    ///     Decompresses a chunk into a tile image sized as the tile header declares.
+    ///     Decompresses a chunk into a tile image sized as the tile declares.
     /// </summary>
     /// <param name="page">The page file the chunk lives in.</param>
     /// <param name="pageIndex">The page within that page file.</param>
@@ -119,11 +95,9 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
     /// <returns>The decompressed tile.</returns>
     private BC5Image UnpackChunkBc5(VirtualTexturePage page, int pageIndex, int chunkIndex)
     {
-        var header = tileSet.Header;
-        var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
-                         + 16 * ((header.TileWidth / 2 + 3) / 4) * ((header.TileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), header.TileWidth,
-            header.TileHeight);
+        var outputSize = 16 * ((tileWidth + 3) / 4) * ((tileHeight + 3) / 4)
+                         + 16 * ((tileWidth / 2 + 3) / 4) * ((tileHeight / 2 + 3) / 4);
+        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), tileWidth, tileHeight);
     }
 
     /// <summary>
@@ -162,7 +136,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
 
         var block = EncodeConstantColor(payload[0], payload[1], payload[2], payload[3]);
-        var blockCount = (tileSet.Header.TileWidth + 3) / 4 * ((tileSet.Header.TileHeight + 3) / 4);
+        var blockCount = (tileWidth + 3) / 4 * ((tileHeight + 3) / 4);
         var data = new byte[blockCount * 16];
         for (var i = 0; i < blockCount; i++) block.CopyTo(data, i * 16);
         return data;
@@ -194,8 +168,8 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string
     /// <returns>The decompressed block data.</returns>
     private byte[] DecompressBc(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
     {
-        var parameterBlock = (GTSBCParameterBlock)tileSet.ParameterBlocks[chunkHeader.ParameterBlockID];
-        return _compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
+        var parameterBlock = (GTSBCParameterBlock)parameterBlocks[chunkHeader.ParameterBlockID];
+        return compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
             parameterBlock.CompressionName2);
     }
 }
