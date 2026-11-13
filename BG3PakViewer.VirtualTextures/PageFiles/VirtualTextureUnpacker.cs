@@ -17,17 +17,17 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 internal sealed class VirtualTextureUnpacker(
     int pageSize,
     Func<int, Stream> pageStreamProvider,
-    VirtualTexturePageChunkDecoder decoder)
+    VirtualTextureTilePageChunkDecoder decoder)
     : IDisposable
 {
-    private readonly VirtualTexturePageFileHolder _pageFiles = new(pageSize, pageStreamProvider);
+    private readonly VirtualTextureTilePageFileHolder _tilePageFiles = new(pageSize, pageStreamProvider);
 
     /// <summary>
     ///     Closes the page file that is still open.
     /// </summary>
     public void Dispose()
     {
-        _pageFiles.Dispose();
+        _tilePageFiles.Dispose();
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ internal sealed class VirtualTextureUnpacker(
     /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
     public BC5Image ReadTile(in GTSFlatTileInfo tile)
     {
-        var pageFile = _pageFiles.GetPageFile(tile.PageFileIndex);
+        var pageFile = _tilePageFiles.GetPageFile(tile.PageFileIndex);
         return decoder.ReadTile(pageFile, tile.PageIndex, tile.ChunkIndex);
     }
 }

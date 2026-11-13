@@ -8,7 +8,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     One open GTP page file: the stream it was read from and the chunk offsets needed to read its
 ///     tiles.
 /// </summary>
-internal sealed class VirtualTexturePageFile : IDisposable
+internal sealed class VirtualTextureTilePageFile : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly int _pageSize;
@@ -20,7 +20,7 @@ internal sealed class VirtualTexturePageFile : IDisposable
     /// </summary>
     /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
     /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
-    public VirtualTexturePageFile(int pageSize, Stream stream)
+    public VirtualTextureTilePageFile(int pageSize, Stream stream)
     {
         _pageSize = pageSize;
         _reader = new BinaryReader(stream, Encoding.UTF8, false);
