@@ -8,7 +8,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band
 ///     of tiles into a reusable strip buffer, trimming tile borders.
 /// </summary>
-public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache texturePageCache)
+public sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualTexturePageCache pageCache)
 {
     private readonly TileCompressor _compressor = new();
 
@@ -49,7 +49,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
-        var pageFile = texturePageCache.Get(tileInfo.PageFileIndex);
+        var pageFile = pageCache.Get(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
     }
 
@@ -60,7 +60,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     /// <param name="pageIndex"></param>
     /// <param name="chunkIndex"></param>
     /// <returns></returns>
-    private BC5Image UnpackChunkBc5(TexturePage page, int pageIndex, int chunkIndex)
+    private BC5Image UnpackChunkBc5(VirtualTexturePage page, int pageIndex, int chunkIndex)
     {
         var header = tileSet.Header;
         var outputSize = 16 * ((header.TileWidth + 3) / 4) * ((header.TileHeight + 3) / 4)
@@ -78,7 +78,7 @@ public sealed class TextureUnpacker(VirtualTileSet tileSet, TexturePageCache tex
     /// <param name="outputSize"></param>
     /// <returns></returns>
     /// <exception cref="InvalidDataException"></exception>
-    private byte[] UnpackChunk(TexturePage page, int pageIndex, int chunkIndex, int outputSize)
+    private byte[] UnpackChunk(VirtualTexturePage page, int pageIndex, int chunkIndex, int outputSize)
     {
         var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault

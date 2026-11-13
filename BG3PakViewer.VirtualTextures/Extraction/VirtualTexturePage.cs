@@ -5,9 +5,10 @@ using LSLib.VirtualTextures;
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
-///     TexturePage
+///     One open GTP page file: the stream it was read from and the chunk offsets needed to read its
+///     tiles.
 /// </summary>
-public sealed class TexturePage : IDisposable
+public sealed class VirtualTexturePage : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly BinaryReader _reader;
@@ -15,11 +16,11 @@ public sealed class TexturePage : IDisposable
     private readonly VirtualTileSet _tileSet;
 
     /// <summary>
-    ///     Constructs a new TexturePage from a stream.
+    ///     Constructs a new VirtualTexturePage from a stream.
     /// </summary>
     /// <param name="tileSet"></param>
     /// <param name="stream"></param>
-    public TexturePage(VirtualTileSet tileSet, Stream stream)
+    public VirtualTexturePage(VirtualTileSet tileSet, Stream stream)
     {
         _tileSet = tileSet;
         _stream = stream;

@@ -9,16 +9,16 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     one horizontal tile band into a reusable strip buffer per row, using the configured
 ///     tile unpacker for a fixed (level, layer) combination.
 /// </summary>
-public sealed class TextureWriter : IDisposable
+public sealed class VirtualTextureWriter : IDisposable
 {
     private readonly BinaryWriter _bw;
     private readonly int _layer;
     private readonly int _level;
     private readonly BC5Image _strip;
-    private readonly TextureUnpacker _unpacker;
+    private readonly VirtualTextureUnpacker _unpacker;
 
     /// <summary>
-    ///     Constructs a new TextureWriter.
+    ///     Constructs a new VirtualTextureWriter.
     /// </summary>
     /// <param name="output"></param>
     /// <param name="cols"></param>
@@ -28,8 +28,8 @@ public sealed class TextureWriter : IDisposable
     /// <param name="unpacker"></param>
     /// <param name="level"></param>
     /// <param name="layer"></param>
-    public TextureWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
-        TextureUnpacker unpacker, int level, int layer)
+    public VirtualTextureWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
+        VirtualTextureUnpacker unpacker, int level, int layer)
     {
         _bw = new BinaryWriter(output, Encoding.UTF8, true);
         WriteHeader(_bw, cols * tileWidth, rows * tileHeight);

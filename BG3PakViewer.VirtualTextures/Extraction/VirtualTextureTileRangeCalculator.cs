@@ -6,7 +6,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Computes tile-grid coverage for virtual textures: maps a texture's pixel span onto the
 ///     tile range of a mip level and validates that a region is fully present in a layer.
 /// </summary>
-public sealed class TileRangeCalculator(VirtualTileSet tileSet)
+public sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
 {
     /// <summary>
     ///     Gets the tile range size (cols, rows) for a given tile range.

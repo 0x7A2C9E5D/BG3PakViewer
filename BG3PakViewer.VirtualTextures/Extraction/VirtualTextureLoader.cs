@@ -11,9 +11,9 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// </summary>
 public sealed class VirtualTextureLoader : IDisposable
 {
-    private readonly TexturePageCache _texturePageCache;
-    private readonly TileRangeCalculator _tileRanges;
-    private readonly TextureUnpacker _unpacker;
+    private readonly VirtualTexturePageCache _texturePageCache;
+    private readonly VirtualTextureTileRangeCalculator _tileRanges;
+    private readonly VirtualTextureUnpacker _unpacker;
 
     /// <summary>
     ///     Fully stream-based constructor: title metadata is read directly from <paramref name="stream" />
@@ -26,9 +26,9 @@ public sealed class VirtualTextureLoader : IDisposable
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(stream, reader, false);
         TextureNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
-        _texturePageCache = new TexturePageCache(TileSet, pageStreamProvider);
-        _tileRanges = new TileRangeCalculator(TileSet);
-        _unpacker = new TextureUnpacker(TileSet, _texturePageCache);
+        _texturePageCache = new VirtualTexturePageCache(TileSet, pageStreamProvider);
+        _tileRanges = new VirtualTextureTileRangeCalculator(TileSet);
+        _unpacker = new VirtualTextureUnpacker(TileSet, _texturePageCache);
     }
 
     private VirtualTileSet TileSet { get; }
@@ -124,9 +124,9 @@ public sealed class VirtualTextureLoader : IDisposable
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
         Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var (cols, rows) = TileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
+        var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
 
-        using var writer = new TextureWriter(output, cols, rows, TileSet.EffectiveTileWidth,
+        using var writer = new VirtualTextureWriter(output, cols, rows, TileSet.EffectiveTileWidth,
             TileSet.EffectiveTileHeight, _unpacker, level, layer);
         for (var row = 0; row < rows; row++)
         {

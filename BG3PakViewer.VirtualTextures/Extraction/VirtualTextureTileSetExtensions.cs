@@ -7,7 +7,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     shared border used for block compression is trimmed. The rule lives here only, so consumers
 ///     cannot drift apart.
 /// </summary>
-public static class VirtualTileSetExtensions
+public static class VirtualTextureTileSetExtensions
 {
     extension(VirtualTileSet tileSet)
     {
