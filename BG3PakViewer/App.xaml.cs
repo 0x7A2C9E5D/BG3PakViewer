@@ -58,12 +58,15 @@ public sealed partial class App : IDisposable
             .AddSingleton<ICultureResolver, CultureResolver>()
             .AddSingleton<ILogAccessService, LogAccessService>()
             .AddSingleton<ISettingsPersistenceService, SettingsPersistenceService>()
+            // Loaded once here, so every consumer of IAppSettings writes back to the object that is
+            // persisted on exit.
             .AddSingleton<IAppSettings, AppSettings>(x => x
                 .GetRequiredService<ISettingsPersistenceService>().Load<AppSettings>())
             .AddSingleton<IShellOpenService, ShellOpenService>()
             .AddSingleton<IClipboardService, ClipboardService>()
             .AddSingleton<ISettingsManagerService, SettingsManagerService>()
             .AddSingleton<IPackageService, PackageService>()
+            // Seeded with the recent list the settings object has already loaded.
             .AddSingleton<IRecentFilesService>(x => new RecentFilesService(
                 x.GetRequiredService<IAppSettings>().RecentItems))
             .AddSingleton<IAppDiagnostics, AppDiagnostics>()
@@ -72,6 +75,9 @@ public sealed partial class App : IDisposable
             .AddSingleton<IDialogService, DialogService>()
             .AddSingleton<ICheckUpdateService, CheckUpdateService>()
             .AddLogging(b => b.AddSerilog())
+            // Every strategy and preview handler needs its own registration: ExportService and
+            // PreviewService receive them as an IEnumerable and dispatch to the first one that accepts
+            // the entry.
             .AddSingleton<IExportStrategy, ImageExportStrategy>()
             .AddSingleton<IExportStrategy, Model3DExportStrategy>()
             .AddSingleton<IExportStrategy, AudioExportStrategy>()
@@ -88,8 +94,11 @@ public sealed partial class App : IDisposable
             .AddSingleton<IPreviewService, PreviewService>()
             .AddSingleton<IExportService, ExportService>()
             .AddSingleton<IPreviewExportService, PreviewExportService>()
+            // Both hold streams of the loaded package, so the shell clears them before it replaces the
+            // package.
             .AddSingleton<IVirtualTextureCatalog, VirtualTextureCatalog>()
             .AddSingleton<IVirtualTextureExtractor, VirtualTextureExtractor>()
+            // Weak references, so a view that forgets to unregister is still collected.
             .AddSingleton<IMessenger, WeakReferenceMessenger>()
             .AddSingleton<MainWindowViewModel>()
             .BuildServiceProvider());
@@ -101,6 +110,8 @@ public sealed partial class App : IDisposable
     /// <returns></returns>
     private static StrongViewLocator CreateViewLocator()
     {
+        // The dialog manager finds the view of a dialog through this locator, so a dialog view model it
+        // can open has to be registered here.
         var viewLocator = new StrongViewLocator();
         viewLocator.Register<LogDialogViewModel, LogDialog>();
         viewLocator.Register<AboutDialogViewModel, AboutDialog>();
@@ -115,6 +126,9 @@ public sealed partial class App : IDisposable
     /// </summary>
     private static void InitializeMainWindow()
     {
+        // The view model comes from the container, so the window shares its services with everything
+        // else. Showing this window makes it the application's main window, and the default shutdown
+        // mode ends the application with it.
         var mainWindow = new MainWindow
         {
             DataContext = Ioc.Default.GetRequiredService<MainWindowViewModel>()
@@ -127,6 +141,8 @@ public sealed partial class App : IDisposable
     /// </summary>
     private void InitializeApplication()
     {
+        // The order matters: the container has to exist before the first service is resolved, the
+        // exception handlers need the logger, and both have to be in place before the window is created.
         ConfigureServices();
         InitializeLogging();
         SetupExceptionHandling();
@@ -158,6 +174,8 @@ public sealed partial class App : IDisposable
     /// </summary>
     private void InitializeLogging()
     {
+        // Replaces the logger created before startup with the same file sink plus the in-app log view;
+        // events logged before this point are in the file only.
         _logObserver = new AnonymousObserver<LogEvent>(Ioc.Default.GetRequiredService<ILogAccessService>().Logs.Add);
 
         Log.Logger = new LoggerConfiguration()
@@ -174,6 +192,8 @@ public sealed partial class App : IDisposable
     /// </summary>
     private static void InitializeCulture()
     {
+        // An empty language means the settings have never been filled in: resolve the OS culture once and
+        // store it, so the next start does not have to resolve it again.
         var appSettings = Ioc.Default.GetRequiredService<IAppSettings>();
         var language = appSettings.Language;
         CultureInfo cultureInfo;
@@ -195,6 +215,8 @@ public sealed partial class App : IDisposable
     /// </summary>
     private static void RegisterSyncfusionLicense()
     {
+        // The key is embedded in the assembly (EmbeddedResource in the project file), so a build has no
+        // loose license file to keep next to the executable.
         using var stream = Assembly.GetExecutingAssembly()
             .GetManifestResourceStream("BG3PakViewer.Syncfusion.lic")!;
         using var reader = new StreamReader(stream);
@@ -208,6 +230,8 @@ public sealed partial class App : IDisposable
     {
         DispatcherUnhandledException += static (_, e) =>
         {
+            // Logged and marked handled: one failing command should not close the window the user is
+            // working in.
             e.Handled = true;
             var ex = e.Exception;
             Log.Error(ex, "Unhandled exception: {ExceptionMessage}", ex.Message);
@@ -215,18 +239,25 @@ public sealed partial class App : IDisposable
 
         TaskScheduler.UnobservedTaskException += static (_, e) =>
         {
+            // Nothing awaits these tasks any more; logging them and marking them observed keeps the
+            // failure from being reported a second time.
             e.SetObserved();
             var ex = e.Exception;
             Log.Error(ex, "Unobserved task exception: {ExceptionMessage}", ex.Message);
         };
     }
 
+    /// <summary>
+    ///     Checks whether another instance is already running, then initializes the application.
+    /// </summary>
     protected override void OnStartup(StartupEventArgs e)
     {
         // Set up logging before anything else: the full pipeline also feeds the in-app log view and
         // depends on the service container, so failures before that point would otherwise be lost.
         InitializeEarlyLogging();
 
+        // Debug builds use their own mutex name, so a debug session can run next to an installed release
+        // build instead of being treated as a second instance.
         _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
         if (_singleInstanceManager.IsAnotherInstanceRunning())
         {
@@ -255,6 +286,9 @@ public sealed partial class App : IDisposable
             .CreateLogger();
     }
 
+    /// <summary>
+    ///     Saves the settings and releases the resources the application owns.
+    /// </summary>
     protected override void OnExit(ExitEventArgs e)
     {
         Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
@@ -271,6 +305,8 @@ public sealed partial class App : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
+            // The container is never disposed, so the window view model it keeps as a singleton is
+            // released here by hand.
             (Current.MainWindow?.DataContext as IDisposable)?.Dispose();
             _logObserver?.Dispose();
             _singleInstanceManager?.Dispose();
