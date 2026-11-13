@@ -110,8 +110,8 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         var tileSet = file.TileSet;
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
-        using var unpacker = new VirtualTextureUnpacker((int)tileSet.Header.PageSize, tileSet.Header.TileWidth,
-            tileSet.Header.TileHeight,
+        using var unpacker = new VirtualTextureUnpacker((int)tileSet.Header.PageSize,
+            new Size(tileSet.Header.TileWidth, tileSet.Header.TileHeight),
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
             tileSet.ParameterBlocks, _compressor);
         var tile = new Size(tileSet.EffectiveTileWidth, tileSet.EffectiveTileHeight);

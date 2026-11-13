@@ -14,22 +14,19 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     files is an argument.
 /// </remarks>
 /// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
-/// <param name="tileWidth">The pixel width of one tile, without its border.</param>
-/// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+/// <param name="tile">The pixel size of one tile, including its border.</param>
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
 internal sealed class VirtualTextureUnpacker(
     int pageSize,
-    int tileWidth,
-    int tileHeight,
+    Size tile,
     Func<int, Stream> pageStreamProvider,
     IReadOnlyDictionary<uint, object> parameterBlocks,
     TileCompressor compressor)
     : IDisposable
 {
-    private readonly VirtualTexturePageChunkDecoder _decoder =
-        new(new Size(tileWidth, tileHeight), parameterBlocks, compressor);
+    private readonly VirtualTexturePageChunkDecoder _decoder = new(tile, parameterBlocks, compressor);
 
     private readonly VirtualTexturePageFileCache _virtualTexturePages = new(pageSize, pageStreamProvider);
 

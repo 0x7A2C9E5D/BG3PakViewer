@@ -14,7 +14,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     parameter block its header names. The decoder knows nothing about which page file a chunk lives in:
 ///     the page arrives as a <see cref="VirtualTexturePage" />.
 /// </remarks>
-/// <param name="tile">The pixel size of one tile, without its border.</param>
+/// <param name="tile">The pixel size of one tile, including its border.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
 internal sealed class VirtualTexturePageChunkDecoder(
