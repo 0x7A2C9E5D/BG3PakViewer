@@ -112,8 +112,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        // The catalog holds streams opened from the package, so it goes first.
+        // The catalog and the extractor hold streams opened from the package, so they go first.
         _virtualTextureCatalog.Dispose();
+        _virtualTextureExtractor.Dispose();
         _packageService.Dispose();
         _cancellationTokenSource?.Dispose();
         if (PreviewVm is IDisposable disposable)

@@ -93,10 +93,11 @@ internal partial class MainWindowViewModel
             // so it is released here on the UI thread instead of inside the background work below.
             await DisposePreviewVmAsync();
 
-            // The toolbox index holds streams into the package being replaced, so it is released
-            // before the package is cleaned up.
+            // The toolbox index and the extractor hold streams into the package being replaced, so they
+            // are released before the package is cleaned up.
             IsVirtualTexturePackage = false;
             await _virtualTextureCatalog.ClearAsync();
+            await _virtualTextureExtractor.ClearAsync();
 
             var success = await Task.Run(async () =>
             {
