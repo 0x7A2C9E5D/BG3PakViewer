@@ -94,10 +94,10 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
         var tile = tileSet.TileSize;
-        using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize, tile,
-            pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
-            tileSet.ParameterBlocks, _compressor);
-        var writer = new VirtualTextureWriter(size, tile, tileSet.Header.TileBorder, unpacker, dds);
+        var decoder = new VirtualTexturePageChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
+        using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
+            pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName), decoder);
+        var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, dds);
         writer.WriteHeader();
         var rowTiles = new GTSFlatTileInfo?[size.Width];
         for (var row = 0; row < size.Height; row++)

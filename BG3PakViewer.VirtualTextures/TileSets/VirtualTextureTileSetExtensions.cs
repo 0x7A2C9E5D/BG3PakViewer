@@ -23,6 +23,11 @@ internal static class VirtualTextureTileSetExtensions
         public Size TileSize => new(tileSet.Header.TileWidth, tileSet.Header.TileHeight);
 
         /// <summary>
+        ///     The border, in pixels, that every tile carries on each side.
+        /// </summary>
+        public int TileBorder => tileSet.Header.TileBorder;
+
+        /// <summary>
         ///     Effective tile width after trimming the shared border.
         /// </summary>
         public int EffectiveTileWidth => tileSet.Header.TileWidth - tileSet.Header.TileBorder * 2;

@@ -72,7 +72,7 @@ internal sealed class VirtualTexturePageChunkDecoder(
         if (payload.Length < 4)
             throw new InvalidDataException(
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
-        var color =new ColorRgba32(payload[0], payload[1], payload[2], payload[3]);
+        var color = new ColorRgba32(payload[0], payload[1], payload[2], payload[3]);
         var block = EncodeConstantColor(color);
         var blockCount = (tile.Width + 3) / 4 * ((tile.Height + 3) / 4);
         var data = new byte[blockCount * 16];
