@@ -72,8 +72,8 @@ internal sealed class VirtualTexturePageChunkDecoder(
         if (payload.Length < 4)
             throw new InvalidDataException(
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
-
-        var block = EncodeConstantColor(payload[0], payload[1], payload[2], payload[3]);
+        var color =new ColorRgba32(payload[0], payload[1], payload[2], payload[3]);
+        var block = EncodeConstantColor(color);
         var blockCount = (tile.Width + 3) / 4 * ((tile.Height + 3) / 4);
         var data = new byte[blockCount * 16];
         for (var i = 0; i < blockCount; i++) block.CopyTo(data, i * 16);
@@ -85,15 +85,12 @@ internal sealed class VirtualTexturePageChunkDecoder(
     ///     This mirrors LSLib, which runs sixteen identical pixels through the BCnEncoder block encoder
     ///     instead of quantizing the endpoints by hand, so uniform tiles come out byte for byte alike.
     /// </summary>
-    /// <param name="r">The red channel, 0-255.</param>
-    /// <param name="g">The green channel, 0-255.</param>
-    /// <param name="b">The blue channel, 0-255.</param>
-    /// <param name="a">The alpha channel, 0-255.</param>
+    /// <param name="color">The color every texel of the block resolves to.</param>
     /// <returns>One BC3 block whose sixteen texels all resolve to that color.</returns>
-    private static byte[] EncodeConstantColor(byte r, byte g, byte b, byte a)
+    private static byte[] EncodeConstantColor(ColorRgba32 color)
     {
         var source = new ColorRgba32[16];
-        Array.Fill(source, new ColorRgba32(r, g, b, a));
+        Array.Fill(source, color);
         return new BcEncoder(CompressionFormat.Bc3).EncodeBlock(source);
     }
 
