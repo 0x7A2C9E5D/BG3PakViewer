@@ -1,3 +1,4 @@
+using BG3PakViewer.VirtualTextures.Extraction;
 using BG3PakViewer.VirtualTextures.Models;
 
 namespace BG3PakViewer.VirtualTextures.Catalog;

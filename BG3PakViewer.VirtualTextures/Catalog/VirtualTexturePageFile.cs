@@ -27,7 +27,7 @@ internal static class VirtualTexturePageFile
     /// <param name="pageFileName">The name of the page file, as referenced by the tile set.</param>
     /// <returns>The content of the page file.</returns>
     /// <exception cref="FileNotFoundException">The package does not contain the page file.</exception>
-    public static Stream Open(IPackageService packageService, string directory, string pageFileName)
+    private static Stream Open(IPackageService packageService, string directory, string pageFileName)
     {
         var pagePath = directory.Length == 0 ? pageFileName : $"{directory}/{pageFileName}";
         return packageService.GetFileByPath(pagePath)?.CreateContentReader()

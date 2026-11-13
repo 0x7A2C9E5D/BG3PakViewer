@@ -16,6 +16,7 @@ using BG3PakViewer.Services.PreviewHandlers;
 using BG3PakViewer.ViewModels;
 using BG3PakViewer.Views;
 using BG3PakViewer.VirtualTextures.Catalog;
+using BG3PakViewer.VirtualTextures.Extraction;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using HanumanInstitute.MvvmDialogs;

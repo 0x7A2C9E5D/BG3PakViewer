@@ -1,6 +1,6 @@
 using BG3PakViewer.VirtualTextures.Models;
 
-namespace BG3PakViewer.VirtualTextures.Catalog;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Extracts the layers of an indexed virtual texture into DDS streams.

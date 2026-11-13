@@ -1,8 +1,8 @@
 using BG3PakViewer.Contracts;
-using BG3PakViewer.VirtualTextures.Extraction;
+using BG3PakViewer.VirtualTextures.Catalog;
 using BG3PakViewer.VirtualTextures.Models;
 
-namespace BG3PakViewer.VirtualTextures.Catalog;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Extracts the layers of the indexed virtual textures from the loaded package.
