@@ -58,7 +58,9 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            ReleaseCachedExtractor();
+            _cachedExtractor?.Dispose();
+            _cachedExtractorPath = null;
+            _cachedExtractor = null;
         }
         finally
         {
@@ -71,7 +73,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     /// </summary>
     public void Dispose()
     {
-        ReleaseCachedExtractor();
+        _cachedExtractor?.Dispose();
     }
 
     /// <summary>
@@ -84,24 +86,13 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     {
         if (_cachedExtractor is not null && _cachedExtractorPath == gtsPath) return _cachedExtractor;
 
-        ReleaseCachedExtractor();
+        _cachedExtractor?.Dispose();
         var file = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
             .ConfigureAwait(false);
         _cachedExtractor = new VirtualTextureLayerExtractor(file,
             pageFileName => OpenPackageFile(VirtualTexturePackagePath.GetPageFilePath(gtsPath, pageFileName)));
         _cachedExtractorPath = gtsPath;
         return _cachedExtractor;
-    }
-
-    /// <summary>
-    ///     Releases the cached extractor and the tile set it owns.
-    /// </summary>
-    private void ReleaseCachedExtractor()
-    {
-        var cached = _cachedExtractor;
-        _cachedExtractor = null;
-        _cachedExtractorPath = null;
-        cached?.Dispose();
     }
 
     /// <summary>
