@@ -14,7 +14,7 @@ public static class FileExtensions
         ImmutableHashSet.Create(".xml", ".json", ".lua", ".txt", ".xaml", ".ann", ".anc", ".khn");
 
     private static readonly ImmutableHashSet<string> BitmapImageFormats =
-        ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tiff", ".tga", ".cur");
+        ImmutableHashSet.Create(".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif",".tiff", ".tga", ".cur");
 
     /// <summary>
     ///     Determines whether the specified extension is a Larian resource.
