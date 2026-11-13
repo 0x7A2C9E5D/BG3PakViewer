@@ -37,8 +37,8 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     /// <param name="dialogService">The service used to pick the export folder and report the result.</param>
     /// <param name="clipboardService">The service used to copy texture names.</param>
     /// <param name="initialSearch">
-    ///     The texture name to search and select after indexing, or <see langword="null" /> to show
-    ///     the whole list.
+    ///     The texture name or tile set file name to search and select after indexing, or
+    ///     <see langword="null" /> to show the whole list.
     /// </param>
     public VtToolboxViewModel(IVirtualTextureCatalog catalog, IPreviewExportService exportService,
         IAppSettings appSettings, IDialogService dialogService, IClipboardService clipboardService,
@@ -54,7 +54,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     }
 
     /// <summary>
-    ///     The texture name the list was opened with, if any.
+    ///     The texture name or tile set file name the list was opened with, if any.
     /// </summary>
     public string? InitialSearch { get; }
 
@@ -225,8 +225,8 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     }
 
     /// <summary>
-    ///     Turns the indexed textures into rows and shows every one of them, selecting the first one
-    ///     like the single tile set preview does.
+    ///     Turns the indexed textures into rows, applies the search the dialog was opened with and
+    ///     selects its first match.
     /// </summary>
     private void BuildRows()
     {
@@ -237,13 +237,13 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
         if (!string.IsNullOrWhiteSpace(InitialSearch))
             SearchText = InitialSearch;
         SelectedRow = Textures.FirstOrDefault(row =>
-            string.IsNullOrWhiteSpace(InitialSearch) ||
-            row.DisplayName.Contains(InitialSearch, StringComparison.OrdinalIgnoreCase));
+            string.IsNullOrWhiteSpace(InitialSearch) || Matches(row, InitialSearch));
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }
 
     /// <summary>
-    ///     Builds the filter the list view applies: a case-insensitive substring match on the name.
+    ///     Builds the filter the list view applies: a case-insensitive substring match on the texture
+    ///     name or on the tile set file the texture comes from.
     /// </summary>
     /// <param name="searchText">The submitted search text.</param>
     /// <returns>The predicate, or <see langword="null" /> when everything is shown.</returns>
@@ -251,8 +251,20 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     {
         return string.IsNullOrWhiteSpace(searchText)
             ? null
-            : item => item is VtToolboxTextureViewModel row &&
-                      row.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+            : item => item is VtToolboxTextureViewModel row && Matches(row, searchText);
+    }
+
+    /// <summary>
+    ///     Whether a row matches the search text, by texture name or by the tile set file it comes from,
+    ///     so searching a tile set name narrows the list to the textures of that tile set.
+    /// </summary>
+    /// <param name="row">The row to test.</param>
+    /// <param name="searchText">The submitted search text.</param>
+    /// <returns><see langword="true" /> when the row matches.</returns>
+    private static bool Matches(VtToolboxTextureViewModel row, string searchText)
+    {
+        return row.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+               row.SourceFile.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

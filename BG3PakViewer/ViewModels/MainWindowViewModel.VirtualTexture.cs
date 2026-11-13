@@ -22,12 +22,12 @@ internal partial class MainWindowViewModel
     /// <summary>
     ///     Shows the cross-file virtual texture export dialog.
     /// </summary>
-    /// <param name="textureName">
-    ///     The texture name embedded in the page file that asked for the dialog, or
+    /// <param name="initialSearch">
+    ///     The texture name or tile set file name embedded in the file that asked for the dialog, or
     ///     <see langword="null" /> when it was opened from the toolbar.
     /// </param>
     [RelayCommand]
-    private async Task ShowVtToolboxAsync(string? textureName)
+    private async Task ShowVtToolboxAsync(string? initialSearch)
     {
         if (!IsVirtualTexturePackage) return;
 
@@ -35,7 +35,7 @@ internal partial class MainWindowViewModel
         try
         {
             viewModel = new VtToolboxViewModel(_virtualTextureCatalog, _previewExportService, AppSettings,
-                _dialogService, _clipboardService, textureName);
+                _dialogService, _clipboardService, initialSearch);
             await _dialogService.ShowDialogAsync(this, viewModel);
         }
         catch (Exception ex)
