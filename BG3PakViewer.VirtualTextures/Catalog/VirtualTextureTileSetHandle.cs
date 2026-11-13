@@ -1,5 +1,5 @@
-using LSLib.VirtualTextures;
 using BG3PakViewer.VirtualTextures.Extraction;
+using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
@@ -7,23 +7,23 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     One open tile set of the package, ready to extract its textures.
 /// </summary>
 /// <remarks>
-///     Owns the tile set stream and the loader, so releasing the source releases every page stream the
+///     Owns the tile set stream and the loader, so releasing the handle releases every page stream the
 ///     loader opened as well.
 /// </remarks>
-internal sealed class VirtualTextureSource : IDisposable
+internal sealed class VirtualTextureTileSetHandle : IDisposable
 {
     private readonly VirtualTextureLoader _loader;
     private readonly IReadOnlyList<FourCCTextureMeta> _textures;
     private readonly Stream _tileSetStream;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VirtualTextureSource" /> class.
+    ///     Initializes a new instance of the <see cref="VirtualTextureTileSetHandle" /> class.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
     /// <param name="tileSetStream">The stream of the tile set.</param>
     /// <param name="loader">The loader that extracts the textures.</param>
     /// <param name="textures">The textures of the tile set, in index order.</param>
-    public VirtualTextureSource(string gtsPath, Stream tileSetStream, VirtualTextureLoader loader,
+    public VirtualTextureTileSetHandle(string gtsPath, Stream tileSetStream, VirtualTextureLoader loader,
         IReadOnlyList<FourCCTextureMeta> textures)
     {
         GtsPath = gtsPath;

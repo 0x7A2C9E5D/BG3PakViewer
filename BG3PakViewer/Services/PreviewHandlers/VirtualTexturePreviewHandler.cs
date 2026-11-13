@@ -57,7 +57,7 @@ internal class VirtualTexturePreviewHandler(
             {
                 // ReSharper disable once AccessToModifiedClosure
                 var pageFileName = pageFileNames[pageFileIndex];
-                return VirtualTexturePageProvider.OpenPage(packageService, directory, pageFileName);
+                return VirtualTexturePageFile.Open(packageService, directory, pageFileName);
             }));
             pageFileNames = loader.TextureNames;
             return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService,

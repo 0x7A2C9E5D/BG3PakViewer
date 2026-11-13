@@ -3,9 +3,9 @@ using BG3PakViewer.Contracts;
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
-///     Resolves the GTP page files of a virtual texture tile set that lives inside the package.
+///     Opens the GTP page files of a virtual texture tile set that lives inside the package.
 /// </summary>
-public static class VirtualTexturePageProvider
+public static class VirtualTexturePageFile
 {
     /// <summary>
     ///     Opens the page file at the given name, which sits next to the tile set in the package.
@@ -15,7 +15,7 @@ public static class VirtualTexturePageProvider
     /// <param name="pageFileName">The name of the page file, as referenced by the tile set.</param>
     /// <returns>The content of the page file.</returns>
     /// <exception cref="FileNotFoundException">The package does not contain the page file.</exception>
-    public static Stream OpenPage(IPackageService packageService, string directory, string pageFileName)
+    public static Stream Open(IPackageService packageService, string directory, string pageFileName)
     {
         var pagePath = directory.Length == 0 ? pageFileName : $"{directory}/{pageFileName}";
         return packageService.GetFileByPath(pagePath)?.CreateContentReader()

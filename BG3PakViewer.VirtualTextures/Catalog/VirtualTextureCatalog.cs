@@ -23,7 +23,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     private const int MaxOpenTileSets = 2;
 
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private readonly List<VirtualTextureSource> _sources = [];
+    private readonly List<VirtualTextureTileSetHandle> _handles = [];
     private bool _disposed;
     private List<VirtualTextureEntry> _entries = [];
     private CancellationTokenSource? _loadCancellation;
@@ -72,7 +72,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         await _gate.WaitAsync(CancellationToken.None).ConfigureAwait(false);
         try
         {
-            DisposeSources();
+            DisposeHandles();
             _entries = [];
             IsLoaded = false;
             _loadCancellation?.Dispose();
@@ -99,8 +99,8 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var source = TakeSource(entry.GtsPath) ?? await OpenSourceAsync(entry.GtsPath).ConfigureAwait(false);
-            return await source.ExtractAsync(entry.Index, layer, progress, cancellationToken).ConfigureAwait(false);
+            var handle = TakeHandle(entry.GtsPath) ?? await OpenHandleAsync(entry.GtsPath).ConfigureAwait(false);
+            return await handle.ExtractAsync(entry.Index, layer, progress, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -113,7 +113,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         if (_disposed) return;
         _disposed = true;
         _loadCancellation?.Cancel();
-        DisposeSources();
+        DisposeHandles();
         _entries = [];
         IsLoaded = false;
         _loadCancellation?.Dispose();
@@ -196,18 +196,18 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Creates one tile set source, wiring its page files to the package.
+    ///     Creates one tile set handle, wiring its page files to the package.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The source, which is not cached yet.</returns>
-    private Task<VirtualTextureSource> OpenSourceAsync(string gtsPath)
+    /// <returns>The handle, which is not cached yet.</returns>
+    private Task<VirtualTextureTileSetHandle> OpenHandleAsync(string gtsPath)
     {
         return Task.Run(() =>
         {
-            var source = CreateSource(gtsPath);
-            _sources.Add(source);
-            TrimSources();
-            return source;
+            var handle = CreateHandle(gtsPath);
+            _handles.Add(handle);
+            TrimHandles();
+            return handle;
         }, CancellationToken.None);
     }
 
@@ -215,8 +215,8 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     Opens one tile set of the package.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The source.</returns>
-    private VirtualTextureSource CreateSource(string gtsPath)
+    /// <returns>The handle.</returns>
+    private VirtualTextureTileSetHandle CreateHandle(string gtsPath)
     {
         var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
         var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
@@ -227,9 +227,9 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
             // The names are looked up lazily: the tile set knows them only once it has been parsed.
             IReadOnlyList<string> pageFileNames = [];
             loader = new VirtualTextureLoader(stream, pageIndex =>
-                VirtualTexturePageProvider.OpenPage(packageService, directory, pageFileNames[pageIndex]));
+                VirtualTexturePageFile.Open(packageService, directory, pageFileNames[pageIndex]));
             pageFileNames = loader.TextureNames;
-            return new VirtualTextureSource(gtsPath, stream, loader, loader.GetTextures());
+            return new VirtualTextureTileSetHandle(gtsPath, stream, loader, loader.GetTextures());
         }
         catch
         {
@@ -240,31 +240,31 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Takes the cached source of the given tile set, marking it as the most recently used one.
+    ///     Takes the cached handle of the given tile set, marking it as the most recently used one.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The source, or <see langword="null" /> when the tile set is not open.</returns>
-    private VirtualTextureSource? TakeSource(string gtsPath)
+    /// <returns>The handle, or <see langword="null" /> when the tile set is not open.</returns>
+    private VirtualTextureTileSetHandle? TakeHandle(string gtsPath)
     {
-        var index = _sources.FindIndex(source =>
-            source.GtsPath.Equals(gtsPath, StringComparison.OrdinalIgnoreCase));
+        var index = _handles.FindIndex(handle =>
+            handle.GtsPath.Equals(gtsPath, StringComparison.OrdinalIgnoreCase));
         if (index < 0) return null;
 
-        var source = _sources[index];
-        _sources.RemoveAt(index);
-        _sources.Add(source);
-        return source;
+        var handle = _handles[index];
+        _handles.RemoveAt(index);
+        _handles.Add(handle);
+        return handle;
     }
 
     /// <summary>
     ///     Releases the least recently used tile sets beyond the cache limit.
     /// </summary>
-    private void TrimSources()
+    private void TrimHandles()
     {
-        while (_sources.Count > MaxOpenTileSets)
+        while (_handles.Count > MaxOpenTileSets)
         {
-            var oldest = _sources[0];
-            _sources.RemoveAt(0);
+            var oldest = _handles[0];
+            _handles.RemoveAt(0);
             oldest.Dispose();
         }
     }
@@ -272,9 +272,9 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <summary>
     ///     Releases every open tile set.
     /// </summary>
-    private void DisposeSources()
+    private void DisposeHandles()
     {
-        foreach (var source in _sources) source.Dispose();
-        _sources.Clear();
+        foreach (var handle in _handles) handle.Dispose();
+        _handles.Clear();
     }
 }
