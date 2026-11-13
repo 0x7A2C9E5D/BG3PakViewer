@@ -63,8 +63,13 @@ internal class SettingsPersistenceService : ISettingsPersistenceService
     {
         try
         {
-            using var stream = File.Create(_filePath);
-            JsonSerializer.Serialize(stream, settings, _jsonSerializerOptions);
+            var tempPath = _filePath + ".tmp";
+            using (var stream = File.Create(tempPath))
+            {
+                JsonSerializer.Serialize(stream, settings, _jsonSerializerOptions);
+            }
+
+            File.Move(tempPath, _filePath, true);
             Log.Debug("Settings saved to {FilePath}", _filePath);
         }
         catch (Exception ex)

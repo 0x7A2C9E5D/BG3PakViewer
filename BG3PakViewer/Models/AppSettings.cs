@@ -23,10 +23,10 @@ internal partial class AppSettings : ObservableObject, IAppSettings
     /// <param name="recentItems"></param>
     /// <param name="language"></param>
     [JsonConstructor]
-    public AppSettings(ObservableCollection<IRecentFileEntry> recentItems, string language)
+    public AppSettings(ObservableCollection<IRecentFileEntry>? recentItems, string language)
     {
         Language = language;
-        RecentItems = [.. recentItems];
+        RecentItems = [.. recentItems ?? []];
     }
 
     /// <summary>
