@@ -2,7 +2,7 @@ using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
 ///     One open GTP page file: the stream it was read from and the chunk offsets needed to read its

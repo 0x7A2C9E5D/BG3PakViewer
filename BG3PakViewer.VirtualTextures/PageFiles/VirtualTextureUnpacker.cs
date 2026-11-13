@@ -1,7 +1,7 @@
 using System.Drawing;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
 ///     Decompresses single tiles from the GTP page files.

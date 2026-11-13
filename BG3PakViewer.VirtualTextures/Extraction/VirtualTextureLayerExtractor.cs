@@ -1,4 +1,6 @@
 using System.Drawing;
+using BG3PakViewer.VirtualTextures.PageFiles;
+using BG3PakViewer.VirtualTextures.TileSets;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;

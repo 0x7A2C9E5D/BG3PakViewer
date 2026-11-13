@@ -3,7 +3,7 @@ using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
 ///     Writes a single-mip DXT5 DDS: emits the header, then stitches one horizontal tile band into a

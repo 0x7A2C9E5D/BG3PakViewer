@@ -1,4 +1,4 @@
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
 ///     Holds the page files that are being read from, keeping at most one of them open.

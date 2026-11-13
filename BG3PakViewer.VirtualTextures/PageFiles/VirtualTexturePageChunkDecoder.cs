@@ -3,7 +3,7 @@ using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
 ///     Decompresses single GTP chunks into BC5 tiles.

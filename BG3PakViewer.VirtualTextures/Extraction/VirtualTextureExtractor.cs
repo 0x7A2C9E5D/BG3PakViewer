@@ -1,5 +1,6 @@
 using BG3PakViewer.Contracts;
 using BG3PakViewer.VirtualTextures.Models;
+using BG3PakViewer.VirtualTextures.TileSets;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
 

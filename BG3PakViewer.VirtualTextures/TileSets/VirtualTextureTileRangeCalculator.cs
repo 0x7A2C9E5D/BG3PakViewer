@@ -1,7 +1,7 @@
 using System.Drawing;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.TileSets;
 
 /// <summary>
 ///     Computes tile-grid coverage for virtual textures: maps a texture's pixel span onto the

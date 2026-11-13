@@ -1,7 +1,7 @@
 using System.Text;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.VirtualTextures.Extraction;
+namespace BG3PakViewer.VirtualTextures.TileSets;
 
 /// <summary>
 ///     A tile set (.gts) parsed from a stream: owns the stream and the parsed tile set, and exposes the
