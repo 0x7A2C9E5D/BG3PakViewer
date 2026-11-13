@@ -108,6 +108,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         }
     }
 
+    /// <summary>
+    ///     Stops indexing, releases every open tile set and disposes the synchronization gate; the loaded
+    ///     package itself is left alone.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed) return;

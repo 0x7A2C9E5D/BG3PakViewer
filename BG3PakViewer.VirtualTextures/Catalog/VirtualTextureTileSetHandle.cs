@@ -39,7 +39,10 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     ///     The package path of the tile set.
     /// </summary>
     public string GtsPath { get; }
-
+    
+    /// <summary>
+    ///     Closes the page files, the loader and the tile set stream, in that order.
+    /// </summary>
     public void Dispose()
     {
         _pages.Dispose();

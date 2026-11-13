@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -18,6 +18,9 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
     private bool _disposedValue;
     private Mutex? _mutex;
 
+    /// <summary>
+    ///     Releases the single instance mutex.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
@@ -88,6 +91,10 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         PInvoke.SetForegroundWindow(mainWindowHandle);
     }
 
+    /// <summary>
+    ///     Releases the mutex; managed resources only when called from <see cref="Dispose()" />.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     private void Dispose(bool disposing)
     {
         if (_disposedValue) return;
@@ -100,6 +107,9 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
         _disposedValue = true;
     }
 
+    /// <summary>
+    ///     Finalizer that releases the mutex when <see cref="Dispose()" /> was not called.
+    /// </summary>
     ~SingleInstanceManager()
     {
         Dispose(false);

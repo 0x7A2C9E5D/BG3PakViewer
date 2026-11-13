@@ -64,7 +64,7 @@ public abstract partial class SearchFilterViewModel : DisposableViewModel
     /// <summary>
     ///     Unsubscribes from search messages.
     /// </summary>
-    /// <param name="disposing"></param>
+    /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,

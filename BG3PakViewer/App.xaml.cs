@@ -38,6 +38,9 @@ public sealed partial class App : IDisposable
     private ObserverBase<LogEvent>? _logObserver;
     private SingleInstanceManager? _singleInstanceManager;
 
+    /// <summary>
+    ///     Releases the main window view model, the log observer and the single instance manager.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
@@ -257,6 +260,10 @@ public sealed partial class App : IDisposable
         Dispose();
     }
 
+    /// <summary>
+    ///     Releases the resources the application owns.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     private void Dispose(bool disposing)
     {
         if (_disposedValue) return;

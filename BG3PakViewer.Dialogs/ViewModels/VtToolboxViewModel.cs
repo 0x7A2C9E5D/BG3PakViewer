@@ -150,6 +150,10 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
         SelectedCount = _selectedTextures.Count;
     }
 
+    /// <summary>
+    ///     Cancels previewing and exporting, and detaches the image from the view before it is released.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

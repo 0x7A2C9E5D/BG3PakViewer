@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
@@ -103,12 +103,19 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     Releases the open package.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Releases the open package; managed resources only when called from <see cref="Dispose()" />.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     private void Dispose(bool disposing)
     {
         if (_disposedValue) return;
@@ -121,6 +128,9 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
         _disposedValue = true;
     }
 
+    /// <summary>
+    ///     Finalizer that releases the package when <see cref="Dispose()" /> was not called.
+    /// </summary>
     ~PackageService()
     {
         Dispose(false);

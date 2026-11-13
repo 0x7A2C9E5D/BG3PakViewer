@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Data;
@@ -106,6 +106,10 @@ public sealed partial class LogDialogViewModel
             });
     }
 
+    /// <summary>
+    ///     Unsubscribes from the log collections.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

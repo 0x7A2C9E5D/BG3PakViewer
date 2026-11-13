@@ -24,6 +24,10 @@ public partial class ImagePreviewViewModel : DisposableViewModel
         if (!ReferenceEquals(oldValue, newValue)) oldValue?.Dispose();
     }
 
+    /// <summary>
+    ///     Detaches the image from the view before it is released.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);

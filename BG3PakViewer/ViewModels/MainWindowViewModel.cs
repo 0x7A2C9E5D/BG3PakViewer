@@ -99,6 +99,11 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     [ObservableProperty]
     public partial bool IsUpdateAvailable { get; private set; }
 
+    /// <summary>
+    ///     Releases the virtual texture catalog, the package service, the cancellation source and the
+    ///     preview view model.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
