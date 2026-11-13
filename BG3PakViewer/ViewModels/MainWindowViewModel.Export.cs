@@ -86,13 +86,23 @@ internal partial class MainWindowViewModel
             return;
         }
 
+        // The source belongs to this export only. Clearing it in the finally keeps the "a cancellable
+        // export is running" check honest for the next attempt to open a package.
         _cancellationTokenSource = new CancellationTokenSource();
-        var success =
-            await _exportService.ExportFolderAsync(node, storageFolder.LocalPath, _cancellationTokenSource.Token);
-        if (_cancellationTokenSource.IsCancellationRequested)
-            Log.Information("Folder export was cancelled");
-        else
-            await HandleExportResultAsync(success);
+        try
+        {
+            var success =
+                await _exportService.ExportFolderAsync(node, storageFolder.LocalPath, _cancellationTokenSource.Token);
+            if (_cancellationTokenSource.IsCancellationRequested)
+                Log.Information("Folder export was cancelled");
+            else
+                await HandleExportResultAsync(success);
+        }
+        finally
+        {
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
     }
 
     /// <summary>
@@ -135,9 +145,19 @@ internal partial class MainWindowViewModel
     private async Task<bool> HandleIsExportingFiles()
     {
         if (!IsExporting) return true;
+
+        // Only a folder export has a cancellation source. A single file export cannot be canceled,
+        // so offering to cancel it would promise something the export cannot do.
+        if (_cancellationTokenSource is null)
+        {
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportNotCancellableMessage,
+                Strings.CancelExportOperationCaption, MessageBoxIcon.Warning);
+            return false;
+        }
+
         if (!await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.CancelExportOperationMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning)) return false;
-        await _cancellationTokenSource?.CancelAsync()!;
+        await _cancellationTokenSource.CancelAsync();
         IsExporting = false;
         return true;
     }

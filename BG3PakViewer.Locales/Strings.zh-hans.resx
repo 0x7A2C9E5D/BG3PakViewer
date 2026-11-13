@@ -204,6 +204,9 @@
     <data name="ExportFailedCaption" xml:space="preserve">
         <value>导出失败</value>
     </data>
+    <data name="ExportNotCancellableMessage" xml:space="preserve">
+        <value>正在导出文件，当前导出无法取消，请等待完成后再试。</value>
+    </data>
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
         <value>已导出 {0} 个文件。</value>
     </data>

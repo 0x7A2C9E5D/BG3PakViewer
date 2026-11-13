@@ -90,6 +90,9 @@
     <data name="ExportFailedMessage" xml:space="preserve">
         <value>匯出檔案失敗。請查看日誌以獲取詳細資訊。</value>
     </data>
+    <data name="ExportNotCancellableMessage" xml:space="preserve">
+        <value>正在匯出檔案，目前的匯出無法取消，請等待完成後再試。</value>
+    </data>
     <data name="ExportPakBtnLabel" xml:space="preserve">
         <value>匯出資源</value>
     </data>

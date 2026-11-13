@@ -312,6 +312,9 @@
     <data name="ExportFailedCaption" xml:space="preserve">
     <value>Esportazione non riuscita</value>
   </data>
+    <data name="ExportNotCancellableMessage" xml:space="preserve">
+    <value>È in corso un'esportazione di file, che non può essere annullata. Attenderne il completamento.</value>
+  </data>
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
     <value>Esportati {0} file.</value>
   </data>

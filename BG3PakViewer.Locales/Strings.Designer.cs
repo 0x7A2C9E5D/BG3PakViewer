@@ -294,6 +294,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A file export is in progress and cannot be cancelled. Wait for it to finish..
+        /// </summary>
+        public static string ExportNotCancellableMessage {
+            get {
+                return ResourceManager.GetString("ExportNotCancellableMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///     Looks up a localized string similar to Export Resources.
         /// </summary>
         public static string ExportPakBtnLabel {

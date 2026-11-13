@@ -213,6 +213,9 @@
     <data name="ExportFailedCaption" xml:space="preserve">
         <value>Export Failed</value>
     </data>
+    <data name="ExportNotCancellableMessage" xml:space="preserve">
+        <value>A file export is in progress and cannot be cancelled. Wait for it to finish.</value>
+    </data>
     <data name="PreviewExportCompletedMessage" xml:space="preserve">
         <value>Exported {0} files.</value>
     </data>
