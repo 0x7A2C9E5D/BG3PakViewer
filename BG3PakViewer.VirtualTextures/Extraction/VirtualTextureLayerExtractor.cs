@@ -102,8 +102,9 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         var rowTiles = new GTSFlatTileInfo?[size.Width];
         for (var row = 0; row < size.Height; row++)
         {
+            ct.ThrowIfCancellationRequested();
             ResolveRow(level, layer, new Point(min.X, min.Y + row), rowTiles);
-            writer.WriteRow(rowTiles, ct);
+            writer.WriteRow(rowTiles);
             progress?.Report((row + 1, size.Height));
         }
 

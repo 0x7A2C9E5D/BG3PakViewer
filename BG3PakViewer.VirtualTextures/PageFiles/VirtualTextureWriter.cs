@@ -70,10 +70,8 @@ internal sealed class VirtualTextureWriter
     ///     Writes one band of tiles, leaving the columns without a tile transparent.
     /// </summary>
     /// <param name="tiles">The tiles of the band, in column order; a missing tile is written as empty.</param>
-    /// <param name="ct">Cancels to write.</param>
-    public void WriteRow(ReadOnlySpan<GTSFlatTileInfo?> tiles, CancellationToken ct)
+    public void WriteRow(ReadOnlySpan<GTSFlatTileInfo?> tiles)
     {
-        ct.ThrowIfCancellationRequested();
         Array.Clear(_strip.Data);
         for (var col = 0; col < tiles.Length; col++)
         {
