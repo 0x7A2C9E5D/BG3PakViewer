@@ -11,7 +11,7 @@ namespace BG3PakViewer.VirtualTextures.TileSets;
 ///     Parsing opens no GTP page file; the page files are separate streams the layer extraction asks a
 ///     provider for. The tile ranges are not computed here either, because only an extraction needs them.
 /// </remarks>
-internal sealed class VirtualTileSetFile : IDisposable
+internal sealed class VirtualTextureTileSetFile : IDisposable
 {
     private readonly Stream _stream;
 
@@ -19,7 +19,7 @@ internal sealed class VirtualTileSetFile : IDisposable
     ///     Reads the tile set from <paramref name="stream" />, which this object owns from then on.
     /// </summary>
     /// <param name="stream">The tile set stream.</param>
-    public VirtualTileSetFile(Stream stream)
+    public VirtualTextureTileSetFile(Stream stream)
     {
         _stream = stream;
         try

@@ -12,7 +12,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     A chunk is addressed by the page and the chunk index it occupies inside its page file. It is either
 ///     uniform, carrying the single RGBA8 texel the whole tile repeats, or BC, compressed with the
 ///     parameter block its header names. The decoder knows nothing about which page file a chunk lives in:
-///     the page arrives as a <see cref="VirtualTexturePage" />.
+///     the page arrives as a <see cref="VirtualTexturePageFile" />.
 /// </remarks>
 /// <param name="tile">The pixel size of one tile, including its border.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
@@ -26,32 +26,32 @@ internal sealed class VirtualTexturePageChunkDecoder(
     ///     Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into
     ///     a tile image sized as the tile declares.
     /// </summary>
-    /// <param name="page">The page file the chunk lives in.</param>
+    /// <param name="pageFile">The page file the chunk lives in.</param>
     /// <param name="pageIndex">The page within that page file.</param>
     /// <param name="chunkIndex">The chunk within that page.</param>
     /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
-    public BC5Image ReadTile(VirtualTexturePage page, int pageIndex, int chunkIndex)
+    public BC5Image ReadTile(VirtualTexturePageFile pageFile, int pageIndex, int chunkIndex)
     {
         // BC5 stores two channels: sixteen bytes per 4x4 block for the one kept at full resolution, and
         // the same again for the one kept at half resolution.
         var outputSize = 16 * ((tile.Width + 3) / 4) * ((tile.Height + 3) / 4)
                          + 16 * ((tile.Width / 2 + 3) / 4) * ((tile.Height / 2 + 3) / 4);
-        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), tile.Width, tile.Height);
+        return new BC5Image(UnpackChunk(pageFile, pageIndex, chunkIndex, outputSize), tile.Width, tile.Height);
     }
 
     /// <summary>
     ///     Decompresses a chunk and returns its block data.
     /// </summary>
-    /// <param name="page">The page file the chunk lives in.</param>
+    /// <param name="pageFile">The page file the chunk lives in.</param>
     /// <param name="pageIndex">The page within that page file.</param>
     /// <param name="chunkIndex">The chunk within that page.</param>
     /// <param name="outputSize">The number of decompressed bytes to produce.</param>
     /// <returns>The decompressed block data.</returns>
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
-    private byte[] UnpackChunk(VirtualTexturePage page, int pageIndex, int chunkIndex, int outputSize)
+    private byte[] UnpackChunk(VirtualTexturePageFile pageFile, int pageIndex, int chunkIndex, int outputSize)
     {
-        var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
+        var (chunkHeader, compressed) = pageFile.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return chunkHeader.Codec switch
         {

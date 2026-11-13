@@ -17,7 +17,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// </remarks>
 /// <param name="file">The parsed tile set the texture belongs to; disposing the extractor disposes it.</param>
 /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
-internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func<string, Stream> pageStreamProvider)
+internal sealed class VirtualTextureLayerExtractor(VirtualTextureTileSetFile file, Func<string, Stream> pageStreamProvider)
     : IDisposable
 {
     private readonly TileCompressor _compressor = new();

@@ -20,14 +20,14 @@ internal sealed class VirtualTextureUnpacker(
     VirtualTexturePageChunkDecoder decoder)
     : IDisposable
 {
-    private readonly VirtualTexturePageFileCache _virtualTexturePages = new(pageSize, pageStreamProvider);
+    private readonly VirtualTexturePageFileHolder _pageFiles = new(pageSize, pageStreamProvider);
 
     /// <summary>
     ///     Closes the page file that is still open.
     /// </summary>
     public void Dispose()
     {
-        _virtualTexturePages.Dispose();
+        _pageFiles.Dispose();
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ internal sealed class VirtualTextureUnpacker(
     /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
     public BC5Image ReadTile(in GTSFlatTileInfo tile)
     {
-        var page = _virtualTexturePages.GetPage(tile.PageFileIndex);
-        return decoder.ReadTile(page, tile.PageIndex, tile.ChunkIndex);
+        var pageFile = _pageFiles.GetPageFile(tile.PageFileIndex);
+        return decoder.ReadTile(pageFile, tile.PageIndex, tile.ChunkIndex);
     }
 }

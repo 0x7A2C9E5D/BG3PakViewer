@@ -87,7 +87,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         if (_cachedExtractor is not null && _cachedExtractorPath == gtsPath) return _cachedExtractor;
 
         _cachedExtractor?.Dispose();
-        var file = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
+        var file = await Task.Run(() => new VirtualTextureTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
             .ConfigureAwait(false);
         _cachedExtractor = new VirtualTextureLayerExtractor(file,
             pageFileName => OpenPackageFile(GetPageFilePath(gtsPath, pageFileName)));

@@ -1,7 +1,7 @@
 namespace BG3PakViewer.VirtualTextures.PageFiles;
 
 /// <summary>
-///     Holds the page files that are being read from, keeping at most one of them open.
+///     Holds the open page file of a tile set, at most one at a time.
 /// </summary>
 /// <remarks>
 ///     When a page file other than the open one is requested, the open page file is closed before the new
@@ -10,17 +10,17 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// </remarks>
 /// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
-internal sealed class VirtualTexturePageFileCache(int pageSize, Func<int, Stream> pageStreamProvider) : IDisposable
+internal sealed class VirtualTexturePageFileHolder(int pageSize, Func<int, Stream> pageStreamProvider) : IDisposable
 {
     private int _openPageFileIndex = -1;
-    private VirtualTexturePage? _page;
+    private VirtualTexturePageFile? _pageFile;
 
     /// <summary>
     ///     Closes the page file that is still open.
     /// </summary>
     public void Dispose()
     {
-        ClosePage();
+        ClosePageFile();
     }
 
     /// <summary>
@@ -29,11 +29,11 @@ internal sealed class VirtualTexturePageFileCache(int pageSize, Func<int, Stream
     /// </summary>
     /// <param name="pageFileIndex">The index of the page file in the tile set's page file list.</param>
     /// <returns>The page file, ready to read chunks from.</returns>
-    public VirtualTexturePage GetPage(int pageFileIndex)
+    public VirtualTexturePageFile GetPageFile(int pageFileIndex)
     {
-        if (_page != null && _openPageFileIndex == pageFileIndex) return _page;
+        if (_pageFile != null && _openPageFileIndex == pageFileIndex) return _pageFile;
 
-        ClosePage();
+        ClosePageFile();
 
         var stream = pageStreamProvider(pageFileIndex);
         if (!stream.CanSeek)
@@ -44,18 +44,18 @@ internal sealed class VirtualTexturePageFileCache(int pageSize, Func<int, Stream
             stream = buffer;
         }
 
-        _page = new VirtualTexturePage(pageSize, stream);
+        _pageFile = new VirtualTexturePageFile(pageSize, stream);
         _openPageFileIndex = pageFileIndex;
-        return _page;
+        return _pageFile;
     }
 
     /// <summary>
     ///     Closes the page file that is open, if any.
     /// </summary>
-    private void ClosePage()
+    private void ClosePageFile()
     {
-        _page?.Dispose();
-        _page = null;
+        _pageFile?.Dispose();
+        _pageFile = null;
         _openPageFileIndex = -1;
     }
 }
