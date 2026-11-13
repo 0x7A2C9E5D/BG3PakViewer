@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
@@ -9,22 +10,38 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     reusable strip buffer per row and writes its blocks.
 /// </summary>
 /// <remarks>
-///     The writer keeps the output and the unpacker it was created with and owns neither of them: the
-///     caller supplies both and keeps them open for as long as this writer is used.
+///     The writer owns neither the output stream nor the unpacker it was created with: the caller
+///     supplies both and keeps them open for as long as this writer is used. The tile size it is given
+///     includes the border every tile carries; the border is trimmed here, so every consumer of a tile
+///     size uses the same convention.
 /// </remarks>
-/// <param name="grid">How many tiles each band holds: the number of columns and rows.</param>
-/// <param name="tile">The pixel size of one tile, without its border.</param>
-/// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
-/// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
-/// <param name="writer">The writer the DDS is written through; the caller owns it.</param>
-internal sealed class VirtualTextureWriter(
-    Size grid,
-    Size tile,
-    int tileBorder,
-    VirtualTextureUnpacker unpacker,
-    BinaryWriter writer)
+internal sealed class VirtualTextureWriter
 {
-    private readonly BC5Image _strip = new(grid.Width * tile.Width, tile.Height);
+    private readonly Size _content;
+    private readonly Size _grid;
+    private readonly BC5Image _strip;
+    private readonly int _tileBorder;
+    private readonly VirtualTextureUnpacker _unpacker;
+    private readonly BinaryWriter _writer;
+
+    /// <summary>
+    ///     Constructs a new VirtualTextureWriter.
+    /// </summary>
+    /// <param name="grid">How many tiles each band holds: the number of columns and rows.</param>
+    /// <param name="tile">The pixel size of one tile, including its border.</param>
+    /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
+    /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
+    /// <param name="stream">The stream the DDS is written to; the caller keeps it open.</param>
+    public VirtualTextureWriter(Size grid, Size tile, int tileBorder, VirtualTextureUnpacker unpacker,
+        Stream stream)
+    {
+        _grid = grid;
+        _content = new Size(tile.Width - tileBorder * 2, tile.Height - tileBorder * 2);
+        _strip = new BC5Image(grid.Width * _content.Width, _content.Height);
+        _tileBorder = tileBorder;
+        _unpacker = unpacker;
+        _writer = new BinaryWriter(stream, Encoding.UTF8, true);
+    }
 
     /// <summary>
     ///     Writes the DDS header of the image the bands form, which the bands follow in the stream.
@@ -36,9 +53,9 @@ internal sealed class VirtualTextureWriter(
             dwMagic = DDSHeader.DDSMagic,
             dwSize = DDSHeader.HeaderSize,
             dwFlags = 0x1007,
-            dwWidth = (uint)(grid.Width * tile.Width),
-            dwHeight = (uint)(grid.Height * tile.Height),
-            dwPitchOrLinearSize = (uint)(grid.Width * tile.Width * grid.Height * tile.Height),
+            dwWidth = (uint)(_grid.Width * _content.Width),
+            dwHeight = (uint)(_grid.Height * _content.Height),
+            dwPitchOrLinearSize = (uint)(_grid.Width * _content.Width * _grid.Height * _content.Height),
             dwDepth = 1,
             dwMipMapCount = 1,
             dwPFSize = 32,
@@ -46,7 +63,7 @@ internal sealed class VirtualTextureWriter(
             dwFourCC = DDSHeader.FourCC_DXT5,
             dwCaps = 0x1000
         };
-        BinUtils.WriteStruct(writer, ref header);
+        BinUtils.WriteStruct(_writer, ref header);
     }
 
     /// <summary>
@@ -61,9 +78,9 @@ internal sealed class VirtualTextureWriter(
         for (var col = 0; col < tiles.Length; col++)
         {
             if (tiles[col] is not { } cell) continue;
-            unpacker.ReadTile(cell).CopyTo(_strip, tile, tileBorder, col);
+            _unpacker.ReadTile(cell).CopyTileTo(_strip, _content, _tileBorder, col);
         }
 
-        writer.Write(_strip.Data, 0, _strip.Data.Length);
+        _writer.Write(_strip.Data, 0, _strip.Data.Length);
     }
 }

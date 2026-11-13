@@ -12,15 +12,15 @@ internal static class BC5ImageExtensions
     {
         /// <summary>
         ///     Copies this tile into <paramref name="strip" /> at band column <paramref name="column" />,
-        ///     trimming the border every tile carries on each side.
+        ///     skipping the border every tile carries on each side.
         /// </summary>
         /// <param name="strip">The band strip the tile is copied into.</param>
-        /// <param name="size">The pixel size of one tile, without its border.</param>
+        /// <param name="content">The pixel size of one tile, without its border.</param>
         /// <param name="border">The border, in pixels, that every tile carries on each side.</param>
         /// <param name="column">The band column the tile is copied to.</param>
-        public void CopyTo(BC5Image strip, Size size, int border, int column)
+        public void CopyTileTo(BC5Image strip, Size content, int border, int column)
         {
-            tile.CopyTo(strip, border, border, column * size.Width, 0, size.Width, size.Height);
+            tile.CopyTo(strip, border, border, column * content.Width, 0, content.Width, content.Height);
         }
     }
 }

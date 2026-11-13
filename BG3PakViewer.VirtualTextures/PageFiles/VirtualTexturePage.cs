@@ -20,19 +20,9 @@ internal sealed class VirtualTexturePage : IDisposable
     /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
     /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
     public VirtualTexturePage(int pageSize, Stream stream)
-        : this(pageSize, new BinaryReader(stream, Encoding.UTF8, false))
-    {
-    }
-
-    /// <summary>
-    ///     Constructs a new VirtualTexturePage from a reader the caller created.
-    /// </summary>
-    /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
-    /// <param name="reader">The reader the page file is read through.</param>
-    private VirtualTexturePage(int pageSize, BinaryReader reader)
     {
         _pageSize = pageSize;
-        _reader = reader;
+        _reader = new BinaryReader(stream, Encoding.UTF8, false);
         _chunkOffsets = ReadChunkOffsetTables();
     }
 

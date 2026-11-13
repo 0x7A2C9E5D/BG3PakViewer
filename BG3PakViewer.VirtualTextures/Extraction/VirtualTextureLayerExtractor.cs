@@ -1,5 +1,4 @@
 using System.Drawing;
-using System.Text;
 using BG3PakViewer.VirtualTextures.PageFiles;
 using BG3PakViewer.VirtualTextures.TileSets;
 using LSLib.VirtualTextures;
@@ -44,38 +43,22 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     /// </returns>
     public async Task<Stream?> ExtractAsync(int index, int layer, IProgress<double>? progress, CancellationToken ct)
     {
-        var ddsStream = new MemoryStream();
-        var transferred = false;
-        try
-        {
-            var extracted = await Task.Run(
-                () => ExtractTexture(layer, file.Textures[index], ddsStream, CreateTileProgress(progress), ct), ct);
-            if (!extracted) return null;
-
-            ddsStream.Position = 0;
-            transferred = true;
-            return ddsStream;
-        }
-        finally
-        {
-            if (!transferred) await ddsStream.DisposeAsync();
-        }
+        return await Task.Run(
+            () => ExtractTexture(layer, file.Textures[index], CreateTileProgress(progress), ct), ct);
     }
 
     /// <summary>
-    ///     Extracts <paramref name="layer" /> of <paramref name="tex" /> into <paramref name="output" />,
-    ///     stopping at the first mip level whose tile region exists.
+    ///     Extracts <paramref name="layer" /> of <paramref name="tex" /> into a new DDS stream, stopping
+    ///     at the first mip level whose tile region exists.
     /// </summary>
     /// <param name="layer">The index of the layer to extract.</param>
     /// <param name="tex">The texture to extract.</param>
-    /// <param name="output">The stream the DDS data is written to.</param>
     /// <param name="progress">Reports how many tile rows have been written.</param>
     /// <param name="ct">Cancels the extraction.</param>
     /// <returns>
-    ///     <see langword="true" /> when the layer was written to <paramref name="output" />; otherwise
-    ///     <see langword="false" />, meaning the layer is empty at every mip level.
+    ///     A seekable DDS stream, or <see langword="null" /> when the layer is empty at every mip level.
     /// </returns>
-    private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
+    private Stream? ExtractTexture(int layer, FourCCTextureMeta tex,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         for (var level = 0; level < file.TileSet.TileSetLevels.Length; level++)
@@ -86,37 +69,35 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
                 continue;
             if (!VirtualTextureTileRangeCalculator.RegionExists(file.TileSet, level, layer, min, max)) continue;
 
-            ExtractToStream(level, layer, min, max, output, progress, ct);
-            return true;
+            return ExtractToStream(level, layer, min, max, progress, ct);
         }
 
-        return false;
+        return null;
     }
 
     /// <summary>
-    ///     Extracts a region of a layer into a DDS stream.
+    ///     Extracts a region of a layer into a new DDS stream.
     /// </summary>
     /// <param name="level">The index of the mip level the tiles are read from.</param>
     /// <param name="layer">The index of the layer to extract.</param>
     /// <param name="min">The first tile column and row of the region, inclusive.</param>
     /// <param name="max">The last tile column and row of the region, inclusive.</param>
-    /// <param name="output">The stream the DDS data is written to.</param>
     /// <param name="progress">Reports how many tile rows have been written.</param>
     /// <param name="ct">Cancels the extraction.</param>
-    private void ExtractToStream(int level, int layer, Point min, Point max, Stream output,
+    /// <returns>A seekable DDS stream, positioned at its start.</returns>
+    private MemoryStream ExtractToStream(int level, int layer, Point min, Point max,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
         var tileSet = file.TileSet;
+        var dds = new MemoryStream();
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
-        using var unpacker = new VirtualTextureUnpacker((int)tileSet.Header.PageSize,
-            new Size(tileSet.Header.TileWidth, tileSet.Header.TileHeight),
+        var tile = new Size(tileSet.Header.TileWidth, tileSet.Header.TileHeight);
+        using var unpacker = new VirtualTextureUnpacker((int)tileSet.Header.PageSize, tile,
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
             tileSet.ParameterBlocks, _compressor);
-        var tile = new Size(tileSet.EffectiveTileWidth, tileSet.EffectiveTileHeight);
-        using var binaryWriter = new BinaryWriter(output, Encoding.UTF8, true);
-        var writer = new VirtualTextureWriter(size, tile, tileSet.Header.TileBorder, unpacker, binaryWriter);
+        var writer = new VirtualTextureWriter(size, tile, tileSet.Header.TileBorder, unpacker, dds);
         writer.WriteHeader();
         var rowTiles = new GTSFlatTileInfo?[size.Width];
         for (var row = 0; row < size.Height; row++)
@@ -125,6 +106,9 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
             writer.WriteRow(rowTiles, ct);
             progress?.Report((row + 1, size.Height));
         }
+
+        dds.Position = 0;
+        return dds;
     }
 
     /// <summary>
