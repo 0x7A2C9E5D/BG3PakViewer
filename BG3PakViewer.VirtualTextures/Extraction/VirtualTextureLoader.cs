@@ -4,31 +4,30 @@ using LSLib.VirtualTextures;
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
-///     Fully stream-based virtual texture extractor: loads a title set directly from a stream (no temp files),
-///     exposes its layers and texture metadata, and extracts a selected layer into a DDS stream that can
-///     be decoded by <c>ImageLoader.LoadAsync</c>. GTP page files are opened lazily per pageFileIndex
-///     via a stream provider delegate (e.g. read from inside a PAK).
+///     Fully stream-based virtual texture extractor: loads a tile set directly from a stream (no temp
+///     files), exposes its layers and texture metadata, and extracts a selected layer into a DDS stream
+///     that can be decoded by <c>ImageLoader.LoadAsync</c>.
 /// </summary>
+/// <remarks>
+///     Parsing needs nothing but the tile set stream. The GTP page files are separate files whose names
+///     the tile set lists, so they are opened on demand through the page cache that
+///     <see cref="CreatePageCache" /> builds once the caller knows where the pages come from.
+/// </remarks>
 internal sealed class VirtualTextureLoader : IDisposable
 {
-    private readonly VirtualTexturePageCache _texturePageCache;
     private readonly VirtualTextureTileRangeCalculator _tileRanges;
-    private readonly VirtualTextureUnpacker _unpacker;
 
     /// <summary>
-    ///     Fully stream-based constructor: title metadata is read directly from <paramref name="stream" />
-    ///     without writing to disk; <paramref name="pageStreamProvider" /> supplies a stream for the GTP
-    ///     page file of a given pageFileIndex (e.g. read from inside a PAK).
+    ///     Reads the tile set metadata directly from <paramref name="stream" />, without opening any page
+    ///     file.
     /// </summary>
-    public VirtualTextureLoader(Stream stream, Func<int, Stream> pageStreamProvider)
+    /// <param name="stream">The tile set stream, which is read again during extraction.</param>
+    public VirtualTextureLoader(Stream stream)
     {
         using var reader = new BinaryReader(stream, Encoding.UTF8, true);
         TileSet = new VirtualTileSet();
         TileSet.LoadFromStream(stream, reader, false);
-        TextureNames = [.. TileSet.PageFileInfos.Select(f => f.FileName)];
-        _texturePageCache = new VirtualTexturePageCache(TileSet, pageStreamProvider);
         _tileRanges = new VirtualTextureTileRangeCalculator(TileSet);
-        _unpacker = new VirtualTextureUnpacker(TileSet, _texturePageCache);
     }
 
     private VirtualTileSet TileSet { get; }
@@ -38,31 +37,46 @@ internal sealed class VirtualTextureLoader : IDisposable
     /// </summary>
     internal int LayerCount => TileSet.TileSetLayers.Length;
 
-    /// <summary>
-    ///     The names of the textures in the virtual texture.
-    /// </summary>
-    internal IReadOnlyList<string> TextureNames { get; }
-
     public void Dispose()
     {
-        _texturePageCache.Dispose();
         TileSet.Dispose();
     }
 
     /// <summary>
     ///     Gets the metadata for all textures in the virtual texture.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>
+    ///     The textures in tile set order, which is the order the layer metadata is indexed in.
+    /// </returns>
     internal List<FourCCTextureMeta> GetTextures()
     {
         return TileSet.FourCCMetadata.ExtractTextureMetadata();
     }
 
     /// <summary>
-    ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into a seekable DDS stream,
-    ///     reporting progress in percent; returns null when the layer contains no data.
+    ///     Creates the cache that opens the GTP page files of this tile set on demand.
     /// </summary>
-    public async Task<Stream?> ExtractAsync(FourCCTextureMeta meta, int layer,
+    /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
+    /// <returns>The page cache, which the caller owns and disposes together with the handle.</returns>
+    internal VirtualTexturePageCache CreatePageCache(Func<string, Stream> pageStreamProvider)
+    {
+        return new VirtualTexturePageCache(TileSet, pageStreamProvider);
+    }
+
+    /// <summary>
+    ///     Extracts <paramref name="layer" /> of <paramref name="meta" /> into a seekable DDS stream,
+    ///     opening the GTP pages it needs through <paramref name="pages" /> and reporting progress in
+    ///     percent.
+    /// </summary>
+    /// <param name="meta">The texture to extract, as returned by <see cref="GetTextures" />.</param>
+    /// <param name="layer">The index of the layer to extract.</param>
+    /// <param name="pages">The page cache that opens the GTP page files the layer needs.</param>
+    /// <param name="progress">Reports the extraction progress, in percent.</param>
+    /// <param name="ct">Cancels the extraction.</param>
+    /// <returns>
+    ///     A seekable DDS stream, or <see langword="null" /> when the layer contains no data.
+    /// </returns>
+    public async Task<Stream?> ExtractAsync(FourCCTextureMeta meta, int layer, VirtualTexturePageCache pages,
         IProgress<double>? progress, CancellationToken ct)
     {
         var ddsStream = new MemoryStream();
@@ -70,7 +84,7 @@ internal sealed class VirtualTextureLoader : IDisposable
         try
         {
             var extracted = await Task.Run(
-                () => ExtractTexture(layer, meta, ddsStream, CreateTileProgress(progress), ct), ct);
+                () => ExtractTexture(layer, meta, ddsStream, pages, CreateTileProgress(progress), ct), ct);
             if (!extracted) return null;
 
             ddsStream.Position = 0;
@@ -85,14 +99,19 @@ internal sealed class VirtualTextureLoader : IDisposable
 
     /// <summary>
     ///     Extracts <paramref name="layer" /> of <paramref name="tex" /> into <paramref name="output" />,
+    ///     stopping at the first mip level whose tile region exists.
     /// </summary>
-    /// <param name="layer"></param>
-    /// <param name="tex"></param>
-    /// <param name="output"></param>
-    /// <param name="progress"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output,
+    /// <param name="layer">The index of the layer to extract.</param>
+    /// <param name="tex">The texture to extract.</param>
+    /// <param name="output">The stream the DDS data is written to.</param>
+    /// <param name="pages">The page cache that opens the GTP page files the layer needs.</param>
+    /// <param name="progress">Reports how many tile rows have been written.</param>
+    /// <param name="ct">Cancels the extraction.</param>
+    /// <returns>
+    ///     <see langword="true" /> when the layer was written to <paramref name="output" />; otherwise
+    ///     <see langword="false" />, meaning the layer is empty at every mip level.
+    /// </returns>
+    private bool ExtractTexture(int layer, FourCCTextureMeta tex, Stream output, VirtualTexturePageCache pages,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
         for (var level = 0; level < TileSet.TileSetLevels.Length; level++)
@@ -102,7 +121,7 @@ internal sealed class VirtualTextureLoader : IDisposable
                 continue;
             if (!_tileRanges.RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
 
-            ExtractToStream(level, layer, minX, minY, maxX, maxY, output, progress, ct);
+            ExtractToStream(level, layer, minX, minY, maxX, maxY, output, pages, progress, ct);
             return true;
         }
 
@@ -112,22 +131,24 @@ internal sealed class VirtualTextureLoader : IDisposable
     /// <summary>
     ///     Extracts a region of a layer into a DDS stream.
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="layer"></param>
-    /// <param name="minX"></param>
-    /// <param name="minY"></param>
-    /// <param name="maxX"></param>
-    /// <param name="maxY"></param>
-    /// <param name="output"></param>
-    /// <param name="progress"></param>
-    /// <param name="ct"></param>
+    /// <param name="level">The index of the mip level the tiles are read from.</param>
+    /// <param name="layer">The index of the layer to extract.</param>
+    /// <param name="minX">The first tile column of the region, inclusive.</param>
+    /// <param name="minY">The first tile row of the region, inclusive.</param>
+    /// <param name="maxX">The last tile column of the region, inclusive.</param>
+    /// <param name="maxY">The last tile row of the region, inclusive.</param>
+    /// <param name="output">The stream the DDS data is written to.</param>
+    /// <param name="pages">The page cache that opens the GTP page files the region needs.</param>
+    /// <param name="progress">Reports how many tile rows have been written.</param>
+    /// <param name="ct">Cancels the extraction.</param>
     private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
-        Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
+        Stream output, VirtualTexturePageCache pages, IProgress<(int Done, int Total)>? progress = null,
+        CancellationToken ct = default)
     {
         var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
 
         using var writer = new VirtualTextureWriter(output, cols, rows, TileSet.EffectiveTileWidth,
-            TileSet.EffectiveTileHeight, _unpacker, level, layer);
+            TileSet.EffectiveTileHeight, new VirtualTextureUnpacker(TileSet, pages), level, layer);
         for (var row = 0; row < rows; row++)
         {
             writer.WriteRow(minX, minY + row, cols, ct);
@@ -138,8 +159,11 @@ internal sealed class VirtualTextureLoader : IDisposable
     /// <summary>
     ///     Creates a progress reporter for tile extraction.
     /// </summary>
-    /// <param name="progress"></param>
-    /// <returns></returns>
+    /// <param name="progress">The progress reported to the caller, in percent.</param>
+    /// <returns>
+    ///     A reporter that turns the written tile rows into percent, or <see langword="null" /> when the
+    ///     caller does not want progress.
+    /// </returns>
     private static Progress<(int Done, int Total)>? CreateTileProgress(IProgress<double>? progress)
     {
         if (progress is null) return null;

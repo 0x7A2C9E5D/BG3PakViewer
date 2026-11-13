@@ -185,8 +185,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     {
         using var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
                            ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
-        using var loader = new VirtualTextureLoader(stream,
-            _ => throw new InvalidOperationException("Virtual texture page files are not read while indexing."));
+        using var loader = new VirtualTextureLoader(stream);
         var textures = loader.GetTextures();
         var entries = new List<VirtualTextureEntry>(textures.Count);
         entries.AddRange(textures.Select((meta, index) =>
@@ -222,17 +221,18 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
                      ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
         VirtualTextureLoader? loader = null;
+        VirtualTexturePageCache? pages = null;
         try
         {
-            // The names are looked up lazily: the tile set knows them only once it has been parsed.
-            IReadOnlyList<string> pageFileNames = [];
-            loader = new VirtualTextureLoader(stream, pageIndex =>
-                VirtualTexturePageFile.Open(packageService, directory, pageFileNames[pageIndex]));
-            pageFileNames = loader.TextureNames;
-            return new VirtualTextureTileSetHandle(gtsPath, stream, loader, loader.GetTextures());
+            // The page files are opened on demand, so the tile set can be parsed before they are known.
+            loader = new VirtualTextureLoader(stream);
+            pages = loader.CreatePageCache(pageName =>
+                VirtualTexturePageFile.Open(packageService, directory, pageName));
+            return new VirtualTextureTileSetHandle(gtsPath, stream, loader, pages, loader.GetTextures());
         }
         catch
         {
+            pages?.Dispose();
             loader?.Dispose();
             stream.Dispose();
             throw;

@@ -3,10 +3,10 @@ using LSLib.VirtualTextures;
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
-///     Cache of open GTP page files, lazily opened per pageFileIndex via the stream provider delegate
-///     (e.g. read from inside a PAK), without relying on disk paths.
+///     Cache of open GTP page files, lazily opened per pageFileIndex: the provider is asked for the page
+///     file name the tile set lists (e.g. read from inside a PAK), so no disk path is involved.
 /// </summary>
-internal sealed class VirtualTexturePageCache(VirtualTileSet tileSet, Func<int, Stream> streamProvider) : IDisposable
+internal sealed class VirtualTexturePageCache(VirtualTileSet tileSet, Func<string, Stream> streamProvider) : IDisposable
 {
     private readonly Dictionary<int, VirtualTexturePage> _open = [];
 
@@ -25,7 +25,7 @@ internal sealed class VirtualTexturePageCache(VirtualTileSet tileSet, Func<int, 
     {
         if (_open.TryGetValue(pageFileIndex, out var file)) return file;
 
-        var stream = streamProvider(pageFileIndex);
+        var stream = streamProvider(tileSet.PageFileInfos[pageFileIndex].FileName);
         if (!stream.CanSeek)
         {
             var buffer = new MemoryStream();

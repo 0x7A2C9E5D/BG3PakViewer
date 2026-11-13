@@ -7,12 +7,13 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     One open tile set of the package, ready to extract its textures.
 /// </summary>
 /// <remarks>
-///     Owns the tile set stream and the loader, so releasing the handle releases every page stream the
-///     loader opened as well.
+///     Owns the tile set stream, the loader and the page cache, so releasing the handle releases every
+///     page stream the cache opened as well.
 /// </remarks>
 internal sealed class VirtualTextureTileSetHandle : IDisposable
 {
     private readonly VirtualTextureLoader _loader;
+    private readonly VirtualTexturePageCache _pages;
     private readonly IReadOnlyList<FourCCTextureMeta> _textures;
     private readonly Stream _tileSetStream;
 
@@ -22,13 +23,15 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     /// <param name="gtsPath">The package path of the tile set.</param>
     /// <param name="tileSetStream">The stream of the tile set.</param>
     /// <param name="loader">The loader that extracts the textures.</param>
+    /// <param name="pages">The page cache the loader opens the GTP page files through.</param>
     /// <param name="textures">The textures of the tile set, in index order.</param>
     public VirtualTextureTileSetHandle(string gtsPath, Stream tileSetStream, VirtualTextureLoader loader,
-        IReadOnlyList<FourCCTextureMeta> textures)
+        VirtualTexturePageCache pages, IReadOnlyList<FourCCTextureMeta> textures)
     {
         GtsPath = gtsPath;
         _tileSetStream = tileSetStream;
         _loader = loader;
+        _pages = pages;
         _textures = textures;
     }
 
@@ -39,6 +42,7 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
 
     public void Dispose()
     {
+        _pages.Dispose();
         _loader.Dispose();
         _tileSetStream.Dispose();
     }
@@ -54,6 +58,6 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     public Task<Stream?> ExtractAsync(int index, int layer, IProgress<double>? progress,
         CancellationToken cancellationToken)
     {
-        return _loader.ExtractAsync(_textures[index], layer, progress, cancellationToken);
+        return _loader.ExtractAsync(_textures[index], layer, _pages, progress, cancellationToken);
     }
 }
