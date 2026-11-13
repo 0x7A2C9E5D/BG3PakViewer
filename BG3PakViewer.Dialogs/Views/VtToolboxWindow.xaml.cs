@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using BG3PakViewer.Dialogs.ViewModels;
 
@@ -14,6 +15,18 @@ public partial class VtToolboxWindow
     public VtToolboxWindow()
     {
         InitializeComponent();
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    /// <summary>
+    ///     Shows the texture name the window was opened with in the search box.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is VtToolboxViewModel viewModel)
+            SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
     }
 
     /// <summary>

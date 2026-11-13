@@ -26,6 +26,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
+    private readonly string? _initialSearch;
     private List<VtToolboxTextureViewModel> _selectedTextures = [];
 
     /// <summary>
@@ -36,16 +37,27 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     /// <param name="appSettings">The settings holding the default export directory.</param>
     /// <param name="dialogService">The service used to pick the export folder and report the result.</param>
     /// <param name="clipboardService">The service used to copy texture names.</param>
+    /// <param name="initialSearch">
+    ///     The texture name to search and select after indexing, or <see langword="null" /> to show
+    ///     the whole list.
+    /// </param>
     public VtToolboxViewModel(IVirtualTextureCatalog catalog, IPreviewExportService exportService,
-        IAppSettings appSettings, IDialogService dialogService, IClipboardService clipboardService)
+        IAppSettings appSettings, IDialogService dialogService, IClipboardService clipboardService,
+        string? initialSearch = null)
     {
         _catalog = catalog;
         _exportService = exportService;
         _appSettings = appSettings;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
+        _initialSearch = initialSearch;
         _ = IndexAsync();
     }
+
+    /// <summary>
+    ///     The texture name the list was opened with, if any.
+    /// </summary>
+    public string? InitialSearch => _initialSearch;
 
     /// <summary>
     ///     The textures of the package, in index order; the list view filters them through
@@ -218,7 +230,12 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
         Textures.Clear();
         foreach (var entry in _catalog.Entries)
             Textures.Add(new VtToolboxTextureViewModel(entry, _clipboardService));
-        SelectedRow = Textures.FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(_initialSearch))
+            SearchText = _initialSearch;
+        SelectedRow = Textures.FirstOrDefault(row =>
+            string.IsNullOrWhiteSpace(_initialSearch) ||
+            row.DisplayName.Contains(_initialSearch, StringComparison.OrdinalIgnoreCase));
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }
 
