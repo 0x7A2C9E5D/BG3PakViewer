@@ -36,12 +36,12 @@ internal sealed class VirtualTextureLoader : IDisposable
     /// <summary>
     ///     The number of layers in the virtual texture.
     /// </summary>
-    public int LayerCount => TileSet.TileSetLayers.Length;
+    internal int LayerCount => TileSet.TileSetLayers.Length;
 
     /// <summary>
     ///     The names of the textures in the virtual texture.
     /// </summary>
-    public IReadOnlyList<string> TextureNames { get; }
+    internal IReadOnlyList<string> TextureNames { get; }
 
     public void Dispose()
     {
@@ -53,7 +53,7 @@ internal sealed class VirtualTextureLoader : IDisposable
     ///     Gets the metadata for all textures in the virtual texture.
     /// </summary>
     /// <returns></returns>
-    public List<FourCCTextureMeta> GetTextures()
+    internal List<FourCCTextureMeta> GetTextures()
     {
         return TileSet.FourCCMetadata.ExtractTextureMetadata();
     }
