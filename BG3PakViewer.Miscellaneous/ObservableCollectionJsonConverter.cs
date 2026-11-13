@@ -21,7 +21,7 @@ public class ObservableCollectionJsonConverter<T> : JsonConverter<ObservableColl
         JsonSerializerOptions options)
     {
         var list = JsonSerializer.Deserialize<List<T>>(ref reader, options);
-        return new ObservableCollection<T>(list!);
+        return [.. list!];
     }
 
     /// <summary>

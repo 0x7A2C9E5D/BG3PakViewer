@@ -38,7 +38,7 @@ public partial class StoryScriptsPreviewViewModel
     /// <param name="total">How many files the export attempted.</param>
     /// <param name="failures">The files that could not be written.</param>
     /// <param name="folder">The folder the files were written to.</param>
-    private async Task ReportExportResultAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
+    private async Task ReportExportResultAsync(int exported, int total, List<PreviewExportResult> failures,
         string folder)
     {
         if (failures.Count == 0)

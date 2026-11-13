@@ -67,7 +67,7 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
     private static List<string> GetVirtualTexturePageFileNames(string tileSetPath)
     {
         using var tileSet = new VirtualTileSet(tileSetPath);
-        return tileSet.PageFileInfos.Select(x => x.FileName).ToList();
+        return [.. tileSet.PageFileInfos.Select(x => x.FileName)];
     }
 
     /// <summary>

@@ -21,7 +21,7 @@ internal partial class MainWindowViewModel
     // the name (stripping "Async" only for Task-returning methods), and the view binds
     // SearchCommand / ClearSearchCommand. A stray suffix silently breaks those bindings.
     [RelayCommand]
-    private void Search(string query)
+    private static void Search(string query)
     {
         Log.Information("Searching the preview for '{Query}'...", query);
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(query), MessageTokens.SearchQueryChanged);
@@ -31,7 +31,7 @@ internal partial class MainWindowViewModel
     ///     Clears the preview filter when the title bar box is emptied.
     /// </summary>
     [RelayCommand]
-    private void ClearSearch(string query)
+    private static void ClearSearch(string query)
     {
         if (!string.IsNullOrWhiteSpace(query)) return;
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string?>(null), MessageTokens.SearchQueryChanged);
