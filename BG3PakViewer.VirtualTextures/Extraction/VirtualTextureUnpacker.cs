@@ -93,7 +93,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     /// <summary>
     ///     Expands a uniform chunk into the BC3 blocks covering a whole tile. The payload of such a
     ///     chunk is the tile's single RGBA8 texel (the uniform parameter block declares a 4x1 image),
-    ///     so the tile is one flat colour and every block repeats it.
+    ///     so the tile is one flat color and every block repeats it.
     /// </summary>
     /// <param name="payload"></param>
     /// <returns></returns>
@@ -112,7 +112,7 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     }
 
     /// <summary>
-    ///     Encodes one colour as a BC3 (DXT5) block in which every texel resolves to that colour.
+    ///     Encodes one color as a BC3 (DXT5) block in which every texel resolves to that color.
     ///     This mirrors LSLib, which runs sixteen identical pixels through the BCnEncoder block encoder
     ///     instead of quantizing the endpoints by hand, so uniform tiles come out byte for byte alike.
     /// </summary>
