@@ -19,17 +19,17 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     The class is split by responsibility: this file holds the state, the search and the preview
 ///     status, the sibling files load the preview and export the textures.
 /// </remarks>
-public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogViewModel
+public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewModel, IModalDialogViewModel
 {
     private readonly IAppSettings _appSettings;
     private readonly IVirtualTextureCatalog _catalog;
     private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
-    private List<VtToolboxTextureViewModel> _selectedTextures = [];
+    private List<VirtualTextureToolboxTextureViewModel> _selectedTextures = [];
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VtToolboxViewModel" /> class.
+    ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialogViewModel" /> class.
     /// </summary>
     /// <param name="catalog">The index of the package's virtual textures.</param>
     /// <param name="exportService">The service the selected textures are written by.</param>
@@ -40,7 +40,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     ///     The texture name or tile set file name to search and select after indexing, or
     ///     <see langword="null" /> to show the whole list.
     /// </param>
-    public VtToolboxViewModel(IVirtualTextureCatalog catalog, IPreviewExportService exportService,
+    public VirtualTextureToolboxDialogViewModel(IVirtualTextureCatalog catalog, IPreviewExportService exportService,
         IAppSettings appSettings, IDialogService dialogService, IClipboardService clipboardService,
         string? initialSearch = null)
     {
@@ -62,13 +62,13 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     ///     The textures of the package, in index order; the list view filters them through
     ///     <see cref="SearchFilterViewModel.ItemFilter" />.
     /// </summary>
-    public ObservableCollection<VtToolboxTextureViewModel> Textures { get; } = [];
+    public ObservableCollection<VirtualTextureToolboxTextureViewModel> Textures { get; } = [];
 
     /// <summary>
     ///     The texture whose preview is shown.
     /// </summary>
     [ObservableProperty]
-    public partial VtToolboxTextureViewModel? SelectedRow { get; set; }
+    public partial VirtualTextureToolboxTextureViewModel? SelectedRow { get; set; }
 
     /// <summary>
     ///     The index of the layer the preview shows.
@@ -136,7 +136,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     public bool IsBusy => IsIndexing || IsExporting || IsPreviewing;
 
     /// <summary>
-    ///     The dialog result; the window is closed with the close button.
+    ///     The dialog result; the dialog is closed with the close button.
     /// </summary>
     public bool? DialogResult => true;
 
@@ -144,7 +144,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     ///     Updates the textures the export writes from the list selection.
     /// </summary>
     /// <param name="selected">The textures selected in the list.</param>
-    public void UpdateSelection(IEnumerable<VtToolboxTextureViewModel> selected)
+    public void UpdateSelection(IEnumerable<VirtualTextureToolboxTextureViewModel> selected)
     {
         _selectedTextures = [.. selected];
         SelectedCount = _selectedTextures.Count;
@@ -232,7 +232,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     {
         Textures.Clear();
         foreach (var entry in _catalog.Entries)
-            Textures.Add(new VtToolboxTextureViewModel(entry, _clipboardService));
+            Textures.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
 
         if (!string.IsNullOrWhiteSpace(InitialSearch))
             SearchText = InitialSearch;
@@ -251,7 +251,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     {
         return string.IsNullOrWhiteSpace(searchText)
             ? null
-            : item => item is VtToolboxTextureViewModel row && Matches(row, searchText);
+            : item => item is VirtualTextureToolboxTextureViewModel row && Matches(row, searchText);
     }
 
     /// <summary>
@@ -261,7 +261,7 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     /// <param name="row">The row to test.</param>
     /// <param name="searchText">The submitted search text.</param>
     /// <returns><see langword="true" /> when the row matches.</returns>
-    private static bool Matches(VtToolboxTextureViewModel row, string searchText)
+    private static bool Matches(VirtualTextureToolboxTextureViewModel row, string searchText)
     {
         return row.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                row.SourceFile.Contains(searchText, StringComparison.OrdinalIgnoreCase);

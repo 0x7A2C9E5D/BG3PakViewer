@@ -17,7 +17,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// <summary>
 ///     Exporting the selected textures, one folder per tile set, and telling the user what was written.
 /// </summary>
-public partial class VtToolboxViewModel
+public partial class VirtualTextureToolboxDialogViewModel
 {
     private CancellationTokenSource? _exportCancellation;
 
@@ -73,7 +73,7 @@ public partial class VtToolboxViewModel
     ///     Asks the user for a target folder and exports the given textures there.
     /// </summary>
     /// <param name="rows">The textures to export, each of their layers as one DDS file.</param>
-    private async Task ExportAsync(IReadOnlyList<VtToolboxTextureViewModel> rows)
+    private async Task ExportAsync(IReadOnlyList<VirtualTextureToolboxTextureViewModel> rows)
     {
         if (rows.Count == 0) return;
 
@@ -132,7 +132,7 @@ public partial class VtToolboxViewModel
     /// <param name="rows">The textures to export.</param>
     /// <param name="cancellationToken">Cancels the export.</param>
     /// <returns>The files to write, grouped by tile set.</returns>
-    private List<PreviewExportFile> BuildFiles(string folder, IReadOnlyList<VtToolboxTextureViewModel> rows,
+    private List<PreviewExportFile> BuildFiles(string folder, IReadOnlyList<VirtualTextureToolboxTextureViewModel> rows,
         CancellationToken cancellationToken)
     {
         var files = new List<PreviewExportFile>();

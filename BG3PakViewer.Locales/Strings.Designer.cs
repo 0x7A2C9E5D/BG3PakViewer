@@ -935,9 +935,9 @@ namespace BG3PakViewer.Locales {
         /// <summary>
         ///     Looks up a localized string similar to Virtual Texture Preview Export.
         /// </summary>
-        public static string VtToolbox {
+        public static string VirtualTextureToolbox {
             get {
-                return ResourceManager.GetString("VtToolbox", resourceCulture);
+                return ResourceManager.GetString("VirtualTextureToolbox", resourceCulture);
             }
         }
         

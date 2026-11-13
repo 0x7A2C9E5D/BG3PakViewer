@@ -318,7 +318,7 @@
     <data name="ExportAllScripts" xml:space="preserve">
         <value>Export all scripts</value>
     </data>
-    <data name="VtToolbox" xml:space="preserve">
+    <data name="VirtualTextureToolbox" xml:space="preserve">
         <value>Virtual Texture Preview Export</value>
     </data>
     <data name="VirtualTexturePrompt" xml:space="preserve">

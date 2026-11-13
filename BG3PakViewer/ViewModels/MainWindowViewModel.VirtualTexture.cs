@@ -27,14 +27,14 @@ internal partial class MainWindowViewModel
     ///     <see langword="null" /> when it was opened from the toolbar.
     /// </param>
     [RelayCommand]
-    private async Task ShowVtToolboxAsync(string? initialSearch)
+    private async Task ShowVirtualTextureToolboxAsync(string? initialSearch)
     {
         if (!IsVirtualTexturePackage) return;
 
-        VtToolboxViewModel? viewModel = null;
+        VirtualTextureToolboxDialogViewModel? viewModel = null;
         try
         {
-            viewModel = new VtToolboxViewModel(_virtualTextureCatalog, _previewExportService, AppSettings,
+            viewModel = new VirtualTextureToolboxDialogViewModel(_virtualTextureCatalog, _previewExportService, AppSettings,
                 _dialogService, _clipboardService, initialSearch);
             await _dialogService.ShowDialogAsync(this, viewModel);
         }

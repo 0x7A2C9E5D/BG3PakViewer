@@ -309,7 +309,7 @@
     <data name="ExportAllScripts" xml:space="preserve">
         <value>导出全部脚本</value>
     </data>
-    <data name="VtToolbox" xml:space="preserve">
+    <data name="VirtualTextureToolbox" xml:space="preserve">
         <value>虚拟纹理预览导出</value>
     </data>
     <data name="VirtualTexturePrompt" xml:space="preserve">

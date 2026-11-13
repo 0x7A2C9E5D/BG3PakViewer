@@ -9,7 +9,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     Extracting and decoding the selected layer of the selected texture, including the cancellation
 ///     of the load that a new selection or layer replaces.
 /// </summary>
-public partial class VtToolboxViewModel
+public partial class VirtualTextureToolboxDialogViewModel
 {
     private CancellationTokenSource? _previewCancellation;
 
@@ -18,7 +18,7 @@ public partial class VtToolboxViewModel
     /// </summary>
     /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedRowChanged(VtToolboxTextureViewModel? value)
+    partial void OnSelectedRowChanged(VirtualTextureToolboxTextureViewModel? value)
     {
         _ = LoadPreviewAsync();
     }

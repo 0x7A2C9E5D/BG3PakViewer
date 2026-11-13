@@ -5,27 +5,27 @@ using BG3PakViewer.Dialogs.ViewModels;
 namespace BG3PakViewer.Dialogs.Views;
 
 /// <summary>
-///     The cross-file virtual texture toolbox window.
+///     The cross-file virtual texture toolbox dialog.
 /// </summary>
-public partial class VtToolboxWindow
+public partial class VirtualTextureToolboxDialog
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VtToolboxWindow" /> class.
+    ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialog" /> class.
     /// </summary>
-    public VtToolboxWindow()
+    public VirtualTextureToolboxDialog()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
     }
 
     /// <summary>
-    ///     Shows the texture name the window was opened with in the search box.
+    ///     Shows the initial search text the dialog was opened with in the search box.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.NewValue is VtToolboxViewModel viewModel)
+        if (e.NewValue is VirtualTextureToolboxDialogViewModel viewModel)
             SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
     }
 
@@ -36,7 +36,7 @@ public partial class VtToolboxWindow
     /// <param name="e"></param>
     private void TextureList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is VtToolboxViewModel viewModel)
-            viewModel.UpdateSelection(TextureList.SelectedItems.OfType<VtToolboxTextureViewModel>());
+        if (DataContext is VirtualTextureToolboxDialogViewModel viewModel)
+            viewModel.UpdateSelection(TextureList.SelectedItems.OfType<VirtualTextureToolboxTextureViewModel>());
     }
 }
