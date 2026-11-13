@@ -180,8 +180,7 @@ public partial class VtToolboxViewModel
     /// <param name="exported">How many files were written.</param>
     /// <param name="total">How many files the export attempted.</param>
     /// <param name="failures">The files that could not be written.</param>
-    private async Task ReportExportResultAsync(int exported, int total,
-        IReadOnlyList<PreviewExportResult> failures)
+    private async Task ReportExportResultAsync(int exported, int total, List<PreviewExportResult> failures)
     {
         if (failures.Count == 0)
         {

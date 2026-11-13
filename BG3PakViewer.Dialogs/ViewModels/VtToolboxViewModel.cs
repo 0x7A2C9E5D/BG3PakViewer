@@ -26,7 +26,6 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
     private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
-    private readonly string? _initialSearch;
     private List<VtToolboxTextureViewModel> _selectedTextures = [];
 
     /// <summary>
@@ -50,14 +49,14 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
         _appSettings = appSettings;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
-        _initialSearch = initialSearch;
+        InitialSearch = initialSearch;
         _ = IndexAsync();
     }
 
     /// <summary>
     ///     The texture name the list was opened with, if any.
     /// </summary>
-    public string? InitialSearch => _initialSearch;
+    public string? InitialSearch { get; }
 
     /// <summary>
     ///     The textures of the package, in index order; the list view filters them through
@@ -231,11 +230,11 @@ public partial class VtToolboxViewModel : SearchFilterViewModel, IModalDialogVie
         foreach (var entry in _catalog.Entries)
             Textures.Add(new VtToolboxTextureViewModel(entry, _clipboardService));
 
-        if (!string.IsNullOrWhiteSpace(_initialSearch))
-            SearchText = _initialSearch;
+        if (!string.IsNullOrWhiteSpace(InitialSearch))
+            SearchText = InitialSearch;
         SelectedRow = Textures.FirstOrDefault(row =>
-            string.IsNullOrWhiteSpace(_initialSearch) ||
-            row.DisplayName.Contains(_initialSearch, StringComparison.OrdinalIgnoreCase));
+            string.IsNullOrWhiteSpace(InitialSearch) ||
+            row.DisplayName.Contains(InitialSearch, StringComparison.OrdinalIgnoreCase));
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }
 
