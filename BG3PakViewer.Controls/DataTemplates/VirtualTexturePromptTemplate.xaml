@@ -11,16 +11,13 @@
                   DataType="{x:Type vm:VirtualTexturePromptViewModel}">
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
-                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.MapLayers}" FontSize="40"
-                             HorizontalAlignment="Center" Foreground="Gray" />
-                <TextBlock Margin="0,16,0,0" TextAlignment="Center" TextWrapping="Wrap"
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap"
                            Text="{I18N {x:Static l:LangKeys.VirtualTexturePrompt}}" />
-                <TextBlock Margin="0,8,0,0" Foreground="Gray" FontSize="12" TextAlignment="Center"
-                           TextTrimming="CharacterEllipsis" Text="{Binding FileName}" />
+                <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
                 <Button Margin="0,20,0,0" Padding="16,8" HorizontalAlignment="Center"
                         Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.ShowVtToolboxCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" FontSize="14" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.MapLayers}" FontSize="14" />
                         <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"
                                    Text="{I18N {x:Static l:LangKeys.VtToolbox}}" />
                     </StackPanel>
