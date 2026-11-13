@@ -20,14 +20,14 @@ internal sealed class VirtualTextureWriter : IDisposable
     /// <summary>
     ///     Constructs a new VirtualTextureWriter.
     /// </summary>
-    /// <param name="output"></param>
-    /// <param name="cols"></param>
-    /// <param name="rows"></param>
-    /// <param name="tileWidth"></param>
-    /// <param name="tileHeight"></param>
-    /// <param name="unpacker"></param>
-    /// <param name="level"></param>
-    /// <param name="layer"></param>
+    /// <param name="output">The stream the DDS bytes are written to; it stays open and the caller owns it.</param>
+    /// <param name="cols">How many tiles each band holds.</param>
+    /// <param name="rows">How many tile bands the texture spans.</param>
+    /// <param name="tileWidth">The pixel width of one tile, without its border.</param>
+    /// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+    /// <param name="unpacker">The unpacker that decompresses one band, bound to a fixed level and layer.</param>
+    /// <param name="level">The index of the mip level the tiles are read from.</param>
+    /// <param name="layer">The index of the layer to extract.</param>
     public VirtualTextureWriter(Stream output, int cols, int rows, int tileWidth, int tileHeight,
         VirtualTextureUnpacker unpacker, int level, int layer)
     {
@@ -39,6 +39,9 @@ internal sealed class VirtualTextureWriter : IDisposable
         _layer = layer;
     }
 
+    /// <summary>
+    ///     Closes the writer, which leaves the output stream open.
+    /// </summary>
     public void Dispose()
     {
         _bw.Dispose();
@@ -47,10 +50,10 @@ internal sealed class VirtualTextureWriter : IDisposable
     /// <summary>
     ///     Writes a single row of tiles to the output stream.
     /// </summary>
-    /// <param name="startX"></param>
-    /// <param name="y"></param>
-    /// <param name="cols"></param>
-    /// <param name="ct"></param>
+    /// <param name="startX">The tile column the band starts at.</param>
+    /// <param name="y">The tile row the band is read from.</param>
+    /// <param name="cols">How many tiles the band holds.</param>
+    /// <param name="ct">Cancels the write.</param>
     public void WriteRow(int startX, int y, int cols, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
@@ -61,9 +64,9 @@ internal sealed class VirtualTextureWriter : IDisposable
     /// <summary>
     ///     Writes a DDS header to the output stream.
     /// </summary>
-    /// <param name="bw"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
+    /// <param name="bw">The writer the header is written through.</param>
+    /// <param name="width">The pixel width of the image the bands form.</param>
+    /// <param name="height">The pixel height of the image the bands form.</param>
     private static void WriteHeader(BinaryWriter bw, int width, int height)
     {
         var header = new DDSHeader

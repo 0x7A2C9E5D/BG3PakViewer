@@ -10,6 +10,9 @@ internal sealed class VirtualTexturePageCache(VirtualTileSet tileSet, Func<strin
 {
     private readonly Dictionary<int, VirtualTexturePage> _open = [];
 
+    /// <summary>
+    ///     Closes every page file that was opened so far.
+    /// </summary>
     public void Dispose()
     {
         foreach (var file in _open.Values) file.Dispose();
@@ -19,8 +22,8 @@ internal sealed class VirtualTexturePageCache(VirtualTileSet tileSet, Func<strin
     /// <summary>
     ///     Gets the page file at <paramref name="pageFileIndex" />, lazily opening it if not already open.
     /// </summary>
-    /// <param name="pageFileIndex"></param>
-    /// <returns></returns>
+    /// <param name="pageFileIndex">The index of the page file in the tile set's page file list.</param>
+    /// <returns>The page file, ready to read chunks from.</returns>
     public VirtualTexturePage Get(int pageFileIndex)
     {
         if (_open.TryGetValue(pageFileIndex, out var file)) return file;

@@ -15,12 +15,15 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     /// <summary>
     ///     Decompresses and stitches one horizontal band of tiles into a reusable strip buffer.
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="layer"></param>
-    /// <param name="startX"></param>
-    /// <param name="y"></param>
-    /// <param name="cols"></param>
-    /// <param name="strip"></param>
+    /// <param name="level">The index of the mip level the tiles are read from.</param>
+    /// <param name="layer">The index of the layer the tiles are read from.</param>
+    /// <param name="startX">The tile column the band starts at.</param>
+    /// <param name="y">The tile row the band is read from.</param>
+    /// <param name="cols">How many tiles the band holds.</param>
+    /// <param name="strip">
+    ///     The strip buffer the band is stitched into; it is cleared first and ends up holding the BC3
+    ///     blocks of the whole band.
+    /// </param>
     public void StitchRow(int level, int layer, int startX, int y, int cols, BC5Image strip)
     {
         var tileWidth = tileSet.EffectiveTileWidth;
@@ -40,12 +43,14 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     ///     Tries to decompress and return a tile at (<paramref name="level" />, <paramref name="layer" />,
     ///     <paramref name="x" />, <paramref name="y" />).
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="layer"></param>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="tileInfo"></param>
-    /// <returns></returns>
+    /// <param name="level">The index of the mip level to read.</param>
+    /// <param name="layer">The index of the layer to read.</param>
+    /// <param name="x">The tile column.</param>
+    /// <param name="y">The tile row.</param>
+    /// <param name="tileInfo">
+    ///     The tile info the tile set fills in; reused across calls so a band does not allocate one per tile.
+    /// </param>
+    /// <returns>The decompressed tile, or <see langword="null" /> when the tile set has no tile there.</returns>
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
@@ -54,12 +59,12 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     }
 
     /// <summary>
-    ///     Decompresses a chunk and returns the raw pixel data.
+    ///     Decompresses a chunk into a tile image sized as the tile header declares.
     /// </summary>
-    /// <param name="page"></param>
-    /// <param name="pageIndex"></param>
-    /// <param name="chunkIndex"></param>
-    /// <returns></returns>
+    /// <param name="page">The page file the chunk lives in.</param>
+    /// <param name="pageIndex">The page within that page file.</param>
+    /// <param name="chunkIndex">The chunk within that page.</param>
+    /// <returns>The decompressed tile.</returns>
     private BC5Image UnpackChunkBc5(VirtualTexturePage page, int pageIndex, int chunkIndex)
     {
         var header = tileSet.Header;
@@ -70,14 +75,14 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     }
 
     /// <summary>
-    ///     Decompresses a chunk and returns the raw pixel data.
+    ///     Decompresses a chunk and returns its block data.
     /// </summary>
-    /// <param name="page"></param>
-    /// <param name="pageIndex"></param>
-    /// <param name="chunkIndex"></param>
-    /// <param name="outputSize"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidDataException"></exception>
+    /// <param name="page">The page file the chunk lives in.</param>
+    /// <param name="pageIndex">The page within that page file.</param>
+    /// <param name="chunkIndex">The chunk within that page.</param>
+    /// <param name="outputSize">The number of decompressed bytes to produce.</param>
+    /// <returns>The decompressed block data.</returns>
+    /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
     private byte[] UnpackChunk(VirtualTexturePage page, int pageIndex, int chunkIndex, int outputSize)
     {
         var (chunkHeader, compressed) = page.ReadChunk(pageIndex, chunkIndex);
@@ -95,9 +100,9 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     ///     chunk is the tile's single RGBA8 texel (the uniform parameter block declares a 4x1 image),
     ///     so the tile is one flat color and every block repeats it.
     /// </summary>
-    /// <param name="payload"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidDataException"></exception>
+    /// <param name="payload">The uniform chunk payload: the single RGBA8 texel the chunk declares.</param>
+    /// <returns>The BC3 blocks of one tile, every block being that color.</returns>
+    /// <exception cref="InvalidDataException">The payload is shorter than one RGBA8 texel.</exception>
     private byte[] CreateUniformTile(byte[] payload)
     {
         if (payload.Length < 4)
@@ -116,11 +121,11 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     ///     This mirrors LSLib, which runs sixteen identical pixels through the BCnEncoder block encoder
     ///     instead of quantizing the endpoints by hand, so uniform tiles come out byte for byte alike.
     /// </summary>
-    /// <param name="r"></param>
-    /// <param name="g"></param>
-    /// <param name="b"></param>
-    /// <param name="a"></param>
-    /// <returns></returns>
+    /// <param name="r">The red channel, 0-255.</param>
+    /// <param name="g">The green channel, 0-255.</param>
+    /// <param name="b">The blue channel, 0-255.</param>
+    /// <param name="a">The alpha channel, 0-255.</param>
+    /// <returns>One BC3 block whose sixteen texels all resolve to that color.</returns>
     private static byte[] EncodeConstantColor(byte r, byte g, byte b, byte a)
     {
         var source = new ColorRgba32[16];
@@ -131,10 +136,10 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     /// <summary>
     ///     Decompresses a BC chunk.
     /// </summary>
-    /// <param name="chunkHeader"></param>
-    /// <param name="compressed"></param>
-    /// <param name="outputSize"></param>
-    /// <returns></returns>
+    /// <param name="chunkHeader">The chunk header naming the parameter block that describes the codec.</param>
+    /// <param name="compressed">The still-compressed chunk bytes.</param>
+    /// <param name="outputSize">The number of decompressed bytes to produce.</param>
+    /// <returns>The decompressed block data.</returns>
     private byte[] DecompressBc(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
     {
         var parameterBlock = (GTSBCParameterBlock)tileSet.ParameterBlocks[chunkHeader.ParameterBlockID];

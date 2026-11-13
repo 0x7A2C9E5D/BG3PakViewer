@@ -37,6 +37,9 @@ internal sealed class VirtualTextureLoader : IDisposable
     /// </summary>
     internal int LayerCount => TileSet.TileSetLayers.Length;
 
+    /// <summary>
+    ///     Releases the parsed tile set.
+    /// </summary>
     public void Dispose()
     {
         TileSet.Dispose();

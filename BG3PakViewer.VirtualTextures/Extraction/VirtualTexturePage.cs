@@ -18,8 +18,8 @@ internal sealed class VirtualTexturePage : IDisposable
     /// <summary>
     ///     Constructs a new VirtualTexturePage from a stream.
     /// </summary>
-    /// <param name="tileSet"></param>
-    /// <param name="stream"></param>
+    /// <param name="tileSet">The tile set the page belongs to, which provides the page size and layout.</param>
+    /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
     public VirtualTexturePage(VirtualTileSet tileSet, Stream stream)
     {
         _tileSet = tileSet;
@@ -28,6 +28,9 @@ internal sealed class VirtualTexturePage : IDisposable
         _chunkOffsets = ReadChunkOffsetTables();
     }
 
+    /// <summary>
+    ///     Closes the reader, which closes the page file stream as well.
+    /// </summary>
     public void Dispose()
     {
         _reader.Dispose();
@@ -59,6 +62,9 @@ internal sealed class VirtualTexturePage : IDisposable
     ///     Positions the stream at the chunk (<paramref name="pageIndex" />, <paramref name="chunkIndex" />)
     ///     and returns its GTP chunk header together with the raw (still compressed) chunk bytes.
     /// </summary>
+    /// <param name="pageIndex">The page within this page file.</param>
+    /// <param name="chunkIndex">The chunk within that page.</param>
+    /// <returns>The chunk header and the bytes it describes, still compressed.</returns>
     public (GTPChunkHeader Header, byte[] Data) ReadChunk(int pageIndex, int chunkIndex)
     {
         _stream.Position = _chunkOffsets[pageIndex][chunkIndex] + pageIndex * _tileSet.Header.PageSize;

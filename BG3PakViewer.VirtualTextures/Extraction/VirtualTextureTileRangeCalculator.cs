@@ -11,12 +11,12 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Gets the tile range size (cols, rows) for a given tile range.
     /// </summary>
-    /// <param name="minX"></param>
-    /// <param name="minY"></param>
-    /// <param name="maxX"></param>
-    /// <param name="maxY"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="minX">The first tile column of the region, inclusive.</param>
+    /// <param name="minY">The first tile row of the region, inclusive.</param>
+    /// <param name="maxX">The last tile column of the region, inclusive.</param>
+    /// <param name="maxY">The last tile row of the region, inclusive.</param>
+    /// <returns>How many tiles the region is wide and tall.</returns>
+    /// <exception cref="ArgumentException">The region is empty.</exception>
     public static (int Cols, int Rows) GetTileRangeSize(int minX, int minY, int maxX, int maxY)
     {
         var cols = maxX - minX + 1;
@@ -28,13 +28,16 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Gets the tile range for a texture at a given mip level.
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="tex"></param>
-    /// <param name="minX"></param>
-    /// <param name="minY"></param>
-    /// <param name="maxX"></param>
-    /// <param name="maxY"></param>
-    /// <returns></returns>
+    /// <param name="level">The index of the mip level.</param>
+    /// <param name="tex">The texture metadata, which places the texture on the level 0 tile grid.</param>
+    /// <param name="minX">The first tile column covering the texture at that level, inclusive.</param>
+    /// <param name="minY">The first tile row covering the texture at that level, inclusive.</param>
+    /// <param name="maxX">The last tile column, clipped to the tile grid of the level.</param>
+    /// <param name="maxY">The last tile row, clipped to the tile grid of the level.</param>
+    /// <returns>
+    ///     <see langword="true" /> when at least one tile of the texture remains after clipping to the
+    ///     grid of that level.
+    /// </returns>
     public bool TryGetTileRange(int level, FourCCTextureMeta tex,
         out int minX, out int minY, out int maxX, out int maxY)
     {
@@ -51,8 +54,8 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Gets the tile span for a texture at level 0.
     /// </summary>
-    /// <param name="tex"></param>
-    /// <returns></returns>
+    /// <param name="tex">The texture metadata, in pixels.</param>
+    /// <returns>The texture position and size on the level 0 tile grid, in tiles.</returns>
     private (int X, int Y, int Width, int Height) GetTextureTileSpan(FourCCTextureMeta tex)
     {
         return (tex.X / tileSet.EffectiveTileWidth, tex.Y / tileSet.EffectiveTileHeight,
@@ -62,12 +65,12 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Converts a texture span to a tile range at a given mip level.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="level"></param>
-    /// <returns></returns>
+    /// <param name="x">The first tile column on level 0.</param>
+    /// <param name="y">The first tile row on level 0.</param>
+    /// <param name="width">How many tiles wide the texture is on level 0.</param>
+    /// <param name="height">How many tiles tall the texture is on level 0.</param>
+    /// <param name="level">The index of the mip level to convert to.</param>
+    /// <returns>The tile range covering the span at that level, both ends inclusive.</returns>
     private static (int MinX, int MinY, int MaxX, int MaxY) ToLevelRange(
         int x, int y, int width, int height, int level)
     {
@@ -79,9 +82,9 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Divides a value by a divisor and rounds up.
     /// </summary>
-    /// <param name="value"></param>
-    /// <param name="divisor"></param>
-    /// <returns></returns>
+    /// <param name="value">The value to divide.</param>
+    /// <param name="divisor">The divisor, greater than zero.</param>
+    /// <returns>The quotient, rounded up.</returns>
     private static int DivideCeiling(int value, int divisor)
     {
         return value / divisor + (value % divisor > 0 ? 1 : 0);
@@ -90,9 +93,9 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Clips a tile range to the tile grid of a given mip level.
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="maxX"></param>
-    /// <param name="maxY"></param>
+    /// <param name="level">The index of the mip level whose tile grid the range is clipped to.</param>
+    /// <param name="maxX">The last tile column, lowered to the grid width when it overflows.</param>
+    /// <param name="maxY">The last tile row, lowered to the grid height when it overflows.</param>
     private void ClampToLevelGrid(int level, ref int maxX, ref int maxY)
     {
         var levelWidth = (int)tileSet.TileSetLevels[level].Width;
@@ -104,13 +107,16 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Checks if a region exists in a given layer.
     /// </summary>
-    /// <param name="level"></param>
-    /// <param name="layer"></param>
-    /// <param name="minX"></param>
-    /// <param name="minY"></param>
-    /// <param name="maxX"></param>
-    /// <param name="maxY"></param>
-    /// <returns></returns>
+    /// <param name="level">The index of the mip level the region lives at.</param>
+    /// <param name="layer">The index of the layer the region must exist in.</param>
+    /// <param name="minX">The first tile column of the region, inclusive.</param>
+    /// <param name="minY">The first tile row of the region, inclusive.</param>
+    /// <param name="maxX">The last tile column of the region, inclusive.</param>
+    /// <param name="maxY">The last tile row of the region, inclusive.</param>
+    /// <returns>
+    ///     <see langword="true" /> when every tile of the region exists in that layer; otherwise
+    ///     <see langword="false" />, meaning the layer leaves part of the region empty.
+    /// </returns>
     public bool RegionExists(int level, int layer, int minX, int minY, int maxX, int maxY)
     {
         GTSFlatTileInfo tile = default;
