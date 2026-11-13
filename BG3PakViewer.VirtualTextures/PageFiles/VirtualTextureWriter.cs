@@ -45,6 +45,11 @@ internal sealed class VirtualTextureWriter
     }
 
     /// <summary>
+    ///     The number of bytes one band occupies in the DDS; the bands follow each other in the stream.
+    /// </summary>
+    public int RowByteCount => _strip.Data.Length;
+
+    /// <summary>
     ///     Writes the DDS header of the image the bands form, which the bands follow in the stream.
     /// </summary>
     public void WriteHeader()

@@ -17,7 +17,9 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// </remarks>
 /// <param name="file">The parsed tile set the texture belongs to; disposing the extractor disposes it.</param>
 /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
-internal sealed class VirtualTextureLayerExtractor(VirtualTextureTileSetFile file, Func<string, Stream> pageStreamProvider)
+internal sealed class VirtualTextureLayerExtractor(
+    VirtualTextureTileSetFile file,
+    Func<string, Stream> pageStreamProvider)
     : IDisposable
 {
     private readonly TileCompressor _compressor = new();
@@ -100,6 +102,9 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTextureTileSetFile fil
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName), decoder);
         var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, dds);
         writer.WriteHeader();
+        // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
+        // written.
+        dds.Capacity = (int)(dds.Length + writer.RowByteCount * size.Height);
         var rowTiles = new GTSFlatTileInfo?[size.Width];
         for (var row = 0; row < size.Height; row++)
         {
