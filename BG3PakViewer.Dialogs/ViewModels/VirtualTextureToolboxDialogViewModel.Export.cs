@@ -19,8 +19,6 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// </summary>
 public partial class VirtualTextureToolboxDialogViewModel
 {
-    private CancellationTokenSource? _exportCancellation;
-
     /// <summary>
     ///     The completion message template, parsed once per dialog instead of per export.
     /// </summary>
@@ -33,13 +31,15 @@ public partial class VirtualTextureToolboxDialogViewModel
     private readonly CompositeFormat _partialMessageFormat =
         CompositeFormat.Parse(Strings.PreviewExportPartialMessage);
 
+    private CancellationTokenSource? _exportCancellation;
+
     /// <summary>
-    ///     Whether there is a selected texture to export.
+    ///     Whether there is a selected texture to export, and at least one layer of it holds data.
     /// </summary>
     /// <returns></returns>
     private bool CanExportSelected()
     {
-        return !IsIndexing && !IsExporting && SelectedCount > 0;
+        return !IsIndexing && !IsExporting && SelectedCount > 0 && _selectionHasData;
     }
 
     /// <summary>
@@ -72,10 +72,10 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <summary>
     ///     Asks the user for a target folder and exports the given textures there.
     /// </summary>
-    /// <param name="rows">The textures to export, each of their layers as one DDS file.</param>
-    private async Task ExportAsync(IReadOnlyList<VirtualTextureToolboxTextureViewModel> rows)
+    /// <param name="textures">The textures to export, each of their layers as one DDS file.</param>
+    private async Task ExportAsync(IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures)
     {
-        if (rows.Count == 0) return;
+        if (textures.Count == 0) return;
 
         var folder = await PickFolderAsync();
         if (folder is null)
@@ -86,35 +86,12 @@ public partial class VirtualTextureToolboxDialogViewModel
 
         _exportCancellation?.Dispose();
         _exportCancellation = new CancellationTokenSource();
-        var cancellationToken = _exportCancellation.Token;
-        var files = BuildFiles(folder, rows, cancellationToken);
-        var stopwatch = Stopwatch.StartNew();
         IsExporting = true;
         Progress = 0;
 
         try
         {
-            var exported = 0;
-            var failures = new List<PreviewExportResult>();
-            await foreach (var result in _exportService.ExportAsync(folder, files, cancellationToken))
-            {
-                exported++;
-                if (!result.Success) failures.Add(result);
-                Progress = files.Count == 0 ? 0 : exported * 100.0 / files.Count;
-            }
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                Log.Information(
-                    "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
-                    rows.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
-                return;
-            }
-
-            Log.Information(
-                "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
-                rows.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
-            await ReportExportResultAsync(exported, files.Count, failures);
+            await WriteAndReportAsync(folder, textures, _exportCancellation.Token);
         }
         finally
         {
@@ -126,33 +103,126 @@ public partial class VirtualTextureToolboxDialogViewModel
     }
 
     /// <summary>
+    ///     Writes the layers of the given textures and tells the user what was written.
+    /// </summary>
+    /// <param name="folder">The folder the files are written to.</param>
+    /// <param name="textures">The textures to export.</param>
+    /// <param name="cancellationToken">Cancels the export.</param>
+    private async Task WriteAndReportAsync(string folder, IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures,
+        CancellationToken cancellationToken)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var files = await TryBuildFilesAsync(folder, textures, cancellationToken);
+        if (files is null) return;
+
+        var (exported, failures) = await WriteFilesAsync(folder, files, cancellationToken);
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Log.Information(
+                "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
+                textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
+            return;
+        }
+
+        Log.Information(
+            "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
+            textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
+        await ReportExportResultAsync(exported, files.Count, failures);
+    }
+
+    /// <summary>
+    ///     Builds the files to write.
+    /// </summary>
+    /// <param name="folder">The folder the files are written to.</param>
+    /// <param name="textures">The textures to export.</param>
+    /// <param name="cancellationToken">Cancels the export.</param>
+    /// <returns>
+    ///     The files to write, or <see langword="null" /> when the export was canceled while the layers were
+    ///     checked or when no selected layer holds data; the reason is logged and, for the latter, shown.
+    /// </returns>
+    private async Task<List<PreviewExportFile>?> TryBuildFilesAsync(string folder,
+        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, CancellationToken cancellationToken)
+    {
+        List<PreviewExportFile> files;
+        try
+        {
+            files = await BuildFilesAsync(folder, textures, cancellationToken);
+        }
+        catch (OperationCanceledException ex)
+        {
+            Log.Information(ex, "Virtual texture toolbox export was cancelled while the layers were checked");
+            return null;
+        }
+
+        if (files.Count > 0) return files;
+
+        Log.Information("Virtual texture toolbox export has nothing to write: no selected layer holds data");
+        await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.PreviewExportNothingMessage,
+            Strings.ExportFailedCaption, MessageBoxIcon.Warning);
+        return null;
+    }
+
+    /// <summary>
+    ///     Writes the given files, reporting the progress, and keeps the ones that failed.
+    /// </summary>
+    /// <param name="folder">The folder the files are written to.</param>
+    /// <param name="files">The files to write.</param>
+    /// <param name="cancellationToken">Cancels the export.</param>
+    /// <returns>How many files were processed, and the ones that failed.</returns>
+    private async Task<(int Exported, List<PreviewExportResult> Failures)> WriteFilesAsync(string folder,
+        List<PreviewExportFile> files, CancellationToken cancellationToken)
+    {
+        var exported = 0;
+        var failures = new List<PreviewExportResult>();
+        await foreach (var result in _exportService.ExportAsync(folder, files, cancellationToken))
+        {
+            exported++;
+            if (!result.Success) failures.Add(result);
+            Progress = exported * 100.0 / files.Count;
+        }
+
+        return (exported, failures);
+    }
+
+    /// <summary>
     ///     Turns the textures into the files they are exported as, one sub folder per tile set.
     /// </summary>
     /// <param name="folder">The folder the sub folders are created in.</param>
-    /// <param name="rows">The textures to export.</param>
+    /// <param name="textures">The textures to export.</param>
     /// <param name="cancellationToken">Cancels the export.</param>
     /// <returns>The files to write, grouped by tile set.</returns>
-    private List<PreviewExportFile> BuildFiles(string folder, IReadOnlyList<VirtualTextureToolboxTextureViewModel> rows,
-        CancellationToken cancellationToken)
+    private async Task<List<PreviewExportFile>> BuildFilesAsync(string folder,
+        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, CancellationToken cancellationToken)
     {
         var files = new List<PreviewExportFile>();
-        foreach (var group in rows.GroupBy(row => row.Entry.GtsPath))
+        var skipped = 0;
+        foreach (var group in textures.GroupBy(texture => texture.Entry.GtsPath))
         {
             var folderName = Path.GetFileNameWithoutExtension(group.Key);
             Directory.CreateDirectory(Path.Combine(folder, folderName));
-            foreach (var row in group)
+            foreach (var texture in group)
             {
-                var layerCount = Math.Min(row.Entry.LayerCount, VirtualTextureLayers.Names.Count);
+                var layerCount = Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count);
                 for (var layer = 0; layer < layerCount; layer++)
                 {
                     var layerIndex = layer;
+                    if (!await _extractor.HasLayerDataAsync(texture.Entry, layerIndex, cancellationToken))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
                     var fileName = Path.Combine(folderName,
-                        $"{row.DisplayName}_{VirtualTextureLayers.Names[layerIndex]}.dds");
+                        $"{texture.DisplayName}_{VirtualTextureLayers.Names[layerIndex]}.dds");
                     files.Add(new PreviewExportFile(fileName,
-                        () => OpenLayerAsync(row.Entry, layerIndex, cancellationToken)));
+                        () => OpenLayerAsync(texture.Entry, layerIndex, cancellationToken)));
                 }
             }
         }
+
+        if (skipped > 0)
+            Log.Information("Virtual texture toolbox export skipped {Skipped} layer(s) without data", skipped);
 
         return files;
     }

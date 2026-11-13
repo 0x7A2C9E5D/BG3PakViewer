@@ -52,6 +52,17 @@ internal sealed class VirtualTextureLayerExtractor(
     }
 
     /// <summary>
+    ///     Tells whether the layer of a texture holds any tile, without extracting it.
+    /// </summary>
+    /// <param name="index">The index of the texture in the tile set's texture list.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <returns><see langword="true" /> when the layer has a tile region to extract.</returns>
+    public bool HasLayerData(int index, int layer)
+    {
+        return FindLevel(layer, file.Textures[index]) is not null;
+    }
+
+    /// <summary>
     ///     Extracts <paramref name="layer" /> of <paramref name="tex" /> into a new DDS stream, stopping
     ///     at the first mip level whose tile region exists.
     /// </summary>
@@ -65,6 +76,20 @@ internal sealed class VirtualTextureLayerExtractor(
     private Stream? ExtractTexture(int layer, FourCCTextureMeta tex,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
+        if (FindLevel(layer, tex, ct) is not { } found) return null;
+        return ExtractToStream(found.Level, layer, found.Min, found.Max, progress, ct);
+    }
+
+    /// <summary>
+    ///     Finds the first mip level whose tile region exists in a layer.
+    /// </summary>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="tex">The texture to look up.</param>
+    /// <param name="ct">Cancels the search.</param>
+    /// <returns>The level and its region, or <see langword="null" /> when no level holds the layer.</returns>
+    private (int Level, Point Min, Point Max)? FindLevel(int layer, FourCCTextureMeta tex,
+        CancellationToken ct = default)
+    {
         for (var level = 0; level < file.TileSet.TileSetLevels.Length; level++)
         {
             ct.ThrowIfCancellationRequested();
@@ -73,7 +98,7 @@ internal sealed class VirtualTextureLayerExtractor(
             var (min, max) = range;
             if (!VirtualTextureTileRangeCalculator.RegionExists(file.TileSet, level, layer, min, max)) continue;
 
-            return ExtractToStream(level, layer, min, max, progress, ct);
+            return (level, min, max);
         }
 
         return null;

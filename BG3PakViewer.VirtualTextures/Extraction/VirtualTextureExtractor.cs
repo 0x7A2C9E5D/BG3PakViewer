@@ -50,6 +50,29 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     }
 
     /// <summary>
+    ///     Tells whether a layer of a texture holds any tile, without extracting it.
+    /// </summary>
+    /// <param name="entry">The texture to inspect.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns><see langword="true" /> when the layer holds data.</returns>
+    public async Task<bool> HasLayerDataAsync(VirtualTextureEntry entry, int layer,
+        CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var extractor = await OpenExtractorAsync(entry.GtsPath).ConfigureAwait(false);
+            return await Task.Run(() => extractor.HasLayerData(entry.Index, layer), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>
     ///     Releases the parsed tile set, so the package it was read from can be closed.
     /// </summary>
     /// <returns>A task that completes when the tile set is released.</returns>

@@ -24,11 +24,13 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 {
     private readonly IAppSettings _appSettings;
     private readonly IVirtualTextureCatalog _catalog;
-    private readonly IVirtualTextureExtractor _extractor;
     private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
+    private readonly IVirtualTextureExtractor _extractor;
     private List<VirtualTextureToolboxTextureViewModel> _selectedTextures = [];
+    private CancellationTokenSource? _selectionCheckCancellation;
+    private bool _selectionHasData;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialogViewModel" /> class.
@@ -152,6 +154,55 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     {
         _selectedTextures = [.. selected];
         SelectedCount = _selectedTextures.Count;
+        _ = CheckSelectionAsync();
+    }
+
+    /// <summary>
+    ///     Finds out whether the selection holds any layer to export, so that a selection which is
+    ///     empty in every layer cannot be exported at all.
+    /// </summary>
+    private async Task CheckSelectionAsync()
+    {
+        if (_selectionCheckCancellation is not null) await _selectionCheckCancellation.CancelAsync();
+        var cts = new CancellationTokenSource();
+        _selectionCheckCancellation = cts;
+
+        // Off until the check proves otherwise: the command must not offer an export that has
+        // nothing to write.
+        _selectionHasData = false;
+        ExportSelectedCommand.NotifyCanExecuteChanged();
+
+        try
+        {
+            // Grouped by tile set so the cached one is parsed as few times as possible.
+            var textures = _selectedTextures.OrderBy(texture => texture.Entry.GtsPath, StringComparer.Ordinal).ToList();
+            foreach (var layer in Enumerable.Range(0, VirtualTextureLayers.Names.Count))
+            foreach (var texture in textures.Where(texture =>
+                         layer < Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count)))
+            {
+                if (!await _extractor.HasLayerDataAsync(texture.Entry, layer, cts.Token)) continue;
+
+                _selectionHasData = true;
+                return;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer selection replaced this check.
+        }
+        catch (Exception ex)
+        {
+            // Failing to prove the selection has data keeps the export disabled, which is the safe side.
+            Log.Error(ex, "Failed to check whether the selected textures hold any layer data");
+        }
+        finally
+        {
+            if (ReferenceEquals(_selectionCheckCancellation, cts))
+            {
+                ExportSelectedCommand.NotifyCanExecuteChanged();
+                _selectionCheckCancellation = null;
+            }
+        }
     }
 
     /// <summary>
@@ -164,6 +215,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         if (!disposing) return;
         _ = _previewCancellation?.CancelAsync();
         _ = _exportCancellation?.CancelAsync();
+        _ = _selectionCheckCancellation?.CancelAsync();
 
         // Detach the view from the image before releasing it.
         Preview = null;
@@ -240,8 +292,8 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 
         if (!string.IsNullOrWhiteSpace(InitialSearch))
             SearchText = InitialSearch;
-        SelectedRow = Textures.FirstOrDefault(row =>
-            string.IsNullOrWhiteSpace(InitialSearch) || Matches(row, InitialSearch));
+        SelectedRow = Textures.FirstOrDefault(texture =>
+            string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }
 
@@ -255,20 +307,20 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     {
         return string.IsNullOrWhiteSpace(searchText)
             ? null
-            : item => item is VirtualTextureToolboxTextureViewModel row && Matches(row, searchText);
+            : item => item is VirtualTextureToolboxTextureViewModel texture && Matches(texture, searchText);
     }
 
     /// <summary>
-    ///     Whether a row matches the search text, by texture name or by the tile set file it comes from,
+    ///     Whether a texture matches the search text, by texture name or by the tile set file it comes from,
     ///     so searching a tile set name narrows the list to the textures of that tile set.
     /// </summary>
-    /// <param name="row">The row to test.</param>
+    /// <param name="texture">The texture to test.</param>
     /// <param name="searchText">The submitted search text.</param>
-    /// <returns><see langword="true" /> when the row matches.</returns>
-    private static bool Matches(VirtualTextureToolboxTextureViewModel row, string searchText)
+    /// <returns><see langword="true" /> when the texture matches.</returns>
+    private static bool Matches(VirtualTextureToolboxTextureViewModel texture, string searchText)
     {
-        return row.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-               row.SourceFile.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+        return texture.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+               texture.SourceFile.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

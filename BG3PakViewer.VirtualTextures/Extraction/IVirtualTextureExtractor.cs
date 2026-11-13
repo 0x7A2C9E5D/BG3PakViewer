@@ -24,6 +24,15 @@ public interface IVirtualTextureExtractor : IDisposable
         CancellationToken cancellationToken);
 
     /// <summary>
+    ///     Tells whether a layer of a texture holds any tile, without extracting it.
+    /// </summary>
+    /// <param name="entry">The texture to inspect.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns><see langword="true" /> when the layer holds data.</returns>
+    Task<bool> HasLayerDataAsync(VirtualTextureEntry entry, int layer, CancellationToken cancellationToken);
+
+    /// <summary>
     ///     Releases the tile set the extractor keeps parsed, so the package it was read from can be closed.
     /// </summary>
     /// <returns>A task that completes when the tile set is released.</returns>
