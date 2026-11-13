@@ -36,6 +36,7 @@ namespace BG3PakViewer;
 public sealed partial class App : IDisposable
 {
     private bool _disposedValue;
+    private bool _initialized;
     private ObserverBase<LogEvent>? _logObserver;
     private SingleInstanceManager? _singleInstanceManager;
 
@@ -135,6 +136,9 @@ public sealed partial class App : IDisposable
         InitializeSettingsManager();
         LogStartupInformation();
         InitializeMainWindow();
+        // Set last: a failure before this point leaves the instance uninitialized, so OnExit must
+        // not save the settings it never loaded.
+        _initialized = true;
     }
 
     /// <summary>
@@ -259,13 +263,24 @@ public sealed partial class App : IDisposable
     }
 
     /// <summary>
-    ///     Saves the settings and releases the resources the application owns.
+    ///     Saves the settings and releases the resources the application owns, but only when this
+    ///     instance initialized the services. A second instance that shut itself down because another
+    ///     one was already running never loaded the settings, and saving them would overwrite the state
+    ///     of the instance that keeps running.
     /// </summary>
     protected override void OnExit(ExitEventArgs e)
     {
+        if (!_initialized)
+        {
+            _singleInstanceManager?.Dispose();
+            base.OnExit(e);
+            return;
+        }
+
         Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
             .Save(Ioc.Default.GetRequiredService<IAppSettings>());
         Dispose();
+        base.OnExit(e);
     }
 
     /// <summary>
