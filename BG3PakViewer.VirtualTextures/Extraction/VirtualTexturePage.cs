@@ -8,7 +8,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     One open GTP page file: the stream it was read from and the chunk offsets needed to read its
 ///     tiles.
 /// </summary>
-public sealed class VirtualTexturePage : IDisposable
+internal sealed class VirtualTexturePage : IDisposable
 {
     private readonly List<uint[]> _chunkOffsets;
     private readonly BinaryReader _reader;

@@ -9,7 +9,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     one horizontal tile band into a reusable strip buffer per row, using the configured
 ///     tile unpacker for a fixed (level, layer) combination.
 /// </summary>
-public sealed class VirtualTextureWriter : IDisposable
+internal sealed class VirtualTextureWriter : IDisposable
 {
     private readonly BinaryWriter _bw;
     private readonly int _layer;
