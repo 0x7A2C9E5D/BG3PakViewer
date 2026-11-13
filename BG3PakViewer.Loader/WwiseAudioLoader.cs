@@ -35,7 +35,7 @@ public static class WwiseAudioLoader
         try
         {
             await using var ms = await ExportAsync(stream);
-            await using var fs = File.OpenWrite(path);
+            await using var fs = File.Create(path);
             await ms.CopyToAsync(fs);
             await fs.FlushAsync();
             return true;
