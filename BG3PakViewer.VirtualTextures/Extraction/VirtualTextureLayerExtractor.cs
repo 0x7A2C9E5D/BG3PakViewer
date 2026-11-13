@@ -79,11 +79,11 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         for (var level = 0; level < file.TileSet.TileSetLevels.Length; level++)
         {
             ct.ThrowIfCancellationRequested();
-            if (!_tileRanges.TryGetTileRange(level, tex, out var minX, out var minY, out var maxX, out var maxY))
+            if (!_tileRanges.TryGetTileRange(level, tex, out var min, out var max))
                 continue;
-            if (!_tileRanges.RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
+            if (!_tileRanges.RegionExists(level, layer, min, max)) continue;
 
-            ExtractToStream(level, layer, new Point(minX, minY), new Point(maxX, maxY), output, progress, ct);
+            ExtractToStream(level, layer, min, max, output, progress, ct);
             return true;
         }
 
@@ -103,7 +103,7 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     private void ExtractToStream(int level, int layer, Point min, Point max, Stream output,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(min.X, min.Y, max.X, max.Y);
+        var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
         var tileSet = file.TileSet;
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
@@ -111,16 +111,16 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
             tileSet.Header.TileHeight,
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
             tileSet.ParameterBlocks, _compressor);
-        var writer = new VirtualTextureWriter(new Size(cols, rows),
+        var writer = new VirtualTextureWriter(size,
             new Size(tileSet.EffectiveTileWidth, tileSet.EffectiveTileHeight),
             tileSet.Header.TileBorder, unpacker, output);
         writer.WriteHeader();
-        var rowTiles = new GTSFlatTileInfo?[cols];
-        for (var row = 0; row < rows; row++)
+        var rowTiles = new GTSFlatTileInfo?[size.Width];
+        for (var row = 0; row < size.Height; row++)
         {
             ResolveRow(level, layer, new Point(min.X, min.Y + row), rowTiles);
             writer.WriteRow(rowTiles, ct);
-            progress?.Report((row + 1, rows));
+            progress?.Report((row + 1, size.Height));
         }
     }
 
