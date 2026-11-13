@@ -1,3 +1,4 @@
+using System.Drawing;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
@@ -27,7 +28,9 @@ internal sealed class VirtualTextureUnpacker(
     TileCompressor compressor)
     : IDisposable
 {
-    private readonly VirtualTexturePageChunkDecoder _decoder = new(tileWidth, tileHeight, parameterBlocks, compressor);
+    private readonly VirtualTexturePageChunkDecoder _decoder =
+        new(new Size(tileWidth, tileHeight), parameterBlocks, compressor);
+
     private readonly VirtualTexturePageFileCache _virtualTexturePages = new(pageSize, pageStreamProvider);
 
     /// <summary>

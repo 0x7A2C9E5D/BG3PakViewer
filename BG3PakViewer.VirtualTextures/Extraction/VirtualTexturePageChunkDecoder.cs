@@ -1,3 +1,4 @@
+using System.Drawing;
 using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using LSLib.VirtualTextures;
@@ -13,13 +14,11 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     parameter block its header names. The decoder knows nothing about which page file a chunk lives in:
 ///     the page arrives as a <see cref="VirtualTexturePage" />.
 /// </remarks>
-/// <param name="tileWidth">The pixel width of one tile, without its border.</param>
-/// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+/// <param name="tile">The pixel size of one tile, without its border.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
 internal sealed class VirtualTexturePageChunkDecoder(
-    int tileWidth,
-    int tileHeight,
+    Size tile,
     IReadOnlyDictionary<uint, object> parameterBlocks,
     TileCompressor compressor)
 {
@@ -34,9 +33,9 @@ internal sealed class VirtualTexturePageChunkDecoder(
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
     public BC5Image ReadTile(VirtualTexturePage page, int pageIndex, int chunkIndex)
     {
-        var outputSize = 16 * ((tileWidth + 3) / 4) * ((tileHeight + 3) / 4)
-                         + 16 * ((tileWidth / 2 + 3) / 4) * ((tileHeight / 2 + 3) / 4);
-        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), tileWidth, tileHeight);
+        var outputSize = 16 * ((tile.Width + 3) / 4) * ((tile.Height + 3) / 4)
+                         + 16 * ((tile.Width / 2 + 3) / 4) * ((tile.Height / 2 + 3) / 4);
+        return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), tile.Width, tile.Height);
     }
 
     /// <summary>
@@ -75,7 +74,7 @@ internal sealed class VirtualTexturePageChunkDecoder(
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
 
         var block = EncodeConstantColor(payload[0], payload[1], payload[2], payload[3]);
-        var blockCount = (tileWidth + 3) / 4 * ((tileHeight + 3) / 4);
+        var blockCount = (tile.Width + 3) / 4 * ((tile.Height + 3) / 4);
         var data = new byte[blockCount * 16];
         for (var i = 0; i < blockCount; i++) block.CopyTo(data, i * 16);
         return data;
