@@ -10,9 +10,7 @@ namespace BG3PakViewer.Icons;
 /// </summary>
 /// <param name="Image">The icon. The caller owns and disposes it.</param>
 /// <param name="Bounds">The rectangle of the atlas the icon was cut from, in pixels.</param>
-/// <param name="Row">The one based row of the cell in the atlas grid, or 0 when the sheet has no grid.</param>
-/// <param name="Column">The one based column of the cell in the atlas grid, or 0 when the sheet has no grid.</param>
-public sealed record IconAtlasCell(Image Image, Rectangle Bounds, int Row, int Column);
+public sealed record IconAtlasCell(Image Image, Rectangle Bounds);
 
 /// <summary>
 ///     Cuts the icons of an icon atlas out of the sheet.
@@ -85,7 +83,7 @@ public static class IconAtlasSlicer
                 // granularity then leaves the padding of a whole cell looking like an icon.
                 if (FindContentBoundingBox(atlas, cell) is null) continue;
 
-                icons.Add(new IconAtlasCell(atlas.Clone(context => context.Crop(cell)), cell, row + 1, column + 1));
+                icons.Add(new IconAtlasCell(atlas.Clone(context => context.Crop(cell)), cell));
             }
         }
 
@@ -101,7 +99,7 @@ public static class IconAtlasSlicer
     {
         var whole = new Rectangle(0, 0, atlas.Width, atlas.Height);
         return FindContentBoundingBox(atlas, whole) is { } icon
-            ? [new IconAtlasCell(atlas.Clone(context => context.Crop(icon)), icon, 0, 0)]
+            ? [new IconAtlasCell(atlas.Clone(context => context.Crop(icon)), icon)]
             : [];
     }
 
@@ -119,15 +117,15 @@ public static class IconAtlasSlicer
         var bottom = -1;
 
         for (var row = area.Top; row < area.Bottom; row += SampleStride)
-        for (var column = area.Left; column < area.Right; column += SampleStride)
-        {
-            if (!IsVisibleContentPixel(atlas[column, row])) continue;
+            for (var column = area.Left; column < area.Right; column += SampleStride)
+            {
+                if (!IsVisibleContentPixel(atlas[column, row])) continue;
 
-            left = Math.Min(left, column);
-            top = Math.Min(top, row);
-            right = Math.Max(right, column);
-            bottom = Math.Max(bottom, row);
-        }
+                left = Math.Min(left, column);
+                top = Math.Min(top, row);
+                right = Math.Max(right, column);
+                bottom = Math.Max(bottom, row);
+            }
 
         return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
     }
