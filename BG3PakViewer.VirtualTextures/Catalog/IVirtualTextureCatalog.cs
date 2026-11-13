@@ -7,8 +7,8 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// </summary>
 /// <remarks>
 ///     Indexing reads the tile set metadata only, so it stays cheap: it does not open any GTP page
-///     file. Extracting a layer opens the pages that layer needs and keeps the tile set it came from
-///     cached, so exporting several textures of the same tile set does not parse it again.
+///     file. Extracting a layer parses the tile set it belongs to, opens the pages that layer needs and
+///     releases both when the call ends, so nothing opened from the package outlives the extraction.
 /// </remarks>
 public interface IVirtualTextureCatalog : IDisposable
 {

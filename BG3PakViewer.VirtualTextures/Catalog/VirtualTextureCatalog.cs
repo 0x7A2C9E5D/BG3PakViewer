@@ -12,20 +12,15 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// </summary>
 /// <remarks>
 ///     The index holds metadata only, so it does not open any GTP page file. Extraction is serialized
-///     because the parsed tile set is shared by the one handle that reads it, and the most recently
-///     used tile sets stay parsed, up to <see cref="MaxOpenTileSets" />, so exporting several textures
-///     of one tile set parses it once. A tile set never holds more than the page file it is currently
-///     reading open, so neither the number of indexed textures nor the size of a tile set adds open
-///     page streams. <see cref="ClearAsync" /> waits for the work in progress before releasing the
-///     streams, which is what lets the package be closed safely.
+///     because one extraction reads the package at a time; each one parses the tile set it needs, opens
+///     only the page file it is reading, and releases both when it ends, so nothing opened from the
+///     package outlives the call that opened it. <see cref="ClearAsync" /> waits for the work in
+///     progress before releasing the index, which is what lets the package be closed safely.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
-    private const int MaxOpenTileSets = 2;
-
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private readonly List<VirtualTextureTileSetHandle> _handles = [];
     private bool _disposed;
     private List<VirtualTextureEntry> _entries = [];
     private CancellationTokenSource? _loadCancellation;
@@ -74,7 +69,6 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         await _gate.WaitAsync(CancellationToken.None).ConfigureAwait(false);
         try
         {
-            DisposeHandles();
             _entries = [];
             IsLoaded = false;
             _loadCancellation?.Dispose();
@@ -90,6 +84,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <summary>
     ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
     /// </summary>
+    /// <remarks>
+    ///     The tile set is parsed for this call and released when it ends, together with the page file
+    ///     the extraction read.
+    /// </remarks>
     /// <param name="entry">The texture to extract.</param>
     /// <param name="layer">The layer index.</param>
     /// <param name="progress">Reports the extraction progress, in percent.</param>
@@ -101,8 +99,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var handle = TakeHandle(entry.GtsPath) ?? await OpenHandleAsync(entry.GtsPath).ConfigureAwait(false);
-            return await handle.ExtractAsync(entry.Index, layer, progress, cancellationToken).ConfigureAwait(false);
+            using var handle = await Task.Run(() => CreateHandle(entry.GtsPath), CancellationToken.None)
+                .ConfigureAwait(false);
+            return await handle.ExtractAsync(entry.Index, layer, progress, cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -111,15 +111,14 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Stops indexing, releases every open tile set and disposes the synchronization gate; the loaded
-    ///     package itself is left alone.
+    ///     Stops indexing, releases the index and disposes the synchronization gate; the loaded package
+    ///     itself is left alone.
     /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
         _loadCancellation?.Cancel();
-        DisposeHandles();
         _entries = [];
         IsLoaded = false;
         _loadCancellation?.Dispose();
@@ -201,26 +200,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Creates one tile set handle, wiring the provider that opens its page files to the package.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The handle, which is not cached yet.</returns>
-    private Task<VirtualTextureTileSetHandle> OpenHandleAsync(string gtsPath)
-    {
-        return Task.Run(() =>
-        {
-            var handle = CreateHandle(gtsPath);
-            _handles.Add(handle);
-            TrimHandles();
-            return handle;
-        }, CancellationToken.None);
-    }
-
-    /// <summary>
     ///     Opens one tile set of the package.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The handle.</returns>
+    /// <returns>The handle, which the caller owns and disposes.</returns>
     private VirtualTextureTileSetHandle CreateHandle(string gtsPath)
     {
         var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
@@ -240,44 +223,5 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
             stream.Dispose();
             throw;
         }
-    }
-
-    /// <summary>
-    ///     Takes the cached handle of the given tile set, marking it as the most recently used one.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The handle, or <see langword="null" /> when the tile set is not open.</returns>
-    private VirtualTextureTileSetHandle? TakeHandle(string gtsPath)
-    {
-        var index = _handles.FindIndex(handle =>
-            handle.GtsPath.Equals(gtsPath, StringComparison.OrdinalIgnoreCase));
-        if (index < 0) return null;
-
-        var handle = _handles[index];
-        _handles.RemoveAt(index);
-        _handles.Add(handle);
-        return handle;
-    }
-
-    /// <summary>
-    ///     Releases the least recently used tile sets beyond the cache limit.
-    /// </summary>
-    private void TrimHandles()
-    {
-        while (_handles.Count > MaxOpenTileSets)
-        {
-            var oldest = _handles[0];
-            _handles.RemoveAt(0);
-            oldest.Dispose();
-        }
-    }
-
-    /// <summary>
-    ///     Releases every open tile set.
-    /// </summary>
-    private void DisposeHandles()
-    {
-        foreach (var handle in _handles) handle.Dispose();
-        _handles.Clear();
     }
 }
