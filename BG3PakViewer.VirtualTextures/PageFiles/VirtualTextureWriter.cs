@@ -25,13 +25,14 @@ internal sealed class VirtualTextureWriter
     private readonly BinaryWriter _writer;
 
     /// <summary>
-    ///     Constructs a new VirtualTextureWriter.
+    ///     Creates the strip buffer a band is stitched into and the writer the bands are emitted through;
+    ///     nothing is written until <see cref="WriteHeader" /> runs.
     /// </summary>
     /// <param name="grid">How many tiles each band holds: the number of columns and rows.</param>
     /// <param name="tile">The pixel size of one tile, including its border.</param>
     /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
     /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
-    /// <param name="stream">The stream the DDS is written to; the caller keeps it opens.</param>
+    /// <param name="stream">The stream the DDS is written to; the caller keeps it open.</param>
     public VirtualTextureWriter(Size grid, Size tile, int tileBorder, VirtualTextureUnpacker unpacker,
         Stream stream)
     {
@@ -48,6 +49,8 @@ internal sealed class VirtualTextureWriter
     /// </summary>
     public void WriteHeader()
     {
+        // The numeric values are the DDS bit fields: 0x1007 is DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH |
+        // DDSD_PIXELFORMAT, 0x04 in dwPFFlags is DDPF_FOURCC and 0x1000 in dwCaps is DDSCAPS_TEXTURE.
         var header = new DDSHeader
         {
             dwMagic = DDSHeader.DDSMagic,
@@ -72,6 +75,8 @@ internal sealed class VirtualTextureWriter
     /// <param name="tiles">The tiles of the band, in column order; a missing tile is written as empty.</param>
     public void WriteRow(ReadOnlySpan<GTSFlatTileInfo?> tiles)
     {
+        // The strip is reused by every band, so a column without a tile is cleared instead of keeping the
+        // pixels of the band above it.
         Array.Clear(_strip.Data);
         for (var col = 0; col < tiles.Length; col++)
         {

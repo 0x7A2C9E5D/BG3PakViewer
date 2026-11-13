@@ -81,11 +81,8 @@ internal static class VirtualTextureTileRangeCalculator
     }
 
     /// <summary>
-    ///     Divides a value by a divisor and rounds up.
+    ///     Rounds up, so the tiles that only partly overlap the coarser grid are still covered.
     /// </summary>
-    /// <param name="value">The value to divide.</param>
-    /// <param name="divisor">The divisor, greater than zero.</param>
-    /// <returns>The quotient, rounded up.</returns>
     private static int DivideCeiling(int value, int divisor)
     {
         return value / divisor + (value % divisor > 0 ? 1 : 0);

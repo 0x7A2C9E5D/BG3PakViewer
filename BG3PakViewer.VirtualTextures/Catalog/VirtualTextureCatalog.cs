@@ -39,6 +39,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     Indexes the tile sets of the loaded package.
     /// </summary>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>
+    /// <returns>A task that completes when the index is built.</returns>
     public Task LoadAsync(IProgress<VirtualTextureIndexProgress>? progress)
     {
         if (IsLoaded) return Task.CompletedTask;
@@ -50,6 +51,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <summary>
     ///     Stops indexing and releases the index, so the package can be closed afterward.
     /// </summary>
+    /// <returns>A task that completes when the index has been released.</returns>
     public async Task ClearAsync()
     {
         if (_loadCancellation is not null) await _loadCancellation.CancelAsync();
@@ -89,6 +91,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// </summary>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>
     /// <param name="cancellationToken">Cancels the indexing.</param>
+    /// <returns>A task that completes when the index is built.</returns>
     private async Task IndexAsync(IProgress<VirtualTextureIndexProgress>? progress,
         CancellationToken cancellationToken)
     {

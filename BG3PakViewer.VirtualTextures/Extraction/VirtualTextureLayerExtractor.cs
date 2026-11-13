@@ -43,6 +43,8 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     /// </returns>
     public async Task<Stream?> ExtractAsync(int index, int layer, IProgress<double>? progress, CancellationToken ct)
     {
+        // The token handed to Task.Run keeps an already canceled call from starting the work at all;
+        // the one inside the lambda is the one ExtractTexture checks while it runs.
         return await Task.Run(
             () => ExtractTexture(layer, file.Textures[index], CreateTileProgress(progress), ct), ct);
     }
@@ -92,7 +94,6 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         var tileSet = file.TileSet;
         var dds = new MemoryStream();
 
-        // The unpacker keeps at most one-page file open and closes it when this region is done.
         var tile = tileSet.TileSize;
         var decoder = new VirtualTexturePageChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
         using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,

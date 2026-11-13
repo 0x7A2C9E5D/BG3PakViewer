@@ -26,10 +26,12 @@ public interface IVirtualTextureCatalog : IDisposable
     ///     Indexes the tile sets of the loaded package.
     /// </summary>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>
+    /// <returns>A task that completes when the index is built.</returns>
     Task LoadAsync(IProgress<VirtualTextureIndexProgress>? progress);
 
     /// <summary>
     ///     Stops indexing and releases the index, so the package can be closed afterward.
     /// </summary>
+    /// <returns>A task that completes when the index has been released.</returns>
     Task ClearAsync();
 }

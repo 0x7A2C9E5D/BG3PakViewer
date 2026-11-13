@@ -15,7 +15,8 @@ internal sealed class VirtualTexturePage : IDisposable
     private readonly BinaryReader _reader;
 
     /// <summary>
-    ///     Constructs a new VirtualTexturePage from a stream, creating the reader it reads through.
+    ///     Opens a page file and reads the chunk offset table of every one of its pages, so chunks can be
+    ///     addressed by page and chunk index afterwards.
     /// </summary>
     /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
     /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
@@ -40,6 +41,7 @@ internal sealed class VirtualTexturePage : IDisposable
     /// </summary>
     private List<uint[]> ReadChunkOffsetTables()
     {
+        // The GTP header carries no offset this reader needs, so it is only stepped over.
         BinUtils.ReadStruct<GTPHeader>(_reader);
         var numPages = (int)(_reader.BaseStream.Length / _pageSize);
         var tables = new List<uint[]>(numPages);

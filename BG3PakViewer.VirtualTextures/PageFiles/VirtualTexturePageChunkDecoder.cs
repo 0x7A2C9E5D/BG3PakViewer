@@ -33,6 +33,8 @@ internal sealed class VirtualTexturePageChunkDecoder(
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
     public BC5Image ReadTile(VirtualTexturePage page, int pageIndex, int chunkIndex)
     {
+        // BC5 stores two channels: sixteen bytes per 4x4 block for the one kept at full resolution, and
+        // the same again for the one kept at half resolution.
         var outputSize = 16 * ((tile.Width + 3) / 4) * ((tile.Height + 3) / 4)
                          + 16 * ((tile.Width / 2 + 3) / 4) * ((tile.Height / 2 + 3) / 4);
         return new BC5Image(UnpackChunk(page, pageIndex, chunkIndex, outputSize), tile.Width, tile.Height);
