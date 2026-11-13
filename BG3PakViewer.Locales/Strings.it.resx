@@ -429,4 +429,7 @@
     <data name="IndexingLabel" xml:space="preserve">
       <value>Indicizzazione</value>
     </data>
+    <data name="ExportTexture" xml:space="preserve">
+        <value>Export Texture</value>
+    </data>
 </root>
