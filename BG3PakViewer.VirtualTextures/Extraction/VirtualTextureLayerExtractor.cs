@@ -83,7 +83,7 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
                 continue;
             if (!_tileRanges.RegionExists(level, layer, minX, minY, maxX, maxY)) continue;
 
-            ExtractToStream(level, layer, minX, minY, maxX, maxY, output, progress, ct);
+            ExtractToStream(level, layer, new Point(minX, minY), new Point(maxX, maxY), output, progress, ct);
             return true;
         }
 
@@ -95,17 +95,15 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     /// </summary>
     /// <param name="level">The index of the mip level the tiles are read from.</param>
     /// <param name="layer">The index of the layer to extract.</param>
-    /// <param name="minX">The first tile column of the region, inclusive.</param>
-    /// <param name="minY">The first tile row of the region, inclusive.</param>
-    /// <param name="maxX">The last tile column of the region, inclusive.</param>
-    /// <param name="maxY">The last tile row of the region, inclusive.</param>
+    /// <param name="min">The first tile column and row of the region, inclusive.</param>
+    /// <param name="max">The last tile column and row of the region, inclusive.</param>
     /// <param name="output">The stream the DDS data is written to.</param>
     /// <param name="progress">Reports how many tile rows have been written.</param>
     /// <param name="ct">Cancels the extraction.</param>
-    private void ExtractToStream(int level, int layer, int minX, int minY, int maxX, int maxY,
-        Stream output, IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
+    private void ExtractToStream(int level, int layer, Point min, Point max, Stream output,
+        IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(minX, minY, maxX, maxY);
+        var (cols, rows) = VirtualTextureTileRangeCalculator.GetTileRangeSize(min.X, min.Y, max.X, max.Y);
         var tileSet = file.TileSet;
 
         // The unpacker keeps at most one-page file open and closes it when this region is done.
@@ -120,7 +118,7 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         var rowTiles = new GTSFlatTileInfo?[cols];
         for (var row = 0; row < rows; row++)
         {
-            ResolveRow(level, layer, minX, minY + row, rowTiles);
+            ResolveRow(level, layer, new Point(min.X, min.Y + row), rowTiles);
             writer.WriteRow(rowTiles, ct);
             progress?.Report((row + 1, rows));
         }
@@ -132,15 +130,16 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     /// </summary>
     /// <param name="level">The index of the mip level the tiles are read from.</param>
     /// <param name="layer">The index of the layer the tiles are read from.</param>
-    /// <param name="startX">The tile column the band starts at.</param>
-    /// <param name="y">The tile row the band is read from.</param>
+    /// <param name="origin">The tile column and row the band starts at.</param>
     /// <param name="rowTiles">The buffer the band is resolved into, one entry per column.</param>
-    private void ResolveRow(int level, int layer, int startX, int y, Span<GTSFlatTileInfo?> rowTiles)
+    private void ResolveRow(int level, int layer, Point origin, Span<GTSFlatTileInfo?> rowTiles)
     {
         for (var col = 0; col < rowTiles.Length; col++)
         {
             GTSFlatTileInfo tile = default;
-            rowTiles[col] = file.TileSet.GetTileInfo(level, layer, startX + col, y, ref tile) ? tile : null;
+            rowTiles[col] = file.TileSet.GetTileInfo(level, layer, origin.X + col, origin.Y, ref tile)
+                ? tile
+                : null;
         }
     }
 
