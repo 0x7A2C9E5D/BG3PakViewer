@@ -64,9 +64,9 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         for (var level = 0; level < file.TileSet.TileSetLevels.Length; level++)
         {
             ct.ThrowIfCancellationRequested();
-            if (!VirtualTextureTileRangeCalculator.TryGetTileRange(file.TileSet, level, tex, out var min,
-                    out var max))
+            if (VirtualTextureTileRangeCalculator.GetTileRange(file.TileSet, level, tex) is not { } range)
                 continue;
+            var (min, max) = range;
             if (!VirtualTextureTileRangeCalculator.RegionExists(file.TileSet, level, layer, min, max)) continue;
 
             return ExtractToStream(level, layer, min, max, progress, ct);

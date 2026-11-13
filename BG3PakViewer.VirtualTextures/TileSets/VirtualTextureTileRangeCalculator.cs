@@ -34,23 +34,21 @@ internal static class VirtualTextureTileRangeCalculator
     /// <param name="tileSet">The tile set the texture belongs to.</param>
     /// <param name="level">The index of the mip level.</param>
     /// <param name="tex">The texture metadata, which places the texture on the level 0 tile grid.</param>
-    /// <param name="min">The first tile column and row covering the texture at that level, inclusive.</param>
-    /// <param name="max">The last tile column and row, clipped to the tile grid of the level.</param>
     /// <returns>
-    ///     <see langword="true" /> when at least one tile of the texture remains after clipping to the
-    ///     grid of that level.
+    ///     The first and last tile column and row covering the texture at that level, both ends inclusive
+    ///     and clipped to the tile grid of the level; <see langword="null" /> when no tile remains.
     /// </returns>
-    public static bool TryGetTileRange(VirtualTileSet tileSet, int level, FourCCTextureMeta tex,
-        out Point min, out Point max)
+    public static (Point Min, Point Max)? GetTileRange(VirtualTileSet tileSet, int level,
+        FourCCTextureMeta tex)
     {
         var (origin, span) = GetTextureTileSpan(tileSet, tex);
-        (min, max) = ToLevelRange(origin, span, level);
+        var (min, max) = ToLevelRange(origin, span, level);
 
         // GetTileInfo indexes the flat tile array of this level without bounds checks,
         // so clamp the range to the level's actual tile grid.
         max = ClampToLevelGrid(tileSet, level, max);
 
-        return max.X >= min.X && max.Y >= min.Y;
+        return max.X >= min.X && max.Y >= min.Y ? (min, max) : null;
     }
 
     /// <summary>
@@ -61,7 +59,7 @@ internal static class VirtualTextureTileRangeCalculator
     /// <returns>
     ///     The texture position and size on the level 0 tile grid, in tiles.
     /// </returns>
-    private static (Point Origin, Size Span) GetTextureTileSpan(VirtualTileSet tileSet, FourCCTextureMeta tex)
+    private static (Point Origin, Size Size) GetTextureTileSpan(VirtualTileSet tileSet, FourCCTextureMeta tex)
     {
         return (new Point(tex.X / tileSet.EffectiveTileWidth, tex.Y / tileSet.EffectiveTileHeight),
             new Size(tex.Width / tileSet.EffectiveTileWidth, tex.Height / tileSet.EffectiveTileHeight));
