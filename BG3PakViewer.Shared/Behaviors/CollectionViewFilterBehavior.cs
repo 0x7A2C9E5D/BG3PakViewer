@@ -109,7 +109,7 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
         selector.SelectedIndex = 0;
 
         // Virtualized panels do not bring a programmatically selected row into view.
-        if (selector is ListBox listBox && listBox.SelectedItem is { } selected)
+        if (selector is ListBox { SelectedItem: { } selected } listBox)
             listBox.ScrollIntoView(selected);
     }
 
