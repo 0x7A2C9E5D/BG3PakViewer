@@ -53,7 +53,7 @@ internal sealed class VirtualTextureWriter : IDisposable
     /// <param name="startX">The tile column the band starts at.</param>
     /// <param name="y">The tile row the band is read from.</param>
     /// <param name="cols">How many tiles the band holds.</param>
-    /// <param name="ct">Cancels the write.</param>
+    /// <param name="ct">Cancels to write.</param>
     public void WriteRow(int startX, int y, int cols, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
