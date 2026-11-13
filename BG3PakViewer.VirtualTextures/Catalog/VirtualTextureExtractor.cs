@@ -35,10 +35,9 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var handle = await Task.Run(() => CreateHandle(entry.GtsPath), CancellationToken.None)
+            using var loader = await Task.Run(() => OpenTileSet(entry.GtsPath), CancellationToken.None)
                 .ConfigureAwait(false);
-            return await handle.ExtractAsync(entry.Index, layer, progress, cancellationToken)
-                .ConfigureAwait(false);
+            return await loader.ExtractAsync(entry.Index, layer, progress, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -47,26 +46,21 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     }
 
     /// <summary>
-    ///     Opens one tile set of the package.
+    ///     Opens one tile set of the package, which the loader owns until it is disposed.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The handle, which the caller owns and disposes.</returns>
-    private VirtualTextureTileSetHandle CreateHandle(string gtsPath)
+    /// <returns>The loader of the tile set.</returns>
+    private VirtualTextureLoader OpenTileSet(string gtsPath)
     {
-        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
         var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
                      ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
-        VirtualTextureLoader? loader = null;
         try
         {
             // The page files are opened by the extraction that reads them, so nothing is opened here.
-            loader = new VirtualTextureLoader(stream);
-            return new VirtualTextureTileSetHandle(stream, loader,
-                pageName => VirtualTexturePageFile.Open(packageService, directory, pageName), loader.GetTextures());
+            return new VirtualTextureLoader(stream, VirtualTexturePageFile.CreateProvider(packageService, gtsPath));
         }
         catch
         {
-            loader?.Dispose();
             stream.Dispose();
             throw;
         }

@@ -8,6 +8,18 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 internal static class VirtualTexturePageFile
 {
     /// <summary>
+    ///     Creates the provider that opens the page files of the tile set at <paramref name="gtsPath" />.
+    /// </summary>
+    /// <param name="packageService">The service the pages are read from.</param>
+    /// <param name="gtsPath">The package path of the tile set the page files sit next to.</param>
+    /// <returns>The provider a loader opens its page files through.</returns>
+    public static Func<string, Stream> CreateProvider(IPackageService packageService, string gtsPath)
+    {
+        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
+        return pageFileName => Open(packageService, directory, pageFileName);
+    }
+
+    /// <summary>
     ///     Opens the page file at the given name, which sits next to the tile set in the package.
     /// </summary>
     /// <param name="packageService">The service the page is read from.</param>
