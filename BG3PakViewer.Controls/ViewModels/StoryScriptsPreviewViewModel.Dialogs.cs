@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 using BG3PakViewer.Contracts;
@@ -56,7 +57,7 @@ public partial class StoryScriptsPreviewViewModel
     {
         Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
         await _dialogService.ShowMessageBoxNotifyAsync(this,
-            string.Format(Strings.PreviewExportCompletedMessage, exported),
+            string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportCompletedMessage, exported),
             Strings.ExportCompleted, MessageBoxIcon.Success);
     }
 
@@ -75,10 +76,10 @@ public partial class StoryScriptsPreviewViewModel
         var message = new StringBuilder();
         message.AppendLine(exported == 0
             ? Strings.PreviewExportNothingMessage
-            : string.Format(Strings.PreviewExportPartialMessage, exported, total));
+            : string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportPartialMessage, exported, total));
         message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
         foreach (var failure in failures)
-            message.AppendLine($"{failure.Name}: {failure.Reason}");
+            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.Name}: {failure.Reason}");
 
         await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
             exported == 0 ? Strings.ExportFailedCaption : Strings.PreviewExportPartiallyFailedCaption,

@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Utils;
-using Serilog;
-using BG3PakViewer.VirtualTextures.Models;
 using BG3PakViewer.VirtualTextures.Extraction;
+using BG3PakViewer.VirtualTextures.Models;
+using Serilog;
 
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
