@@ -415,10 +415,7 @@
       <value>Esporta tutti gli script</value>
     </data>
     <data name="VtToolbox" xml:space="preserve">
-      <value>Toolbox texture virtuali</value>
-    </data>
-    <data name="VtToolboxShort" xml:space="preserve">
-      <value>Toolbox VT</value>
+      <value>Anteprima ed esportazione texture virtuali</value>
     </data>
     <data name="ExportSelectedTextures" xml:space="preserve">
       <value>Esporta selezionati</value>

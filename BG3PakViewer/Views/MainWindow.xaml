@@ -134,7 +134,7 @@
                         </Style>
                     </ui:AppBarButton.Style>
                 </ui:AppBarButton>
-                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.VtToolboxShort}}"
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.VtToolbox}}"
                                  Command="{Binding ShowVtToolboxCommand}">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.MapLayers}" />

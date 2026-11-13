@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.IO;
+using BG3PakViewer.Dialogs.Models;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Utils;
-using BG3PakViewer.VirtualTextures;
 using Serilog;
 
 namespace BG3PakViewer.Services;

@@ -310,10 +310,7 @@
         <value>匯出全部腳本</value>
     </data>
     <data name="VtToolbox" xml:space="preserve">
-        <value>虛擬紋理工具箱</value>
-    </data>
-    <data name="VtToolboxShort" xml:space="preserve">
-        <value>VT 工具箱</value>
+        <value>虛擬紋理預覽匯出</value>
     </data>
     <data name="ExportSelectedTextures" xml:space="preserve">
         <value>匯出選取</value>
