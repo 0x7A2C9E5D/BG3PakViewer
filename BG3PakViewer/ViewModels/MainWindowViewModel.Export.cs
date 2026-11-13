@@ -30,6 +30,8 @@ internal partial class MainWindowViewModel
     {
         if (toSave is not PackageEntry node || !_packageService.IsLoaded)
             return;
+        // Opening another package waits on this before releasing the one the export is reading from.
+        _exportCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         IsExporting = true;
         try
         {
@@ -41,6 +43,8 @@ internal partial class MainWindowViewModel
         finally
         {
             IsExporting = false;
+            _exportCompletion?.TrySetResult();
+            _exportCompletion = null;
         }
     }
 
@@ -157,8 +161,11 @@ internal partial class MainWindowViewModel
 
         if (!await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.CancelExportOperationMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning)) return false;
-        await _cancellationTokenSource.CancelAsync();
-        IsExporting = false;
+        // The export may have finished while the dialog was open.
+        if (_cancellationTokenSource is { } cancellation) await cancellation.CancelAsync();
+        // Cancelling only stops the loop between files; the file being written is still reading the
+        // package that is about to be released, so wait until the export lets go of it.
+        if (_exportCompletion is { } completion) await completion.Task;
         return true;
     }
 }

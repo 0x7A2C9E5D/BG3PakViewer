@@ -36,6 +36,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private readonly IVirtualTextureCatalog _virtualTextureCatalog;
     private readonly IVirtualTextureExtractor _virtualTextureExtractor;
     private CancellationTokenSource? _cancellationTokenSource;
+    private TaskCompletionSource? _exportCompletion;
     private bool _isLoading;
 
     /// <summary>
