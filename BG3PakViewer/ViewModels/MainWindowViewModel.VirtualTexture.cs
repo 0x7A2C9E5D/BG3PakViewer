@@ -3,7 +3,6 @@ using BG3PakViewer.Dialogs.ViewModels;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using HanumanInstitute.MvvmDialogs;
 using Serilog;
 
 namespace BG3PakViewer.ViewModels;
@@ -37,7 +36,7 @@ internal partial class MainWindowViewModel
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to show the virtual texture toolbox.");
+            Log.Error(ex, "Failed to show the virtual texture toolbox");
         }
         finally
         {
