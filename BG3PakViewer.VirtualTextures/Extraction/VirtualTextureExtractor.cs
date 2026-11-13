@@ -7,18 +7,18 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Extracts the layers of the indexed virtual textures from the loaded package.
 /// </summary>
 /// <remarks>
-///     Extraction is serialized because one extraction reads the package at a time. The parsed tile set is
-///     kept between calls, because every layer of every texture of a tile set needs exactly that tile set;
-///     only the last one is kept, so the memory this costs stays bounded by one tile set and the handle it
-///     holds is released as soon as another tile set is needed. <see cref="ClearAsync" /> releases it when
-///     the package it was read from is replaced.
+///     Extraction is serialized because one extraction reads the package at a time. The extractor of the
+///     last tile set is kept, because every layer of every texture of a tile set needs exactly that tile
+///     set; only the last one is kept, so the memory this costs stays bounded by one tile set and the
+///     handle it holds is released as soon as another tile set is needed. <see cref="ClearAsync" />
+///     releases it when the package it was read from is replaced.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets and their page files are read from.</param>
 public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private VirtualTileSetFile? _cachedTileSet;
-    private string? _cachedTileSetPath;
+    private VirtualTextureLayerExtractor? _cachedExtractor;
+    private string? _cachedExtractorPath;
 
     /// <summary>
     ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
@@ -38,11 +38,8 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var file = await OpenTileSetAsync(entry.GtsPath).ConfigureAwait(false);
-            var layerExtractor = new VirtualTextureLayerExtractor(file,
-                pageFileName => OpenPackageFile(
-                    VirtualTexturePackagePath.GetPageFilePath(entry.GtsPath, pageFileName)));
-            return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
+            var extractor = await OpenExtractorAsync(entry.GtsPath).ConfigureAwait(false);
+            return await extractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -60,7 +57,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            _cachedTileSet?.Dispose();
+            ReleaseCachedExtractor();
         }
         finally
         {
@@ -73,23 +70,37 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     /// </summary>
     public void Dispose()
     {
-        _cachedTileSet?.Dispose();
+        ReleaseCachedExtractor();
     }
 
     /// <summary>
-    ///     Gets the parsed tile set at <paramref name="gtsPath" />, parsing it when the last extraction used
-    ///     a different one.
+    ///     Gets the extractor of the tile set at <paramref name="gtsPath" />, parsing that tile set when the
+    ///     last extraction used a different one.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The parsed tile set.</returns>
-    private async Task<VirtualTileSetFile> OpenTileSetAsync(string gtsPath)
+    /// <returns>The extractor of that tile set.</returns>
+    private async Task<VirtualTextureLayerExtractor> OpenExtractorAsync(string gtsPath)
     {
-        if (_cachedTileSet is not null && _cachedTileSetPath == gtsPath) return _cachedTileSet;
-        _cachedTileSet?.Dispose();
-        _cachedTileSet = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
+        if (_cachedExtractor is not null && _cachedExtractorPath == gtsPath) return _cachedExtractor;
+
+        ReleaseCachedExtractor();
+        var file = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
             .ConfigureAwait(false);
-        _cachedTileSetPath = gtsPath;
-        return _cachedTileSet;
+        _cachedExtractor = new VirtualTextureLayerExtractor(file,
+            pageFileName => OpenPackageFile(VirtualTexturePackagePath.GetPageFilePath(gtsPath, pageFileName)));
+        _cachedExtractorPath = gtsPath;
+        return _cachedExtractor;
+    }
+
+    /// <summary>
+    ///     Releases the cached extractor and the tile set it owns.
+    /// </summary>
+    private void ReleaseCachedExtractor()
+    {
+        var cached = _cachedExtractor;
+        _cachedExtractor = null;
+        _cachedExtractorPath = null;
+        cached?.Dispose();
     }
 
     /// <summary>

@@ -8,13 +8,22 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// <remarks>
 ///     The layer is written from the first mip level whose tile region exists, one tile band per row. The
 ///     tiles are read through the page stream provider, and only the page file a band is reading stays
-///     open.
+///     open. The extractor owns the tile set it was created with, so disposing it releases that tile set.
 /// </remarks>
-/// <param name="file">The parsed tile set the texture belongs to.</param>
+/// <param name="file">The parsed tile set the texture belongs to; disposing the extractor disposes it.</param>
 /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
 internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func<string, Stream> pageStreamProvider)
+    : IDisposable
 {
     private readonly VirtualTextureTileRangeCalculator _tileRanges = new(file.TileSet);
+
+    /// <summary>
+    ///     Releases the parsed tile set this extractor was created with.
+    /// </summary>
+    public void Dispose()
+    {
+        file.Dispose();
+    }
 
     /// <summary>
     ///     Extracts <paramref name="layer" /> of the texture at <paramref name="index" /> into a seekable
