@@ -7,13 +7,14 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     One open tile set of the package, ready to extract its textures.
 /// </summary>
 /// <remarks>
-///     Owns the tile set stream, the loader and the page cache, so releasing the handle releases every
-///     page stream the cache opened as well.
+///     Owns the tile set stream and the loader, so releasing the handle releases both. The GTP page
+///     files are opened by the extraction that reads them, and only the file being read stays open, so
+///     a handle that stays open never accumulates page streams or their buffers.
 /// </remarks>
 internal sealed class VirtualTextureTileSetHandle : IDisposable
 {
     private readonly VirtualTextureLoader _loader;
-    private readonly VirtualTexturePageCache _pages;
+    private readonly Func<string, Stream> _pageStreamProvider;
     private readonly IReadOnlyList<FourCCTextureMeta> _textures;
     private readonly Stream _tileSetStream;
 
@@ -23,15 +24,17 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     /// <param name="gtsPath">The package path of the tile set.</param>
     /// <param name="tileSetStream">The stream of the tile set.</param>
     /// <param name="loader">The loader that extracts the textures.</param>
-    /// <param name="pages">The page cache the loader opens the GTP page files through.</param>
+    /// <param name="pageStreamProvider">
+    ///     Opens the GTP page file with the given name, e.g. from inside a PAK.
+    /// </param>
     /// <param name="textures">The textures of the tile set, in index order.</param>
     public VirtualTextureTileSetHandle(string gtsPath, Stream tileSetStream, VirtualTextureLoader loader,
-        VirtualTexturePageCache pages, IReadOnlyList<FourCCTextureMeta> textures)
+        Func<string, Stream> pageStreamProvider, IReadOnlyList<FourCCTextureMeta> textures)
     {
         GtsPath = gtsPath;
         _tileSetStream = tileSetStream;
         _loader = loader;
-        _pages = pages;
+        _pageStreamProvider = pageStreamProvider;
         _textures = textures;
     }
 
@@ -41,11 +44,10 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     public string GtsPath { get; }
     
     /// <summary>
-    ///     Closes the page files, the loader and the tile set stream, in that order.
+    ///     Closes the loader and the tile set stream, in that order.
     /// </summary>
     public void Dispose()
     {
-        _pages.Dispose();
         _loader.Dispose();
         _tileSetStream.Dispose();
     }
@@ -61,6 +63,6 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     public Task<Stream?> ExtractAsync(int index, int layer, IProgress<double>? progress,
         CancellationToken cancellationToken)
     {
-        return _loader.ExtractAsync(_textures[index], layer, _pages, progress, cancellationToken);
+        return _loader.ExtractAsync(_textures[index], layer, _pageStreamProvider, progress, cancellationToken);
     }
 }

@@ -8,9 +8,25 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Decompresses individual tiles from GTP page files and stitches one horizontal band
 ///     of tiles into a reusable strip buffer, trimming tile borders.
 /// </summary>
-internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualTexturePageCache pageCache)
+/// <remarks>
+///     The unpacker holds at most one-page file open: when the next tile lives in another page file, the
+///     open one is closed before the new one is opened, so the number of open GTP streams never grows
+///     with the size of the tile set.
+/// </remarks>
+internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, Func<string, Stream> pageStreamProvider)
+    : IDisposable
 {
     private readonly TileCompressor _compressor = new();
+    private int _openPageFileIndex = -1;
+    private VirtualTexturePage? _page;
+
+    /// <summary>
+    ///     Closes the page file that is still open.
+    /// </summary>
+    public void Dispose()
+    {
+        ClosePage();
+    }
 
     /// <summary>
     ///     Decompresses and stitches one horizontal band of tiles into a reusable strip buffer.
@@ -54,8 +70,44 @@ internal sealed class VirtualTextureUnpacker(VirtualTileSet tileSet, VirtualText
     private BC5Image? TryUnpackTile(int level, int layer, int x, int y, ref GTSFlatTileInfo tileInfo)
     {
         if (!tileSet.GetTileInfo(level, layer, x, y, ref tileInfo)) return null;
-        var pageFile = pageCache.Get(tileInfo.PageFileIndex);
+        var pageFile = GetPage(tileInfo.PageFileIndex);
         return UnpackChunkBc5(pageFile, tileInfo.PageIndex, tileInfo.ChunkIndex);
+    }
+
+    /// <summary>
+    ///     Gets the page file at <paramref name="pageFileIndex" />, closing the one that is open when it
+    ///     is a different file.
+    /// </summary>
+    /// <param name="pageFileIndex">The index of the page file in the tile set's page file list.</param>
+    /// <returns>The page file, ready to read chunks from.</returns>
+    private VirtualTexturePage GetPage(int pageFileIndex)
+    {
+        if (_page != null && _openPageFileIndex == pageFileIndex) return _page;
+
+        ClosePage();
+
+        var stream = pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName);
+        if (!stream.CanSeek)
+        {
+            var buffer = new MemoryStream();
+            stream.CopyTo(buffer);
+            stream.Dispose();
+            stream = buffer;
+        }
+
+        _page = new VirtualTexturePage(tileSet, stream);
+        _openPageFileIndex = pageFileIndex;
+        return _page;
+    }
+
+    /// <summary>
+    ///     Closes the page file that is open, if any.
+    /// </summary>
+    private void ClosePage()
+    {
+        _page?.Dispose();
+        _page = null;
+        _openPageFileIndex = -1;
     }
 
     /// <summary>

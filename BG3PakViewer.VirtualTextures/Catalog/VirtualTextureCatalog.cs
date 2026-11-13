@@ -12,10 +12,12 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// </summary>
 /// <remarks>
 ///     The index holds metadata only, so it does not open any GTP page file. Extraction is serialized
-///     because a tile set's page cache is not thread safe, and the most recently used tile sets stay
-///     open, up to <see cref="MaxOpenTileSets" />, so exporting several textures of one tile set parses
-///     it once. <see cref="ClearAsync" /> waits for the work in progress before releasing the streams,
-///     which is what lets the package be closed safely.
+///     because the parsed tile set is shared by the one handle that reads it, and the most recently
+///     used tile sets stay parsed, up to <see cref="MaxOpenTileSets" />, so exporting several textures
+///     of one tile set parses it once. A tile set never holds more than the page file it is currently
+///     reading open, so neither the number of indexed textures nor the size of a tile set adds open
+///     page streams. <see cref="ClearAsync" /> waits for the work in progress before releasing the
+///     streams, which is what lets the package be closed safely.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
@@ -199,7 +201,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Creates one tile set handle, wiring its page files to the package.
+    ///     Creates one tile set handle, wiring the provider that opens its page files to the package.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
     /// <returns>The handle, which is not cached yet.</returns>
@@ -225,18 +227,15 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
                      ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
         VirtualTextureLoader? loader = null;
-        VirtualTexturePageCache? pages = null;
         try
         {
-            // The page files are opened on demand, so the tile set can be parsed before they are known.
+            // The page files are opened by the extraction that reads them, so nothing is opened here.
             loader = new VirtualTextureLoader(stream);
-            pages = loader.CreatePageCache(pageName =>
-                VirtualTexturePageFile.Open(packageService, directory, pageName));
-            return new VirtualTextureTileSetHandle(gtsPath, stream, loader, pages, loader.GetTextures());
+            return new VirtualTextureTileSetHandle(gtsPath, stream, loader,
+                pageName => VirtualTexturePageFile.Open(packageService, directory, pageName), loader.GetTextures());
         }
         catch
         {
-            pages?.Dispose();
             loader?.Dispose();
             stream.Dispose();
             throw;
