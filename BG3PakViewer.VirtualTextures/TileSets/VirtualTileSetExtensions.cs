@@ -8,7 +8,7 @@ namespace BG3PakViewer.VirtualTextures.TileSets;
 ///     tile set declares and the effective size left after the shared border used for block compression
 ///     is trimmed. The rules live here only, so consumers cannot drift apart.
 /// </summary>
-internal static class VirtualTextureTileSetExtensions
+internal static class VirtualTileSetExtensions
 {
     extension(VirtualTileSet tileSet)
     {
