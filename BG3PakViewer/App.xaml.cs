@@ -88,6 +88,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IExportService, ExportService>()
             .AddSingleton<IPreviewExportService, PreviewExportService>()
             .AddSingleton<IVirtualTextureCatalog, VirtualTextureCatalog>()
+            .AddSingleton<IVirtualTextureExtractor, VirtualTextureExtractor>()
             .AddSingleton<IMessenger, WeakReferenceMessenger>()
             .AddSingleton<MainWindowViewModel>()
             .BuildServiceProvider());

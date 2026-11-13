@@ -7,8 +7,7 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// </summary>
 /// <remarks>
 ///     Indexing reads the tile set metadata only, so it stays cheap: it does not open any GTP page
-///     file. Extracting a layer parses the tile set it belongs to, opens the pages that layer needs and
-///     releases both when the call ends, so nothing opened from the package outlives the extraction.
+///     file. The layers of the indexed textures are produced by <see cref="IVirtualTextureExtractor" />.
 /// </remarks>
 public interface IVirtualTextureCatalog : IDisposable
 {
@@ -29,19 +28,7 @@ public interface IVirtualTextureCatalog : IDisposable
     Task LoadAsync(IProgress<VirtualTextureIndexProgress>? progress);
 
     /// <summary>
-    ///     Stops indexing, releases the index and every stream opened from the package, so the
-    ///     package can be closed afterward.
+    ///     Stops indexing and releases the index, so the package can be closed afterward.
     /// </summary>
     Task ClearAsync();
-
-    /// <summary>
-    ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
-    /// </summary>
-    /// <param name="entry">The texture to extract.</param>
-    /// <param name="layer">The layer index.</param>
-    /// <param name="progress">Reports the extraction progress, in percent.</param>
-    /// <param name="cancellationToken">Cancels the extraction.</param>
-    /// <returns>The layer data, or <see langword="null" /> when the layer contains no data.</returns>
-    Task<Stream?> ExtractLayerAsync(VirtualTextureEntry entry, int layer, IProgress<double>? progress,
-        CancellationToken cancellationToken);
 }

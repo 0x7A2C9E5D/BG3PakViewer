@@ -23,6 +23,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 {
     private readonly IAppSettings _appSettings;
     private readonly IVirtualTextureCatalog _catalog;
+    private readonly IVirtualTextureExtractor _extractor;
     private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
@@ -32,6 +33,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialogViewModel" /> class.
     /// </summary>
     /// <param name="catalog">The index of the package's virtual textures.</param>
+    /// <param name="extractor">The service that extracts the selected texture layers.</param>
     /// <param name="exportService">The service the selected textures are written by.</param>
     /// <param name="appSettings">The settings holding the default export directory.</param>
     /// <param name="dialogService">The service used to pick the export folder and report the result.</param>
@@ -40,11 +42,12 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     ///     The texture name or tile set file name to search and select after indexing, or
     ///     <see langword="null" /> to show the whole list.
     /// </param>
-    public VirtualTextureToolboxDialogViewModel(IVirtualTextureCatalog catalog, IPreviewExportService exportService,
-        IAppSettings appSettings, IDialogService dialogService, IClipboardService clipboardService,
-        string? initialSearch = null)
+    public VirtualTextureToolboxDialogViewModel(IVirtualTextureCatalog catalog, IVirtualTextureExtractor extractor,
+        IPreviewExportService exportService, IAppSettings appSettings, IDialogService dialogService,
+        IClipboardService clipboardService, string? initialSearch = null)
     {
         _catalog = catalog;
+        _extractor = extractor;
         _exportService = exportService;
         _appSettings = appSettings;
         _dialogService = dialogService;

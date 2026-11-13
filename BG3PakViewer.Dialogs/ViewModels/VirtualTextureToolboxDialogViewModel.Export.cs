@@ -168,7 +168,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     private async Task<Stream> OpenLayerAsync(VirtualTextureEntry entry, int layer,
         CancellationToken cancellationToken)
     {
-        return await _catalog.ExtractLayerAsync(entry, layer, null, cancellationToken)
+        return await _extractor.ExtractLayerAsync(entry, layer, null, cancellationToken)
                ?? throw new InvalidDataException(Strings.TitleNoData);
     }
 

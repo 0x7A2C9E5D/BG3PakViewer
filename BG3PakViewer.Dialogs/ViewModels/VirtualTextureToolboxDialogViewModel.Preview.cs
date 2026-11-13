@@ -50,7 +50,7 @@ public partial class VirtualTextureToolboxDialogViewModel
 
         try
         {
-            await using var stream = await _catalog.ExtractLayerAsync(row.Entry, layer,
+            await using var stream = await _extractor.ExtractLayerAsync(row.Entry, layer,
                 new Progress<double>(value => Progress = value), cts.Token);
             if (cts.IsCancellationRequested) return;
 

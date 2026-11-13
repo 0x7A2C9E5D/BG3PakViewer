@@ -21,28 +21,21 @@ internal sealed class VirtualTextureTileSetHandle : IDisposable
     /// <summary>
     ///     Initializes a new instance of the <see cref="VirtualTextureTileSetHandle" /> class.
     /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
     /// <param name="tileSetStream">The stream of the tile set.</param>
     /// <param name="loader">The loader that extracts the textures.</param>
     /// <param name="pageStreamProvider">
     ///     Opens the GTP page file with the given name, e.g. from inside a PAK.
     /// </param>
     /// <param name="textures">The textures of the tile set, in index order.</param>
-    public VirtualTextureTileSetHandle(string gtsPath, Stream tileSetStream, VirtualTextureLoader loader,
+    public VirtualTextureTileSetHandle(Stream tileSetStream, VirtualTextureLoader loader,
         Func<string, Stream> pageStreamProvider, IReadOnlyList<FourCCTextureMeta> textures)
     {
-        GtsPath = gtsPath;
         _tileSetStream = tileSetStream;
         _loader = loader;
         _pageStreamProvider = pageStreamProvider;
         _textures = textures;
     }
 
-    /// <summary>
-    ///     The package path of the tile set.
-    /// </summary>
-    public string GtsPath { get; }
-    
     /// <summary>
     ///     Closes the loader and the tile set stream, in that order.
     /// </summary>

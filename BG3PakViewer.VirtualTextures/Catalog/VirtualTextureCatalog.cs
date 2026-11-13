@@ -8,19 +8,17 @@ using Serilog;
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
-///     Indexes every virtual texture tile set (.gts) of the loaded package and extracts layers from them.
+///     Indexes every virtual texture tile set (.gts) of the loaded package.
 /// </summary>
 /// <remarks>
-///     The index holds metadata only, so it does not open any GTP page file. Extraction is serialized
-///     because one extraction reads the package at a time; each one parses the tile set it needs, opens
-///     only the page file it is reading, and releases both when it ends, so nothing opened from the
-///     package outlives the call that opened it. <see cref="ClearAsync" /> waits for the work in
-///     progress before releasing the index, which is what lets the package be closed safely.
+///     The index holds metadata only, so it opens the tile sets, reads their texture names and closes
+///     them again: it never opens a GTP page file. The layers themselves are produced by
+///     <see cref="IVirtualTextureExtractor" />. <see cref="ClearAsync" /> waits for the work in progress
+///     before releasing the index, which is what lets the package be closed safely.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
-    private readonly SemaphoreSlim _gate = new(1, 1);
     private bool _disposed;
     private List<VirtualTextureEntry> _entries = [];
     private CancellationTokenSource? _loadCancellation;
@@ -49,8 +47,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Stops indexing, releases the index and every stream opened from the package, so the
-    ///     package can be closed afterward.
+    ///     Stops indexing and releases the index, so the package can be closed afterward.
     /// </summary>
     public async Task ClearAsync()
     {
@@ -66,53 +63,15 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
             }
 
         // Clearing cannot be canceled: the package is about to be replaced either way.
-        await _gate.WaitAsync(CancellationToken.None).ConfigureAwait(false);
-        try
-        {
-            _entries = [];
-            IsLoaded = false;
-            _loadCancellation?.Dispose();
-            _loadCancellation = null;
-            _loadTask = null;
-        }
-        finally
-        {
-            _gate.Release();
-        }
+        _entries = [];
+        IsLoaded = false;
+        _loadCancellation?.Dispose();
+        _loadCancellation = null;
+        _loadTask = null;
     }
 
     /// <summary>
-    ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
-    /// </summary>
-    /// <remarks>
-    ///     The tile set is parsed for this call and released when it ends, together with the page file
-    ///     the extraction read.
-    /// </remarks>
-    /// <param name="entry">The texture to extract.</param>
-    /// <param name="layer">The layer index.</param>
-    /// <param name="progress">Reports the extraction progress, in percent.</param>
-    /// <param name="cancellationToken">Cancels the extraction.</param>
-    /// <returns>The layer data, or <see langword="null" /> when the layer contains no data.</returns>
-    public async Task<Stream?> ExtractLayerAsync(VirtualTextureEntry entry, int layer, IProgress<double>? progress,
-        CancellationToken cancellationToken)
-    {
-        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            using var handle = await Task.Run(() => CreateHandle(entry.GtsPath), CancellationToken.None)
-                .ConfigureAwait(false);
-            return await handle.ExtractAsync(entry.Index, layer, progress, cancellationToken)
-                .ConfigureAwait(false);
-        }
-        finally
-        {
-            _gate.Release();
-        }
-    }
-
-    /// <summary>
-    ///     Stops indexing, releases the index and disposes the synchronization gate; the loaded package
-    ///     itself is left alone.
+    ///     Stops indexing and releases the index; the loaded package itself is left alone.
     /// </summary>
     public void Dispose()
     {
@@ -122,7 +81,6 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         _entries = [];
         IsLoaded = false;
         _loadCancellation?.Dispose();
-        _gate.Dispose();
     }
 
     /// <summary>
@@ -197,31 +155,5 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
             new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), loader.LayerCount, index)));
 
         return entries;
-    }
-
-    /// <summary>
-    ///     Opens one tile set of the package.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The handle, which the caller owns and disposes.</returns>
-    private VirtualTextureTileSetHandle CreateHandle(string gtsPath)
-    {
-        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
-        var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
-                     ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
-        VirtualTextureLoader? loader = null;
-        try
-        {
-            // The page files are opened by the extraction that reads them, so nothing is opened here.
-            loader = new VirtualTextureLoader(stream);
-            return new VirtualTextureTileSetHandle(gtsPath, stream, loader,
-                pageName => VirtualTexturePageFile.Open(packageService, directory, pageName), loader.GetTextures());
-        }
-        catch
-        {
-            loader?.Dispose();
-            stream.Dispose();
-            throw;
-        }
     }
 }

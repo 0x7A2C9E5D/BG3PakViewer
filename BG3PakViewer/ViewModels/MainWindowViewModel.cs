@@ -33,6 +33,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     private readonly ISettingsManagerService _settingsManagerService;
     private readonly IShellOpenService _shellOpenService;
     private readonly IVirtualTextureCatalog _virtualTextureCatalog;
+    private readonly IVirtualTextureExtractor _virtualTextureExtractor;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isLoading;
 
@@ -48,6 +49,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     /// <param name="recentFilesService"></param>
     /// <param name="settingsManagerService"></param>
     /// <param name="virtualTextureCatalog">The index of the package's virtual textures.</param>
+    /// <param name="virtualTextureExtractor">The service the toolbox extracts texture layers with.</param>
     /// <param name="previewExportService">The service the toolbox writes its exports to.</param>
     /// <param name="clipboardService">The service the toolbox copies texture names with.</param>
     public MainWindowViewModel(
@@ -60,6 +62,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         IRecentFilesService recentFilesService,
         ISettingsManagerService settingsManagerService,
         IVirtualTextureCatalog virtualTextureCatalog,
+        IVirtualTextureExtractor virtualTextureExtractor,
         IPreviewExportService previewExportService,
         IClipboardService clipboardService)
     {
@@ -72,6 +75,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         _recentFilesService = recentFilesService;
         _settingsManagerService = settingsManagerService;
         _virtualTextureCatalog = virtualTextureCatalog;
+        _virtualTextureExtractor = virtualTextureExtractor;
         _previewExportService = previewExportService;
         _clipboardService = clipboardService;
         RegisterFileMessageHandlers();
