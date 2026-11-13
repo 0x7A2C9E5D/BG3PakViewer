@@ -36,8 +36,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         {
             using var file = await Task.Run(() => OpenTileSet(entry.GtsPath), CancellationToken.None)
                 .ConfigureAwait(false);
-            var layerExtractor = new VirtualTextureLayerExtractor(file,
-                VirtualTexturePageFile.CreateProvider(packageService, entry.GtsPath));
+            var layerExtractor = new VirtualTextureLayerExtractor(file, CreatePageStreamProvider(entry.GtsPath));
             return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -54,8 +53,31 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     /// <returns>The parsed tile set.</returns>
     private VirtualTileSetFile OpenTileSet(string gtsPath)
     {
-        return new VirtualTileSetFile(packageService.GetFileByPath(gtsPath)?.CreateContentReader()
-                                      ?? throw new FileNotFoundException(
-                                          $"Virtual texture not found in package: {gtsPath}"));
+        return new VirtualTileSetFile(OpenPackageFile(gtsPath));
+    }
+
+    /// <summary>
+    ///     Creates the provider the extraction opens the page files of one tile set through: a page file
+    ///     is resolved by its name next to the tile set, inside the package.
+    /// </summary>
+    /// <param name="gtsPath">The package path of the tile set the page files sit next to.</param>
+    /// <returns>The provider the extraction opens its page files through.</returns>
+    private Func<string, Stream> CreatePageStreamProvider(string gtsPath)
+    {
+        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
+        return pageFileName =>
+            OpenPackageFile(directory.Length == 0 ? pageFileName : $"{directory}/{pageFileName}");
+    }
+
+    /// <summary>
+    ///     Opens one file of the package.
+    /// </summary>
+    /// <param name="path">The package path of the file.</param>
+    /// <returns>The content of the file.</returns>
+    /// <exception cref="FileNotFoundException">The package does not contain the file.</exception>
+    private Stream OpenPackageFile(string path)
+    {
+        return packageService.GetFileByPath(path)?.CreateContentReader()
+               ?? throw new FileNotFoundException($"Package file not found: {path}");
     }
 }
