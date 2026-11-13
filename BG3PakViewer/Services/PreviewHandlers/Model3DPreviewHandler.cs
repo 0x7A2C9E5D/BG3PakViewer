@@ -43,7 +43,7 @@ internal class Model3DPreviewHandler(IPackageService packageService) : IPreviewH
         Log.Warning("Model has no meshes");
         return new NotSupportedPreviewViewModel
         {
-            HelpText = Strings.ModelMissingMeshes
+            HelpTextKey = LangKeys.ModelMissingMeshes
         };
     }
 }

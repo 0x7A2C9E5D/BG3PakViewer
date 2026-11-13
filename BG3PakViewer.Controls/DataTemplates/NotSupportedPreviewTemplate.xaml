@@ -3,7 +3,7 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
     <DataTemplate x:Key="NotSupportedPreviewFileDataTemplate"
                   DataType="{x:Type vm:NotSupportedPreviewViewModel}">
-        <TextBlock Text="{Binding HelpText}" HorizontalAlignment="Center"
+        <TextBlock Text="{I18N {Binding HelpTextKey}}" HorizontalAlignment="Center"
                    VerticalAlignment="Center" FontSize="16" />
     </DataTemplate>
 </ResourceDictionary>

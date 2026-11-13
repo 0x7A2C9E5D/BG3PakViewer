@@ -40,7 +40,7 @@ internal class PreviewService(
         if (singleStreamResult != null) return singleStreamResult;
 
         Log.Information("No preview handler found for extension: {Extension}", node.FileExtension);
-        return CreateNotSupportedViewModel(Strings.FileNotSupportedPreviewMessage);
+        return CreateNotSupportedViewModel(LangKeys.FileNotSupportedPreviewMessage);
     }
 
     /// <summary>
@@ -54,13 +54,13 @@ internal class PreviewService(
         if (FileExtensions.IsLowTexTexture(fileName))
         {
             Log.Information("Low resolution DDS file is not supported for preview: {FileName}", fileName);
-            return CreateNotSupportedViewModel(Strings.LowTexDDSNotSupportedMessage);
+            return CreateNotSupportedViewModel(LangKeys.LowTexDDSNotSupportedMessage);
         }
 
         var file = packageService.GetFileByPath(node.FullPath);
         if (file != null) return null;
         Log.Warning("Preview file not found: {Path}", node.FullPath);
-        return CreateNotSupportedViewModel(Strings.LoadResourceFailed);
+        return CreateNotSupportedViewModel(LangKeys.LoadResourceFailed);
     }
 
     /// <summary>
@@ -98,10 +98,10 @@ internal class PreviewService(
     /// <summary>
     ///     Create not supported view model
     /// </summary>
-    /// <param name="helpText"></param>
+    /// <param name="helpTextKey"></param>
     /// <returns></returns>
-    private static NotSupportedPreviewViewModel CreateNotSupportedViewModel(string helpText)
+    private static NotSupportedPreviewViewModel CreateNotSupportedViewModel(string helpTextKey)
     {
-        return new NotSupportedPreviewViewModel { HelpText = helpText };
+        return new NotSupportedPreviewViewModel { HelpTextKey = helpTextKey };
     }
 }
