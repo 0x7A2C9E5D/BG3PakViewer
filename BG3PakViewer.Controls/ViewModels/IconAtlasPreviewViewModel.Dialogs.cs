@@ -17,6 +17,18 @@ namespace BG3PakViewer.Controls.ViewModels;
 public partial class IconAtlasPreviewViewModel
 {
     /// <summary>
+    ///     The completion message template, parsed once per preview instead of per export.
+    /// </summary>
+    private readonly CompositeFormat _completedMessageFormat =
+        CompositeFormat.Parse(Strings.PreviewExportCompletedMessage);
+
+    /// <summary>
+    ///     The partial completion message template, parsed once per preview instead of per export.
+    /// </summary>
+    private readonly CompositeFormat _partialMessageFormat =
+        CompositeFormat.Parse(Strings.PreviewExportPartialMessage);
+
+    /// <summary>
     ///     Asks the user where the files should be written.
     /// </summary>
     /// <returns>The chosen folder, or <see langword="null" /> when the user cancels.</returns>
@@ -56,7 +68,7 @@ public partial class IconAtlasPreviewViewModel
     {
         Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
         await _dialogService.ShowMessageBoxNotifyAsync(this,
-            string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportCompletedMessage, exported),
+            string.Format(CultureInfo.CurrentCulture, _completedMessageFormat, exported),
             Strings.ExportCompleted, MessageBoxIcon.Success);
     }
 
@@ -75,7 +87,7 @@ public partial class IconAtlasPreviewViewModel
         var message = new StringBuilder();
         message.AppendLine(exported == 0
             ? Strings.PreviewExportNothingMessage
-            : string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportPartialMessage, exported, total));
+            : string.Format(CultureInfo.CurrentCulture, _partialMessageFormat, exported, total));
         message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
         foreach (var failure in failures)
             message.AppendLine(CultureInfo.CurrentCulture, $"{failure.Name}: {failure.Reason}");
