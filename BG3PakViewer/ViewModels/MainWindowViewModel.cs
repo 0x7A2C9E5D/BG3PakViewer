@@ -3,6 +3,7 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Shared.ViewModels;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HanumanInstitute.MvvmDialogs;
 using iNKORE.UI.WPF.DragDrop;
@@ -16,18 +17,22 @@ namespace BG3PakViewer.ViewModels;
 ///     Split by responsibility across the partial files next to this one:
 ///     <c>.Package</c> (archive lifetime and file opening), <c>.Search</c> (search commands),
 ///     <c>.Export</c> (file and folder export), <c>.Preview</c> (preview pane),
-///     <c>.Dialogs</c> (modal dialogs and about data) and <c>.Window</c> (load and external links).
+///     <c>.VirtualTexture</c> (the virtual texture toolbox), <c>.Dialogs</c> (modal dialogs and about
+///     data) and <c>.Window</c> (load and external links).
 /// </remarks>
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
 {
+    private readonly IClipboardService _clipboardService;
     private readonly IDialogService _dialogService;
     private readonly IExportService _exportService;
     private readonly ILogAccessService _logAccessService;
     private readonly IPackageService _packageService;
+    private readonly IPreviewExportService _previewExportService;
     private readonly IPreviewService _previewService;
     private readonly IRecentFilesService _recentFilesService;
     private readonly ISettingsManagerService _settingsManagerService;
     private readonly IShellOpenService _shellOpenService;
+    private readonly IVirtualTextureCatalog _virtualTextureCatalog;
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _isLoading;
 
@@ -42,6 +47,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     /// <param name="previewService"></param>
     /// <param name="recentFilesService"></param>
     /// <param name="settingsManagerService"></param>
+    /// <param name="virtualTextureCatalog">The index of the package's virtual textures.</param>
+    /// <param name="previewExportService">The service the toolbox writes its exports to.</param>
+    /// <param name="clipboardService">The service the toolbox copies texture names with.</param>
     public MainWindowViewModel(
         IDialogService dialogService,
         IShellOpenService shellOpenService,
@@ -50,7 +58,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         IPackageService packageService,
         IPreviewService previewService,
         IRecentFilesService recentFilesService,
-        ISettingsManagerService settingsManagerService)
+        ISettingsManagerService settingsManagerService,
+        IVirtualTextureCatalog virtualTextureCatalog,
+        IPreviewExportService previewExportService,
+        IClipboardService clipboardService)
     {
         _dialogService = dialogService;
         _shellOpenService = shellOpenService;
@@ -60,6 +71,9 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
         _previewService = previewService;
         _recentFilesService = recentFilesService;
         _settingsManagerService = settingsManagerService;
+        _virtualTextureCatalog = virtualTextureCatalog;
+        _previewExportService = previewExportService;
+        _clipboardService = clipboardService;
         RegisterFileMessageHandlers();
     }
 
@@ -88,6 +102,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
+        // The catalog holds streams opened from the package, so it goes first.
+        _virtualTextureCatalog.Dispose();
         _packageService.Dispose();
         _cancellationTokenSource?.Dispose();
         if (PreviewVm is IDisposable disposable)

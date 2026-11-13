@@ -134,6 +134,21 @@
                         </Style>
                     </ui:AppBarButton.Style>
                 </ui:AppBarButton>
+                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.VtToolboxShort}}"
+                                 Command="{Binding ShowVtToolboxCommand}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.MapLayers}" />
+                    </ui:AppBarButton.Icon>
+                    <ui:AppBarButton.Style>
+                        <Style TargetType="ui:AppBarButton">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsVirtualTexturePackage}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ui:AppBarButton.Style>
+                </ui:AppBarButton>
                 <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.Log}}" Command="{Binding ShowLogDialogCommand}">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KnowledgeArticle}" />

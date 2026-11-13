@@ -15,6 +15,7 @@ using BG3PakViewer.Services.ExportStrategies;
 using BG3PakViewer.Services.PreviewHandlers;
 using BG3PakViewer.ViewModels;
 using BG3PakViewer.Views;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using HanumanInstitute.MvvmDialogs;
@@ -83,6 +84,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IPreviewService, PreviewService>()
             .AddSingleton<IExportService, ExportService>()
             .AddSingleton<IPreviewExportService, PreviewExportService>()
+            .AddSingleton<IVirtualTextureCatalog, VirtualTextureCatalog>()
             .AddSingleton<IMessenger, WeakReferenceMessenger>()
             .AddSingleton<MainWindowViewModel>()
             .BuildServiceProvider());
@@ -99,6 +101,7 @@ public sealed partial class App : IDisposable
         viewLocator.Register<AboutDialogViewModel, AboutDialog>();
         viewLocator.Register<RecentDialogViewModel, RecentDialog>();
         viewLocator.Register<SettingsDialogViewModel, SettingsDialog>();
+        viewLocator.Register<VtToolboxViewModel, VtToolboxWindow>();
         return viewLocator;
     }
 

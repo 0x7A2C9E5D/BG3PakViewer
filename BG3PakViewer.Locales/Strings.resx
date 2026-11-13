@@ -318,4 +318,19 @@
     <data name="ExportAllScripts" xml:space="preserve">
         <value>Export all scripts</value>
     </data>
+    <data name="VtToolbox" xml:space="preserve">
+        <value>Virtual Texture Toolbox</value>
+    </data>
+    <data name="VtToolboxShort" xml:space="preserve">
+        <value>VT Toolbox</value>
+    </data>
+    <data name="ExportSelectedTextures" xml:space="preserve">
+        <value>Export selected</value>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>Cancel</value>
+    </data>
+    <data name="IndexingLabel" xml:space="preserve">
+        <value>Indexing</value>
+    </data>
 </root>

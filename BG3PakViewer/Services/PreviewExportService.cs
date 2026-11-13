@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.CompilerServices;
 using BG3PakViewer.Contracts;
 using Serilog;
 
@@ -14,22 +15,33 @@ internal sealed class PreviewExportService : IPreviewExportService
     /// </summary>
     /// <param name="folder">The folder the files are written to.</param>
     /// <param name="files">The files to write, in the order they are attempted.</param>
+    /// <param name="cancellationToken">Cancels the export.</param>
     /// <returns>One result per file, in the order they were attempted.</returns>
     public async IAsyncEnumerable<PreviewExportResult> ExportAsync(string folder,
-        IReadOnlyList<PreviewExportFile> files)
+        IReadOnlyList<PreviewExportFile> files, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var exported = 0;
         foreach (var file in files)
         {
+            // Stopping between files keeps the cancellation out of the file that is being written,
+            // where it would be reported as a failure instead of as the user's decision.
+            if (cancellationToken.IsCancellationRequested) yield break;
+
             var path = Path.Combine(folder, file.FileName);
             PreviewExportResult result;
             try
             {
                 await using var source = await file.OpenAsync();
                 await using var target = File.Create(path);
-                await source.CopyToAsync(target);
+                await source.CopyToAsync(target, cancellationToken);
                 exported++;
                 result = new PreviewExportResult(file.FileName, true, null);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // The file being written is a half written file like any other.
+                RemovePartialFile(path);
+                yield break;
             }
             catch (Exception ex)
             {
@@ -52,6 +64,7 @@ internal sealed class PreviewExportService : IPreviewExportService
     /// <param name="path">The path the file was being written to.</param>
     private static void RemovePartialFile(string path)
     {
+        if (!File.Exists(path)) return;
         try
         {
             File.Delete(path);

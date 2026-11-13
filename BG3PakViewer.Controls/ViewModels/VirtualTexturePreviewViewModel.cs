@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.ViewModels;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HanumanInstitute.MvvmDialogs;
 using Image = SixLabors.ImageSharp.Image;
@@ -18,16 +19,6 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </remarks>
 public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
 {
-    /// <summary>
-    ///     Virtual texture layers are fixed: Albedo, Normal and Physical.
-    /// </summary>
-    private const int SupportedLayerCount = 3;
-
-    /// <summary>
-    ///     Layer names, kept in sync with the layer selector of the view; used to name exported files.
-    /// </summary>
-    private static readonly string[] LayerNames = ["Albedo", "Normal", "Physical"];
-
     private readonly IAppSettings _appSettings;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
@@ -49,10 +40,10 @@ public partial class VirtualTexturePreviewViewModel : SearchFilterViewModel
         _dialogService = dialogService;
         _appSettings = appSettings;
         _exportService = exportService;
-        if (loader.LayerCount > SupportedLayerCount)
+        if (loader.LayerCount > VirtualTextureLayers.Names.Count)
             throw new InvalidOperationException(
                 $"Unsupported virtual texture: {loader.LayerCount} layers found, " +
-                $"but at most {SupportedLayerCount} (Albedo, Normal, Physical) are supported.");
+                $"but at most {VirtualTextureLayers.Names.Count} (Albedo, Normal, Physical) are supported.");
         foreach (var meta in loader.GetTextures())
             Textures.Add(new VirtualTextureItemViewModel(meta, clipboardService));
         SelectedTexture = Textures.FirstOrDefault();

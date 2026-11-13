@@ -309,4 +309,19 @@
     <data name="ExportAllScripts" xml:space="preserve">
         <value>导出全部脚本</value>
     </data>
+    <data name="VtToolbox" xml:space="preserve">
+        <value>虚拟纹理工具箱</value>
+    </data>
+    <data name="VtToolboxShort" xml:space="preserve">
+        <value>VT 工具箱</value>
+    </data>
+    <data name="ExportSelectedTextures" xml:space="preserve">
+        <value>导出选中</value>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>取消</value>
+    </data>
+    <data name="IndexingLabel" xml:space="preserve">
+        <value>正在索引</value>
+    </data>
 </root>

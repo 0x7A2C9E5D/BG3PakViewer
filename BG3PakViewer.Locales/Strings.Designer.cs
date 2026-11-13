@@ -940,5 +940,50 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("ExportSearchResults", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Virtual Texture Toolbox.
+        /// </summary>
+        public static string VtToolbox {
+            get {
+                return ResourceManager.GetString("VtToolbox", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VT Toolbox.
+        /// </summary>
+        public static string VtToolboxShort {
+            get {
+                return ResourceManager.GetString("VtToolboxShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export selected.
+        /// </summary>
+        public static string ExportSelectedTextures {
+            get {
+                return ResourceManager.GetString("ExportSelectedTextures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Indexing.
+        /// </summary>
+        public static string IndexingLabel {
+            get {
+                return ResourceManager.GetString("IndexingLabel", resourceCulture);
+            }
+        }
     }
 }

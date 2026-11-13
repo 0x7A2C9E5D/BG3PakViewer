@@ -2,6 +2,7 @@ using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
+using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using HanumanInstitute.MvvmDialogs;
@@ -56,11 +57,7 @@ internal class VirtualTexturePreviewHandler(
             {
                 // ReSharper disable once AccessToModifiedClosure
                 var pageFileName = pageFileNames[pageFileIndex];
-                var pagePath = directory.Length == 0
-                    ? pageFileName
-                    : $"{directory}/{pageFileName}";
-                return packageService.GetFileByPath(pagePath)?.CreateContentReader()
-                       ?? throw new FileNotFoundException($"GTP page file not found in package: {pagePath}");
+                return VirtualTexturePageProvider.OpenPage(packageService, directory, pageFileName);
             }));
             pageFileNames = loader.TextureNames;
             return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService,

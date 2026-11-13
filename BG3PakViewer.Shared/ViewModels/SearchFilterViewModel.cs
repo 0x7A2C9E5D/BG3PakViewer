@@ -25,8 +25,7 @@ public abstract partial class SearchFilterViewModel : DisposableViewModel
     ///     The current search text.
     /// </summary>
     [ObservableProperty]
-    // ReSharper disable once UnusedMember.Local
-    private partial string? SearchText { get; set; }
+    protected partial string? SearchText { get; set; }
 
     /// <summary>
     ///     Predicate the view applies to the item collection; null shows every item. Rebuilt whenever

@@ -3,6 +3,7 @@ using System.Text;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
@@ -37,7 +38,7 @@ public partial class VirtualTexturePreviewViewModel
 
         var meta = texture.Meta;
         var name = Path.GetFileNameWithoutExtension(texture.DisplayName);
-        var layerCount = Math.Min(_loader.LayerCount, LayerNames.Length);
+        var layerCount = Math.Min(_loader.LayerCount, VirtualTextureLayers.Names.Count);
         return layerCount == 0
             ? Task.CompletedTask
             : ExportFilesAsync([
@@ -57,7 +58,8 @@ public partial class VirtualTexturePreviewViewModel
         {
             var exported = 0;
             var failures = new List<PreviewExportResult>();
-            await foreach (var result in _exportService.ExportAsync(folder, files))
+            // The single texture export has no cancel action; it reports its own failures instead.
+            await foreach (var result in _exportService.ExportAsync(folder, files, CancellationToken.None))
                 if (result.Success)
                     exported++;
                 else
@@ -149,7 +151,7 @@ public partial class VirtualTexturePreviewViewModel
     /// <returns>The file to write.</returns>
     private PreviewExportFile ToExportFile(string textureName, FourCCTextureMeta meta, int layer)
     {
-        return new PreviewExportFile($"{textureName}_{LayerNames[layer]}.dds",
+        return new PreviewExportFile($"{textureName}_{VirtualTextureLayers.Names[layer]}.dds",
             () => OpenLayerAsync(meta, layer));
     }
 

@@ -93,6 +93,11 @@ internal partial class MainWindowViewModel
             // so it is released here on the UI thread instead of inside the background work below.
             await DisposePreviewVmAsync();
 
+            // The toolbox index holds streams into the package being replaced, so it is released
+            // before the package is cleaned up.
+            IsVirtualTexturePackage = false;
+            await _virtualTextureCatalog.ClearAsync();
+
             var success = await Task.Run(async () =>
             {
                 PackageTree = null;
@@ -101,7 +106,10 @@ internal partial class MainWindowViewModel
             }, CancellationToken.None);
 
             if (success)
+            {
                 _recentFilesService.AddOrUpdateRecentFile(path);
+                IsVirtualTexturePackage = DetectVirtualTexturePackage();
+            }
             else
                 await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
                     Strings.OpenFileFailedCaption,

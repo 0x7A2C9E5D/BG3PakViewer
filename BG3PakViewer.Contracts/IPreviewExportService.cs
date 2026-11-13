@@ -15,12 +15,15 @@ public interface IPreviewExportService
     ///     the enumeration leaves the files that were not reached alone. A file that cannot be opened or
     ///     written does not stop the remaining ones and leaves nothing behind; it is reported as a
     ///     failed result instead, so a folder that cannot be written to shows up as failures rather than
-    ///     as an exception.
+    ///     as an exception. Cancelling stops the sequence after the file being written, which is removed
+    ///     rather than reported as a failure.
     /// </remarks>
     /// <param name="folder">The folder the files are written to.</param>
     /// <param name="files">The files to write, in the order they are attempted.</param>
+    /// <param name="cancellationToken">Cancels the export.</param>
     /// <returns>One result per file, in the order they were attempted.</returns>
-    IAsyncEnumerable<PreviewExportResult> ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files);
+    IAsyncEnumerable<PreviewExportResult> ExportAsync(string folder, IReadOnlyList<PreviewExportFile> files,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
