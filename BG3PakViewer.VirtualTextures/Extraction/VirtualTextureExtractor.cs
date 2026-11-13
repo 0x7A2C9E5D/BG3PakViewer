@@ -90,9 +90,21 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         var file = await Task.Run(() => new VirtualTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
             .ConfigureAwait(false);
         _cachedExtractor = new VirtualTextureLayerExtractor(file,
-            pageFileName => OpenPackageFile(VirtualTexturePackagePath.GetPageFilePath(gtsPath, pageFileName)));
+            pageFileName => OpenPackageFile(GetPageFilePath(gtsPath, pageFileName)));
         _cachedExtractorPath = gtsPath;
         return _cachedExtractor;
+    }
+
+    /// <summary>
+    ///     Composes the package path of a page file, which sits next to its tile set.
+    /// </summary>
+    /// <param name="gtsPath">The package path of the tile set the page file sits next to.</param>
+    /// <param name="pageFileName">The name of the page file, as the tile set records it.</param>
+    /// <returns>The package path of the page file.</returns>
+    private static string GetPageFilePath(string gtsPath, string pageFileName)
+    {
+        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/');
+        return string.IsNullOrEmpty(directory) ? pageFileName : $"{directory}/{pageFileName}";
     }
 
     /// <summary>
