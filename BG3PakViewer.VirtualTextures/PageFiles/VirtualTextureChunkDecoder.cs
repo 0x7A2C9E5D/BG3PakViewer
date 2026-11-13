@@ -17,7 +17,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// <param name="tile">The pixel size of one tile, including its border.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
-internal sealed class VirtualTextureTilePageChunkDecoder(
+internal sealed class VirtualTextureChunkDecoder(
     Size tile,
     IReadOnlyDictionary<uint, object> parameterBlocks,
     TileCompressor compressor)

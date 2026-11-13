@@ -17,7 +17,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 internal sealed class VirtualTextureUnpacker(
     int pageSize,
     Func<int, Stream> pageStreamProvider,
-    VirtualTextureTilePageChunkDecoder decoder)
+    VirtualTextureChunkDecoder decoder)
     : IDisposable
 {
     private readonly VirtualTextureTilePageFileHolder _tilePageFiles = new(pageSize, pageStreamProvider);

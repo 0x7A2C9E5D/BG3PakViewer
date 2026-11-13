@@ -95,7 +95,7 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTextureTileSetFile fil
         var dds = new MemoryStream();
 
         var tile = tileSet.TileSize;
-        var decoder = new VirtualTextureTilePageChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
+        var decoder = new VirtualTextureChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
         using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName), decoder);
         var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, dds);
