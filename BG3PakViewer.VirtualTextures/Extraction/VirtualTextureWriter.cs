@@ -1,3 +1,4 @@
+using System.Text;
 using LSLib.LS;
 using LSLib.VirtualTextures;
 
@@ -8,27 +9,60 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     reusable strip buffer per row and writes its blocks.
 /// </summary>
 /// <remarks>
-///     The writer owns neither the output stream nor its writer: the caller supplies the
-///     <see cref="BinaryWriter" /> every call writes through and keeps it open, so creating the writer has
-///     no side effect.
+///     The writer owns neither the output stream nor its writer: the caller supplies the stream or the
+///     writer it writes through and keeps it open, so creating the writer has no side effect.
 /// </remarks>
-/// <param name="cols">How many tiles each band holds.</param>
-/// <param name="rows">How many tile bands the texture spans.</param>
-/// <param name="tileWidth">The pixel width of one tile, without its border.</param>
-/// <param name="tileHeight">The pixel height of one tile, without its border.</param>
-/// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
-/// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
-/// <param name="writer">The writer the DDS is written through; the caller owns it.</param>
-internal sealed class VirtualTextureWriter(
-    int cols,
-    int rows,
-    int tileWidth,
-    int tileHeight,
-    int tileBorder,
-    VirtualTextureUnpacker unpacker,
-    BinaryWriter writer)
+internal sealed class VirtualTextureWriter
 {
-    private readonly BC5Image _strip = new(cols * tileWidth, tileHeight);
+    private readonly int _cols;
+    private readonly int _rows;
+    private readonly BC5Image _strip;
+    private readonly int _tileBorder;
+    private readonly int _tileHeight;
+    private readonly int _tileWidth;
+    private readonly VirtualTextureUnpacker _unpacker;
+    private readonly BinaryWriter _writer;
+
+    /// <summary>
+    ///     Constructs a new VirtualTextureWriter from an output stream, creating the writer it writes
+    ///     through.
+    /// </summary>
+    /// <param name="cols">How many tiles each band holds.</param>
+    /// <param name="rows">How many tile bands the texture spans.</param>
+    /// <param name="tileWidth">The pixel width of one tile, without its border.</param>
+    /// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+    /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
+    /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
+    /// <param name="stream">The stream the DDS is written to; the caller keeps it open.</param>
+    public VirtualTextureWriter(int cols, int rows, int tileWidth, int tileHeight, int tileBorder,
+        VirtualTextureUnpacker unpacker, Stream stream)
+        : this(cols, rows, tileWidth, tileHeight, tileBorder, unpacker,
+            new BinaryWriter(stream, Encoding.UTF8, true))
+    {
+    }
+
+    /// <summary>
+    ///     Constructs a new VirtualTextureWriter from a writer the caller created.
+    /// </summary>
+    /// <param name="cols">How many tiles each band holds.</param>
+    /// <param name="rows">How many tile bands the texture spans.</param>
+    /// <param name="tileWidth">The pixel width of one tile, without its border.</param>
+    /// <param name="tileHeight">The pixel height of one tile, without its border.</param>
+    /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
+    /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
+    /// <param name="writer">The writer the DDS is written through; the caller owns it.</param>
+    private VirtualTextureWriter(int cols, int rows, int tileWidth, int tileHeight, int tileBorder,
+        VirtualTextureUnpacker unpacker, BinaryWriter writer)
+    {
+        _cols = cols;
+        _rows = rows;
+        _tileBorder = tileBorder;
+        _tileHeight = tileHeight;
+        _tileWidth = tileWidth;
+        _unpacker = unpacker;
+        _writer = writer;
+        _strip = new BC5Image(cols * tileWidth, tileHeight);
+    }
 
     /// <summary>
     ///     Writes the DDS header of the image the bands form, which the bands follow in the stream.
@@ -40,9 +74,9 @@ internal sealed class VirtualTextureWriter(
             dwMagic = DDSHeader.DDSMagic,
             dwSize = DDSHeader.HeaderSize,
             dwFlags = 0x1007,
-            dwWidth = (uint)(cols * tileWidth),
-            dwHeight = (uint)(rows * tileHeight),
-            dwPitchOrLinearSize = (uint)(cols * tileWidth * rows * tileHeight),
+            dwWidth = (uint)(_cols * _tileWidth),
+            dwHeight = (uint)(_rows * _tileHeight),
+            dwPitchOrLinearSize = (uint)(_cols * _tileWidth * _rows * _tileHeight),
             dwDepth = 1,
             dwMipMapCount = 1,
             dwPFSize = 32,
@@ -50,7 +84,7 @@ internal sealed class VirtualTextureWriter(
             dwFourCC = DDSHeader.FourCC_DXT5,
             dwCaps = 0x1000
         };
-        BinUtils.WriteStruct(writer, ref header);
+        BinUtils.WriteStruct(_writer, ref header);
     }
 
     /// <summary>
@@ -65,9 +99,10 @@ internal sealed class VirtualTextureWriter(
         for (var col = 0; col < tiles.Length; col++)
         {
             if (tiles[col] is not { } tile) continue;
-            unpacker.ReadTile(tile).CopyTo(_strip, tileBorder, tileBorder, col * tileWidth, 0, tileWidth, tileHeight);
+            _unpacker.ReadTile(tile)
+                .CopyTo(_strip, _tileBorder, _tileBorder, col * _tileWidth, 0, _tileWidth, _tileHeight);
         }
 
-        writer.Write(_strip.Data, 0, _strip.Data.Length);
+        _writer.Write(_strip.Data, 0, _strip.Data.Length);
     }
 }
