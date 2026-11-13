@@ -5,7 +5,7 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// <summary>
 ///     Opens the GTP page files of a virtual texture tile set that lives inside the package.
 /// </summary>
-public static class VirtualTexturePageFile
+internal static class VirtualTexturePageFile
 {
     /// <summary>
     ///     Opens the page file at the given name, which sits next to the tile set in the package.

@@ -50,9 +50,9 @@ internal class PreviewTemplateSelector : DataTemplateSelector
     public DataTemplate? LocalizationPreviewTemplate { get; set; }
 
     /// <summary>
-    ///     Virtual texture preview template
+    ///     Virtual texture prompt template
     /// </summary>
-    public DataTemplate? VirtualTexturePreviewTemplate { get; set; }
+    public DataTemplate? VirtualTexturePromptTemplate { get; set; }
 
     /// <summary>
     ///     Select template
@@ -72,7 +72,7 @@ internal class PreviewTemplateSelector : DataTemplateSelector
             StoryScriptsPreviewViewModel => StoryScriptsPreviewTemplate,
             LarianResourcePreviewViewModel => LarianResourcePreviewTemplate,
             LocalizationPreviewViewModel => LocalizationPreviewTemplate,
-            VirtualTexturePreviewViewModel => VirtualTexturePreviewTemplate,
+            VirtualTexturePromptViewModel => VirtualTexturePromptTemplate,
             _ => null
         };
     }

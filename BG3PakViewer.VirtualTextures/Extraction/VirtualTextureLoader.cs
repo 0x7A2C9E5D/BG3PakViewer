@@ -9,7 +9,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     be decoded by <c>ImageLoader.LoadAsync</c>. GTP page files are opened lazily per pageFileIndex
 ///     via a stream provider delegate (e.g. read from inside a PAK).
 /// </summary>
-public sealed class VirtualTextureLoader : IDisposable
+internal sealed class VirtualTextureLoader : IDisposable
 {
     private readonly VirtualTexturePageCache _texturePageCache;
     private readonly VirtualTextureTileRangeCalculator _tileRanges;

@@ -125,4 +125,14 @@ public static class FileExtensions
     {
         return extension.Equals(".gts", StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    ///     Determines whether the specified extension is a virtual texture page file.
+    /// </summary>
+    /// <param name="extension"></param>
+    /// <returns></returns>
+    public static bool IsVirtualTexturePage(string extension)
+    {
+        return extension.Equals(".gtp", StringComparison.OrdinalIgnoreCase);
+    }
 }

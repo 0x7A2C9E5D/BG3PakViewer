@@ -9,7 +9,7 @@
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/StoryScriptsPreviewTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/LarianResourcePreviewTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/LocalizationPreviewTemplate.xaml" />
-        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/VirtualTexturePreviewTemplate.xaml" />
+        <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/VirtualTexturePromptTemplate.xaml" />
         <ResourceDictionary Source="/BG3PakViewer.Controls;component/DataTemplates/IconAtlasPreviewTemplate.xaml" />
     </ResourceDictionary.MergedDictionaries>
     <dt:PreviewTemplateSelector x:Key="PakNodeTemplateSelector"
@@ -20,6 +20,6 @@
                                 StoryScriptsPreviewTemplate="{StaticResource StoryScriptPreviewDataTemplate}"
                                 LarianResourcePreviewTemplate="{StaticResource LarianResourcePreviewDataTemplate}"
                                 LocalizationPreviewTemplate="{StaticResource LocalizationPreviewDataTemplate}"
-                                VirtualTexturePreviewTemplate="{StaticResource VirtualTexturePreviewDataTemplate}"
+                                VirtualTexturePromptTemplate="{StaticResource VirtualTexturePromptDataTemplate}"
                                 IconAtlasPreviewTemplate="{StaticResource IconAtlasPreviewTemplate}" />
 </ResourceDictionary>

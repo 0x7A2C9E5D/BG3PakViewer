@@ -321,6 +321,9 @@
     <data name="VtToolbox" xml:space="preserve">
         <value>Virtual Texture Preview Export</value>
     </data>
+    <data name="VirtualTexturePrompt" xml:space="preserve">
+        <value>Open this file from Virtual Texture Preview Export.</value>
+    </data>
     <data name="ExportSelectedTextures" xml:space="preserve">
         <value>Export selected</value>
     </data>

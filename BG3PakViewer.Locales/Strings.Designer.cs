@@ -942,6 +942,15 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open this file from Virtual Texture Preview Export..
+        /// </summary>
+        public static string VirtualTexturePrompt {
+            get {
+                return ResourceManager.GetString("VirtualTexturePrompt", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///     Looks up a localized string similar to Is Exporting.Are You Sure To Exit?.
         /// </summary>
         public static string WhenIsExportingExitMessage {

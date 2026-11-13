@@ -1,30 +1,24 @@
 using System.IO;
-using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
-using BG3PakViewer.VirtualTextures.Catalog;
-using BG3PakViewer.VirtualTextures.Extraction;
-using HanumanInstitute.MvvmDialogs;
 
 namespace BG3PakViewer.Services.PreviewHandlers;
 
 /// <summary>
-///     Virtual texture preview handler
+///     Virtual texture preview handler: a tile set or one of its page files has no per-file preview;
+///     both point the user at the virtual texture preview export tool.
 /// </summary>
-/// <param name="packageService"></param>
-/// <param name="dialogService">The service used by the preview to pick an export folder.</param>
-/// <param name="appSettings">The settings holding the default export directory.</param>
-/// <param name="exportService">The service that writes the exported layer files.</param>
-/// <param name="clipboardService">The service used to copy texture names.</param>
 // ReSharper disable once ClassNeverInstantiated.Global
-internal class VirtualTexturePreviewHandler(
-    IPackageService packageService,
-    IPreviewExportService exportService,
-    IDialogService dialogService,
-    IAppSettings appSettings,
-    IClipboardService clipboardService) : IPreviewHandler
+internal sealed class VirtualTexturePreviewHandler : IPreviewHandler
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="VirtualTexturePreviewHandler" /> class.
+    /// </summary>
+    public VirtualTexturePreviewHandler()
+    {
+    }
+
     /// <summary>
     ///     Can handle
     /// </summary>
@@ -32,41 +26,17 @@ internal class VirtualTexturePreviewHandler(
     /// <returns></returns>
     public bool CanHandle(string fileExtension)
     {
-        return FileExtensions.IsVirtualTexture(fileExtension);
+        return FileExtensions.IsVirtualTexture(fileExtension) ||
+               FileExtensions.IsVirtualTexturePage(fileExtension);
     }
 
     /// <summary>
-    ///     Create preview view model async
+    ///     Create the prompt that points at the virtual texture preview export tool.
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
-    /// <exception cref="FileNotFoundException"></exception>
-    public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
+    public Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        var directory = Path.GetDirectoryName(node.FullPath)?.Replace('\\', '/') ?? string.Empty;
-        var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
-        if (stream is null) return null;
-
-        IReadOnlyList<string> pageFileNames = [];
-        VirtualTextureLoader? loader = null;
-        try
-        {
-            // Parsing the tile set stays off the UI thread. The view model itself is created back
-            // on the UI thread, so its property changes and command notifications happen there.
-            loader = await Task.Run(() => new VirtualTextureLoader(stream, pageFileIndex =>
-            {
-                // ReSharper disable once AccessToModifiedClosure
-                var pageFileName = pageFileNames[pageFileIndex];
-                return VirtualTexturePageFile.Open(packageService, directory, pageFileName);
-            }));
-            pageFileNames = loader.TextureNames;
-            return new VirtualTexturePreviewViewModel(loader, dialogService, appSettings, exportService,
-                clipboardService);
-        }
-        catch
-        {
-            loader?.Dispose();
-            throw;
-        }
+        return Task.FromResult<object?>(new VirtualTexturePromptViewModel(Path.GetFileName(node.FullPath)));
     }
 }
