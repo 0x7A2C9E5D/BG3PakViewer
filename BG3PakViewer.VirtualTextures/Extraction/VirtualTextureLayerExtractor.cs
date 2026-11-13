@@ -1,3 +1,4 @@
+using System.Text;
 using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
@@ -112,8 +113,10 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
             tileSet.Header.TileHeight,
             pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
             tileSet.ParameterBlocks, _compressor);
-        using var writer = new VirtualTextureWriter(output, cols, rows, tileSet.EffectiveTileWidth,
-            tileSet.EffectiveTileHeight, tileSet.Header.TileBorder, unpacker);
+        using var binaryWriter = new BinaryWriter(output, Encoding.UTF8, true);
+        var writer = new VirtualTextureWriter(cols, rows, tileSet.EffectiveTileWidth,
+            tileSet.EffectiveTileHeight, tileSet.Header.TileBorder, unpacker, binaryWriter);
+        writer.WriteHeader();
         var rowTiles = new GTSFlatTileInfo?[cols];
         for (var row = 0; row < rows; row++)
         {
