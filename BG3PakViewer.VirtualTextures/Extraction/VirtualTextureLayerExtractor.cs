@@ -21,7 +21,6 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
     : IDisposable
 {
     private readonly TileCompressor _compressor = new();
-    private readonly VirtualTextureTileRangeCalculator _tileRanges = new(file.TileSet);
 
     /// <summary>
     ///     Releases the parsed tile set this extractor was created with.
@@ -81,9 +80,10 @@ internal sealed class VirtualTextureLayerExtractor(VirtualTileSetFile file, Func
         for (var level = 0; level < file.TileSet.TileSetLevels.Length; level++)
         {
             ct.ThrowIfCancellationRequested();
-            if (!_tileRanges.TryGetTileRange(level, tex, out var min, out var max))
+            if (!VirtualTextureTileRangeCalculator.TryGetTileRange(file.TileSet, level, tex, out var min,
+                    out var max))
                 continue;
-            if (!_tileRanges.RegionExists(level, layer, min, max)) continue;
+            if (!VirtualTextureTileRangeCalculator.RegionExists(file.TileSet, level, layer, min, max)) continue;
 
             ExtractToStream(level, layer, min, max, output, progress, ct);
             return true;

@@ -7,7 +7,11 @@ namespace BG3PakViewer.VirtualTextures.TileSets;
 ///     Computes tile-grid coverage for virtual textures: maps a texture's pixel span onto the
 ///     tile range of a mip level and validates that a region is fully present in a layer.
 /// </summary>
-internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
+/// <remarks>
+///     The calculator holds no tile set: every call receives the tile set it works on, so the same
+///     rules serve any tile set without the calculator having to be rebuilt for each one.
+/// </remarks>
+internal static class VirtualTextureTileRangeCalculator
 {
     /// <summary>
     ///     Gets the tile range size (columns, rows) for a given tile range.
@@ -27,6 +31,7 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Gets the tile range for a texture at a given mip level.
     /// </summary>
+    /// <param name="tileSet">The tile set the texture belongs to.</param>
     /// <param name="level">The index of the mip level.</param>
     /// <param name="tex">The texture metadata, which places the texture on the level 0 tile grid.</param>
     /// <param name="min">The first tile column and row covering the texture at that level, inclusive.</param>
@@ -35,14 +40,15 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     ///     <see langword="true" /> when at least one tile of the texture remains after clipping to the
     ///     grid of that level.
     /// </returns>
-    public bool TryGetTileRange(int level, FourCCTextureMeta tex, out Point min, out Point max)
+    public static bool TryGetTileRange(VirtualTileSet tileSet, int level, FourCCTextureMeta tex,
+        out Point min, out Point max)
     {
-        var (origin, span) = GetTextureTileSpan(tex);
+        var (origin, span) = GetTextureTileSpan(tileSet, tex);
         (min, max) = ToLevelRange(origin, span, level);
 
         // GetTileInfo indexes the flat tile array of this level without bounds checks,
         // so clamp the range to the level's actual tile grid.
-        max = ClampToLevelGrid(level, max);
+        max = ClampToLevelGrid(tileSet, level, max);
 
         return max.X >= min.X && max.Y >= min.Y;
     }
@@ -50,11 +56,12 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Gets the tile span for a texture at level 0.
     /// </summary>
+    /// <param name="tileSet">The tile set the texture belongs to.</param>
     /// <param name="tex">The texture metadata, in pixels.</param>
     /// <returns>
     ///     The texture position and size on the level 0 tile grid, in tiles.
     /// </returns>
-    private (Point Origin, Size Span) GetTextureTileSpan(FourCCTextureMeta tex)
+    private static (Point Origin, Size Span) GetTextureTileSpan(VirtualTileSet tileSet, FourCCTextureMeta tex)
     {
         return (new Point(tex.X / tileSet.EffectiveTileWidth, tex.Y / tileSet.EffectiveTileHeight),
             new Size(tex.Width / tileSet.EffectiveTileWidth, tex.Height / tileSet.EffectiveTileHeight));
@@ -89,10 +96,11 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Clips the last tile of a range to the tile grid of a given mip level.
     /// </summary>
+    /// <param name="tileSet">The tile set whose mip levels the range is clipped to.</param>
     /// <param name="level">The index of the mip level whose tile grid the range is clipped to.</param>
     /// <param name="max">The last tile column and row, lowered to the grid when they overflow.</param>
     /// <returns>The last tile column and row, inside the tile grid of that level.</returns>
-    private Point ClampToLevelGrid(int level, Point max)
+    private static Point ClampToLevelGrid(VirtualTileSet tileSet, int level, Point max)
     {
         var levelWidth = (int)tileSet.TileSetLevels[level].Width;
         var levelHeight = (int)tileSet.TileSetLevels[level].Height;
@@ -102,6 +110,7 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     /// <summary>
     ///     Checks if a region exists in a given layer.
     /// </summary>
+    /// <param name="tileSet">The tile set the region is looked up in.</param>
     /// <param name="level">The index of the mip level the region lives at.</param>
     /// <param name="layer">The index of the layer the region must exist in.</param>
     /// <param name="min">The first tile column and row of the region, inclusive.</param>
@@ -110,7 +119,7 @@ internal sealed class VirtualTextureTileRangeCalculator(VirtualTileSet tileSet)
     ///     <see langword="true" /> when every tile of the region exists in that layer; otherwise
     ///     <see langword="false" />, meaning the layer leaves part of the region empty.
     /// </returns>
-    public bool RegionExists(int level, int layer, Point min, Point max)
+    public static bool RegionExists(VirtualTileSet tileSet, int level, int layer, Point min, Point max)
     {
         GTSFlatTileInfo tile = default;
         for (var y = min.Y; y <= max.Y; y++)
