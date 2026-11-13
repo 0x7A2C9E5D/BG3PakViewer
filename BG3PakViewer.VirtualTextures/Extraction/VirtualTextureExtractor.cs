@@ -1,5 +1,4 @@
 using BG3PakViewer.Contracts;
-using BG3PakViewer.VirtualTextures.Catalog;
 using BG3PakViewer.VirtualTextures.Models;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
@@ -35,9 +34,12 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var loader = await Task.Run(() => OpenTileSet(entry.GtsPath), CancellationToken.None)
+            using var file = await Task.Run(() => OpenTileSet(entry.GtsPath), CancellationToken.None)
                 .ConfigureAwait(false);
-            return await loader.ExtractAsync(entry.Index, layer, progress, cancellationToken).ConfigureAwait(false);
+            var layerExtractor = new VirtualTextureLayerExtractor(file,
+                VirtualTexturePageFile.CreateProvider(packageService, entry.GtsPath));
+            return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
+                .ConfigureAwait(false);
         }
         finally
         {
@@ -46,23 +48,14 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     }
 
     /// <summary>
-    ///     Opens one tile set of the package, which the loader owns until it is disposed.
+    ///     Opens and parses one tile set of the package, which the file owns until it is disposed.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The loader of the tile set.</returns>
-    private VirtualTextureLoader OpenTileSet(string gtsPath)
+    /// <returns>The parsed tile set.</returns>
+    private VirtualTileSetFile OpenTileSet(string gtsPath)
     {
-        var stream = packageService.GetFileByPath(gtsPath)?.CreateContentReader()
-                     ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
-        try
-        {
-            // The page files are opened by the extraction that reads them, so nothing is opened here.
-            return new VirtualTextureLoader(stream, VirtualTexturePageFile.CreateProvider(packageService, gtsPath));
-        }
-        catch
-        {
-            stream.Dispose();
-            throw;
-        }
+        return new VirtualTileSetFile(packageService.GetFileByPath(gtsPath)?.CreateContentReader()
+                                      ?? throw new FileNotFoundException(
+                                          $"Virtual texture not found in package: {gtsPath}"));
     }
 }

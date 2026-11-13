@@ -146,12 +146,11 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <returns>The textures of the tile set, in index order.</returns>
     private List<VirtualTextureEntry> ReadTileSet(string gtsPath)
     {
-        using var loader = new VirtualTextureLoader(
+        using var file = new VirtualTileSetFile(
             packageService.GetFileByPath(gtsPath)?.CreateContentReader()
-            ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}"),
-            VirtualTexturePageFile.CreateProvider(packageService, gtsPath));
+            ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}"));
 
-        return loader.Textures.Select((meta, index) =>
-            new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), loader.LayerCount, index)).ToList();
+        return file.Textures.Select((meta, index) =>
+            new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), file.LayerCount, index)).ToList();
     }
 }

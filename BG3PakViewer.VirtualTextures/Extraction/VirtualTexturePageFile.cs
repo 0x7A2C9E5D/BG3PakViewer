@@ -1,6 +1,6 @@
 using BG3PakViewer.Contracts;
 
-namespace BG3PakViewer.VirtualTextures.Catalog;
+namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
 ///     Opens the GTP page files of a virtual texture tile set that lives inside the package.
