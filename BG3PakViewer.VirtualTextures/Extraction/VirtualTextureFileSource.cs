@@ -10,7 +10,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     the call, and the path of that file is composed elsewhere.
 /// </remarks>
 /// <param name="packageService">The package the files are read from.</param>
-internal sealed class VirtualTextureFileSource(IPackageService packageService)
+public sealed class VirtualTextureFileSource(IPackageService packageService)
 {
     /// <summary>
     ///     Opens one file of the package.

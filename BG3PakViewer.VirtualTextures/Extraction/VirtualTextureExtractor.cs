@@ -1,4 +1,3 @@
-using BG3PakViewer.Contracts;
 using BG3PakViewer.VirtualTextures.Models;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
@@ -11,11 +10,10 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     tile set it needs, opens only the page file it is reading, and releases both when it ends, so
 ///     nothing opened from the package outlives the call that opened it.
 /// </remarks>
-/// <param name="packageService">The loaded package the tile sets and their page files are read from.</param>
-public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
+/// <param name="fileSource">The files of the loaded package the tile sets and their page files are read from.</param>
+public sealed class VirtualTextureExtractor(VirtualTextureFileSource fileSource) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private readonly VirtualTextureFileSource _source = new(packageService);
 
     /// <summary>
     ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
@@ -35,11 +33,11 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var file = await Task.Run(() => new VirtualTileSetFile(_source.Open(entry.GtsPath)),
+            using var file = await Task.Run(() => new VirtualTileSetFile(fileSource.Open(entry.GtsPath)),
                     CancellationToken.None)
                 .ConfigureAwait(false);
             var layerExtractor = new VirtualTextureLayerExtractor(file,
-                pageFileName => _source.Open(
+                pageFileName => fileSource.Open(
                     VirtualTexturePackagePath.GetPageFilePath(entry.GtsPath, pageFileName)));
             return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
