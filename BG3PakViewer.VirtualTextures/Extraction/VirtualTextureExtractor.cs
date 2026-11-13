@@ -15,6 +15,7 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly VirtualTextureFileSource _source = new(packageService);
 
     /// <summary>
     ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
@@ -34,9 +35,12 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            using var file = await Task.Run(() => OpenTileSet(entry.GtsPath), CancellationToken.None)
+            using var file = await Task.Run(() => new VirtualTileSetFile(_source.Open(entry.GtsPath)),
+                    CancellationToken.None)
                 .ConfigureAwait(false);
-            var layerExtractor = new VirtualTextureLayerExtractor(file, CreatePageStreamProvider(entry.GtsPath));
+            var layerExtractor = new VirtualTextureLayerExtractor(file,
+                pageFileName => _source.Open(
+                    VirtualTexturePackagePath.GetPageFilePath(entry.GtsPath, pageFileName)));
             return await layerExtractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -44,40 +48,5 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         {
             _gate.Release();
         }
-    }
-
-    /// <summary>
-    ///     Opens and parses one tile set of the package, which the file owns until it is disposed.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The parsed tile set.</returns>
-    private VirtualTileSetFile OpenTileSet(string gtsPath)
-    {
-        return new VirtualTileSetFile(OpenPackageFile(gtsPath));
-    }
-
-    /// <summary>
-    ///     Creates the provider the extraction opens the page files of one tile set through: a page file
-    ///     is resolved by its name next to the tile set, inside the package.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set the page files sit next to.</param>
-    /// <returns>The provider the extraction opens its page files through.</returns>
-    private Func<string, Stream> CreatePageStreamProvider(string gtsPath)
-    {
-        var directory = Path.GetDirectoryName(gtsPath)?.Replace('\\', '/') ?? string.Empty;
-        return pageFileName =>
-            OpenPackageFile(directory.Length == 0 ? pageFileName : $"{directory}/{pageFileName}");
-    }
-
-    /// <summary>
-    ///     Opens one file of the package.
-    /// </summary>
-    /// <param name="path">The package path of the file.</param>
-    /// <returns>The content of the file.</returns>
-    /// <exception cref="FileNotFoundException">The package does not contain the file.</exception>
-    private Stream OpenPackageFile(string path)
-    {
-        return packageService.GetFileByPath(path)?.CreateContentReader()
-               ?? throw new FileNotFoundException($"Package file not found: {path}");
     }
 }
