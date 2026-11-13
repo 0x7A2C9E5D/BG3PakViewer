@@ -24,10 +24,10 @@ internal sealed class VirtualTextureCatalog(IPackageService packageService) : IV
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly List<VirtualTextureSource> _sources = [];
+    private bool _disposed;
     private List<VirtualTextureEntry> _entries = [];
     private CancellationTokenSource? _loadCancellation;
     private Task? _loadTask;
-    private bool _disposed;
 
     /// <summary>
     ///     Whether the textures of the loaded package have been indexed.
@@ -189,12 +189,8 @@ internal sealed class VirtualTextureCatalog(IPackageService packageService) : IV
             _ => throw new InvalidOperationException("Virtual texture page files are not read while indexing."));
         var textures = loader.GetTextures();
         var entries = new List<VirtualTextureEntry>(textures.Count);
-        for (var index = 0; index < textures.Count; index++)
-        {
-            var meta = textures[index];
-            entries.Add(new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), meta.Width, meta.Height,
-                loader.LayerCount, index));
-        }
+        entries.AddRange(textures.Select((meta, index) =>
+            new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), loader.LayerCount, index)));
 
         return entries;
     }
