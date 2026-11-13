@@ -55,7 +55,7 @@ internal sealed class VirtualTexturePageChunkDecoder(
         return chunkHeader.Codec switch
         {
             GTSCodec.Uniform => CreateUniformTile(compressed),
-            GTSCodec.BC => DecompressBc(chunkHeader, compressed, outputSize),
+            GTSCodec.BC => DecompressChunk(chunkHeader, compressed, outputSize),
             _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
         };
     }
@@ -105,7 +105,7 @@ internal sealed class VirtualTexturePageChunkDecoder(
     /// <param name="compressed">The still-compressed chunk bytes.</param>
     /// <param name="outputSize">The number of decompressed bytes to produce.</param>
     /// <returns>The decompressed block data.</returns>
-    private byte[] DecompressBc(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
+    private byte[] DecompressChunk(GTPChunkHeader chunkHeader, byte[] compressed, int outputSize)
     {
         var parameterBlock = (GTSBCParameterBlock)parameterBlocks[chunkHeader.ParameterBlockID];
         return compressor.Decompress(compressed, outputSize, parameterBlock.CompressionName1,
