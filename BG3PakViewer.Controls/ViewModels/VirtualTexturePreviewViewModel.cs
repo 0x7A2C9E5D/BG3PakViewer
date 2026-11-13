@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;

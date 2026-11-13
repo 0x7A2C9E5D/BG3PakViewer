@@ -1,6 +1,6 @@
 using System.IO;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Dialogs.Models;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 

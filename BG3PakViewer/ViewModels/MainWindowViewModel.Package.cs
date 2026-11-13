@@ -111,9 +111,11 @@ internal partial class MainWindowViewModel
                 IsVirtualTexturePackage = DetectVirtualTexturePackage();
             }
             else
+            {
                 await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
                     Strings.OpenFileFailedCaption,
                     MessageBoxIcon.Error);
+            }
         }
         finally
         {

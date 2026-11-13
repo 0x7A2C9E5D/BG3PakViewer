@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Dialogs.Models;
 using BG3PakViewer.Shared.ViewModels;
+using BG3PakViewer.VirtualTextures;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;

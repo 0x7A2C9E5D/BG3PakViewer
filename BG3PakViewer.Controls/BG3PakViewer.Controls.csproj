@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
@@ -40,6 +40,7 @@
         <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Shared\BG3PakViewer.Shared.csproj"/>
         <ProjectReference Include="..\BG3PakViewer.Utils\BG3PakViewer.Utils.csproj"/>
+        <ProjectReference Include="..\BG3PakViewer.VirtualTextures\BG3PakViewer.VirtualTextures.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

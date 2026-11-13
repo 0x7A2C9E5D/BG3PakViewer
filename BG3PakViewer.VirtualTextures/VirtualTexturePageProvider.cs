@@ -1,11 +1,11 @@
-using System.IO;
+using BG3PakViewer.Contracts;
 
-namespace BG3PakViewer.Services;
+namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
 ///     Resolves the GTP page files of a virtual texture tile set that lives inside the package.
 /// </summary>
-internal static class VirtualTexturePageProvider
+public static class VirtualTexturePageProvider
 {
     /// <summary>
     ///     Opens the page file at the given name, which sits next to the tile set in the package.

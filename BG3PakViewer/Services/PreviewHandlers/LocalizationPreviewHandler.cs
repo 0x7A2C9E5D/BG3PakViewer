@@ -1,3 +1,4 @@
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;

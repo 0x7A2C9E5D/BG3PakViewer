@@ -1,4 +1,4 @@
-namespace BG3PakViewer.Dialogs.Models;
+namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
 ///     How far the virtual texture catalog has got while indexing the tile sets of a package.

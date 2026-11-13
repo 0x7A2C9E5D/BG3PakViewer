@@ -1,10 +1,9 @@
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Controls.ViewModels;
-using BG3PakViewer.Loader;
-using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
+using BG3PakViewer.VirtualTextures;
 using HanumanInstitute.MvvmDialogs;
 
 namespace BG3PakViewer.Services.PreviewHandlers;

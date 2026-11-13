@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;

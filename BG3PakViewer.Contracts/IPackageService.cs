@@ -2,7 +2,7 @@
 using BG3PakViewer.Shared.Models;
 using LSLib.LS;
 
-namespace BG3PakViewer.Services;
+namespace BG3PakViewer.Contracts;
 
 /// <summary>
 ///     Package service

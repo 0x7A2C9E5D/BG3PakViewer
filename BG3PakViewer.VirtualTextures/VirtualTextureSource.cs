@@ -1,8 +1,6 @@
-using System.IO;
-using BG3PakViewer.Loader;
 using LSLib.VirtualTextures;
 
-namespace BG3PakViewer.Services;
+namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
 ///     One open tile set of the package, ready to extract its textures.
@@ -14,8 +12,8 @@ namespace BG3PakViewer.Services;
 internal sealed class VirtualTextureSource : IDisposable
 {
     private readonly VirtualTextureLoader _loader;
-    private readonly Stream _tileSetStream;
     private readonly IReadOnlyList<FourCCTextureMeta> _textures;
+    private readonly Stream _tileSetStream;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="VirtualTextureSource" /> class.
@@ -38,6 +36,12 @@ internal sealed class VirtualTextureSource : IDisposable
     /// </summary>
     public string GtsPath { get; }
 
+    public void Dispose()
+    {
+        _loader.Dispose();
+        _tileSetStream.Dispose();
+    }
+
     /// <summary>
     ///     Extracts one layer of the texture at the given index.
     /// </summary>
@@ -50,11 +54,5 @@ internal sealed class VirtualTextureSource : IDisposable
         CancellationToken cancellationToken)
     {
         return _loader.ExtractAsync(_textures[index], layer, progress, cancellationToken);
-    }
-
-    public void Dispose()
-    {
-        _loader.Dispose();
-        _tileSetStream.Dispose();
     }
 }

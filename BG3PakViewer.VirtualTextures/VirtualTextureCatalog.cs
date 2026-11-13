@@ -1,11 +1,9 @@
 using System.Diagnostics;
-using System.IO;
-using BG3PakViewer.Dialogs.Models;
-using BG3PakViewer.Loader;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Utils;
 using Serilog;
 
-namespace BG3PakViewer.Services;
+namespace BG3PakViewer.VirtualTextures;
 
 /// <summary>
 ///     Indexes every virtual texture tile set (.gts) of the loaded package and extracts layers from them.
@@ -18,7 +16,7 @@ namespace BG3PakViewer.Services;
 ///     which is what lets the package be closed safely.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
-internal sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
+public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
     private const int MaxOpenTileSets = 2;
 

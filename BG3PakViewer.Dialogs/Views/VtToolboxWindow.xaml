@@ -198,7 +198,7 @@
                                                                                 Storyboard.TargetProperty="RenderTransform.ScaleX">
                                                                             <DoubleAnimation.EasingFunction>
                                                                                 <BackEase EasingMode="EaseOut"
-                                                                                        Amplitude="0.2" />
+                                                                                    Amplitude="0.2" />
                                                                             </DoubleAnimation.EasingFunction>
                                                                         </DoubleAnimation>
                                                                         <DoubleAnimation BeginTime="00:00:00.15"
@@ -206,7 +206,7 @@
                                                                                 Storyboard.TargetProperty="RenderTransform.ScaleY">
                                                                             <DoubleAnimation.EasingFunction>
                                                                                 <BackEase EasingMode="EaseOut"
-                                                                                        Amplitude="0.2" />
+                                                                                    Amplitude="0.2" />
                                                                             </DoubleAnimation.EasingFunction>
                                                                         </DoubleAnimation>
                                                                         <DoubleAnimation BeginTime="00:00:00.15"

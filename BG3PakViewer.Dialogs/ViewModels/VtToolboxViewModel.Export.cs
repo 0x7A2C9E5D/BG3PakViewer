@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using BG3PakViewer.Contracts;
-using BG3PakViewer.Dialogs.Models;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.VirtualTextures;
@@ -31,7 +30,7 @@ public partial class VtToolboxViewModel
     }
 
     /// <summary>
-    ///     Whether an export is running and can be cancelled.
+    ///     Whether an export is running and can be canceled.
     /// </summary>
     /// <returns></returns>
     private bool CanCancelExport()

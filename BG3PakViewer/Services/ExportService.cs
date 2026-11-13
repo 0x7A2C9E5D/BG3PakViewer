@@ -1,4 +1,5 @@
-﻿using BG3PakViewer.Services.ExportStrategies;
+﻿using BG3PakViewer.Contracts;
+using BG3PakViewer.Services.ExportStrategies;
 using BG3PakViewer.Shared.Models;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
 using Serilog;

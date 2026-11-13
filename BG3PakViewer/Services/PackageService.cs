@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Shared.Models;
 using LSLib.LS;
