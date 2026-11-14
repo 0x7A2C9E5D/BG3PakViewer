@@ -3,7 +3,10 @@
                     xmlns:vm="clr-namespace:BG3PakViewer.Controls.ViewModels">
     <DataTemplate x:Key="NotSupportedPreviewFileDataTemplate"
                   DataType="{x:Type vm:NotSupportedPreviewViewModel}">
-        <TextBlock Text="{I18N {Binding HelpTextKey}}" HorizontalAlignment="Center"
+        <!-- The pane clears PreviewVm before building the next preview, which detaches this template
+             and briefly drops the DataContext to null. Without the fallback the I18N converter looks
+             the null key up in its dictionary and throws. -->
+        <TextBlock Text="{I18N {Binding HelpTextKey, FallbackValue=''}}" HorizontalAlignment="Center"
                    VerticalAlignment="Center" FontSize="16" />
     </DataTemplate>
 </ResourceDictionary>
