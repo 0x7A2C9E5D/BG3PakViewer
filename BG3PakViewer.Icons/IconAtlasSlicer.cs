@@ -30,6 +30,11 @@ public static class IconAtlasSlicer
     /// <summary>
     ///     A pixel this transparent, and this dark, does not count as content.
     /// </summary>
+    /// <remarks>
+    ///     The darkness has to count as well: the biggest atlases are padded up to a square with solid
+    ///     black cells, and those cells are as opaque as an icon, so alpha alone would bring them back
+    ///     as empty icons.
+    /// </remarks>
     private const int VisibleThreshold = 16;
 
     /// <summary>
@@ -135,6 +140,10 @@ public static class IconAtlasSlicer
     /// </summary>
     /// <param name="pixel">The pixel to look at.</param>
     /// <returns><c>true</c> when the pixel is visible.</returns>
+    /// <remarks>
+    ///     Both the alpha and the color have to say "content": an icon is neither transparent nor black,
+    ///     and the black cells that square an atlas up are neither.
+    /// </remarks>
     private static bool IsVisibleContentPixel(Bgra32 pixel)
     {
         if (pixel.A <= VisibleThreshold) return false;

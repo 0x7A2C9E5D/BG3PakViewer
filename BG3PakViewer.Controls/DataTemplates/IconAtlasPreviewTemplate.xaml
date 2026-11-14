@@ -85,8 +85,11 @@
                         <ItemsPanelTemplate>
                             <!-- The panel measures an icon once to learn the cell size it needs to
                                  virtualize the wrapped layout; all cells of a sliced atlas are the
-                                 same size. -->
-                            <ikw:VirtualizingWrapPanel Orientation="Horizontal" />
+                                 same size. SpacingMode is None because the cells already are the
+                                 spacing of the sheet: the panel otherwise defaults to Uniform, which
+                                 spreads the width a row has left over between the icons and shows
+                                 gaps the atlas does not have. -->
+                            <ikw:VirtualizingWrapPanel Orientation="Horizontal" SpacingMode="None" />
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
