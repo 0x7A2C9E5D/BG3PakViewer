@@ -9,8 +9,10 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// <remarks>
 ///     Indexing reads the tile set metadata only, so it stays cheap: it does not open any GTP page
 ///     file. The layers of the indexed textures are produced by <see cref="IVirtualTextureExtractor" />.
+///     Releasing the catalog waits for a running index to stop reading the package, so it is done
+///     through <see cref="IAsyncDisposable.DisposeAsync" /> instead of a blocking disposal.
 /// </remarks>
-public interface IVirtualTextureCatalog : IDisposable
+public interface IVirtualTextureCatalog : IAsyncDisposable
 {
     /// <summary>
     ///     Whether the textures of the loaded package have been indexed.

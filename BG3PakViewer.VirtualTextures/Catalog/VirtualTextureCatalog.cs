@@ -78,15 +78,17 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     package itself is left alone.
     /// </summary>
     /// <remarks>
-    ///     This runs right before the package is closed, so indexing must have stopped by the time it
-    ///     returns. <see cref="ClearAsync" /> cancels and waits, and it leaves the cancellation source and
-    ///     the task null, so a later <see cref="LoadAsync" /> does not reach into a disposed source.
+    ///     This runs right before the package is closed, so indexing must have stopped by the time the
+    ///     returned task completes. <see cref="ClearAsync" /> cancels and waits, and it leaves the
+    ///     cancellation source and the task null, so a later <see cref="LoadAsync" /> does not reach into
+    ///     a disposed source.
     /// </remarks>
-    public void Dispose()
+    /// <returns>A task that completes when the index has been released.</returns>
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
-        ClearAsync().GetAwaiter().GetResult();
+        await ClearAsync().ConfigureAwait(false);
     }
 
     /// <summary>
