@@ -350,6 +350,7 @@ WPF 在元素卸载时**不会**调用 `OnDetaching`（行为只在被移出 `Be
 - 顺带修掉两个真问题：
   1. **复制后没有复位 `MemoryStream.Position`**（旧代码的 `Stream.CopyTo` 同样以流末尾结束）→ 非 seek 页文件解析从流末尾开始，必然失败；探针在没有这一行时稳定复现 `Page 0 has no room for its chunk offset count`。现在复制完成后 `buffer.Position = 0`。
   2. **构造失败的兜底只覆盖了 `ReadChunkOffsetTables`**：`ValidatePageSize` 抛异常时（例如 gts 头把 PageSize 写成 0）流不会被关闭。现在整个构造体在一个 try/catch 里，任何失败都关流（reader 已创建时由 reader 关闭同一个流）。
+**回归与恢复（2026-11-14）**：`d12cd9f`（"移除多余的流位置重置"）把这一行删掉了，非 seek 路径重新从流末尾开始读。用非 seek 的 3 页合成 GTP 走真实构造路径：删除后稳定复现 `InvalidDataException: Page 0 has no room for its chunk offset count`；恢复后同一探针构造成功并读出 chunk（`size=4`、`data=01-02-03-04`）。`dotnet build BG3PakViewer.slnx -m:1 -c Debug -p:Platform=x64` 0 错误。
 **验证**：
 - 反射探针（加载真实 `BG3PakViewer.VirtualTextures.dll`，用反射构造 `VirtualTextureTilePageFile` / `VirtualTextureTilePageFileHolder`；`pageSize=4096`，因此上限 = 4096 × 4096 = 16 MiB）：
   - 非 seek 3 页（12 KiB）→ 构造成功、源流已关闭、页文件 `Dispose` 正常；通过 holder 取页文件同样正常。
