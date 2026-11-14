@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Extensions;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Xaml.Behaviors;
@@ -72,7 +73,6 @@ public class SfDataGridSearchBehavior : Behavior<SfDataGrid>, IRecipient<ValueCh
             MessageTokens.SearchQueryChanged);
         if (_disposed) return;
         _disposed = true;
-        AssociatedObject.SearchHelper.Dispose();
-        AssociatedObject.Dispose();
+        AssociatedObject.DisposeOnce();
     }
 }

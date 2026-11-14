@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using BG3PakViewer.Shared.Extensions;
 using Microsoft.Xaml.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.Grid.Helpers;
@@ -49,8 +50,7 @@ public class SfDataGridRowHeightBehavior : Behavior<SfDataGrid>
     /// <param name="e"></param>
     private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
     {
-        AssociatedObject.SearchHelper.Dispose();
-        AssociatedObject.Dispose();
+        AssociatedObject.DisposeOnce();
     }
 
     /// <summary>
