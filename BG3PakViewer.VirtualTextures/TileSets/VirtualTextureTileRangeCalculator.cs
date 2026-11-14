@@ -59,10 +59,29 @@ internal static class VirtualTextureTileRangeCalculator
     /// <returns>
     ///     The texture position and size on the level 0 tile grid, in tiles.
     /// </returns>
+    /// <remarks>
+    ///     The size is rounded up because a texture that does not end on a tile boundary still has its
+    ///     last pixels stored: rounding it down drops that column and row from every extraction, which
+    ///     is what the tile data shows (the content of a 1076 px wide texture runs to 1076, not to 1024).
+    ///     The position is not rounded up, because the textures start on tile boundaries.
+    /// </remarks>
     private static (Point Origin, Size Size) GetTextureTileSpan(VirtualTileSet tileSet, FourCCTextureMeta tex)
     {
-        return (new Point(tex.X / tileSet.EffectiveTileWidth, tex.Y / tileSet.EffectiveTileHeight),
-            new Size(tex.Width / tileSet.EffectiveTileWidth, tex.Height / tileSet.EffectiveTileHeight));
+        var tileWidth = tileSet.EffectiveTileWidth;
+        var tileHeight = tileSet.EffectiveTileHeight;
+        return (new Point(tex.X / tileWidth, tex.Y / tileHeight),
+            new Size(DivideCeiling(tex.Width, tileWidth), DivideCeiling(tex.Height, tileHeight)));
+    }
+
+    /// <summary>
+    ///     Divides a pixel size by the size of one tile, rounding up to the whole tiles it covers.
+    /// </summary>
+    /// <param name="value">The value to divide.</param>
+    /// <param name="divisor">The tile size to divide by.</param>
+    /// <returns>The number of tiles needed to hold <paramref name="value" />.</returns>
+    private static int DivideCeiling(int value, int divisor)
+    {
+        return value / divisor + (value % divisor > 0 ? 1 : 0);
     }
 
     /// <summary>
