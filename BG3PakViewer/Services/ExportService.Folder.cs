@@ -1,4 +1,3 @@
-using System.IO;
 using BG3PakViewer.Shared.Models;
 using BG3PakViewer.Utils;
 using LSLib.LS;
@@ -85,10 +84,11 @@ internal partial class ExportService
     /// <param name="folder"></param>
     private static async Task ExportFileToFolderAsync(PackagedFileInfo file, string folder)
     {
-        var targetPath = Path.Combine(folder, file.Name);
-        FileOperations.EnsureDirectoryExists(targetPath);
         try
         {
+            // The entry name comes from the package, so it may try to escape the chosen folder.
+            var targetPath = FileOperations.ResolveInside(folder, file.Name);
+            FileOperations.EnsureDirectoryExists(targetPath);
             await using var stream = file.CreateContentReader();
             if (!await FileOperations.SaveStreamToFileAsync(stream, targetPath))
                 Log.Warning("Failed to export file: {Path}", file.Name);

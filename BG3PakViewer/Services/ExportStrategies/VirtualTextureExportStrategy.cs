@@ -89,7 +89,8 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
                 return;
             }
 
-            var targetFilePath = Path.Combine(targetFolderPath, pageFileName);
+            // The page file name comes from the tile set, so it may try to escape the target folder.
+            var targetFilePath = FileOperations.ResolveInside(targetFolderPath, pageFileName);
             await using var pageStream = pageFile.CreateContentReader();
             await FileOperations.SaveStreamToFileAsync(pageStream, targetFilePath);
         }

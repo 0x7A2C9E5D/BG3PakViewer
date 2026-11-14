@@ -1,6 +1,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Utils;
 using Serilog;
 
 namespace BG3PakViewer.Services;
@@ -27,35 +28,90 @@ internal sealed class PreviewExportService : IPreviewExportService
             // where it would be reported as a failure instead of as the user's decision.
             if (cancellationToken.IsCancellationRequested) yield break;
 
-            var path = Path.Combine(folder, file.FileName);
-            PreviewExportResult result;
-            try
-            {
-                await using var source = await file.OpenAsync();
-                await using var target = File.Create(path);
-                await source.CopyToAsync(target, cancellationToken);
-                exported++;
-                result = new PreviewExportResult(file.FileName, true, null);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                // The file being written is a half written file like any other.
-                RemovePartialFile(path);
-                yield break;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to export file to: {Path}", path);
-                result = new PreviewExportResult(file.FileName, false, ex.Message);
+            var result = await ExportFileAsync(folder, file, cancellationToken);
+            if (result is null) yield break;
 
-                // A half written file would look exported, so the outcome could not be trusted.
-                RemovePartialFile(path);
-            }
-
+            if (result.Success) exported++;
             yield return result;
         }
 
         Log.Information("Exported {Exported} of {Total} files to: {Folder}", exported, files.Count, folder);
+    }
+
+    /// <summary>
+    ///     Writes one file into the folder, rejecting a name that would escape it.
+    /// </summary>
+    /// <param name="folder">The folder the file is written to.</param>
+    /// <param name="file">The file to write.</param>
+    /// <param name="cancellationToken">Cancels the write.</param>
+    /// <returns>
+    ///     The result of writing the file, or <see langword="null" /> when the export was cancelled while
+    ///     writing it and the remaining files must be left alone.
+    /// </returns>
+    private static async Task<PreviewExportResult?> ExportFileAsync(string folder, PreviewExportFile file,
+        CancellationToken cancellationToken)
+    {
+        string path;
+        try
+        {
+            // The file name comes from the package content, so it may try to escape the folder.
+            path = FileOperations.ResolveInside(folder, file.FileName);
+        }
+        catch (InvalidDataException ex)
+        {
+            Log.Error(ex, "Refused to export file outside the target folder: {Path}", file.FileName);
+            return new PreviewExportResult(file.FileName, false, ex.Message);
+        }
+
+        return await WriteFileAsync(path, file, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Copies one file to <paramref name="path" />, removing what a failure or a cancellation left
+    ///     behind.
+    /// </summary>
+    /// <param name="path">The full path the file is written to.</param>
+    /// <param name="file">The file to write.</param>
+    /// <param name="cancellationToken">Cancels the write.</param>
+    /// <returns>
+    ///     The result of writing the file, or <see langword="null" /> when the export was cancelled while
+    ///     writing it.
+    /// </returns>
+    private static async Task<PreviewExportResult?> WriteFileAsync(string path, PreviewExportFile file,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var source = await file.OpenAsync();
+            await using var target = File.Create(path);
+            await source.CopyToAsync(target, cancellationToken);
+            return new PreviewExportResult(file.FileName, true, null);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The file being written is a half written file like any other.
+            RemovePartialFile(path);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return FailWrite(path, file, ex);
+        }
+    }
+
+    /// <summary>
+    ///     Reports a failed write and returns its result, after removing what the failure left behind.
+    /// </summary>
+    /// <param name="path">The full path the file was written to.</param>
+    /// <param name="file">The file that could not be written.</param>
+    /// <param name="exception">The failure.</param>
+    /// <returns>A failed result for the file.</returns>
+    private static PreviewExportResult FailWrite(string path, PreviewExportFile file, Exception exception)
+    {
+        Log.Error(exception, "Failed to export file to: {Path}", path);
+        // A half written file would look exported, so the outcome could not be trusted.
+        RemovePartialFile(path);
+        return new PreviewExportResult(file.FileName, false, exception.Message);
     }
 
     /// <summary>

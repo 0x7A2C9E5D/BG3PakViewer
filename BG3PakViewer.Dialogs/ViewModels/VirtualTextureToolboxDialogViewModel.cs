@@ -163,46 +163,106 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     /// </summary>
     private async Task CheckSelectionAsync()
     {
-        if (_selectionCheckCancellation is not null) await _selectionCheckCancellation.CancelAsync();
-        var cts = new CancellationTokenSource();
-        _selectionCheckCancellation = cts;
-
-        // Off until the check proves otherwise: the command must not offer an export that has
-        // nothing to write.
-        _selectionHasData = false;
-        ExportSelectedCommand.NotifyCanExecuteChanged();
+        var cts = await BeginSelectionCheckAsync();
 
         try
         {
-            // Grouped by tile set so the cached one is parsed as few times as possible.
-            var textures = _selectedTextures.OrderBy(texture => texture.Entry.GtsPath, StringComparer.Ordinal).ToList();
-            foreach (var layer in Enumerable.Range(0, VirtualTextureLayers.Names.Count))
-            foreach (var texture in textures.Where(texture =>
-                         layer < Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count)))
-            {
-                if (!await _extractor.HasLayerDataAsync(texture.Entry, layer, cts.Token)) continue;
+            _selectionHasData = await TryAnySelectedLayerHasDataAsync(cts.Token);
+        }
+        finally
+        {
+            EndSelectionCheck(cts);
+        }
+    }
 
-                _selectionHasData = true;
-                return;
-            }
+    /// <summary>
+    ///     Runs the layer-data check, treating a cancellation and a failure as "no data" so the export
+    ///     stays disabled instead of offering files that cannot be written.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns><see langword="true" /> when one selected layer holds data.</returns>
+    private async Task<bool> TryAnySelectedLayerHasDataAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await AnySelectedLayerHasDataAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
             // A newer selection replaced this check.
+            return false;
         }
         catch (Exception ex)
         {
             // Failing to prove the selection has data keeps the export disabled, which is the safe side.
             Log.Error(ex, "Failed to check whether the selected textures hold any layer data");
+            return false;
         }
-        finally
-        {
-            if (ReferenceEquals(_selectionCheckCancellation, cts))
-            {
-                ExportSelectedCommand.NotifyCanExecuteChanged();
-                _selectionCheckCancellation = null;
-            }
-        }
+    }
+
+    /// <summary>
+    ///     Starts a new selection check, cancelling the one it replaces, and keeps the export disabled
+    ///     until the check proves the selection holds data.
+    /// </summary>
+    /// <returns>The cancellation source of the new check.</returns>
+    private async Task<CancellationTokenSource> BeginSelectionCheckAsync()
+    {
+        if (_selectionCheckCancellation is not null) await _selectionCheckCancellation.CancelAsync();
+
+        var cts = new CancellationTokenSource();
+        _selectionCheckCancellation = cts;
+        // Off until the check proves otherwise: the command must not offer an export that has
+        // nothing to write.
+        _selectionHasData = false;
+        ExportSelectedCommand.NotifyCanExecuteChanged();
+
+        return cts;
+    }
+
+    /// <summary>
+    ///     Re-enables the export for the check that finished, unless a newer check replaced it already.
+    /// </summary>
+    /// <param name="cts">The cancellation source of the check that finished.</param>
+    private void EndSelectionCheck(CancellationTokenSource cts)
+    {
+        if (!ReferenceEquals(_selectionCheckCancellation, cts)) return;
+
+        ExportSelectedCommand.NotifyCanExecuteChanged();
+        _selectionCheckCancellation = null;
+    }
+
+    /// <summary>
+    ///     Finds out whether any selected texture holds a layer to export.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns><see langword="true" /> when at least one selected layer holds data.</returns>
+    private async Task<bool> AnySelectedLayerHasDataAsync(CancellationToken cancellationToken)
+    {
+        // Grouped by tile set so the cached one is parsed as few times as possible.
+        var textures = _selectedTextures.OrderBy(texture => texture.Entry.GtsPath, StringComparer.Ordinal).ToList();
+        for (var layer = 0; layer < VirtualTextureLayers.Names.Count; layer++)
+            if (await AnyTextureHasLayerDataAsync(textures, layer, cancellationToken))
+                return true;
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Finds out whether one of the textures holds a layer to export at the given layer index.
+    /// </summary>
+    /// <param name="textures">The selected textures, ordered by tile set.</param>
+    /// <param name="layer">The layer index to check.</param>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns><see langword="true" /> when one texture holds data in that layer.</returns>
+    private async Task<bool> AnyTextureHasLayerDataAsync(
+        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, int layer, CancellationToken cancellationToken)
+    {
+        foreach (var texture in textures.Where(texture =>
+                     layer < Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count)))
+            if (await _extractor.HasLayerDataAsync(texture.Entry, layer, cancellationToken))
+                return true;
+
+        return false;
     }
 
     /// <summary>
