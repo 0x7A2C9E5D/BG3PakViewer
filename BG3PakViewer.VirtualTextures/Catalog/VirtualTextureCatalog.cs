@@ -143,7 +143,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <returns>The tile set paths, in package order.</returns>
     private List<string> GetTileSetPaths()
     {
-        return packageService.GetValidFiles()
+        return packageService.Search()
             .Where(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)))
             .Select(file => file.Name)
             .ToList();

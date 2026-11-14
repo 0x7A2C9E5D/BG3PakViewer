@@ -63,12 +63,12 @@ internal partial class ExportService
     {
         // The root node carries an empty path and covers the whole package.
         if (folderNode.FullPath.Length == 0)
-            return packageService.GetValidFiles();
+            return packageService.Search();
 
         // Compare whole path segments, so a sibling folder that merely starts with this name
         // (Public/SharedDev next to Public/Shared) is not exported as well.
         var folderPrefix = folderNode.FullPath + "/";
-        return packageService.GetValidFiles()
+        return packageService.Search()
             .Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase));
     }
 

@@ -54,7 +54,7 @@ internal partial class MainWindowViewModel
     /// <returns><see langword="true" /> when the package contains a .gts file.</returns>
     private bool DetectVirtualTexturePackage()
     {
-        return _packageService.GetValidFiles()
+        return _packageService.Search()
             .Any(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)));
     }
 }

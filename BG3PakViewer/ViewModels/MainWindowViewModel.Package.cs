@@ -3,7 +3,6 @@ using System.IO;
 using System.Windows;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
-using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -146,16 +145,18 @@ internal partial class MainWindowViewModel
     }
 
     /// <summary>
-    ///     Builds the tree from the currently loaded package. Runs on the caller's thread: every
-    ///     caller does this on a worker and publishes the result from the UI thread.
+    ///     Builds the tree from the loaded package's paths, optionally narrowed by the tree search
+    ///     query. Runs on the caller's thread: every caller does this on a worker and publishes the
+    ///     result from the UI thread.
     /// </summary>
     /// <param name="searchQuery">The tree search box query.</param>
     /// <returns>The tree, or null when no package is loaded.</returns>
     private ObservableCollection<PackageEntry>? BuildPackageTree(string? searchQuery = null)
     {
         if (!_packageService.IsLoaded) return null;
-        var paths = _packageService.GetValidFiles().Select(f => f.Name);
-        return PackageTreeBuilder.Build(paths, searchQuery);
+
+        var paths = _packageService.Search(searchQuery).Select(f => f.Name);
+        return PackageEntry.BuildTree(paths);
     }
 
     /// <summary>

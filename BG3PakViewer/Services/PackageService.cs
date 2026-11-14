@@ -63,12 +63,18 @@ internal sealed class PackageService : IPackageService
     }
 
     /// <summary>
-    ///     Get valid files
+    ///     Searches the package's active files, optionally by a case-insensitive path fragment.
     /// </summary>
+    /// <param name="query">Path fragment to match; null or blank returns every active file.</param>
     /// <returns></returns>
-    public IEnumerable<PackagedFileInfo> GetValidFiles()
+    public IEnumerable<PackagedFileInfo> Search(string? query = null)
     {
-        return CurrentPackage == null ? [] : CurrentPackage.Files.Where(f => !f.IsDeletion());
+        if (CurrentPackage == null) return [];
+
+        var files = CurrentPackage.Files.Where(f => !f.IsDeletion());
+        return string.IsNullOrWhiteSpace(query)
+            ? files
+            : files.Where(f => f.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

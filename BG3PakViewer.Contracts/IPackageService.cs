@@ -27,10 +27,11 @@ public interface IPackageService : IDisposable
     PackagedFileInfo? GetFileByPath(string fullPath);
 
     /// <summary>
-    ///     Get valid files
+    ///     Searches the package's active files, optionally by a case-insensitive path fragment.
     /// </summary>
+    /// <param name="query">Path fragment to match; null or blank returns every active file.</param>
     /// <returns></returns>
-    IEnumerable<PackagedFileInfo> GetValidFiles();
+    IEnumerable<PackagedFileInfo> Search(string? query = null);
 
     /// <summary>
     ///     Cleanup async
