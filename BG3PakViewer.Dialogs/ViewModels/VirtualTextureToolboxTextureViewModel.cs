@@ -11,7 +11,9 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// </summary>
 /// <param name="entry">The indexed texture.</param>
 /// <param name="clipboardService">The service used to copy the texture name.</param>
-public partial class VirtualTextureToolboxTextureViewModel(VirtualTextureEntry entry, IClipboardService clipboardService)
+public partial class VirtualTextureToolboxTextureViewModel(
+    VirtualTextureEntry entry,
+    IClipboardService clipboardService)
     : ObservableObject
 {
     /// <summary>

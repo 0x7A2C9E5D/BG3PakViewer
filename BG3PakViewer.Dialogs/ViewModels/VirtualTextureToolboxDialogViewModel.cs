@@ -28,6 +28,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
     private readonly IVirtualTextureExtractor _extractor;
+    private CancellationTokenSource? _indexCancellation;
     private List<VirtualTextureToolboxTextureViewModel> _selectedTextures = [];
     private CancellationTokenSource? _selectionCheckCancellation;
     private bool _selectionHasData;
@@ -276,6 +277,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         _ = _previewCancellation?.CancelAsync();
         _ = _exportCancellation?.CancelAsync();
         _ = _selectionCheckCancellation?.CancelAsync();
+        _ = _indexCancellation?.CancelAsync();
 
         // Detach the view from the image before releasing it.
         Preview = null;
@@ -315,20 +317,31 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     {
         if (_catalog.IsLoaded)
         {
-            BuildRows();
+            PopulateTextures();
             return;
         }
 
+        var cts = new CancellationTokenSource();
+        _indexCancellation = cts;
         IsIndexing = true;
         try
         {
             var progress = new Progress<VirtualTextureIndexProgress>(value =>
             {
+                if (cts.IsCancellationRequested) return;
                 IndexedCount = value.Indexed;
                 IndexTotal = value.Total;
             });
             await _catalog.LoadAsync(progress);
-            BuildRows();
+            // The dialog may have been closed while the index was built: publishing the rows then
+            // would touch a disposed view model and start a preview for it.
+            if (cts.IsCancellationRequested) return;
+            PopulateTextures();
+        }
+        catch (OperationCanceledException)
+        {
+            // The dialog was closed before the index was built; the catalog keeps the result for the
+            // next time the toolbox is opened.
         }
         catch (Exception ex)
         {
@@ -336,15 +349,16 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         }
         finally
         {
-            IsIndexing = false;
+            if (!cts.IsCancellationRequested) IsIndexing = false;
+            if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
         }
     }
 
     /// <summary>
-    ///     Turns the indexed textures into rows, applies the search the dialog was opened with and
+    ///     Fills the texture list from the index, applies the search the dialog was opened with and
     ///     selects its first match.
     /// </summary>
-    private void BuildRows()
+    private void PopulateTextures()
     {
         Textures.Clear();
         foreach (var entry in _catalog.Entries)
