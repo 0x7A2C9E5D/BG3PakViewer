@@ -58,8 +58,12 @@ internal sealed class PackageService : IPackageService
     /// <returns></returns>
     public async Task<PackagedFileInfo?> GetFileByPath(string fullPath)
     {
-        return await Task.Run(() => CurrentPackage?.Files.FirstOrDefault(f =>
-            f.Name.Equals(fullPath, StringComparison.OrdinalIgnoreCase)));
+        var package = CurrentPackage;
+        if (package is null) return null;
+
+        var file = package.Files.FirstOrDefault(f =>
+            f.Name.Equals(fullPath, StringComparison.OrdinalIgnoreCase));
+        return await Task.FromResult(file).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -67,18 +71,15 @@ internal sealed class PackageService : IPackageService
     /// </summary>
     /// <param name="query">Path fragment to match; null or blank returns every active file.</param>
     /// <returns>The matching files, or <see langword="null" /> when no package is loaded.</returns>
-    public async Task<IReadOnlyList<PackagedFileInfo>?> Search(string? query = null)
+    public Task<IReadOnlyList<PackagedFileInfo>?> Search(string? query = null)
     {
         var package = CurrentPackage;
-        if (package is null) return await Task.FromResult<IReadOnlyList<PackagedFileInfo>?>(null);
+        if (package is null) return Task.FromResult<IReadOnlyList<PackagedFileInfo>?>(null);
 
-        return await Task.Run(IReadOnlyList<PackagedFileInfo>? () =>
-        {
-            var files = package.Files.Where(f => !f.IsDeletion());
-            if (!string.IsNullOrWhiteSpace(query))
-                files = files.Where(f => f.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
-            return [.. files];
-        }).ConfigureAwait(false);
+        var files = package.Files.Where(f => !f.IsDeletion());
+        if (!string.IsNullOrWhiteSpace(query))
+            files = files.Where(f => f.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult<IReadOnlyList<PackagedFileInfo>?>([.. files]);
     }
 
     /// <summary>
