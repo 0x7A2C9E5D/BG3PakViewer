@@ -21,7 +21,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly IPackageService _packageService;
     private bool _disposed;
-    private VirtualTextureTileSetFile? _tileSet;
+    private VirtualTextureTileSetSlot? _tileSet;
     private string? _tileSetPath;
 
     /// <summary>
@@ -120,7 +120,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         // later call for the old path hand out a released object for the rest of the session.
         await ReleaseCachedTileSetAsync().ConfigureAwait(false);
         var stream = await OpenPackageFileAsync(path).ConfigureAwait(false);
-        _tileSet = await Task.Run(() => new VirtualTextureTileSetFile(stream), CancellationToken.None)
+        _tileSet = await Task.Run(() => new VirtualTextureTileSetSlot(stream), CancellationToken.None)
             .ConfigureAwait(false);
         _tileSetPath = path;
     }

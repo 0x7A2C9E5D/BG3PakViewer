@@ -12,7 +12,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     A chunk is addressed by the page and the chunk index it occupies inside its page file. It is either
 ///     uniform, carrying the single RGBA8 texel the whole size repeats, or BC, compressed with the
 ///     parameter block its header names. The decoder knows nothing about which page file a chunk lives in:
-///     the page arrives as a <see cref="VirtualTextureTilePageFile" />.
+///     the page arrives as a <see cref="VirtualTextureTilePage" />.
 /// </remarks>
 /// <param name="size">The pixel size of one size, including its border.</param>
 /// <param name="parameterBlocks">The codec parameter blocks of the size set, by parameter block id.</param>
@@ -39,7 +39,7 @@ internal sealed class VirtualTextureChunkDecoder(
     ///     Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into
     ///     a size image sized as the size declares.
     /// </summary>
-    /// <param name="tilePageFile">The page file the chunk lives in.</param>
+    /// <param name="tilePage">The page file the chunk lives in.</param>
     /// <param name="pageIndex">The page within that page file.</param>
     /// <param name="chunkIndex">The chunk within that page.</param>
     /// <returns>
@@ -47,9 +47,9 @@ internal sealed class VirtualTextureChunkDecoder(
     ///     same image again on every call, so the caller has to copy it out before reading the next size.
     /// </returns>
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
-    public BC5Image Decode(VirtualTextureTilePageFile tilePageFile, int pageIndex, int chunkIndex)
+    public BC5Image Decode(VirtualTextureTilePage tilePage, int pageIndex, int chunkIndex)
     {
-        var (chunkHeader, compressed) = tilePageFile.ReadChunk(pageIndex, chunkIndex);
+        var (chunkHeader, compressed) = tilePage.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return chunkHeader.Codec switch
         {

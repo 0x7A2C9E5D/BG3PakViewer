@@ -15,7 +15,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     truncated page file therefore fails with an <see cref="InvalidDataException" /> at the first read
 ///     instead of allocating from, or reading past, whatever the corrupt data claims.
 /// </remarks>
-internal sealed class VirtualTextureTilePageFile : IAsyncDisposable
+internal sealed class VirtualTextureTilePage : IAsyncDisposable
 {
     /// <summary>
     ///     The largest page size accepted from the tile set that owns the page files. It is a sanity bound,
@@ -55,7 +55,7 @@ internal sealed class VirtualTextureTilePageFile : IAsyncDisposable
     ///     it makes when the stream cannot seek.
     /// </param>
     /// <exception cref="InvalidDataException">The page file is not a readable GTP page file.</exception>
-    public VirtualTextureTilePageFile(int pageSize, Stream stream)
+    public VirtualTextureTilePage(int pageSize, Stream stream)
     {
         try
         {

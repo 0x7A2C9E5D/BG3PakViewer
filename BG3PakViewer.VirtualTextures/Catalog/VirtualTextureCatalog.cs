@@ -166,7 +166,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         // the metadata parse on that worker too instead of returning to the UI thread.
         var stream = await Task.Run(file.CreateContentReader, cancellationToken).ConfigureAwait(false);
         if (stream is null) throw new FileNotFoundException($"Virtual texture not found in package: {file.Name}");
-        await using var tileSetFile = new VirtualTextureTileSetFile(stream);
+        await using var tileSetFile = new VirtualTextureTileSetSlot(stream);
         var layerCount = tileSetFile.LayerCount;
         var textures = tileSetFile.Textures;
         return
