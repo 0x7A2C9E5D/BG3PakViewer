@@ -1,26 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0-windows10.0.18362.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
         <Platforms>x64</Platforms>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <DebugType>embedded</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <DebugType>embedded</DebugType>
+        <!-- ZeroQL generates a member that hides an inherited one; the warning is in generated code. -->
+        <NoWarn>$(NoWarn);CS0108</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="ZeroQL" Version="8.0.0"/>
-        <PackageReference Update="Nerdbank.GitVersioning">
-            <Version>3.10.94</Version>
-        </PackageReference>
     </ItemGroup>
 
 </Project>

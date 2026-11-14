@@ -5,16 +5,7 @@
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
-        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
         <Platforms>x64</Platforms>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <DebugType>embedded</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,11 +19,8 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Update="Nerdbank.GitVersioning">
-            <Version>3.10.94</Version>
-        </PackageReference>
         <PackageReference Include="Syncfusion.SfGrid.WPF" Version="35.1.46"/>
-        <PackageReference Include="System.IO.Hashing" Version="11.0.0" />
+        <PackageReference Include="System.IO.Hashing" Version="11.0.0"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -6,16 +6,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
-        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
         <Platforms>x64</Platforms>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-        <DebugType>embedded</DebugType>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -40,9 +31,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="System.Reactive" Version="7.0.0"/>
-        <PackageReference Update="Nerdbank.GitVersioning">
-            <Version>3.10.94</Version>
-        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
@@ -60,7 +48,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="..\..\..\..\.nuget\packages\naudio.vorbis\1.5.0\contentFiles\any\netstandard2.0\README.md"/>
         <None Remove="Syncfusion.lic"/>
     </ItemGroup>
 

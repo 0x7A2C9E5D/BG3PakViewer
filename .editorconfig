@@ -1,0 +1,16 @@
+root = true
+
+# The repository only fixes what every editor can agree on: encoding and whitespace. Coding style is
+# left to the analyzers the projects already reference, so this file cannot reformat the tree.
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,csproj,props,targets,slnx,xaml}]
+indent_style = space
+indent_size = 4
+
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
