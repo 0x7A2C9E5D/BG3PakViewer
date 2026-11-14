@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using BG3PakViewer.Shared.Models;
-using LSLib.LS;
+﻿using LSLib.LS;
 
 namespace BG3PakViewer.Contracts;
 
@@ -20,13 +18,6 @@ public interface IPackageService : IDisposable
     /// <param name="path"></param>
     /// <returns></returns>
     Task<bool> LoadPackageAsync(string path);
-
-    /// <summary>
-    ///     Build tree
-    /// </summary>
-    /// <param name="searchQuery"></param>
-    /// <returns></returns>
-    ObservableCollection<PackageEntry>? BuildTree(string? searchQuery = null);
 
     /// <summary>
     ///     Get file by path

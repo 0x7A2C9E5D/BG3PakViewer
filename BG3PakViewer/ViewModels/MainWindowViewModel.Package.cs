@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
+using BG3PakViewer.Services;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using CommunityToolkit.Mvvm.Input;
@@ -141,7 +142,20 @@ internal partial class MainWindowViewModel
     private async Task<ObservableCollection<PackageEntry>?> LoadAndBuildTreeAsync(string path)
     {
         var success = await _packageService.LoadPackageAsync(path);
-        return success ? _packageService.BuildTree() : null;
+        return success ? BuildPackageTree() : null;
+    }
+
+    /// <summary>
+    ///     Builds the tree from the currently loaded package. Runs on the caller's thread: every
+    ///     caller does this on a worker and publishes the result from the UI thread.
+    /// </summary>
+    /// <param name="searchQuery">The tree search box query.</param>
+    /// <returns>The tree, or null when no package is loaded.</returns>
+    private ObservableCollection<PackageEntry>? BuildPackageTree(string? searchQuery = null)
+    {
+        if (!_packageService.IsLoaded) return null;
+        var paths = _packageService.GetValidFiles().Select(f => f.Name);
+        return PackageTreeBuilder.Build(paths, searchQuery);
     }
 
     /// <summary>

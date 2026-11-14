@@ -1,7 +1,5 @@
-using System.Collections.ObjectModel;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Loader;
-using BG3PakViewer.Shared.Models;
 using LSLib.LS;
 using Serilog;
 
@@ -51,22 +49,6 @@ internal sealed class PackageService : IPackageService
             CurrentPackage = null;
             return false;
         }
-    }
-
-    /// <summary>
-    ///     Build tree
-    /// </summary>
-    /// <param name="searchQuery"></param>
-    /// <returns></returns>
-    public ObservableCollection<PackageEntry>? BuildTree(string? searchQuery = null)
-    {
-        if (CurrentPackage == null)
-            return null;
-        var files = string.IsNullOrWhiteSpace(searchQuery)
-            ? GetValidFiles()
-            : FilterFiles(searchQuery);
-        var filePaths = files.Select(f => f.Name);
-        return PackageEntry.BuildTree(filePaths);
     }
 
     /// <summary>
@@ -133,19 +115,5 @@ internal sealed class PackageService : IPackageService
     ~PackageService()
     {
         Dispose(false);
-    }
-
-    /// <summary>
-    ///     Filter files
-    /// </summary>
-    /// <param name="searchQuery"></param>
-    /// <returns></returns>
-    private IEnumerable<PackagedFileInfo> FilterFiles(string searchQuery)
-    {
-        if (CurrentPackage == null || string.IsNullOrWhiteSpace(searchQuery))
-            return [];
-        return CurrentPackage.Files
-            .Where(f => !f.IsDeletion() &&
-                        f.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
     }
 }
