@@ -52,7 +52,7 @@ internal sealed class VirtualTextureWriter
     /// <summary>
     ///     Writes the DDS header of the image the bands form, which the bands follow in the stream.
     /// </summary>
-    public void WriteHeader()
+    public Task WriteHeader()
     {
         // The numeric values are the DDS bit fields: 0x1007 is DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH |
         // DDSD_PIXELFORMAT, 0x04 in dwPFFlags is DDPF_FOURCC and 0x1000 in dwCaps is DDSCAPS_TEXTURE.
@@ -72,6 +72,7 @@ internal sealed class VirtualTextureWriter
             dwCaps = 0x1000
         };
         BinUtils.WriteStruct(_writer, ref header);
+        return Task.CompletedTask;
     }
 
     /// <summary>

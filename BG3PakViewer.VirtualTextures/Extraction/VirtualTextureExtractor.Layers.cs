@@ -44,7 +44,7 @@ public sealed partial class VirtualTextureExtractor
                 async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName),
                 decoder);
             var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
-            writer.WriteHeader();
+            await writer.WriteHeader();
             // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
             // written.
             stream.Capacity = (int)(stream.Length + writer.RowByteCount * size.Height);
