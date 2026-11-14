@@ -55,8 +55,15 @@ internal partial class ExportService
     /// <returns></returns>
     private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
     {
+        // The root node carries an empty path and covers the whole package.
+        if (folderNode.FullPath.Length == 0)
+            return packageService.GetValidFiles();
+
+        // Compare whole path segments, so a sibling folder that merely starts with this name
+        // (Public/SharedDev next to Public/Shared) is not exported as well.
+        var folderPrefix = folderNode.FullPath + "/";
         return packageService.GetValidFiles()
-            .Where(x => x.Name.StartsWith(folderNode.FullPath, StringComparison.OrdinalIgnoreCase));
+            .Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
