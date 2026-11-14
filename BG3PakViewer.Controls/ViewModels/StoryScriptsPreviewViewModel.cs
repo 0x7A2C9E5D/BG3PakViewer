@@ -7,6 +7,7 @@ using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
 using HanumanInstitute.MvvmDialogs;
 using LSLib.LS.Story;
+using Serilog;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -22,6 +23,12 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     private readonly IAppSettings _appSettings;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
+
+    /// <summary>
+    ///     Identifies the decompile that owns <see cref="Scripts" />: a decompile that was started for
+    ///     an earlier selection compares against it and drops its own result.
+    /// </summary>
+    private int _scriptsVersion;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel" /> class.
@@ -105,25 +112,54 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     ///     Decompiles the scripts when the selected goal changes.
     /// </summary>
     /// <param name="value"></param>
-    // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedGoalChanged(StoryScriptsGoalItemViewModel? value)
     {
-        _ = DecompileScriptsAsync();
+        _ = ShowScriptsAsync(value);
     }
 
     /// <summary>
-    ///     Decompiles the scripts.
+    ///     Shows the script of a goal, decompiling it off the UI thread.
     /// </summary>
-    private async Task DecompileScriptsAsync()
+    /// <param name="goal">The goal to decompile, or <see langword="null" /> to blank the script.</param>
+    /// <returns>A task that completes once the script is shown or discarded.</returns>
+    /// <remarks>
+    ///     This runs from a property change, i.e. on the UI thread, and it awaits without
+    ///     <c>ConfigureAwait(false)</c>, so <see cref="Scripts" /> is written back on the UI thread the
+    ///     preview is bound to. Decompiling a goal takes long enough for a later selection to overtake
+    ///     it, so a result is only shown while no newer decompile was requested.
+    /// </remarks>
+    private async Task ShowScriptsAsync(StoryScriptsGoalItemViewModel? goal)
     {
-        if (SelectedGoal is null)
+        var version = ++_scriptsVersion;
+        if (goal?.Goal is not { } target)
         {
             Scripts = null;
             return;
         }
 
-        await using var writer = new StringWriter();
-        SelectedGoal.Goal?.MakeScript(writer, Story);
-        Scripts = await Task.Run(() => TextOperations.TruncateToLines(writer.ToString(), _appSettings.MaxPreviewLines));
+        var maxLines = _appSettings.MaxPreviewLines;
+        try
+        {
+            var scripts = await Task.Run(() => DecompileScript(target, maxLines));
+            if (version == _scriptsVersion) Scripts = scripts;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to decompile the script of goal: {Goal}", target.Name);
+            if (version == _scriptsVersion) Scripts = null;
+        }
+    }
+
+    /// <summary>
+    ///     Decompiles one goal and truncates the preview to the configured line limit.
+    /// </summary>
+    /// <param name="goal">The goal to decompile.</param>
+    /// <param name="maxLines">The number of lines the preview shows.</param>
+    /// <returns>The script text.</returns>
+    private static string DecompileScript(Goal goal, int maxLines)
+    {
+        using var writer = new StringWriter();
+        goal.MakeScript(writer, goal.Story);
+        return TextOperations.TruncateToLines(writer.ToString(), maxLines);
     }
 }

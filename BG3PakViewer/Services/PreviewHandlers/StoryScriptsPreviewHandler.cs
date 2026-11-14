@@ -41,12 +41,9 @@ public class StoryScriptsPreviewHandler(
         await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
         if (stream is null) return null;
 
-        return await Task.Run(() =>
-        {
-            var reader = new StoryReader();
-            var story = reader.Read(stream);
-            return new StoryScriptsPreviewViewModel(appSettings, exportService, dialogService)
-                { Story = story };
-        });
+        // Only the parse runs off the UI thread: the view model is built by the thread that awaits
+        // this call, because it fills the bound goal list and starts the first decompile.
+        var story = await Task.Run(() => new StoryReader().Read(stream));
+        return new StoryScriptsPreviewViewModel(appSettings, exportService, dialogService) { Story = story };
     }
 }
