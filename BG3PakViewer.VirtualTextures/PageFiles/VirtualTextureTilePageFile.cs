@@ -137,6 +137,10 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
         }
 
         stream.Dispose();
+        // The copy has to be read from its start, the way the original stream was: the writes above
+        // leave the buffer at its end, and the header is the first thing the offset tables are read
+        // from.
+        buffer.Position = 0;
         return buffer;
     }
 
