@@ -83,9 +83,12 @@ internal partial class MainWindowViewModel
     }
 
     /// <summary>
-    ///     Open package async
+    ///     Replaces the loaded package and rebuilds the tree bound to the view.
     /// </summary>
-    /// <param name="path"></param>
+    /// <remarks>
+    ///     Only the tree is published from the UI thread; loading and building it happen on a worker.
+    /// </remarks>
+    /// <param name="path">The package file to open.</param>
     private async Task OpenPackageAsync(string path)
     {
         _isLoading = true;
@@ -96,10 +99,7 @@ internal partial class MainWindowViewModel
             // so it is released here on the UI thread instead of inside the background work below.
             await DisposePreviewVmAsync();
 
-            // The extractor holds a parsed tile set of the package being replaced, so it is released
-            // before the package is cleaned up. The catalog keeps no index between calls.
             IsVirtualTexturePackage = false;
-            await _virtualTextureExtractor.ReleaseAsync();
 
             // The tree is bound to the view, so it may only be replaced from the UI thread: the
             // background work builds the new one and the continuation below publishes it.

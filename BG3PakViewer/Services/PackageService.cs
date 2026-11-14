@@ -20,11 +20,11 @@ internal sealed class PackageService : IPackageService
     public bool IsLoaded => CurrentPackage != null;
 
     /// <summary>
-    ///     Load package async
+    ///     Loads a package, releasing the one that is currently open.
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <param name="path">The package file to load.</param>
+    /// <returns><see langword="true" /> when the package was loaded.</returns>
+    /// <exception cref="ObjectDisposedException">The service has already been disposed.</exception>
     public async Task<bool> LoadPackageAsync(string path)
     {
         ObjectDisposedException.ThrowIf(_disposedValue, nameof(PackageService));

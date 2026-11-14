@@ -13,10 +13,10 @@ public interface IPackageService : IAsyncDisposable
     bool IsLoaded { get; }
 
     /// <summary>
-    ///     Load package async
+    ///     Loads a package, releasing the one that is currently open.
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
+    /// <param name="path">The package file to load.</param>
+    /// <returns><see langword="true" /> when the package was loaded.</returns>
     Task<bool> LoadPackageAsync(string path);
 
     /// <summary>

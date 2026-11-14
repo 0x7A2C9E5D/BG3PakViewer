@@ -108,7 +108,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
-    ///     Cancels the running export, releases the extractor, then the loaded package.
+    ///     Cancels the running export, then disposes the extractor and the loaded package in that order.
     /// </summary>
     /// <remarks>
     ///     The export may still be reading the package, and stopping it is asynchronous: this is
@@ -123,7 +123,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
         // here exactly like on the open-package path. The wait has to live in this asynchronous method:
         // the export's continuation needs the UI thread, which a synchronous Dispose would block.
         await CancelAndWaitForExportAsync();
-        // The extractor still holds a parsed tile set and page streams, so it must go before the package.
+        // The extractor may still hold a tileset parsed from this package, so it must go before the
+        // package that provided its data.
         await _virtualTextureExtractor.DisposeAsync();
         await _packageService.DisposeAsync();
         Dispose();
@@ -131,7 +132,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
 
     /// <summary>
     ///     Releases the cancellation source and the preview view model; the extractor and the package
-    ///     service are released by <see cref="DisposeAsync" />.
+    ///     service are released by <see cref="DisposeAsync" />. The catalog holds no resources and needs
+    ///     no disposal.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)

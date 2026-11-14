@@ -8,8 +8,9 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// <remarks>
 ///     Extraction is separate from the index: it parses the tile set of the requested texture and opens
 ///     the page files the layer needs, so it depends on the loaded package rather than on the index. The
-///     parsed tile set outlives the extraction that read it, which is why <see cref="ReleaseAsync" /> exists.
-///     Releasing the service waits for an extraction in progress, so it is done through
+///     parsed tile set outlives the extraction that read it and is cached by the implementation.
+///     Disposing the service waits for an extraction in progress and releases that cache, so it is done
+///     through
 ///     <see cref="IAsyncDisposable.DisposeAsync" /> rather than a blocking disposal.
 /// </remarks>
 public interface IVirtualTextureExtractor : IAsyncDisposable
@@ -33,11 +34,4 @@ public interface IVirtualTextureExtractor : IAsyncDisposable
     /// <param name="cancellationToken">Cancels the check.</param>
     /// <returns><see langword="true" /> when the layer holds data.</returns>
     Task<bool> HasLayerDataAsync(VirtualTextureEntry entry, int layer, CancellationToken cancellationToken);
-
-    /// <summary>
-    ///     Releases the parsed tile set, so the package it was read from can be replaced or closed, while
-    ///     keeping the extractor usable for the next package.
-    /// </summary>
-    /// <returns>A task that completes when the tile set is released.</returns>
-    Task ReleaseAsync();
 }
