@@ -162,6 +162,12 @@ public sealed partial class App : IDisposable
     /// </summary>
     private void InitializeLogging()
     {
+        // The early logger writes to the same file, and a file sink keeps its log file open for
+        // itself: the sink of the pipeline below cannot open it and silently writes nothing, so
+        // everything logged while the application runs would be lost. Closing the early logger
+        // first flushes what it captured and hands the file over.
+        Log.CloseAndFlush();
+
         _logObserver = new AnonymousObserver<LogEvent>(Ioc.Default.GetRequiredService<ILogAccessService>().Add);
 
         Log.Logger = new LoggerConfiguration()
@@ -336,16 +342,21 @@ public sealed partial class App : IDisposable
     /// </summary>
     protected override void OnExit(ExitEventArgs e)
     {
-        if (!_initialized)
+        if (_initialized)
+        {
+            Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
+                .Save(Ioc.Default.GetRequiredService<IAppSettings>());
+            Dispose();
+        }
+        else
         {
             _singleInstanceManager?.Dispose();
-            base.OnExit(e);
-            return;
         }
 
-        Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
-            .Save(Ioc.Default.GetRequiredService<IAppSettings>());
-        Dispose();
+        // Both paths logged something (a second instance reports why it is leaving), and the file
+        // sink keeps its handle open until it is closed: flush it here so nothing is lost and the
+        // file is released before the process ends.
+        Log.CloseAndFlush();
         base.OnExit(e);
     }
 
