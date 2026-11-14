@@ -179,19 +179,33 @@ public sealed partial class App : IDisposable
     private static void InitializeCulture()
     {
         var appSettings = Ioc.Default.GetRequiredService<IAppSettings>();
-        var language = appSettings.Language;
-        CultureInfo cultureInfo;
-        if (language == string.Empty)
-        {
-            cultureInfo = Ioc.Default.GetRequiredService<ICultureResolver>().ResolveSupportedCulture();
-            appSettings.Language = cultureInfo.Name;
-        }
-        else
-        {
-            cultureInfo = new CultureInfo(language);
-        }
-
+        // A settings file can hold no language at all or one this build does not know (hand edit, or a
+        // culture that disappeared with an OS update). Resolving it blindly used to throw here, which is
+        // the startup path: the process then ended up without a window. Fall back to a supported culture
+        // and store the effective name back, so the same broken value is not resolved again next time.
+        var cultureInfo = ResolveConfiguredCulture(appSettings.Language);
+        appSettings.Language = cultureInfo.Name;
         I18NExtension.Culture = cultureInfo;
+    }
+
+    /// <summary>
+    ///     Resolves the culture for the language name stored in the settings
+    /// </summary>
+    /// <param name="language">The language name stored in the settings</param>
+    /// <returns>The culture of that name, or the best supported culture when it is empty or unknown</returns>
+    private static CultureInfo ResolveConfiguredCulture(string? language)
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(language)
+                ? Ioc.Default.GetRequiredService<ICultureResolver>().ResolveSupportedCulture()
+                : CultureInfo.GetCultureInfo(language);
+        }
+        catch (CultureNotFoundException ex)
+        {
+            Log.Warning(ex, "Configured language {Language} is unknown; falling back", language);
+            return Ioc.Default.GetRequiredService<ICultureResolver>().ResolveSupportedCulture();
+        }
     }
 
     /// <summary>
