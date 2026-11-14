@@ -30,11 +30,6 @@
                     <Setter TargetName="iconElement" Property="ui:FontIcon.Glyph"
                             Value="&#xE735;" />
                 </Trigger>
-                <Trigger Property="IsChecked" Value="{x:Null}">
-                    <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
-                    <Setter TargetName="iconElement" Property="ui:FontIcon.Glyph"
-                            Value="&#xE734;" />
-                </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </Window.Resources>
@@ -74,7 +69,7 @@
             AllowDeleting="True"
             AllowResizingColumns="True"
             AutoGenerateColumns="False"
-            ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=TwoWay}"
+            ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=OneWay}"
             NavigationMode="Row"
             RowHeight="30"
             SelectionMode="Extended"

@@ -46,6 +46,13 @@
                         TextWrapping="WrapWithOverflow" />
                 </sf:SfDataGrid.Columns>
                 <i:Interaction.Behaviors>
+                    <!--
+                      The content column wraps, so a row has to grow past RowHeight when an entry does
+                      not fit on one line. Without this behavior every row stays at the fixed 28px and
+                      the wrapped text is clipped. MinHeight is a literal because inside a DataTemplate
+                      the behavior has no namescope, so an ElementName binding on it cannot resolve.
+                    -->
+                    <b:SfDataGridRowHeightBehavior MinHeight="28" />
                     <b:SfDataGridSearchBehavior />
                 </i:Interaction.Behaviors>
             </sf:SfDataGrid>

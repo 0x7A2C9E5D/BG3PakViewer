@@ -64,7 +64,7 @@
                 AllowResizingColumns="True"
                 AutoGenerateColumns="False"
                 HeaderRowHeight="25"
-                ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=TwoWay}"
+                ItemsSource="{Binding PagedSource, ElementName=SfDataPager, Mode=OneWay}"
                 NavigationMode="Row"
                 RowHeight="30"
                 SelectionMode="Extended"
