@@ -39,7 +39,7 @@ internal partial class ExportService(
     /// <returns></returns>
     public async Task<bool> ExportFileAsync(PackageEntry node, string targetPath)
     {
-        var file = packageService.GetFileByPath(node.FullPath);
+        var file = await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false);
         if (file == null)
         {
             Log.Warning("Export file not found: {Path}", node.FullPath);

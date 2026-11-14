@@ -19,17 +19,21 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 /// <param name="pageStreamProvider">Opens the page file with the given name, e.g. from inside a PAK.</param>
 internal sealed class VirtualTextureLayerExtractor(
     VirtualTextureTileSetFile file,
-    Func<string, Stream> pageStreamProvider)
-    : IDisposable
+    Func<string, Task<Stream>> pageStreamProvider) : IAsyncDisposable
 {
     private readonly TileCompressor _compressor = new();
 
     /// <summary>
     ///     Releases the parsed tile set this extractor was created with.
     /// </summary>
-    public void Dispose()
+    /// <remarks>
+    ///     Closing the tile set stream is synchronous, but the caller's release chain is asynchronous,
+    ///     so the extractor exposes <see cref="IAsyncDisposable" /> instead of a blocking disposal.
+    /// </remarks>
+    public ValueTask DisposeAsync()
     {
         file.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -73,11 +77,12 @@ internal sealed class VirtualTextureLayerExtractor(
     /// <returns>
     ///     A seekable DDS stream, or <see langword="null" /> when the layer is empty at every mip level.
     /// </returns>
-    private Stream? ExtractTexture(int layer, FourCCTextureMeta tex,
+    private async Task<Stream?> ExtractTexture(int layer, FourCCTextureMeta tex,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        if (FindLevel(layer, tex, ct) is not { } found) return null;
-        return ExtractToStream(found.Level, layer, found.Min, found.Max, progress, ct);
+        return FindLevel(layer, tex, ct) is { } found
+            ? await ExtractToStream(found.Level, layer, found.Min, found.Max, progress, ct)
+            : null;
     }
 
     /// <summary>
@@ -114,33 +119,37 @@ internal sealed class VirtualTextureLayerExtractor(
     /// <param name="progress">Reports how many tile rows have been written.</param>
     /// <param name="ct">Cancels the extraction.</param>
     /// <returns>A seekable DDS stream, positioned at its start.</returns>
-    private MemoryStream ExtractToStream(int level, int layer, Point min, Point max,
+    private async Task<MemoryStream> ExtractToStream(int level, int layer, Point min, Point max,
         IProgress<(int Done, int Total)>? progress = null, CancellationToken ct = default)
     {
-        var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
-        var tileSet = file.TileSet;
-        var dds = new MemoryStream();
-
-        var tile = tileSet.TileSize;
-        var decoder = new VirtualTextureChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
-        using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
-            pageFileIndex => pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName), decoder);
-        var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, dds);
-        writer.WriteHeader();
-        // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
-        // written.
-        dds.Capacity = (int)(dds.Length + writer.RowByteCount * size.Height);
-        var rowTiles = new GTSFlatTileInfo?[size.Width];
-        for (var row = 0; row < size.Height; row++)
+        return await Task.Run(() =>
         {
-            ct.ThrowIfCancellationRequested();
-            ResolveRow(level, layer, new Point(min.X, min.Y + row), rowTiles);
-            writer.WriteRow(rowTiles);
-            progress?.Report((row + 1, size.Height));
-        }
+            var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
+            var tileSet = file.TileSet;
+            var dds = new MemoryStream();
 
-        dds.Position = 0;
-        return dds;
+            var tile = tileSet.TileSize;
+            var decoder = new VirtualTextureChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
+            using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
+                async pageFileIndex => await pageStreamProvider(tileSet.PageFileInfos[pageFileIndex].FileName),
+                decoder);
+            var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, dds);
+            writer.WriteHeader();
+            // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
+            // written.
+            dds.Capacity = (int)(dds.Length + writer.RowByteCount * size.Height);
+            var rowTiles = new GTSFlatTileInfo?[size.Width];
+            for (var row = 0; row < size.Height; row++)
+            {
+                ct.ThrowIfCancellationRequested();
+                ResolveRow(level, layer, new Point(min.X, min.Y + row), rowTiles);
+                writer.WriteRow(rowTiles);
+                progress?.Report((row + 1, size.Height));
+            }
+
+            dds.Position = 0;
+            return dds;
+        }, ct);
     }
 
     /// <summary>

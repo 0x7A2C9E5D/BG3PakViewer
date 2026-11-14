@@ -31,7 +31,7 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return false;
         if (!await FileOperations.SaveStreamToFileAsync(stream, path))
             return false;
@@ -82,7 +82,7 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
         try
         {
             var sourceFilePath = Path.Combine(sourceFolderPath, pageFileName).Replace("\\", "/");
-            var pageFile = packageService.GetFileByPath(sourceFilePath);
+            var pageFile = await packageService.GetFileByPath(sourceFilePath).ConfigureAwait(false);
             if (pageFile == null)
             {
                 Log.Warning("Page file not found: {Path}", sourceFilePath);

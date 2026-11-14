@@ -46,7 +46,7 @@ internal class LocalizationExportStrategy(IPackageService packageService) : IExp
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return false;
         switch (GetOperation(node.FileExtension, Path.GetExtension(path)))
         {

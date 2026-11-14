@@ -1,7 +1,7 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Utils;
-using BG3PakViewer.VirtualTextures.Extraction;
 using BG3PakViewer.VirtualTextures.Models;
 using BG3PakViewer.VirtualTextures.TileSets;
 using Serilog;
@@ -9,214 +9,102 @@ using Serilog;
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
-///     Indexes every virtual texture tile set (.gts) of the loaded package.
+///     Streams every virtual texture of the loaded package as its tile sets (.gts) are read.
 /// </summary>
 /// <remarks>
-///     The index holds metadata only, so it opens the tile sets, reads their texture names and closes
-///     them again: it never opens a GTP page file. The layers themselves are produced by
-///     <see cref="IVirtualTextureExtractor" />. <see cref="ClearAsync" /> waits for the work in progress
-///     before releasing the index, which is what lets the package be closed safely.
+///     The enumeration is pull-driven: a tile set is parsed only when the caller asks for its textures,
+///     and its list is released before the next one starts. Nothing is cached between enumerations, so
+///     the peak memory is one tile set rather than the whole index.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
     private bool _disposed;
-    private List<VirtualTextureEntry> _entries = [];
-    private List<VirtualTextureTileSetFailure> _failedTileSets = [];
-    private CancellationTokenSource? _loadCancellation;
-    private Task? _loadTask;
 
-    /// <summary>
-    ///     Whether the textures of the loaded package have been indexed.
-    /// </summary>
-    public bool IsLoaded { get; private set; }
-
-    /// <summary>
-    ///     The indexed textures, in package order; empty until <see cref="LoadAsync" /> completes.
-    /// </summary>
-    public IReadOnlyList<VirtualTextureEntry> Entries => _entries;
-
-    /// <summary>
-    ///     The tile sets that could not be indexed, in package order; empty when every tile set was read.
-    /// </summary>
-    public IReadOnlyList<VirtualTextureTileSetFailure> FailedTileSets => _failedTileSets;
-
-    /// <summary>
-    ///     Indexes the tile sets of the loaded package.
-    /// </summary>
-    /// <param name="progress">Reports how many tile sets have been indexed.</param>
-    /// <returns>A task that completes when the index is built.</returns>
-    public Task LoadAsync(IProgress<VirtualTextureIndexProgress>? progress)
+    /// <inheritdoc />
+    public async IAsyncEnumerable<VirtualTextureEntry> LoadAsync(
+        IProgress<VirtualTextureIndexProgress>? progress,
+        ICollection<VirtualTextureTileSetFailure> failures,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (IsLoaded) return Task.CompletedTask;
-        _loadCancellation ??= new CancellationTokenSource();
-        _loadTask ??= IndexAsync(progress, _loadCancellation.Token);
-        return _loadTask;
-    }
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var stopwatch = Stopwatch.StartNew();
 
-    /// <summary>
-    ///     Stops indexing and releases the index, so the package can be closed afterward.
-    /// </summary>
-    /// <returns>A task that completes when the index has been released.</returns>
-    public async Task ClearAsync()
-    {
-        if (_loadCancellation is not null) await _loadCancellation.CancelAsync();
-        if (_loadTask is not null)
+        var files = await packageService.Search().ConfigureAwait(false);
+        if (files is null) yield break;
+
+        // The progress total needs a count, but walking the package files twice is cheaper than
+        // materializing another list of path strings.
+        var total = files.Count(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)));
+        progress?.Report(new VirtualTextureIndexProgress(0, total));
+
+        var indexed = 0;
+        var textureCount = 0;
+        var failureCount = 0;
+        foreach (var file in files)
+        {
+            if (!FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name))) continue;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            IReadOnlyList<VirtualTextureEntry>? entries = null;
             try
             {
-                await _loadTask.ConfigureAwait(false);
+                // LSLib parses a tile set synchronously, so it runs on a worker. Only this one tile set
+                // is materialized, and it is released as soon as its entries have been yielded.
+                entries = await Task.Run(() => ReadTileSetAsync(file.Name, cancellationToken), cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                // The index was stopped on purpose; the entries it did not reach are not needed.
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // One unreadable tile set must not cost the textures of all the others.
+                Log.Warning(ex, "Failed to index virtual texture tile set: {Path}", file.Name);
+                failureCount++;
+                failures.Add(new VirtualTextureTileSetFailure(file.Name, ex.Message));
             }
 
-        // Clearing cannot be canceled: the package is about to be replaced either way.
-        _entries = [];
-        _failedTileSets = [];
-        IsLoaded = false;
-        _loadCancellation?.Dispose();
-        _loadCancellation = null;
-        _loadTask = null;
-    }
+            if (entries is not null)
+                foreach (var entry in entries)
+                {
+                    textureCount++;
+                    yield return entry;
+                }
 
-    /// <summary>
-    ///     Stops indexing, waits for it to stop reading the package, and releases the index; the loaded
-    ///     package itself is left alone.
-    /// </summary>
-    /// <remarks>
-    ///     This runs right before the package is closed, so indexing must have stopped by the time the
-    ///     returned task completes. <see cref="ClearAsync" /> cancels and waits, and it leaves the
-    ///     cancellation source and the task null, so a later <see cref="LoadAsync" /> does not reach into
-    ///     a disposed source.
-    /// </remarks>
-    /// <returns>A task that completes when the index has been released.</returns>
-    public async ValueTask DisposeAsync()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        await ClearAsync().ConfigureAwait(false);
-    }
+            progress?.Report(new VirtualTextureIndexProgress(++indexed, total));
+        }
 
-    /// <summary>
-    ///     Indexes the tile sets in the background and publishes the result.
-    /// </summary>
-    /// <param name="progress">Reports how many tile sets have been indexed.</param>
-    /// <param name="cancellationToken">Cancels the indexing.</param>
-    /// <returns>A task that completes when the index is built.</returns>
-    private async Task IndexAsync(IProgress<VirtualTextureIndexProgress>? progress,
-        CancellationToken cancellationToken)
-    {
-        var entries = await Task.Run(() => ReadEntries(progress, cancellationToken), CancellationToken.None)
-            .ConfigureAwait(false);
-        _entries = entries;
-        IsLoaded = true;
-    }
-
-    /// <summary>
-    ///     Reads the metadata of every tile set of the package.
-    /// </summary>
-    /// <param name="progress">Reports how many tile sets have been indexed.</param>
-    /// <param name="cancellationToken">Cancels the indexing.</param>
-    /// <returns>The entries of every tile set, in package order.</returns>
-    private List<VirtualTextureEntry> ReadEntries(IProgress<VirtualTextureIndexProgress>? progress,
-        CancellationToken cancellationToken)
-    {
-        var paths = GetTileSetPaths();
-        var stopwatch = Stopwatch.StartNew();
-        var results = ReadTileSetsInParallel(paths, progress, cancellationToken);
-        var entries = CollectEntries(results);
-        _failedTileSets = results.Select(result => result.Failure).OfType<VirtualTextureTileSetFailure>().ToList();
         Log.Information("Indexed {TextureCount} virtual textures from {TileSetCount} tile set(s) in {Elapsed} ms",
-            entries.Count, paths.Count, stopwatch.ElapsedMilliseconds);
+            textureCount, total, stopwatch.ElapsedMilliseconds);
         // Kept next to the totals so that a tile set which stopped parsing shows up in the log even
         // when nobody opens the toolbox and sees the warning there.
-        if (_failedTileSets.Count != 0)
+        if (failureCount != 0)
             Log.Warning("Failed to index {FailureCount} of {TileSetCount} virtual texture tile set(s)",
-                _failedTileSets.Count, paths.Count);
-        return entries;
+                failureCount, total);
     }
 
     /// <summary>
-    ///     Lists the package paths of the virtual texture tile sets.
+    ///     Marks the catalog as disposed. Nothing is kept between enumerations, so a running
+    ///     enumeration is stopped by cancelling its token instead.
     /// </summary>
-    /// <returns>The tile set paths, in package order.</returns>
-    private List<string> GetTileSetPaths()
+    public ValueTask DisposeAsync()
     {
-        return packageService.Search()
-            .Where(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)))
-            .Select(file => file.Name)
-            .ToList();
+        _disposed = true;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
-    ///     Reads the tile sets, reporting progress as each one is done.
+    ///     Reads one tile set on a worker; the caller yields its textures and then releases the list.
     /// </summary>
-    /// <param name="paths">The package paths of the tile sets.</param>
-    /// <param name="progress">Reports how many tile sets have been indexed.</param>
-    /// <param name="cancellationToken">Cancels the indexing.</param>
-    /// <returns>The result of each tile set, at the index of the tile set it came from.</returns>
-    private (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)[] ReadTileSetsInParallel(
-        List<string> paths, IProgress<VirtualTextureIndexProgress>? progress, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<VirtualTextureEntry>> ReadTileSetAsync(
+        string gtsPath, CancellationToken cancellationToken)
     {
-        var indexed = 0;
-        var results = new (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)[paths.Count];
-        // The tile sets are independent, so their metadata is read in parallel; the entries keep the
-        // package order because each result is stored at the index of the tile set it came from.
-        Parallel.For(0, paths.Count, new ParallelOptions { CancellationToken = cancellationToken },
-            index =>
-            {
-                results[index] = ReadTileSetOrEmpty(paths[index]);
-                progress?.Report(new VirtualTextureIndexProgress(Interlocked.Increment(ref indexed),
-                    paths.Count));
-            });
-
-        return results;
-    }
-
-    /// <summary>
-    ///     Reads one tile set, reporting a failure instead of losing the textures of all the others.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The textures of the tile set, or why it could not be read.</returns>
-    private (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure) ReadTileSetOrEmpty(
-        string gtsPath)
-    {
-        try
-        {
-            return (ReadTileSet(gtsPath), null);
-        }
-        catch (Exception ex)
-        {
-            // A single unreadable tile set must not cost the textures of all the others, but it must
-            // not be indistinguishable from a tile set that simply holds no textures either.
-            Log.Warning(ex, "Failed to index virtual texture tile set: {Path}", gtsPath);
-            return (null, new VirtualTextureTileSetFailure(gtsPath, ex.Message));
-        }
-    }
-
-    /// <summary>
-    ///     Concatenates the entries of the tile sets, keeping their order.
-    /// </summary>
-    /// <param name="results">The result of each tile set, by tile set index.</param>
-    /// <returns>The entries of every tile set, in package order.</returns>
-    private static List<VirtualTextureEntry> CollectEntries(
-        IEnumerable<(List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)> results)
-    {
-        return results.SelectMany(result => result.Entries ?? []).ToList();
-    }
-
-    /// <summary>
-    ///     Reads the textures of one tile set, without opening any of its page files.
-    /// </summary>
-    /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The textures of the tile set, in index order.</returns>
-    private List<VirtualTextureEntry> ReadTileSet(string gtsPath)
-    {
-        using var file = new VirtualTextureTileSetFile(
-            packageService.GetFileByPath(gtsPath)?.CreateContentReader()
-            ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}"));
-
+        var fileInfo = await packageService.GetFileByPath(gtsPath).ConfigureAwait(false);
+        var stream = fileInfo?.CreateContentReader()
+                     ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
+        using var file = new VirtualTextureTileSetFile(Task.FromResult(stream));
         return file.Textures.Select((meta, index) =>
             new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), file.LayerCount, index)).ToList();
     }

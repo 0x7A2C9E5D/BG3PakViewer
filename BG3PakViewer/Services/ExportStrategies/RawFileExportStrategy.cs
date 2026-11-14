@@ -24,7 +24,7 @@ internal class RawFileExportStrategy(IPackageService packageService) : IExportSt
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return false;
         return await FileOperations.SaveStreamToFileAsync(stream, path);
     }

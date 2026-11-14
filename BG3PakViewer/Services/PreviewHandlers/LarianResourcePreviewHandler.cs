@@ -29,7 +29,7 @@ internal class LarianResourcePreviewHandler(IPackageService packageService) : IP
     /// <returns></returns>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return null;
         var resource = await LarianResourceLoader.LoadAsync(stream, node.FileExtension);
         return await Task.Run(() => LarianResourcePreviewViewModel.FromResource(resource));

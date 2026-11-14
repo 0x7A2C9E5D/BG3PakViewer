@@ -30,7 +30,7 @@ internal class PreviewService(
     {
         if (node.IsFolder) return null;
 
-        var validation = ValidatePreviewRequest(node);
+        var validation = await ValidatePreviewRequestAsync(node).ConfigureAwait(false);
         if (validation != null) return validation;
 
         Log.Debug("Creating preview for: {FileName} (Extension: {Extension})",
@@ -48,7 +48,7 @@ internal class PreviewService(
     /// </summary>
     /// <param name="node"></param>
     /// <returns></returns>
-    private NotSupportedPreviewViewModel? ValidatePreviewRequest(PackageEntry node)
+    private async Task<NotSupportedPreviewViewModel?> ValidatePreviewRequestAsync(PackageEntry node)
     {
         var fileName = Path.GetFileName(node.FullPath);
         if (FileExtensions.IsLowTexTexture(fileName))
@@ -57,7 +57,7 @@ internal class PreviewService(
             return CreateNotSupportedViewModel(LangKeys.LowTexDDSNotSupportedMessage);
         }
 
-        var file = packageService.GetFileByPath(node.FullPath);
+        var file = await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false);
         if (file != null) return null;
         Log.Warning("Preview file not found: {Path}", node.FullPath);
         return CreateNotSupportedViewModel(LangKeys.LoadResourceFailed);

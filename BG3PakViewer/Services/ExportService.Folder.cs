@@ -23,7 +23,7 @@ internal partial class ExportService
         Log.Information("Exporting folder: {FolderPath} -> {TargetFolder}", folderNode.FullPath, targetFolder);
         try
         {
-            var files = GetFolderFiles(folderNode).ToList();
+            var files = await GetFolderFilesAsync(folderNode).ConfigureAwait(false);
             if (files.Count == 0)
             {
                 Log.Information("No files to export in folder: {FolderPath}", folderNode.FullPath);
@@ -59,17 +59,19 @@ internal partial class ExportService
     /// </summary>
     /// <param name="folderNode"></param>
     /// <returns></returns>
-    private IEnumerable<PackagedFileInfo> GetFolderFiles(PackageEntry folderNode)
+    private async Task<List<PackagedFileInfo>> GetFolderFilesAsync(PackageEntry folderNode)
     {
+        var files = await packageService.Search().ConfigureAwait(false);
+        if (files is null) return [];
+
         // The root node carries an empty path and covers the whole package.
         if (folderNode.FullPath.Length == 0)
-            return packageService.Search();
+            return [.. files];
 
         // Compare whole path segments, so a sibling folder that merely starts with this name
         // (Public/SharedDev next to Public/Shared) is not exported as well.
         var folderPrefix = folderNode.FullPath + "/";
-        return packageService.Search()
-            .Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase));
+        return files.Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
     /// <summary>

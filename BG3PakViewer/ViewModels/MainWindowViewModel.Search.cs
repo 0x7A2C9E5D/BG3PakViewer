@@ -51,7 +51,7 @@ internal partial class MainWindowViewModel
         Log.Information("Searching package tree for '{Query}'...", query);
         // Only the build runs on the worker: the tree is bound to the view and has to be published
         // from the UI thread, which the continuation below does.
-        PackageTree = await Task.Run(() => BuildPackageTree(query), CancellationToken.None);
+        PackageTree = await Task.Run(() => BuildPackageTreeAsync(query), CancellationToken.None);
         Log.Information("Package tree search completed");
     }
 
@@ -64,7 +64,7 @@ internal partial class MainWindowViewModel
         if (!string.IsNullOrWhiteSpace(query)) return;
         if (!_packageService.IsLoaded) return;
 
-        PackageTree = await Task.Run(() => BuildPackageTree(), CancellationToken.None);
+        PackageTree = await Task.Run(() => BuildPackageTreeAsync(), CancellationToken.None);
         Log.Information("Package tree search query cleared");
     }
 }

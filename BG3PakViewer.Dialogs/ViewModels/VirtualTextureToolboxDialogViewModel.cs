@@ -315,19 +315,25 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     }
 
     /// <summary>
-    ///     Indexes the package's tile sets, or reuses the index the catalog already holds.
+    ///     Indexes the package's tile sets, filling the texture list as each texture arrives.
     /// </summary>
     private async Task IndexAsync()
     {
-        if (_catalog.IsLoaded)
-        {
-            PopulateTextures();
-            return;
-        }
-
+        const int batchSize = 64;
         var cts = new CancellationTokenSource();
         _indexCancellation = cts;
         IsIndexing = true;
+        var failures = new List<VirtualTextureTileSetFailure>();
+        var batch = new List<VirtualTextureToolboxTextureViewModel>(batchSize);
+
+        // ObservableCollection must be touched on the UI thread and has no AddRange: rows are added
+        // in batches so a large tile set cannot monopolize the dispatcher.
+        void Publish()
+        {
+            foreach (var texture in batch) Textures.Add(texture);
+            batch.Clear();
+        }
+
         try
         {
             var progress = new Progress<VirtualTextureIndexProgress>(value =>
@@ -336,16 +342,35 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
                 IndexedCount = value.Indexed;
                 IndexTotal = value.Total;
             });
-            await _catalog.LoadAsync(progress);
+
+            Textures.Clear();
+            await foreach (var entry in _catalog.LoadAsync(progress, failures, cts.Token))
+            {
+                if (cts.IsCancellationRequested) break;
+                batch.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
+                if (batch.Count < batchSize) continue;
+                Publish();
+                // A tile set can fill the batch without awaiting: give the dispatcher a turn so the
+                // rows render and the dialog stays responsive.
+                await Task.Yield();
+            }
+
             // The dialog may have been closed while the index was built: publishing the rows then
             // would touch a disposed view model and start a preview for it.
             if (cts.IsCancellationRequested) return;
-            PopulateTextures();
+            Publish();
+
+            if (!string.IsNullOrWhiteSpace(InitialSearch))
+                SearchText = InitialSearch;
+            // The list is already usable while indexing runs, so keep a row the user selected.
+            if (SelectedRow is null)
+                SelectedRow = Textures.FirstOrDefault(texture =>
+                    string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
+            Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
         }
         catch (OperationCanceledException)
         {
-            // The dialog was closed before the index was built; the catalog keeps the result for the
-            // next time the toolbox is opened.
+            // The dialog was closed before the index finished; abandoning the enumeration ends the read.
         }
         catch (Exception ex)
         {
@@ -360,7 +385,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
         // while indexing must not pop a message for a window that is no longer there.
         if (!cts.IsCancellationRequested)
-            await ReportIndexFailuresAsync(_catalog.FailedTileSets);
+            await ReportIndexFailuresAsync(failures);
     }
 
     /// <summary>
@@ -381,23 +406,6 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 
         await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
             Strings.VirtualTextureIndexFailedCaption, MessageBoxIcon.Warning);
-    }
-
-    /// <summary>
-    ///     Fills the texture list from the index, applies the search the dialog was opened with and
-    ///     selects its first match.
-    /// </summary>
-    private void PopulateTextures()
-    {
-        Textures.Clear();
-        foreach (var entry in _catalog.Entries)
-            Textures.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
-
-        if (!string.IsNullOrWhiteSpace(InitialSearch))
-            SearchText = InitialSearch;
-        SelectedRow = Textures.FirstOrDefault(texture =>
-            string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
-        Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }
 
     /// <summary>

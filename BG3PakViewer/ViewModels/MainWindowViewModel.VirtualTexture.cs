@@ -52,9 +52,10 @@ internal partial class MainWindowViewModel
     ///     Whether the loaded package contains at least one virtual texture tile set.
     /// </summary>
     /// <returns><see langword="true" /> when the package contains a .gts file.</returns>
-    private bool DetectVirtualTexturePackage()
+    private async Task<bool> DetectVirtualTexturePackageAsync()
     {
-        return _packageService.Search()
-            .Any(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)));
+        var files = await _packageService.Search().ConfigureAwait(false);
+        return files is not null &&
+               files.Any(file => FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name)));
     }
 }

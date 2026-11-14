@@ -38,7 +38,7 @@ public class StoryScriptsPreviewHandler(
     /// <returns></returns>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return null;
 
         // Only the parse runs off the UI thread: the view model is built by the thread that awaits

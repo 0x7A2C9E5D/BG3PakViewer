@@ -5,7 +5,7 @@ namespace BG3PakViewer.Contracts;
 /// <summary>
 ///     Package service
 /// </summary>
-public interface IPackageService : IDisposable
+public interface IPackageService : IAsyncDisposable
 {
     /// <summary>
     ///     Is package loaded
@@ -24,18 +24,12 @@ public interface IPackageService : IDisposable
     /// </summary>
     /// <param name="fullPath"></param>
     /// <returns></returns>
-    PackagedFileInfo? GetFileByPath(string fullPath);
+    Task<PackagedFileInfo?> GetFileByPath(string fullPath);
 
     /// <summary>
     ///     Searches the package's active files, optionally by a case-insensitive path fragment.
     /// </summary>
     /// <param name="query">Path fragment to match; null or blank returns every active file.</param>
     /// <returns></returns>
-    IEnumerable<PackagedFileInfo> Search(string? query = null);
-
-    /// <summary>
-    ///     Cleanup async
-    /// </summary>
-    /// <returns></returns>
-    Task CleanupAsync();
+    Task<IReadOnlyList<PackagedFileInfo>?> Search(string? query = null);
 }

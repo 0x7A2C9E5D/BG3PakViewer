@@ -96,26 +96,21 @@ internal partial class MainWindowViewModel
             // so it is released here on the UI thread instead of inside the background work below.
             await DisposePreviewVmAsync();
 
-            // The toolbox index and the extractor hold streams into the package being replaced, so they
-            // are released before the package is cleaned up.
+            // The extractor holds a parsed tile set of the package being replaced, so it is released
+            // before the package is cleaned up. The catalog only reads while an enumeration is active.
             IsVirtualTexturePackage = false;
-            await _virtualTextureCatalog.ClearAsync();
-            await _virtualTextureExtractor.ClearAsync();
+            await _virtualTextureExtractor.ReleaseAsync();
 
             // The tree is bound to the view, so it may only be replaced from the UI thread: the
             // background work builds the new one and the continuation below publishes it.
             PackageTree = null;
-            var tree = await Task.Run(async () =>
-            {
-                await _packageService.CleanupAsync();
-                return await LoadAndBuildTreeAsync(path);
-            }, CancellationToken.None);
+            var tree = await Task.Run(() => LoadAndBuildTreeAsync(path), CancellationToken.None);
 
             if (tree is not null)
             {
                 PackageTree = tree;
                 _recentFilesService.AddOrUpdateRecentFile(path);
-                IsVirtualTexturePackage = DetectVirtualTexturePackage();
+                IsVirtualTexturePackage = await DetectVirtualTexturePackageAsync().ConfigureAwait(false);
             }
             else
             {
@@ -141,7 +136,7 @@ internal partial class MainWindowViewModel
     private async Task<ObservableCollection<PackageEntry>?> LoadAndBuildTreeAsync(string path)
     {
         var success = await _packageService.LoadPackageAsync(path);
-        return success ? BuildPackageTree() : null;
+        return success ? await BuildPackageTreeAsync().ConfigureAwait(false) : null;
     }
 
     /// <summary>
@@ -151,11 +146,13 @@ internal partial class MainWindowViewModel
     /// </summary>
     /// <param name="searchQuery">The tree search box query.</param>
     /// <returns>The tree, or null when no package is loaded.</returns>
-    private ObservableCollection<PackageEntry>? BuildPackageTree(string? searchQuery = null)
+    private async Task<ObservableCollection<PackageEntry>?> BuildPackageTreeAsync(string? searchQuery = null)
     {
         if (!_packageService.IsLoaded) return null;
 
-        var paths = _packageService.Search(searchQuery).Select(f => f.Name);
+        var files = await _packageService.Search(searchQuery).ConfigureAwait(false);
+        if (files is null) return null;
+        var paths = files.Select(f => f.Name);
         return PackageEntry.BuildTree(paths);
     }
 

@@ -108,15 +108,13 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
-    ///     Cancels the running export, releases the virtual texture catalog and then the resources the
-    ///     loaded package owns.
+    ///     Cancels the running export, releases the extractor and the catalog, then the loaded package.
     /// </summary>
     /// <remarks>
-    ///     The export and the catalog may still be reading the package, and stopping them is
-    ///     asynchronous: this is awaited from the main window once it has closed, so the UI thread
-    ///     never waits for either of them.
+    ///     The export may still be reading the package, and stopping it is asynchronous: this is
+    ///     awaited from the main window once it has closed, so the UI thread never waits for it.
     /// </remarks>
-    /// <returns>A task that completes when the catalog and the package resources are released.</returns>
+    /// <returns>A task that completes when the package resources are released.</returns>
     public async ValueTask DisposeAsync()
     {
         if (_catalogReleased) return;
@@ -128,12 +126,15 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
         // The extractor and the package service read the package through streams, so the catalog,
         // which may still be reading it, has to be released first.
         await _virtualTextureCatalog.DisposeAsync();
+        // The extractor still holds a parsed tile set and page streams, so it must go before the package.
+        await _virtualTextureExtractor.DisposeAsync();
+        await _packageService.DisposeAsync();
         Dispose();
     }
 
     /// <summary>
-    ///     Releases the extractor, the package service, the cancellation source and the preview view
-    ///     model; the catalog is released by <see cref="DisposeAsync" />.
+    ///     Releases the cancellation source and the preview view model; the catalog, the extractor and
+    ///     the package service are released by <see cref="DisposeAsync" />.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
@@ -141,8 +142,6 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
         if (_disposed) return;
         _disposed = true;
         base.Dispose(disposing);
-        _virtualTextureExtractor.Dispose();
-        _packageService.Dispose();
         _cancellationTokenSource?.Dispose();
         if (PreviewVm is IDisposable disposable)
             disposable.Dispose();

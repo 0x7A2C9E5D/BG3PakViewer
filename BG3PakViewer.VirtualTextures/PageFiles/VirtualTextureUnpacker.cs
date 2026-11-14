@@ -16,7 +16,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// <param name="decoder">The decoder the chunks are decompressed with; the caller owns it.</param>
 internal sealed class VirtualTextureUnpacker(
     int pageSize,
-    Func<int, Stream> pageStreamProvider,
+    Func<int, Task<Stream>> pageStreamProvider,
     VirtualTextureChunkDecoder decoder)
     : IDisposable
 {

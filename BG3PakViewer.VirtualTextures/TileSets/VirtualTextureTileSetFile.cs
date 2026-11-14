@@ -18,9 +18,12 @@ internal sealed class VirtualTextureTileSetFile : IDisposable
     /// <summary>
     ///     Reads the tile set from <paramref name="stream" />, which this object owns from then on.
     /// </summary>
-    /// <param name="stream">The tile set stream.</param>
-    public VirtualTextureTileSetFile(Stream stream)
+    /// <param name="streamTask">Opens the tile set stream, which this object owns from then on.</param>
+    public VirtualTextureTileSetFile(Task<Stream> streamTask)
     {
+        // The package service opens the stream asynchronously; parsing is synchronous and runs on a
+        // worker, so waiting here cannot deadlock on a UI synchronization context.
+        var stream = streamTask.GetAwaiter().GetResult();
         _stream = stream;
         try
         {

@@ -35,7 +35,7 @@ internal class LarianResourceExportStrategy(IPackageService packageService) : IE
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = packageService.GetFileByPath(node.FullPath)?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return false;
         if (node.FileExtension.Equals(Path.GetExtension(path), StringComparison.OrdinalIgnoreCase))
             return await FileOperations.SaveStreamToFileAsync(stream, path);

@@ -11,13 +11,14 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Extraction is serialized because one extraction reads the package at a time. The extractor of the
 ///     last tile set is kept, because every layer of every texture of a tile set needs exactly that tile
 ///     set; only the last one is kept, so the memory this costs stays bounded by one tile set and the
-///     handle it holds is released as soon as another tile set is needed. <see cref="ClearAsync" />
+///     handle it holds is released as soon as another tile set is needed. <see cref="Release" />
 ///     releases it when the package it was read from is replaced.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets and their page files are read from.</param>
 public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
+    private bool _disposed;
     private VirtualTextureLayerExtractor? _cachedExtractor;
     private string? _cachedExtractorPath;
 
@@ -76,12 +77,13 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     ///     Releases the parsed tile set, so the package it was read from can be closed.
     /// </summary>
     /// <returns>A task that completes when the tile set is released.</returns>
-    public async Task ClearAsync()
+    public async Task ReleaseAsync()
     {
         await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            _cachedExtractor?.Dispose();
+            if (_cachedExtractor is not null)
+                await _cachedExtractor.DisposeAsync().ConfigureAwait(false);
             _cachedExtractorPath = null;
             _cachedExtractor = null;
         }
@@ -92,14 +94,14 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     }
 
     /// <summary>
-    ///     Releases the parsed tile set.
+    ///     Waits for an extraction in progress, releases the parsed tile set and marks the service as
+    ///     disposed. ReleaseAsync does the same cleanup when a package is replaced, but keeps the service usable.
     /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _cachedExtractor?.Dispose();
-        // The cache must never hand out the extractor that was just released.
-        _cachedExtractor = null;
-        _cachedExtractorPath = null;
+        if (_disposed) return;
+        _disposed = true;
+        await ReleaseAsync().ConfigureAwait(false);
     }
 
     /// <summary>
@@ -115,7 +117,8 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         // Forget the cached tile set before the new one is parsed. If parsing throws, an empty cache
         // lets the next call try again; keeping the extractor that was just disposed would make every
         // later call for the old path hand out a released object for the rest of the session.
-        _cachedExtractor?.Dispose();
+        if (_cachedExtractor is not null)
+            await _cachedExtractor.DisposeAsync().ConfigureAwait(false);
         _cachedExtractor = null;
         _cachedExtractorPath = null;
         var file = await Task.Run(() => new VirtualTextureTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
@@ -144,9 +147,9 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     /// <param name="packagePath">The package path of the file.</param>
     /// <returns>The content of the file.</returns>
     /// <exception cref="FileNotFoundException">The package does not contain the file.</exception>
-    private Stream OpenPackageFile(string packagePath)
+    private async Task<Stream> OpenPackageFile(string packagePath)
     {
-        return packageService.GetFileByPath(packagePath)?.CreateContentReader()
+        return (await packageService.GetFileByPath(packagePath).ConfigureAwait(false))?.CreateContentReader()
                ?? throw new FileNotFoundException($"Package file not found: {packagePath}");
     }
 }
