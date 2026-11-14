@@ -36,7 +36,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     private readonly IVirtualTextureCatalog _virtualTextureCatalog;
     private readonly IVirtualTextureExtractor _virtualTextureExtractor;
     private CancellationTokenSource? _cancellationTokenSource;
-    private bool _catalogReleased;
+    private bool _disposeStarted;
     private bool _disposed;
     private TaskCompletionSource? _exportCompletion;
     private bool _isLoading;
@@ -108,7 +108,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
-    ///     Cancels the running export, releases the extractor and the catalog, then the loaded package.
+    ///     Cancels the running export, releases the extractor, then the loaded package.
     /// </summary>
     /// <remarks>
     ///     The export may still be reading the package, and stopping it is asynchronous: this is
@@ -117,15 +117,12 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     /// <returns>A task that completes when the package resources are released.</returns>
     public async ValueTask DisposeAsync()
     {
-        if (_catalogReleased) return;
-        _catalogReleased = true;
+        if (_disposeStarted) return;
+        _disposeStarted = true;
         // A running export reads the package through streams of its own, so it is canceled and awaited
         // here exactly like on the open-package path. The wait has to live in this asynchronous method:
         // the export's continuation needs the UI thread, which a synchronous Dispose would block.
         await CancelAndWaitForExportAsync();
-        // The extractor and the package service read the package through streams, so the catalog,
-        // which may still be reading it, has to be released first.
-        await _virtualTextureCatalog.DisposeAsync();
         // The extractor still holds a parsed tile set and page streams, so it must go before the package.
         await _virtualTextureExtractor.DisposeAsync();
         await _packageService.DisposeAsync();
@@ -133,8 +130,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     }
 
     /// <summary>
-    ///     Releases the cancellation source and the preview view model; the catalog, the extractor and
-    ///     the package service are released by <see cref="DisposeAsync" />.
+    ///     Releases the cancellation source and the preview view model; the extractor and the package
+    ///     service are released by <see cref="DisposeAsync" />.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)

@@ -97,7 +97,7 @@ internal partial class MainWindowViewModel
             await DisposePreviewVmAsync();
 
             // The extractor holds a parsed tile set of the package being replaced, so it is released
-            // before the package is cleaned up. The catalog only reads while an enumeration is active.
+            // before the package is cleaned up. The catalog keeps no index between calls.
             IsVirtualTexturePackage = false;
             await _virtualTextureExtractor.ReleaseAsync();
 

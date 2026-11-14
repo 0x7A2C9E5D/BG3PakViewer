@@ -315,7 +315,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     }
 
     /// <summary>
-    ///     Indexes the package's tile sets, filling the texture list as each texture arrives.
+    ///     Indexes the package's tile sets, then fills the texture list in batches.
     /// </summary>
     private async Task IndexAsync()
     {
@@ -323,7 +323,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         var cts = new CancellationTokenSource();
         _indexCancellation = cts;
         IsIndexing = true;
-        var failures = new List<VirtualTextureTileSetFailure>();
+        VirtualTextureIndexResult? result = null;
         var batch = new List<VirtualTextureToolboxTextureViewModel>(batchSize);
 
         // ObservableCollection must be touched on the UI thread and has no AddRange: rows are added
@@ -344,14 +344,17 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             });
 
             Textures.Clear();
-            await foreach (var entry in _catalog.LoadAsync(progress, failures, cts.Token))
+            result = await _catalog.LoadAsync(progress, cts.Token);
+            if (cts.IsCancellationRequested) return;
+
+            foreach (var entry in result.Entries)
             {
                 if (cts.IsCancellationRequested) break;
                 batch.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
                 if (batch.Count < batchSize) continue;
                 Publish();
-                // A tile set can fill the batch without awaiting: give the dispatcher a turn so the
-                // rows render and the dialog stays responsive.
+                // Publishing a full batch without awaiting can monopolize the dispatcher: give it a
+                // turn so the rows render and the dialog stays responsive.
                 await Task.Yield();
             }
 
@@ -362,7 +365,6 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 
             if (!string.IsNullOrWhiteSpace(InitialSearch))
                 SearchText = InitialSearch;
-            // The list is already usable while indexing runs, so keep a row the user selected.
             if (SelectedRow is null)
                 SelectedRow = Textures.FirstOrDefault(texture =>
                     string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
@@ -370,7 +372,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         }
         catch (OperationCanceledException)
         {
-            // The dialog was closed before the index finished; abandoning the enumeration ends the read.
+            // The dialog was closed before the index finished; the canceled read is discarded.
         }
         catch (Exception ex)
         {
@@ -384,8 +386,8 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
 
         // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
         // while indexing must not pop a message for a window that is no longer there.
-        if (!cts.IsCancellationRequested)
-            await ReportIndexFailuresAsync(failures);
+        if (!cts.IsCancellationRequested && result is not null)
+            await ReportIndexFailuresAsync(result.Failures);
     }
 
     /// <summary>
@@ -393,7 +395,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     ///     is not mistaken for one that holds no textures.
     /// </summary>
     /// <param name="failures">The tile sets that could not be read.</param>
-    private async Task ReportIndexFailuresAsync(IReadOnlyList<VirtualTextureTileSetFailure> failures)
+    private async Task ReportIndexFailuresAsync(IReadOnlyList<VirtualTextureIndexFailure> failures)
     {
         if (failures.Count == 0) return;
 
@@ -402,7 +404,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             failures.Count));
         message.AppendLine();
         foreach (var failure in failures)
-            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.GtsPath}: {failure.Reason}");
+            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.path}: {failure.Reason}");
 
         await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
             Strings.VirtualTextureIndexFailedCaption, MessageBoxIcon.Warning);
