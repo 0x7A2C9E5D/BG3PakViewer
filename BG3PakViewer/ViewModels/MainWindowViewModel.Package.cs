@@ -33,7 +33,7 @@ internal partial class MainWindowViewModel
             var files = data.GetData(DataFormats.FileDrop) as string[];
             if (!(files?.Length > 0)) return;
             var file = files[0];
-            if (Path.GetExtension(file) is not ".pak") return;
+            if (!Path.GetExtension(file).Equals(".pak", StringComparison.OrdinalIgnoreCase)) return;
             await ValidateAndOpenPackageAsync(file);
         }
         catch (Exception ex)
