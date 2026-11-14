@@ -9,44 +9,75 @@ namespace BG3PakViewer.ViewModels;
 /// </summary>
 internal partial class MainWindowViewModel
 {
+    private bool _isPreviewing;
+    private PackageEntry? _pendingPreviewNode;
+
     /// <summary>
     ///     Preview async
     /// </summary>
     /// <param name="toPreview"></param>
-    // Preview is deliberately serial: the command is not allowed to run concurrently, so a preview
-    // that is still being built keeps the next one from starting instead of racing it. What keeps
-    // the window responsive is the handlers doing the expensive work off the UI thread, not
-    // overlapping previews. Disposing first means the pane empties as soon as the selection moves.
-    [RelayCommand]
+    // Preview is deliberately serial: the pane shows one file and the handlers do the expensive
+    // work off the UI thread, not overlapping previews. Concurrent executions are allowed so a
+    // selection made while a preview is still being built is not dropped by CanExecute; it
+    // replaces the pending selection and is built as soon as the current build finishes.
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task PreviewAsync(object toPreview)
     {
         if (toPreview is not PackageEntry node || !_packageService.IsLoaded)
             return;
 
-        await DisposePreviewVmAsync();
+        _pendingPreviewNode = node;
+        if (_isPreviewing) return;
 
-        if (node.IsFolder) return;
-
-        await ShowPreviewAsync(node);
+        _isPreviewing = true;
+        try
+        {
+            await ShowPendingPreviewAsync();
+        }
+        finally
+        {
+            _isPreviewing = false;
+        }
     }
 
     /// <summary>
-    ///     Show preview async
+    ///     Shows the pending preview; a selection made while it is being built replaces the pending
+    ///     one, so only the newest selection is displayed and superseded view models are discarded.
+    /// </summary>
+    private async Task ShowPendingPreviewAsync()
+    {
+        while (_pendingPreviewNode is { } pending)
+        {
+            _pendingPreviewNode = null;
+            await DisposePreviewVmAsync();
+            if (pending.IsFolder) continue;
+
+            var viewModel = await BuildPreviewVmAsync(pending);
+            if (_pendingPreviewNode is null)
+                PreviewVm = viewModel;
+            else
+                await DisposePreviewAsync(viewModel);
+        }
+    }
+
+    /// <summary>
+    ///     Builds the preview view model of a node.
     /// </summary>
     /// <param name="node"></param>
-    private async Task ShowPreviewAsync(PackageEntry node)
+    /// <returns>The view model, or null when the preview could not be created.</returns>
+    private async Task<object?> BuildPreviewVmAsync(PackageEntry node)
     {
         try
         {
             Log.Information("Creating preview for: {Path}", node.FullPath);
             var viewModel = await _previewService.CreatePreviewViewModelAsync(node);
-            if (viewModel != null) Log.Debug("Preview displayed successfully");
-            PreviewVm = viewModel;
+            if (viewModel != null) Log.Debug("Preview created successfully");
+            return viewModel;
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error showing preview for: {Path}", node.FullPath);
-            await DisposePreviewVmAsync();
+            return null;
         }
     }
 
