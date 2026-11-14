@@ -48,7 +48,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         try
         {
             var extractor = await OpenExtractorAsync(entry.path).ConfigureAwait(false);
-            return await extractor.ExtractAsync(entry.Index, layer, progress, cancellationToken)
+            return await extractor.ExtractAsync(entry.index, layer, progress, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -71,7 +71,7 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
         try
         {
             var extractor = await OpenExtractorAsync(entry.path).ConfigureAwait(false);
-            return await Task.Run(() => extractor.HasLayerData(entry.Index, layer), cancellationToken)
+            return await Task.Run(() => extractor.HasLayerData(entry.index, layer), cancellationToken)
                 .ConfigureAwait(false);
         }
         finally

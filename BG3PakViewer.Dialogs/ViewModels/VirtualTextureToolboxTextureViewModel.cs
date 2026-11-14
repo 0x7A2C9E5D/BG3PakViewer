@@ -24,7 +24,7 @@ public partial class VirtualTextureToolboxTextureViewModel(
     /// <summary>
     ///     The name of the texture.
     /// </summary>
-    public string DisplayName => Entry.Name;
+    public string DisplayName => Entry.name;
 
     /// <summary>
     ///     The name of the tile set the texture belongs to.

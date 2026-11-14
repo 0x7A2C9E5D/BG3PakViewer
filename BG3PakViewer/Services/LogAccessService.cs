@@ -18,7 +18,7 @@ internal sealed class LogAccessService : ILogAccessService
     private Action<LogEvent>? _logAdded;
 
     /// <summary>
-    ///     Stores a log entry. Entries arrive from whichever thread wrote the log, so every access is
+    ///     Stores a log entry. entries arrive from whichever thread wrote the log, so every access is
     ///     guarded; the oldest entries are dropped once the limit is reached.
     /// </summary>
     /// <param name="logEvent"></param>

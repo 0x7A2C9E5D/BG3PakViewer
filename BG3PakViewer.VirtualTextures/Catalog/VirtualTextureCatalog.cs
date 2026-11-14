@@ -8,17 +8,34 @@ using Serilog;
 namespace BG3PakViewer.VirtualTextures.Catalog;
 
 /// <summary>
-///     Indexes every virtual texture of the loaded package from its tile sets (.gts).
+///     Indexes the virtual textures of the loaded package from its tile set (.gts) metadata.
 /// </summary>
 /// <remarks>
-///     Tile sets are parsed one at a time on a worker, so only one is materialized while the index is
-///     built; the complete list of textures is returned when the read ends. Nothing is cached between
-///     calls, so every call reads the tile sets again and the package has to stay loaded until it ends.
+///     Only tile set metadata is read; GTP page files are never opened, so indexing stays cheap
+///     compared with extracting a texture layer. Tile sets are parsed one at a time on a worker, so
+///     at most one is materialized while the index is built, and the complete
+///     <see cref="VirtualTextureIndexResult" /> is returned once the read ends. A tile set that cannot
+///     be parsed contributes a <see cref="VirtualTextureIndexFailure" /> instead of aborting the index,
+///     and progress is reported once per tile set. Cancelling the token throws rather than returning a
+///     partial index. Nothing is cached between calls, so every call reads the tile sets again and the
+///     package has to stay loaded until it finishes; the catalog holds no resources of its own and
+///     needs no disposal.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
-    /// <inheritdoc />
+    /// <summary>
+    ///     Indexes every virtual texture tile set of the loaded package.
+    /// </summary>
+    /// <remarks>
+    ///     A package with no active files produces an empty index instead of throwing. Cancellation
+    ///     throws <see cref="OperationCanceledException" /> rather than returning a partial index, and
+    ///     a tile set that cannot be parsed is reported in the result instead of failing the call. The
+    ///     package has to stay loaded until the returned task completes.
+    /// </remarks>
+    /// <param name="progress">Receives the number of tile sets indexed so far; may be <see langword="null" />.</param>
+    /// <param name="cancellation">Stops indexing.</param>
+    /// <returns>Every texture of the package, plus the tile sets that could not be read.</returns>
     public async Task<VirtualTextureIndexResult> IndexAsync(
         IProgress<VirtualTextureIndexProgress>? progress,
         CancellationToken cancellation = default)
@@ -33,9 +50,14 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     Builds the index from every tile set in <paramref name="files" />, reporting progress as
     ///     tile sets complete and logging the totals when the index is finished.
     /// </summary>
-    /// <param name="files">The package's active files.</param>
-    /// <param name="progress">Receives the number of tile sets indexed so far.</param>
-    /// <param name="cancellation">Cancels indexing.</param>
+    /// <remarks>
+    ///     A tile set that fails to parse is recorded and skipped, so one unreadable file does not
+    ///     hide the textures of all the others. Progress counts handled tile sets, including the ones
+    ///     that failed.
+    /// </remarks>
+    /// <param name="files">The package's active files, including entries that are not tile sets.</param>
+    /// <param name="progress">Receives the number of tile sets handled so far; may be <see langword="null" />.</param>
+    /// <param name="cancellation">Stops at the next tile set by throwing <see cref="OperationCanceledException" />.</param>
     /// <returns>Every texture, plus the tile sets that could not be read.</returns>
     private async Task<VirtualTextureIndexResult> IndexFilesAsync(
         IReadOnlyList<PackagedFileInfo> files,
@@ -53,8 +75,8 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
             cancellation.ThrowIfCancellationRequested();
 
             var result = await IndexFileAsync(file, cancellation).ConfigureAwait(false);
-            entries.AddRange(result.Entries);
-            failures.AddRange(result.Failures);
+            entries.AddRange(result.entries);
+            failures.AddRange(result.failures);
 
             progress?.Report(new VirtualTextureIndexProgress(++indexed, total));
         }
@@ -75,8 +97,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Tells whether a package file is a virtual texture tile set.
+    ///     Tells whether a package file is a virtual texture tile set, by its extension.
     /// </summary>
+    /// <param name="file">The package file to check.</param>
+    /// <returns><see langword="true" /> when the file is a virtual texture tile set.</returns>
     private static bool IsIndexable(PackagedFileInfo file)
     {
         return FileExtensions.IsVirtualTexture(Path.GetExtension(file.Name));
@@ -86,6 +110,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     Indexes one tile set on a worker, returning either its textures or the reason it could not
     ///     be read. A canceled read is rethrown so indexing stops.
     /// </summary>
+    /// <param name="file">The tile set's entry in the package.</param>
     /// <param name="cancellation">Cancels the read.</param>
     /// <returns>The tile set's textures, or a single failure when it could not be parsed.</returns>
     private async Task<VirtualTextureIndexResult> IndexFileAsync(PackagedFileInfo file,
@@ -93,8 +118,8 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     {
         try
         {
-            // LSLib parses a tile set synchronously, so it runs on a worker. Only this one tile set
-            // is materialized, and it is released once its entries have been copied to the index.
+            // Only this one tile set is materialized, and it is released once its entries have been
+            // copied into the index.
             var entries = await ParseEntriesAsync(file, cancellation).ConfigureAwait(false);
             return new VirtualTextureIndexResult(entries, []);
         }
@@ -114,11 +139,11 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     Logs the index totals, including the tile sets that could not be read.
     /// </summary>
     /// <param name="textureCount">How many textures were indexed.</param>
-    /// <param name="tileSetCount">How many tile sets the package holds.</param>
+    /// <param name="tileSetCount">How many tile sets the package holds, including failed ones.</param>
     /// <param name="failureCount">How many tile sets failed to parse.</param>
     private static void LogSummary(int textureCount, int tileSetCount, int failureCount)
     {
-        Log.Information("Indexed {TextureCount} virtual textures from {TileSetCount} tile set(s)",
+        Log.Information("indexed {TextureCount} virtual textures from {TileSetCount} tile set(s)",
             textureCount, tileSetCount);
         // Kept next to the totals so that a tile set which stopped parsing shows up in the log even
         // when nobody opens the toolbox and sees the warning there.
@@ -128,12 +153,17 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Parses one tile set's metadata on a worker; the caller copies the entries into the index
-    ///     and then releases the list.
+    ///     Parses one tile set's metadata into texture entries on a worker; the caller copies them
+    ///     into the index and then releases the list.
     /// </summary>
+    /// <param name="file">The tile set's entry in the package.</param>
+    /// <param name="cancellationToken">Cancels the synchronous read.</param>
+    /// <returns>The textures of this tile set, in tile set order.</returns>
     private static async Task<IReadOnlyList<VirtualTextureEntry>> ParseEntriesAsync(
         PackagedFileInfo file, CancellationToken cancellationToken)
     {
+        // LSLib reads the tile set synchronously, so it runs on a worker; ConfigureAwait(false) keeps
+        // the metadata parse on that worker too instead of returning to the UI thread.
         var stream = await Task.Run(file.CreateContentReader, cancellationToken).ConfigureAwait(false);
         if (stream is null) throw new FileNotFoundException($"Virtual texture not found in package: {file.Name}");
         var tileSetFile = new VirtualTextureTileSetFile(stream);

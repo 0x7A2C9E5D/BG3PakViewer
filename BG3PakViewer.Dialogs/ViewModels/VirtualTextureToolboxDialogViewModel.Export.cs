@@ -120,13 +120,13 @@ public partial class VirtualTextureToolboxDialogViewModel
         if (cancellationToken.IsCancellationRequested)
         {
             Log.Information(
-                "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
+                "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{total} files in {Elapsed} ms",
                 textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
             return;
         }
 
         Log.Information(
-            "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
+            "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{total} files in {Elapsed} ms",
             textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
         await ReportExportResultAsync(exported, files.Count, failures);
     }
@@ -203,7 +203,7 @@ public partial class VirtualTextureToolboxDialogViewModel
             Directory.CreateDirectory(Path.Combine(folder, folderName));
             foreach (var texture in group)
             {
-                var layerCount = Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count);
+                var layerCount = Math.Min(texture.Entry.layerCount, VirtualTextureLayers.Names.Count);
                 for (var layer = 0; layer < layerCount; layer++)
                 {
                     var layerIndex = layer;

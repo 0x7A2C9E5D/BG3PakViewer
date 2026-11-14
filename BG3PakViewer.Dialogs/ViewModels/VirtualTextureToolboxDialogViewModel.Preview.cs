@@ -82,7 +82,7 @@ public partial class VirtualTextureToolboxDialogViewModel
         {
             Preview = null;
             PreviewStatusKey = LangKeys.TitlePreviewFailed;
-            Log.Error(ex, "Failed to preview virtual texture: {Name}", row.DisplayName);
+            Log.Error(ex, "Failed to preview virtual texture: {name}", row.DisplayName);
         }
         finally
         {

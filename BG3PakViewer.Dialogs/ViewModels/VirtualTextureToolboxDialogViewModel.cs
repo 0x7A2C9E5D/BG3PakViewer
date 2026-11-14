@@ -263,7 +263,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, int layer, CancellationToken cancellationToken)
     {
         foreach (var texture in textures.Where(texture =>
-                     layer < Math.Min(texture.Entry.LayerCount, VirtualTextureLayers.Names.Count)))
+                     layer < Math.Min(texture.Entry.layerCount, VirtualTextureLayers.Names.Count)))
             if (await _extractor.HasLayerDataAsync(texture.Entry, layer, cancellationToken))
                 return true;
 
@@ -339,15 +339,15 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             var progress = new Progress<VirtualTextureIndexProgress>(value =>
             {
                 if (cts.IsCancellationRequested) return;
-                IndexedCount = value.Indexed;
-                IndexTotal = value.Total;
+                IndexedCount = value.indexed;
+                IndexTotal = value.total;
             });
 
             Textures.Clear();
             result = await _catalog.IndexAsync(progress, cts.Token);
             if (cts.IsCancellationRequested) return;
 
-            foreach (var entry in result.Entries)
+            foreach (var entry in result.entries)
             {
                 if (cts.IsCancellationRequested) break;
                 batch.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
@@ -387,7 +387,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
         // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
         // while indexing must not pop a message for a window that is no longer there.
         if (!cts.IsCancellationRequested && result is not null)
-            await ReportIndexFailuresAsync(result.Failures);
+            await ReportIndexFailuresAsync(result.failures);
     }
 
     /// <summary>
@@ -404,7 +404,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             failures.Count));
         message.AppendLine();
         foreach (var failure in failures)
-            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.path}: {failure.Reason}");
+            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.path}: {failure.reason}");
 
         await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
             Strings.VirtualTextureIndexFailedCaption, MessageBoxIcon.Warning);
