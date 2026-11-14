@@ -88,8 +88,8 @@ internal sealed class PackageService : IPackageService
     public async ValueTask DisposeAsync()
     {
         if (_disposedValue) return;
-        _disposedValue = true;
         await CleanupAsync().ConfigureAwait(false);
+        _disposedValue = true;
     }
 
     /// <summary>
