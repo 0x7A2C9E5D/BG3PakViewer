@@ -36,7 +36,7 @@ public static class FileOperations
     public static void EnsureDirectoryExists(string filePath)
     {
         var directory = Path.GetDirectoryName(filePath);
-        if (!string.IsNullOrEmpty(directory)) 
+        if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
     }
 
