@@ -33,5 +33,5 @@ public interface IVirtualTextureExtractor : IAsyncDisposable
     /// <param name="layer">The layer index.</param>
     /// <param name="cancellationToken">Cancels the check.</param>
     /// <returns><see langword="true" /> when the layer holds data.</returns>
-    Task<bool> HasLayerDataAsync(VirtualTextureEntry entry, int layer, CancellationToken cancellationToken);
+    Task<bool> HasLayerAsync(VirtualTextureEntry entry, int layer, CancellationToken cancellationToken);
 }

@@ -207,7 +207,7 @@ public partial class VirtualTextureToolboxDialogViewModel
                 for (var layer = 0; layer < layerCount; layer++)
                 {
                     var layerIndex = layer;
-                    if (!await _extractor.HasLayerDataAsync(texture.Entry, layerIndex, cancellationToken))
+                    if (!await _extractor.HasLayerAsync(texture.Entry, layerIndex, cancellationToken))
                     {
                         skipped++;
                         continue;

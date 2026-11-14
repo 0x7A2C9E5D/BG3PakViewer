@@ -264,7 +264,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     {
         foreach (var texture in textures.Where(texture =>
                      layer < Math.Min(texture.Entry.layerCount, VirtualTextureLayers.Names.Count)))
-            if (await _extractor.HasLayerDataAsync(texture.Entry, layer, cancellationToken))
+            if (await _extractor.HasLayerAsync(texture.Entry, layer, cancellationToken))
                 return true;
 
         return false;
