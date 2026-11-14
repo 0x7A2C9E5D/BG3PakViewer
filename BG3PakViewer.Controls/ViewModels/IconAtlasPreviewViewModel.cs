@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using BG3PakViewer.Contracts;
-using CommunityToolkit.Mvvm.ComponentModel;
+using BG3PakViewer.Shared.ViewModels;
 using HanumanInstitute.MvvmDialogs;
 using Syncfusion.Data.Extensions;
 
@@ -18,7 +18,7 @@ namespace BG3PakViewer.Controls.ViewModels;
 ///     The class is split by responsibility: this file holds the icons and their selection, the
 ///     sibling files export them and talk to the user.
 /// </remarks>
-public partial class IconAtlasPreviewViewModel : ObservableObject
+public partial class IconAtlasPreviewViewModel : DisposableViewModel
 {
     private readonly IAppSettings _appSettings;
     private readonly string _atlasName;
@@ -74,5 +74,18 @@ public partial class IconAtlasPreviewViewModel : ObservableObject
     {
         if (e.PropertyName == nameof(IconAtlasCellViewModel.IsSelected))
             ExportSelectedCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>
+    ///     Stops watching the icons, so a replaced preview no longer raises the export command state.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (!disposing) return;
+
+        foreach (var item in Items)
+            item.PropertyChanged -= OnItemPropertyChanged;
     }
 }
