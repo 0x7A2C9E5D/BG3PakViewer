@@ -439,6 +439,8 @@ int maxX = (num3 + num5) / num7 + (((num3 + num5) % num7 > 0) ? 1 : 0) - 1;
 - `CultureResolver.ResolveSupportedCulture` 改为从 `CultureInfo.CurrentUICulture` 起算。`CurrentUICulture` 是用户选的显示语言（Windows“语言首选项”），`InstalledUICulture` 是系统安装语言，两者可以不同；注释里写明了为什么不能用后者。
 - `Services/AppDiagnostics.cs` 的 `System UI Culture` 同步改记 `CurrentUICulture`：这一行原本的用途就是“把意外的英文界面追回到没有语言包的系统区域”，改完后它记录的才是真正参与回退的那个输入（否则日志里只有安装语言，误导排查）。
 
+**作者确认（2026-11-14）**：语言回退以显示语言（`CurrentUICulture`）为准是预期行为，保留 `0116398` 的实现；#30 关闭，不再作为缺陷。
+
 **验证**：
 - 探针（真实 `CultureResolver.cs` / `CultureMatcher.cs` / `ICultureMatcher.cs` / `ICultureResolver.cs` 链入 `Add-Type` 编译，模拟程序目录只有 `it` / `zh-Hans` / `zh-Hant` 三个文化目录外加一个非文化名目录 `runtimes`（被忽略），并用 `AppContext.SetData("APP_CONTEXT_BASE_DIRECTORY", …)` 把扫描目录指过去；同一次运行里另编一份“旧实现副本”用 `InstalledUICulture` 做对照）：
 
