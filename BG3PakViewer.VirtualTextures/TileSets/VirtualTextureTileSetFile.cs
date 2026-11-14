@@ -11,9 +11,10 @@ namespace BG3PakViewer.VirtualTextures.TileSets;
 ///     Parsing opens no GTP page file; the page files are separate streams the layer extraction asks a
 ///     provider for. The tile ranges are not computed here either, because only an extraction needs them.
 /// </remarks>
-internal sealed class VirtualTextureTileSetFile : IDisposable
+internal sealed class VirtualTextureTileSetFile : IAsyncDisposable
 {
     private readonly Stream _stream;
+    private bool _disposed;
 
     /// <summary>
     ///     Reads the tile set from <paramref name="stream" />, which this object owns from then on.
@@ -53,9 +54,16 @@ internal sealed class VirtualTextureTileSetFile : IDisposable
     /// <summary>
     ///     Releases the parsed tile set and the stream it was read from.
     /// </summary>
-    public void Dispose()
+    /// <remarks>
+    ///     Both are synchronous to close; <see cref="IAsyncDisposable" /> lets callers release them with
+    ///     <c>await using</c> at the end of an asynchronous scope instead of a blocking disposal.
+    /// </remarks>
+    /// <returns>A task that completes when the tile set is released.</returns>
+    public async ValueTask DisposeAsync()
     {
+        if (_disposed) return;
         TileSet.Dispose();
-        _stream.Dispose();
+        await _stream.DisposeAsync().ConfigureAwait(false);
+        _disposed = true;
     }
 }
