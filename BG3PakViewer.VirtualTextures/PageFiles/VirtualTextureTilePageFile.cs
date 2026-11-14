@@ -31,6 +31,11 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     /// </summary>
     private const int MaxPages = 4096;
 
+    /// <summary>
+    ///     The number of bytes read at a time when a page file that cannot seek is copied into memory.
+    /// </summary>
+    private const int CopyChunkSize = 64 * 1024;
+
     private static readonly int HeaderSize = Marshal.SizeOf<GTPHeader>();
     private static readonly int ChunkHeaderSize = Marshal.SizeOf<GTPChunkHeader>();
 
@@ -43,15 +48,31 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     ///     addressed by page and chunk index afterward.
     /// </summary>
     /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
-    /// <param name="stream">The content of the page file; the page keeps reading from it.</param>
+    /// <param name="stream">
+    ///     The content of the page file; the page file keeps reading from it and closes it, or closes the copy
+    ///     it makes when the stream cannot seek.
+    /// </param>
     /// <exception cref="InvalidDataException">The page file is not a readable GTP page file.</exception>
     public VirtualTextureTilePageFile(int pageSize, Stream stream)
     {
-        ValidatePageSize(pageSize);
-
-        _pageSize = pageSize;
-        _reader = new BinaryReader(stream, Encoding.UTF8, false);
-        _chunkOffsets = ReadOffsetsOrDispose();
+        try
+        {
+            ValidatePageSize(pageSize);
+            _pageSize = pageSize;
+            stream = CopyToMemoryIfNeeded(pageSize, stream);
+            _reader = new BinaryReader(stream, Encoding.UTF8, false);
+            _chunkOffsets = ReadChunkOffsetTables();
+        }
+        catch
+        {
+            // The page file owns the stream from the moment it is handed over, so a rejected file must not
+            // leave it open. Once the reader exists it closes that same stream.
+            if (_reader is null)
+                stream.Dispose();
+            else
+                _reader.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -94,21 +115,53 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     }
 
     /// <summary>
-    ///     Reads the offset tables and, when the page file is rejected, closes the stream it owns.
+    ///     Makes the page file seekable, copying a stream that cannot seek into memory first.
     /// </summary>
-    /// <returns>The chunk offsets of every page.</returns>
-    /// <exception cref="InvalidDataException">The page file is not a readable GTP page file.</exception>
-    private List<uint[]> ReadOffsetsOrDispose()
+    /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
+    /// <param name="stream">The stream of the page file, which is closed when it has to be copied.</param>
+    /// <returns>The stream to read the page file from.</returns>
+    /// <exception cref="InvalidDataException">The stream is longer than a page file this reader accepts.</exception>
+    private static Stream CopyToMemoryIfNeeded(int pageSize, Stream stream)
     {
+        if (stream.CanSeek) return stream;
+
+        var buffer = new MemoryStream();
         try
         {
-            return ReadChunkOffsetTables();
+            CopyToMemory(pageSize, stream, buffer);
         }
         catch
         {
-            // The page file owns the stream, so a rejected file must not leave it open.
-            _reader.Dispose();
+            buffer.Dispose();
             throw;
+        }
+
+        stream.Dispose();
+        // The copy is read from its start, the way the original stream was.
+        buffer.Position = 0;
+        return buffer;
+    }
+
+    /// <summary>
+    ///     Copies the page file into memory, stopping at the largest page file the reader accepts: a longer
+    ///     stream would be rejected for holding more pages than <see cref="MaxPages" /> anyway.
+    /// </summary>
+    /// <param name="pageSize">The aligned size of one page in the page file, in bytes.</param>
+    /// <param name="source">The stream to copy.</param>
+    /// <param name="buffer">The buffer the page file is copied into.</param>
+    /// <exception cref="InvalidDataException">The stream is longer than the largest page file.</exception>
+    private static void CopyToMemory(int pageSize, Stream source, Stream buffer)
+    {
+        var maxLength = (long)MaxPages * pageSize;
+        var chunk = new byte[CopyChunkSize];
+        int read;
+        while ((read = source.Read(chunk, 0, chunk.Length)) > 0)
+        {
+            if (buffer.Length + read > maxLength)
+                throw new InvalidDataException(
+                    $"Page file is longer than the largest one of {MaxPages} pages ({maxLength} bytes)");
+
+            buffer.Write(chunk, 0, read);
         }
     }
 
@@ -245,7 +298,7 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     /// <exception cref="InvalidDataException">The chunk offset is past the page end.</exception>
     private void ValidateChunkOffset(int pageIndex, int chunkIndex, uint offset)
     {
-        if ((long)offset + ChunkHeaderSize > _pageSize)
+        if (offset + ChunkHeaderSize > _pageSize)
             throw new InvalidDataException(
                 $"Chunk {chunkIndex} of page {pageIndex} starts at offset {offset}, past its {_pageSize}-byte page");
     }
@@ -260,7 +313,7 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     /// <exception cref="InvalidDataException">The chunk data does not fit in the page.</exception>
     private void ValidateChunkEnd(int pageIndex, int chunkIndex, uint offset, uint size)
     {
-        if ((long)offset + ChunkHeaderSize + size > _pageSize)
+        if (offset + ChunkHeaderSize + size > _pageSize)
             throw new InvalidDataException(
                 $"Chunk {chunkIndex} of page {pageIndex} declares {size} bytes, past its {_pageSize}-byte page");
     }

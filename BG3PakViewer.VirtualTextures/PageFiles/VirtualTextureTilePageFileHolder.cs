@@ -5,8 +5,8 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// </summary>
 /// <remarks>
 ///     When a page file other than the open one is requested, the open page file is closed before the new
-///     one is opened, so the number of open GTP streams never grows with the size of the tile set. A page
-///     stream that cannot seek is copied into memory first, because reading a page file seeks within it.
+///     one is opened, so the number of open GTP streams never grows with the size of the tile set. The page
+///     file takes over the stream it is given, copying it into memory first when it cannot seek.
 /// </remarks>
 /// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
@@ -35,16 +35,7 @@ internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, S
 
         ClosePageFile();
 
-        var stream = pageStreamProvider(pageFileIndex);
-        if (!stream.CanSeek)
-        {
-            var buffer = new MemoryStream();
-            stream.CopyTo(buffer);
-            stream.Dispose();
-            stream = buffer;
-        }
-
-        _pageFile = new VirtualTextureTilePageFile(pageSize, stream);
+        _pageFile = new VirtualTextureTilePageFile(pageSize, pageStreamProvider(pageFileIndex));
         _openPageFileIndex = pageFileIndex;
         return _pageFile;
     }
