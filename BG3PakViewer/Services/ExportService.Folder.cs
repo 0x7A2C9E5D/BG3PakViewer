@@ -31,7 +31,13 @@ internal partial class ExportService
             }
 
             Log.Information("Found {Count} files to export", files.Count);
-            await ExportFilesToFolderAsync(files, targetFolder, ct);
+            var failed = await ExportFilesToFolderAsync(files, targetFolder, ct);
+            if (failed > 0)
+            {
+                Log.Warning("Folder export finished with {Failed} of {Count} files failed: {TargetFolder}",
+                    failed, files.Count, targetFolder);
+                return false;
+            }
 
             Log.Information("Folder export completed: {TargetFolder}", targetFolder);
             return true;
@@ -72,16 +78,22 @@ internal partial class ExportService
     /// <param name="files"></param>
     /// <param name="folderPath"></param>
     /// <param name="cancellationToken"></param>
-    private static async Task ExportFilesToFolderAsync(List<PackagedFileInfo> files, string folderPath,
+    /// <returns>The number of files that could not be exported.</returns>
+    private static async Task<int> ExportFilesToFolderAsync(List<PackagedFileInfo> files, string folderPath,
         CancellationToken cancellationToken)
     {
+        var failures = 0;
         var parallelOptions = new ParallelOptions
         {
             MaxDegreeOfParallelism = Environment.ProcessorCount,
             CancellationToken = cancellationToken
         };
         await Parallel.ForEachAsync(files, parallelOptions,
-            async (file, _) => { await ExportFileToFolderAsync(file, folderPath); });
+            async (file, _) =>
+            {
+                if (!await ExportFileToFolderAsync(file, folderPath)) Interlocked.Increment(ref failures);
+            });
+        return failures;
     }
 
     /// <summary>
@@ -89,7 +101,8 @@ internal partial class ExportService
     /// </summary>
     /// <param name="file"></param>
     /// <param name="folder"></param>
-    private static async Task ExportFileToFolderAsync(PackagedFileInfo file, string folder)
+    /// <returns>True when the file was written completely.</returns>
+    private static async Task<bool> ExportFileToFolderAsync(PackagedFileInfo file, string folder)
     {
         try
         {
@@ -97,12 +110,15 @@ internal partial class ExportService
             var targetPath = FileOperations.ResolveInside(folder, file.Name);
             FileOperations.EnsureDirectoryExists(targetPath);
             await using var stream = file.CreateContentReader();
-            if (!await FileOperations.SaveStreamToFileAsync(stream, targetPath))
-                Log.Warning("Failed to export file: {Path}", file.Name);
+            if (await FileOperations.SaveStreamToFileAsync(stream, targetPath)) return true;
+
+            Log.Warning("Failed to export file: {Path}", file.Name);
+            return false;
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error exporting file to folder: {Path}", file.Name);
+            return false;
         }
     }
 }

@@ -12,20 +12,44 @@ public static class FileOperations
     /// </summary>
     /// <param name="stream"></param>
     /// <param name="path"></param>
-    /// <returns></returns>
+    /// <returns>True when the whole stream was written; false when the copy failed.</returns>
     public static async Task<bool> SaveStreamToFileAsync(Stream stream, string path)
     {
+        // Write next to the target and rename it into place only after the copy succeeded: a failed
+        // save must neither destroy the file that was already there nor leave a half-written one.
+        var tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
-            await using var fs = File.Create(path);
-            await stream.CopyToAsync(fs);
-            await fs.FlushAsync();
+            await using (var file = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                await stream.CopyToAsync(file);
+                await file.FlushAsync();
+            }
+
+            File.Move(tempPath, path, overwrite: true);
             return true;
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to save stream to file: {Path}", path);
+            TryDelete(tempPath);
             return false;
+        }
+    }
+
+    /// <summary>
+    ///     Deletes a file a failed save left behind, without hiding the original failure.
+    /// </summary>
+    /// <param name="path">The file to remove, if it exists.</param>
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to remove the incomplete file: {Path}", path);
         }
     }
 

@@ -109,18 +109,52 @@ CTS 只在文件夹导出创建；单文件导出期间 `IsExporting=true` 而 C
 验证：Debug/Release 构建 0 错误；新增资源在 en / zh-Hans / zh-Hant / it 四种语言下都能取到正确文本；启停冒烟测试通过（正常关窗 → 退出码 0、事件日志无新增崩溃、设置照常保存）。
 **未覆盖**：没有自动化"文件导出进行中 + 拖入 pak"这个组合动作，该分支靠代码路径与资源解析确认，未做端到端实跑。
 
-**7. 取消导出后立刻换包：旧包在导出仍读取时被释放（已修复，打开路径）**
+**7. 取消导出后立刻换包：旧包在导出仍读取时被释放（已修复，打开与关窗路径）**
 `MainWindowViewModel.Export.cs`（只发取消不等待）→ `MainWindowViewModel.Package.cs`（`CleanupAsync()`）→ `PackageService.CleanupAsync`。
 `CancelAsync` 只置位，`Parallel.ForEachAsync` 还在读绑定到 `MemoryMappedView` 的流；随后立刻 `Package.Dispose()` 会与读取并发。
-**修复记录（2026-11-14）**：`ExportAsync` 增加一个 `TaskCompletionSource _exportCompletion`（在 `finally` 里完成），`HandleIsExportingFiles` 取消后 `await completion.Task`，等导出循环真正退出、不再持有旧包后才返回 true，让调用方继续 `CleanupAsync`。同时处理了模态对话框期间的窗口期：导出可能在用户点确认前就结束，字段已被清空，所以取消前重新判空（否则又回到 `await null`）。
-**仍未覆盖**：关窗退出路径——`MainWindowViewModel.Dispose` 是同步的，在这里等导出会与导出回投 UI 线程的续体互相卡住（死锁），所以只在打开新包这条路径上等待；关窗时用户已被告知"正在导出"，进程随后退出，影响限于半截文件与日志噪音。
-验证：Debug/Release 构建 0 错误、无 CS 警告；启停冒烟通过。**未做**端到端实跑（需要在文件夹导出进行中拖入 pak）。
+**修复记录（2026-11-14，打开路径）**：`ExportAsync` 增加一个 `TaskCompletionSource _exportCompletion`（在 `finally` 里完成），`HandleIsExportingFiles` 取消后 `await completion.Task`，等导出循环真正退出、不再持有旧包后才返回 true，让调用方继续 `CleanupAsync`。同时处理了模态对话框期间的窗口期：导出可能在用户点确认前就结束，字段已被清空，所以取消前重新判空（否则又回到 `await null`）。
+**修复记录（2026-11-14，关窗路径）**：把"取消 + 等 `_exportCompletion`"抽成 `MainWindowViewModel.Export.cs` 的私有 `CancelAndWaitForExportAsync()`，`HandleIsExportingFiles` 与 `MainWindowViewModel.DisposeAsync` 都调它；`DisposeAsync` 在 `Dispose()`（释放包）之前等它。
+- 为什么现在能等：等待放在**异步**的 `DisposeAsync` 里（由 `MainWindow.OnClosed` await；关窗期间 `ShutdownMode=OnExplicitShutdown`，dispatcher 仍在跑），UI 线程在 await 期间回到消息循环，导出回投 UI 线程的续体（`ExportAsync` 的 `finally`）照样能执行。原报告说的死锁只存在于"同步 `Dispose` 里同步等待"这种写法。
+- 单文件导出没有 CTS：`CancelAndWaitForExportAsync` 只等不取消（`ExportNotCancellableMessage` 的语义不变）；文件夹导出先取消再等，取消只拦后续文件，正在写的那一个会被等完。
+- 顺序：先等导出离开包，再 `_virtualTextureCatalog.DisposeAsync()`，最后 `Dispose()` 释放包。
 
-**8. 文件夹导出"假成功"并留下半截文件（代码成立；但日志显示该路径从未被使用）**
+**验证**（探针：真实 `BG3PakViewer.dll` 修复前/后各一份、同一份探针；真实 `MainWindowViewModel`（`RuntimeHelpers.GetUninitializedObject` + 反射注入 6 个依赖字段）、真实 `ExportService` 与真实文件夹导出路径；`IPackageService` / `IDialogService` / `IDialogManager` / `ISettingsManagerService` / `IVirtualTextureCatalog` / `IVirtualTextureExtractor` 用 `DispatchProxy` 桩；包内条目换成 40 个自造 `PackagedFileInfo`（`Solid=true`，`SolidStream` 每读停 2 ms，读到时若"包已释放"就计数），于是"包是否在导出还在读流时被释放"可直接观测）：
+
+| 观察 | 修复前（HEAD 构建） | 修复后 |
+| --- | --- | --- |
+| `DisposeAsync` 用时 | 1 ms（立即返回） | 63 ms（等导出退出） |
+| 释放包那一刻 `IsExporting` | True | False |
+| `DisposeAsync` 返回后 `IsExporting` | True（导出还在跑） | False |
+| 包释放后仍发生的流读取次数 | **62** | **0** |
+| 导出任务最终状态 | 跑完后在"导出完成"提示框上 NRE（探针没有 WPF 应用，属探针环境） | RanToCompletion（取消分支不弹提示框） |
+
+- 导出约 0.4 s（40 × 512 KiB，并行度=CPU 核数，每读 2 ms），`DisposeAsync` 在导出开始 60 ms 后调用，保证调用时导出仍在进行。
+- 修复后 33/40 个文件落盘、导出被取消（取消只拦后续文件），之后没有再读到已释放的包。
+- `dotnet build BG3PakViewer.slnx -m:1 -c Debug -p:Platform=x64` 与同参 `-c Release` 均 **0 警告 / 0 错误**。
+
+**关于原"待确认"（LZ4 流是否 `AcquirePointer`）**：反编译 `LSLib.LS.LZ4DecompressionStream.DoDecompression` 确认它用 `UnmanagedMemoryAccessor.ReadArray` 把压缩字节读进托管数组、再用 `LZ4Codec.Decode` 解到另一个托管数组，`View` 上没有 `AcquirePointer`/`ReleasePointer`。所以并发释放包不会留下悬垂指针，最坏是 `ObjectDisposedException`（文件夹导出逐文件 catch 后记一条日志），不是 AccessViolation 崩溃；但 `ReadArray` 与 `Dispose` 之间没有同步，仍是"读未映射内存"的窗口，关窗路径该等而不是靠异常兜底。
+**未覆盖**：没有在真实 GUI 里"导出中关窗"；探针没有 WPF 消息循环（导出续体跑在线程池上，不经过 dispatcher），"await 期间 UI 线程不阻塞"只由 `OnClosed` 的 await 链与 dispatcher 语义支撑；单文件导出的关窗等待没有单独跑（探针只覆盖文件夹导出）；打开新包路径沿用上一轮验证。
+
+**8. 文件夹导出"假成功"并留下半截文件（已修复并验证；日志显示该路径仍未在 UI 上被实际使用）**
 `ExportService.Folder.cs:86-100`（逐文件异常只记日志、`SaveStreamToFileAsync` 失败只告警）→ `:34-38` 无条件 `return true`；`Utils/FileOperations.cs:16-30` 失败不删目标文件。
 触发：目标分区写满、文件被占用、读取异常。结果：UI 弹 "Export completed"，用户拿到残缺文件。对照 `Services/PreviewExportService.cs:40-53` 有正确的"失败删半成品"实现。
 证据：① 代码如上；② 实测——用一个在 65536 字节处抛 `IOException` 的流调用 `FileOperations.SaveStreamToFileAsync`，返回 **false**、目标文件**仍然存在且为 65536 字节的半截文件**；③ 日志——全部 Debug/Release 日志里 `Exporting folder` / `Found N files to export` / `Folder export completed` 均为 **0 次**，即文件夹导出从未实际执行过。日志中 16 条 `Failed to export file to:` 属于虚拟纹理工具箱的 `PreviewExportService`（会逐条报告失败），不属本项。
 结论：缺陷真实存在但从未被走到，优先级降为"待定"；真要启用文件夹导出时再修（统计失败数 + 失败删文件/临时文件改名）。
+
+**修复记录（2026-11-14）**：
+- `FileOperations.SaveStreamToFileAsync` 改为先写 `path.<guid>.tmp`（同目录、`FileMode.CreateNew`），复制并 flush 后 `File.Move(temp, path, overwrite: true)` 原子替换；任何异常删掉临时文件并返回 false。失败时**既不留半截文件，也不毁掉已存在的旧文件**（旧实现 `File.Create` 一上来就截断目标）。
+- `ExportService.Folder.cs`：`ExportFileToFolderAsync` 返回 bool，`ExportFilesToFolderAsync` 用 `Interlocked` 统计失败数，`ExportFolderAsync` 在有失败时记一条 `{Failed}/{Count}` 的 warning 并返回 false ⇒ UI 从"Export completed"变成"Export failed"。
+**验证**（探针：真实 `FileOperations` / `ExportService`，`PackagedFileInfo` 用 `Solid=true + SolidStream` 构造，坏文件流在 65536 字节处抛 `IOException`）：
+
+| 场景 | 结果 |
+| --- | --- |
+| 正常写 | `True`、内容 4 字节、无 `.tmp` |
+| 失败、目标不存在 | `False`、目标不存在、无 `.tmp` |
+| 失败、目标已存在 | `False`、旧内容 `OLD` 保持不变、无 `.tmp` |
+| 文件夹导出（1 好 1 坏） | 返回 `False`；好文件逐字节一致；坏文件不存在；无 `.tmp` |
+| 文件夹导出（全好） | 返回 `True`；文件存在；无 `.tmp` |
+
+**未覆盖**：没有在真实 UI 里选文件夹导出（该路径在本机日志里仍从未被执行过）；探针直接调真实 `ExportFolderAsync` 与真实 `SaveStreamToFileAsync`。
 
 **9. Wwise 导出用 `File.OpenWrite`，不截断旧文件**
 `Loader/WwiseAudioLoader.cs:38`。
@@ -846,7 +880,6 @@ System.ArgumentNullException: Value cannot be null. (Parameter 'key')
 
 ## 待确认（缺证据）
 
-- #7 LZ4 解压流是否 `AcquirePointer`（决定是异常还是崩溃）。
 - #26 `BC5Image` 平面布局（决定 uniform/BC 缓冲是否真不一致）。
 - #29 是否存在单文件发布配置。
 - 本次未做运行时验证：未启动 GUI、未做导出字节级比对。
