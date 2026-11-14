@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Win32;
@@ -49,26 +50,75 @@ internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
     public void ActivateExistingInstance()
     {
         ObjectDisposedException.ThrowIf(_disposedValue, this);
-        using var existingProcess = FindExistingProcessInstance();
-        if (existingProcess == null)
+        var mainWindowHandle = FindExistingInstanceWindow();
+        if (mainWindowHandle == IntPtr.Zero)
         {
-            Log.Warning("Another instance was detected, but its process could not be found");
+            Log.Warning("Another instance was detected, but no window of it could be found");
             return;
         }
 
-        var mainWindowHandle = new HWND(existingProcess.MainWindowHandle);
-        ActivateExistingInstanceWindow(mainWindowHandle);
+        ActivateExistingInstanceWindow(new HWND(mainWindowHandle));
     }
 
     /// <summary>
-    ///     Find existing process instance
+    ///     Finds the main window of the other running instance.
     /// </summary>
-    /// <returns></returns>
-    private static Process? FindExistingProcessInstance()
+    /// <remarks>
+    ///     Every process of the enumeration is disposed, because only the window handle is needed
+    ///     afterward and each <see cref="Process" /> holds a handle of its own until it is disposed. A
+    ///     process that merely shares the executable name is not the running instance: when its executable
+    ///     path differs from this one it is skipped. A process whose path cannot be read (for instance one
+    ///     that runs with higher rights) still counts, because the name already matched.
+    /// </remarks>
+    /// <returns>The window handle of the other instance, or <see cref="IntPtr.Zero" /> when it has none.</returns>
+    private static IntPtr FindExistingInstanceWindow()
     {
         using var currentProcess = Process.GetCurrentProcess();
+        var currentPath = GetExecutablePath(currentProcess);
         var processes = Process.GetProcessesByName(currentProcess.ProcessName);
-        return processes.FirstOrDefault(p => p.Id != currentProcess.Id);
+        try
+        {
+            foreach (var process in processes)
+            {
+                if (process.Id == currentProcess.Id) continue;
+                var path = GetExecutablePath(process);
+                if (currentPath is not null && path is not null &&
+                    !string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var mainWindowHandle = process.MainWindowHandle;
+                if (mainWindowHandle != IntPtr.Zero) return mainWindowHandle;
+            }
+
+            return IntPtr.Zero;
+        }
+        finally
+        {
+            foreach (var process in processes) process.Dispose();
+        }
+    }
+
+    /// <summary>
+    ///     Reads the path of the executable a process was started from.
+    /// </summary>
+    /// <param name="process">The process to read.</param>
+    /// <returns>The executable path, or <see langword="null" /> when it cannot be read.</returns>
+    private static string? GetExecutablePath(Process process)
+    {
+        try
+        {
+            return process.MainModule?.FileName;
+        }
+        catch (Win32Exception)
+        {
+            // A process that runs with higher rights does not expose its modules.
+            return null;
+        }
+        catch (InvalidOperationException)
+        {
+            // The process exited while it was being inspected.
+            return null;
+        }
     }
 
     /// <summary>
