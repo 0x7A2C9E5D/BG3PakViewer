@@ -102,10 +102,13 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         string gtsPath, CancellationToken cancellationToken)
     {
         var fileInfo = await packageService.GetFileByPath(gtsPath).ConfigureAwait(false);
-        var stream = fileInfo?.CreateContentReader()
-                     ?? throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
-        using var file = new VirtualTextureTileSetFile(Task.FromResult(stream));
-        return file.Textures.Select((meta, index) =>
-            new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), file.LayerCount, index)).ToList();
+        var stream = await Task.Run(() => fileInfo?.CreateContentReader(), cancellationToken).ConfigureAwait(false);
+        if (stream is null) throw new FileNotFoundException($"Virtual texture not found in package: {gtsPath}");
+        var tileSetFile = new VirtualTextureTileSetFile(stream);
+        return
+        [
+            .. tileSetFile.Textures.Select((meta, index) =>
+                new VirtualTextureEntry(gtsPath, Path.GetFileName(meta.Name), tileSetFile.LayerCount, index))
+        ];
     }
 }

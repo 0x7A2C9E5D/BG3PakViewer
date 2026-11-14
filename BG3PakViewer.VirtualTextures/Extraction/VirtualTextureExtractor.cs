@@ -5,22 +5,29 @@ using BG3PakViewer.VirtualTextures.TileSets;
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
 /// <summary>
-///     Extracts the layers of the indexed virtual textures from the loaded package.
+///     Extracts the layers of indexed virtual textures from the loaded package, one tile set at a time.
 /// </summary>
 /// <remarks>
-///     Extraction is serialized because one extraction reads the package at a time. The extractor of the
-///     last tile set is kept, because every layer of every texture of a tile set needs exactly that tile
-///     set; only the last one is kept, so the memory this costs stays bounded by one tile set and the
-///     handle it holds is released as soon as another tile set is needed. <see cref="Release" />
-///     releases it when the package it was read from is replaced.
+///     All operations, including layer extraction, the layer-data check and release, are serialized by a
+///     gate because the cached extractor and the package streams it holds are not safe for concurrent use.
+///     Only the layer extractor of the most recently used tile set is cached; it owns the parsed tile set
+///     and its package stream, so at most one of each stays alive. Requesting another tile set releases the
+///     cached one first, and a failed parse leaves the cache empty so the next call can retry. GTP page
+///     files are never cached: an extraction opens one, keeps it open while the tile bands are read, and
+///     closes it before returning. The returned DDS stream belongs to the caller, which must dispose it.
+///
+///     The cached tile set survives closing the toolbox. It is released when another tile set is needed,
+///     when <see cref="ReleaseAsync" /> is called before the package is replaced, or when
+///     <see cref="DisposeAsync" /> runs at shutdown. <see cref="ReleaseAsync" /> leaves the service usable;
+///     <see cref="DisposeAsync" /> also marks it disposed. Both wait for an extraction in progress.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets and their page files are read from.</param>
 public sealed class VirtualTextureExtractor(IPackageService packageService) : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private bool _disposed;
     private VirtualTextureLayerExtractor? _cachedExtractor;
     private string? _cachedExtractorPath;
+    private bool _disposed;
 
     /// <summary>
     ///     Extracts one layer of a texture into a DDS stream, reporting progress in percent.
@@ -121,9 +128,9 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
             await _cachedExtractor.DisposeAsync().ConfigureAwait(false);
         _cachedExtractor = null;
         _cachedExtractorPath = null;
-        var file = await Task.Run(() => new VirtualTextureTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
-            .ConfigureAwait(false);
-        _cachedExtractor = new VirtualTextureLayerExtractor(file,
+        var tileSetFile = await Task.Run(async () => new VirtualTextureTileSetFile(await OpenPackageFile(gtsPath)),
+            CancellationToken.None).ConfigureAwait(false);
+        _cachedExtractor = new VirtualTextureLayerExtractor(tileSetFile,
             pageFileName => OpenPackageFile(GetPageFilePath(gtsPath, pageFileName)));
         _cachedExtractorPath = gtsPath;
         return _cachedExtractor;
