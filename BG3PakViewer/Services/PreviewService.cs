@@ -91,7 +91,9 @@ internal class PreviewService(
         {
             Log.Error(ex, "Error creating preview for: {FileName}",
                 Path.GetFileName(node.FullPath));
-            return null;
+            // The format has a preview handler but the file could not be read or decoded, so this is
+            // a load failure, not the "no preview for this format" answer.
+            return CreateNotSupportedViewModel(LangKeys.LoadResourceFailed);
         }
     }
 
