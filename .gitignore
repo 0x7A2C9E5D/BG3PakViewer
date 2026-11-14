@@ -361,3 +361,6 @@ MigrationBackup/
 
 #Syncfusion License
 /BG3PakViewer/Syncfusion.lic
+
+# JetBrains Rider workspace
+.idea/
