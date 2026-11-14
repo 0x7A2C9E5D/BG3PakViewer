@@ -91,16 +91,16 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (_disposed) return;
-        _disposed = true;
-        await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            ReleaseCachedTileSet();
+            if (_disposed) return;
+            await _gate.WaitAsync().ConfigureAwait(false);
+            await ReleaseCachedTileSetAsync().ConfigureAwait(false);
         }
         finally
         {
             _gate.Release();
+            _disposed = true;
         }
     }
 
@@ -117,7 +117,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         // Forget the cached tile set before the new one is parsed. If parsing throws, an empty cache
         // lets the next call try again; keeping the tile set that was just disposed would make every
         // later call for the old path hand out a released object for the rest of the session.
-        ReleaseCachedTileSet();
+        await ReleaseCachedTileSetAsync().ConfigureAwait(false);
         var stream = await OpenPackageFileAsync(path).ConfigureAwait(false);
         _tileSet = await Task.Run(() => new VirtualTextureTileSetFile(stream), CancellationToken.None)
             .ConfigureAwait(false);
@@ -127,9 +127,11 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     /// <summary>
     ///     Releases the cached tile set. The caller must hold <see cref="_gate" />.
     /// </summary>
-    private void ReleaseCachedTileSet()
+    /// <returns>A task that completes when the tile set is released.</returns>
+    private async Task ReleaseCachedTileSetAsync()
     {
-        _tileSet?.Dispose();
+        if (_tileSet is not null)
+            await _tileSet.DisposeAsync().ConfigureAwait(false);
         _tileSet = null;
         _tileSetPath = null;
     }
