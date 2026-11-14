@@ -10,8 +10,7 @@ namespace BG3PakViewer.Services;
 /// <summary>
 ///     Package service
 /// </summary>
-/// <param name="packageLoader"></param>
-internal sealed class PackageService(PackageLoader packageLoader) : IPackageService
+internal sealed class PackageService : IPackageService
 {
     private bool _disposedValue;
 
@@ -35,7 +34,7 @@ internal sealed class PackageService(PackageLoader packageLoader) : IPackageServ
         {
             Log.Information("Loading package: {Path}", path);
             await CleanupAsync();
-            CurrentPackage = await packageLoader.LoadAsync(path);
+            CurrentPackage = await PackageLoader.LoadAsync(path);
             if (CurrentPackage == null)
             {
                 Log.Warning("Failed to load package: {Path}", path);

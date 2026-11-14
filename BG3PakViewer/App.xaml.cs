@@ -6,7 +6,6 @@ using System.Windows;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Dialogs.ViewModels;
 using BG3PakViewer.Dialogs.Views;
-using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Miscellaneous;
 using BG3PakViewer.Models;
@@ -54,7 +53,6 @@ public sealed partial class App : IDisposable
     private static void ConfigureServices()
     {
         Ioc.Default.ConfigureServices(new ServiceCollection()
-            .AddSingleton<PackageLoader>()
             .AddSingleton<ICultureMatcher, CultureMatcher>()
             .AddSingleton<ICultureResolver, CultureResolver>()
             .AddSingleton<ILogAccessService, LogAccessService>()

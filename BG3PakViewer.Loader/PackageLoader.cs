@@ -4,22 +4,24 @@ using Serilog;
 namespace BG3PakViewer.Loader;
 
 /// <summary>
-///     PackageLoader
+///     Loads packages from files.
 /// </summary>
-public class PackageLoader
+public static class PackageLoader
 {
-    private readonly PackageReader _packageReader = new();
-
     /// <summary>
     ///     Loads a package from a file.
     /// </summary>
     /// <param name="path"></param>
-    /// <returns></returns>
-    public async Task<Package?> LoadAsync(string path)
+    /// <returns>The loaded package, or null when the file could not be read.</returns>
+    public static async Task<Package?> LoadAsync(string path)
     {
         try
         {
-            return await Task.Run(() => _packageReader.Read(path));
+            // A reader parks the package it is building in an instance field while it parses, and
+            // disposes that field when the read fails. A shared reader would therefore let one
+            // failed load dispose the package another load is still building, so every load gets
+            // its own reader.
+            return await Task.Run(() => new PackageReader().Read(path));
         }
         catch (Exception e)
         {
