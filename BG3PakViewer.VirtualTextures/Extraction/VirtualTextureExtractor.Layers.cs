@@ -25,41 +25,38 @@ public sealed partial class VirtualTextureExtractor
     ///     empty at every mip level. <c>IVirtualTextureExtractor.ExtractLayerAsync</c> reports an empty
     ///     layer as null, so the nullability warning is suppressed on that branch.
     /// </returns>
-    private Task<Stream> TranscodeLayer(VirtualTextureEntry entry, int layer,
+    private async Task<Stream> TranscodeLayer(VirtualTextureEntry entry, int layer,
         IProgress<(int Done, int Total)>? progress, CancellationToken ct)
     {
-        return Task.Run(async () =>
+        var tex = _tileSet!.Textures[entry.index];
+        // An empty layer is a normal result, not an error: the interface reports it as null.
+        if (FindLevel(layer, tex, ct) is not { } found) return null!;
+
+        var tileSet = _tileSet.TileSet;
+        var (mip, min, max) = found;
+        var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
+        var stream = new MemoryStream();
+        var tile = tileSet.TileSize;
+        var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, _compressor);
+        await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
+            async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName),
+            decoder);
+        var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
+        await writer.WriteHeader();
+        // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
+        // written.
+        stream.Capacity = (int)(stream.Length + writer.RowByteCount * size.Height);
+        var rowTiles = new GTSFlatTileInfo?[size.Width];
+        for (var row = 0; row < size.Height; row++)
         {
-            var tex = _tileSet!.Textures[entry.index];
-            // An empty layer is a normal result, not an error: the interface reports it as null.
-            if (FindLevel(layer, tex, ct) is not { } found) return null!;
+            ct.ThrowIfCancellationRequested();
+            FillRows(mip, layer, new Point(min.X, min.Y + row), rowTiles);
+            await writer.WriteRow(rowTiles).ConfigureAwait(false);
+            progress?.Report((row + 1, size.Height));
+        }
 
-            var tileSet = _tileSet.TileSet;
-            var (mip, min, max) = found;
-            var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
-            var stream = new MemoryStream();
-            var tile = tileSet.TileSize;
-            var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, _compressor);
-            await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
-                async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName),
-                decoder);
-            var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
-            await writer.WriteHeader();
-            // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
-            // written.
-            stream.Capacity = (int)(stream.Length + writer.RowByteCount * size.Height);
-            var rowTiles = new GTSFlatTileInfo?[size.Width];
-            for (var row = 0; row < size.Height; row++)
-            {
-                ct.ThrowIfCancellationRequested();
-                FillRows(mip, layer, new Point(min.X, min.Y + row), rowTiles);
-                await writer.WriteRow(rowTiles);
-                progress?.Report((row + 1, size.Height));
-            }
-
-            stream.Position = 0;
-            return (Stream)stream;
-        }, ct);
+        stream.Position = 0;
+        return stream;
     }
 
     /// <summary>
