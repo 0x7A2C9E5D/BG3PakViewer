@@ -137,8 +137,6 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
         }
 
         stream.Dispose();
-        // The copy is read from its start, the way the original stream was.
-        buffer.Position = 0;
         return buffer;
     }
 
