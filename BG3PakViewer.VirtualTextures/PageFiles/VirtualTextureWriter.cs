@@ -32,7 +32,7 @@ internal sealed class VirtualTextureWriter
     /// <param name="tile">The pixel size of one tile, including its border.</param>
     /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
     /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
-    /// <param name="stream">The stream the DDS is written to; the caller keeps it open.</param>
+    /// <param name="stream">The stream the DDS is written to; the caller keeps it opens.</param>
     public VirtualTextureWriter(Size grid, Size tile, int tileBorder, VirtualTextureUnpacker unpacker,
         Stream stream)
     {
@@ -86,7 +86,7 @@ internal sealed class VirtualTextureWriter
         for (var col = 0; col < tiles.Length; col++)
         {
             if (tiles[col] is not { } cell) continue;
-            _unpacker.ReadTile(cell).CopyTileTo(_strip, _content, _tileBorder, col);
+            _unpacker.Decompress(cell).CopyTileTo(_strip, _content, _tileBorder, col);
         }
 
         _writer.Write(_strip.Data, 0, _strip.Data.Length);

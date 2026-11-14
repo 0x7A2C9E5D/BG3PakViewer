@@ -28,7 +28,7 @@ public sealed partial class VirtualTextureExtractor
     private Task<Stream> TranscodeLayer(VirtualTextureEntry entry, int layer,
         IProgress<(int Done, int Total)>? progress, CancellationToken ct)
     {
-        return Task.Run<Stream>(() =>
+        return Task.Run(async () =>
         {
             var tex = _tileSet!.Textures[entry.index];
             // An empty layer is a normal result, not an error: the interface reports it as null.
@@ -39,8 +39,8 @@ public sealed partial class VirtualTextureExtractor
             var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
             var stream = new MemoryStream();
             var tile = tileSet.TileSize;
-            var decoder = new VirtualTextureChunkDecoder(tile, tileSet.ParameterBlocks, _compressor);
-            using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
+            var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, _compressor);
+            await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
                 async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName),
                 decoder);
             var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
@@ -58,7 +58,7 @@ public sealed partial class VirtualTextureExtractor
             }
 
             stream.Position = 0;
-            return stream;
+            return (Stream)stream;
         }, ct);
     }
 

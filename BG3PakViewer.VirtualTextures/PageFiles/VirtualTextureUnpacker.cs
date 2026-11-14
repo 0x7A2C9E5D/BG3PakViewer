@@ -18,16 +18,27 @@ internal sealed class VirtualTextureUnpacker(
     int pageSize,
     Func<int, Task<Stream>> pageStreamProvider,
     VirtualTextureChunkDecoder decoder)
-    : IDisposable
+    : IAsyncDisposable
 {
+    private bool _disposed;
+
     private readonly VirtualTextureTilePageFileHolder _tilePageFiles = new(pageSize, pageStreamProvider);
 
     /// <summary>
     ///     Closes the page file that is still open.
     /// </summary>
-    public void Dispose()
+    /// <remarks>
+    ///     Closing the reader is synchronous; <see cref="IAsyncDisposable" /> lets the extraction release
+    ///     it with <c>await using</c> at the end of its asynchronous scope instead of a blocking disposal.
+    /// </remarks>
+    /// <returns>A task that completes when the page file is closed.</returns>
+    public ValueTask DisposeAsync()
     {
+        if (_disposed) return
+            ValueTask.CompletedTask;
         _tilePageFiles.Dispose();
+        _disposed = true;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
@@ -35,9 +46,9 @@ internal sealed class VirtualTextureUnpacker(
     /// </summary>
     /// <param name="tile">The page file, page and chunk the tile occupies.</param>
     /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
-    public BC5Image ReadTile(in GTSFlatTileInfo tile)
+    public BC5Image Decompress(in GTSFlatTileInfo tile)
     {
         var pageFile = _tilePageFiles.GetPageFile(tile.PageFileIndex);
-        return decoder.ReadTile(pageFile, tile.PageIndex, tile.ChunkIndex);
+        return decoder.Decode(pageFile, tile.PageIndex, tile.ChunkIndex);
     }
 }

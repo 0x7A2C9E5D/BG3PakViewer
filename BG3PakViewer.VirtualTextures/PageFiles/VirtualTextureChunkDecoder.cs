@@ -10,62 +10,61 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// </summary>
 /// <remarks>
 ///     A chunk is addressed by the page and the chunk index it occupies inside its page file. It is either
-///     uniform, carrying the single RGBA8 texel the whole tile repeats, or BC, compressed with the
+///     uniform, carrying the single RGBA8 texel the whole size repeats, or BC, compressed with the
 ///     parameter block its header names. The decoder knows nothing about which page file a chunk lives in:
 ///     the page arrives as a <see cref="VirtualTextureTilePageFile" />.
 /// </remarks>
-/// <param name="tile">The pixel size of one tile, including its border.</param>
-/// <param name="parameterBlocks">The codec parameter blocks of the tile set, by parameter block id.</param>
+/// <param name="size">The pixel size of one size, including its border.</param>
+/// <param name="parameterBlocks">The codec parameter blocks of the size set, by parameter block id.</param>
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
 internal sealed class VirtualTextureChunkDecoder(
-    Size tile,
     IReadOnlyDictionary<uint, object> parameterBlocks,
-    TileCompressor compressor)
+    Size size, TileCompressor compressor)
 {
     private readonly BcEncoder _encoder = new(CompressionFormat.Bc3);
 
     // BC5 stores two channels: sixteen bytes per 4x4 block for the one kept at full resolution, and the
     // same again for the one kept at half resolution.
-    private readonly int _outputSize = 16 * ((tile.Width + 3) / 4) * ((tile.Height + 3) / 4)
-                                       + 16 * ((tile.Width / 2 + 3) / 4) * ((tile.Height / 2 + 3) / 4);
+    private readonly int _outputSize = 16 * ((size.Width + 3) / 4) * ((size.Height + 3) / 4)
+                                       + 16 * ((size.Width / 2 + 3) / 4) * ((size.Height / 2 + 3) / 4);
 
     private readonly ColorRgba32[] _pixels = new ColorRgba32[16];
 
-    // A uniform tile is one flat color, so every one of its blocks is the same 16 bytes.
-    private readonly int _uniformBlockCount = (tile.Width + 3) / 4 * ((tile.Height + 3) / 4);
+    // A uniform size is one flat color, so every one of its blocks is the same 16 bytes.
+    private readonly int _uniformBlockCount = (size.Width + 3) / 4 * ((size.Height + 3) / 4);
     private BC5Image? _uniformTile;
 
     /// <summary>
     ///     Decompresses the chunk at (<paramref name="pageIndex" />, <paramref name="chunkIndex" />) into
-    ///     a tile image sized as the tile declares.
+    ///     a size image sized as the size declares.
     /// </summary>
     /// <param name="tilePageFile">The page file the chunk lives in.</param>
     /// <param name="pageIndex">The page within that page file.</param>
     /// <param name="chunkIndex">The chunk within that page.</param>
     /// <returns>
-    ///     The decompressed tile, trimmed to the tile size without its border. A uniform chunk fills the
-    ///     same image again on every call, so the caller has to copy it out before reading the next tile.
+    ///     The decompressed size, trimmed to the size without its border. A uniform chunk fills the
+    ///     same image again on every call, so the caller has to copy it out before reading the next size.
     /// </returns>
     /// <exception cref="InvalidDataException">The chunk uses a codec other than uniform or BC.</exception>
-    public BC5Image ReadTile(VirtualTextureTilePageFile tilePageFile, int pageIndex, int chunkIndex)
+    public BC5Image Decode(VirtualTextureTilePageFile tilePageFile, int pageIndex, int chunkIndex)
     {
         var (chunkHeader, compressed) = tilePageFile.ReadChunk(pageIndex, chunkIndex);
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return chunkHeader.Codec switch
         {
             GTSCodec.Uniform => CreateUniformTile(compressed),
-            GTSCodec.BC => new BC5Image(DecompressChunk(chunkHeader, compressed), tile.Width, tile.Height),
+            GTSCodec.BC => new BC5Image(DecompressChunk(chunkHeader, compressed), size.Width, size.Height),
             _ => throw new InvalidDataException($"Unsupported codec: {chunkHeader.Codec}")
         };
     }
 
     /// <summary>
-    ///     Expands a uniform chunk into the BC3 blocks covering a whole tile. The payload of such a
-    ///     chunk is the tile's single RGBA8 texel (the uniform parameter block declares a 4x1 image),
-    ///     so the tile is one flat color and every block repeats it.
+    ///     Expands a uniform chunk into the BC3 blocks covering a whole size. The payload of such a
+    ///     chunk is the size's single RGBA8 texel (the uniform parameter block declares a 4x1 image),
+    ///     so the size is one flat color and every block repeats it.
     /// </summary>
     /// <param name="payload">The uniform chunk payload: the single RGBA8 texel the chunk declares.</param>
-    /// <returns>The BC3 blocks of one tile, every block being that color.</returns>
+    /// <returns>The BC3 blocks of one size, every block being that color.</returns>
     /// <exception cref="InvalidDataException">The payload is shorter than one RGBA8 texel.</exception>
     private BC5Image CreateUniformTile(byte[] payload)
     {
@@ -73,7 +72,7 @@ internal sealed class VirtualTextureChunkDecoder(
             throw new InvalidDataException(
                 $"Uniform chunk payload is {payload.Length} bytes, expected one RGBA8 texel");
         var block = EncodeConstantColor(payload);
-        var image = _uniformTile ??= new BC5Image(new byte[_uniformBlockCount * 16], tile.Width, tile.Height);
+        var image = _uniformTile ??= new BC5Image(new byte[_uniformBlockCount * 16], size.Width, size.Height);
         for (var i = 0; i < _uniformBlockCount; i++) block.CopyTo(image.Data, i * 16);
         return image;
     }
