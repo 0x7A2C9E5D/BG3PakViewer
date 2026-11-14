@@ -4,18 +4,19 @@ using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
+using BG3PakViewer.Miscellaneous;
 using CommunityToolkit.Diagnostics;
 using Serilog;
+using WINDOWPLACEMENT = Windows.Win32.UI.WindowsAndMessaging.WINDOWPLACEMENT;
 
 namespace BG3PakViewer.Services;
 
 /// <summary>
 ///     Single instance manager
 /// </summary>
-/// <param name="isDebug"></param>
-internal sealed class SingleInstanceManager(bool isDebug) : IDisposable
+internal sealed class SingleInstanceManager : ISingleInstanceManager
 {
-    private readonly string _mutexName = isDebug ? "BG3PakViewer_Debug" : "BG3PakViewer";
+    private readonly string _mutexName = DebugHelper.IsDebug ? "BG3PakViewer_Debug" : "BG3PakViewer";
     private bool _disposedValue;
     private Mutex? _mutex;
 

@@ -24,7 +24,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Syncfusion.Licensing;
-using DebugHelper = BG3PakViewer.Miscellaneous.DebugHelper;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace BG3PakViewer;
@@ -37,7 +36,7 @@ public sealed partial class App : IDisposable
     private bool _disposedValue;
     private bool _initialized;
     private ObserverBase<LogEvent>? _logObserver;
-    private SingleInstanceManager? _singleInstanceManager;
+    private ISingleInstanceManager? _singleInstanceManager;
 
     /// <summary>
     ///     Releases the log observer and the single instance manager.
@@ -66,6 +65,7 @@ public sealed partial class App : IDisposable
             .AddSingleton<IRecentFilesService>(x => new RecentFilesService(
                 x.GetRequiredService<IAppSettings>().RecentItems))
             .AddSingleton<IAppDiagnostics, AppDiagnostics>()
+            .AddSingleton<ISingleInstanceManager, SingleInstanceManager>()
             .AddSingleton<IViewLocator, StrongViewLocator>(_ => CreateViewLocator())
             .AddSingleton<IDialogManager, DialogManager>()
             .AddSingleton<IDialogService, DialogService>()
@@ -126,7 +126,6 @@ public sealed partial class App : IDisposable
     /// </summary>
     private void InitializeApplication()
     {
-        ConfigureServices();
         InitializeLogging();
         SetupExceptionHandling();
         InitializeCulture();
@@ -251,6 +250,19 @@ public sealed partial class App : IDisposable
         // depends on the service container, so failures before that point would otherwise be lost.
         InitializeEarlyLogging();
 
+        // The single instance gate is resolved from the container, so registration has to happen
+        // first. Registering constructs no other singleton and loads no settings: those factories
+        // are lazy. Keep the startup-failure report this call had inside StartApplication's guard.
+        try
+        {
+            ConfigureServices();
+        }
+        catch (Exception ex)
+        {
+            ReportStartupFailure(ex);
+            return;
+        }
+
         if (TryRedirectToRunningInstance())
         {
             Shutdown();
@@ -271,7 +283,7 @@ public sealed partial class App : IDisposable
     /// <returns>True when this instance must shut down.</returns>
     private bool TryRedirectToRunningInstance()
     {
-        _singleInstanceManager = new SingleInstanceManager(DebugHelper.IsDebug);
+        _singleInstanceManager = Ioc.Default.GetRequiredService<ISingleInstanceManager>();
         if (!_singleInstanceManager.IsAnotherInstanceRunning()) return false;
 
         Log.Information("Another instance is already running; prompting the user");
