@@ -108,17 +108,23 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
-    ///     Releases the virtual texture catalog and then the resources the loaded package owns.
+    ///     Cancels the running export, releases the virtual texture catalog and then the resources the
+    ///     loaded package owns.
     /// </summary>
     /// <remarks>
-    ///     The catalog may still be indexing, and stopping it is asynchronous: this is awaited from the
-    ///     main window once it has closed, so the UI thread never waits for the index.
+    ///     The export and the catalog may still be reading the package, and stopping them is
+    ///     asynchronous: this is awaited from the main window once it has closed, so the UI thread
+    ///     never waits for either of them.
     /// </remarks>
     /// <returns>A task that completes when the catalog and the package resources are released.</returns>
     public async ValueTask DisposeAsync()
     {
         if (_catalogReleased) return;
         _catalogReleased = true;
+        // A running export reads the package through streams of its own, so it is canceled and awaited
+        // here exactly like on the open-package path. The wait has to live in this asynchronous method:
+        // the export's continuation needs the UI thread, which a synchronous Dispose would block.
+        await CancelAndWaitForExportAsync();
         // The extractor and the package service read the package through streams, so the catalog,
         // which may still be reading it, has to be released first.
         await _virtualTextureCatalog.DisposeAsync();

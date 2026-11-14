@@ -162,10 +162,20 @@ internal partial class MainWindowViewModel
         if (!await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.CancelExportOperationMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning)) return false;
         // The export may have finished while the dialog was open.
+        await CancelAndWaitForExportAsync();
+        return true;
+    }
+
+    /// <summary>
+    ///     Cancels a running export (folder exports only) and waits until it lets go of the package.
+    /// </summary>
+    private async Task CancelAndWaitForExportAsync()
+    {
+        // Only a folder export has a cancellation source. A single file export cannot be canceled and
+        // is simply waited for.
         if (_cancellationTokenSource is { } cancellation) await cancellation.CancelAsync();
         // Cancelling only stops the loop between files; the file being written is still reading the
         // package that is about to be released, so wait until the export lets go of it.
         if (_exportCompletion is { } completion) await completion.Task;
-        return true;
     }
 }
