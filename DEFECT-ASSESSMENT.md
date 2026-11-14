@@ -99,7 +99,8 @@ Exception Info: System.InvalidOperationException: The service provider has not b
 
 **修复记录（2026-11-14，`App.xaml.cs`）**：新增 `_initialized` 字段（`:39`），在 `InitializeApplication()` 末尾置位（`:141`），`OnExit`（`:271-284`）改为两分支——未初始化只 `_singleInstanceManager?.Dispose()` 后返回，已初始化才 `Save` + `Dispose`；两分支都调用 `base.OnExit(e)`。
 验证（Debug x64 实跑）：第一个实例正常启动 → 第二个实例弹出"多实例可能导致数据被错误覆盖…"对话框 → 用 UI Automation 点"否(N)" → 第二个实例 **退出码 `0x00000000`**（修复前为 `0xE0434352`）、**事件日志无新增崩溃条目**（前后计数相同）、**`AppSettings.json` 未被修改**（mtime 不变，符合"多开不持久"约束）；随后手动结束第一个实例，无残留进程。Debug/Release 均构建通过（0 错误）。
-附带观察（**待确认**）：11-14 06:16:27/30/34 还有三次同签名崩溃，但没有任何对应日志行——怀疑第二个进程打不开已被占用的日志文件（Serilog.Sinks.File 默认 `FileShare.Read`，打开失败后静默丢弃 sink），即"第二个实例的启动日志可能整段丢失"。
+**附带观察（2026-11-14 复验，已查明）**：11-14 06:16–06:26 的同签名崩溃都发生在修复提交 `58ae01e`（06:30:47）之前（事件日志里的版本是 `1.1.6.6`），不是修复后的残留。原先"第二个进程打不开被占用的日志文件、启动日志整段丢失"的猜测也不成立：13:04 实跑时第二个实例的三行日志写进了**新的滚动文件** `log20261114_005.txt`（第一个实例占着 `_004`，Serilog 会滚到下一个序号文件）。
+**复验（2026-11-14 13:04，Debug x64 实跑）**：第一个实例运行中再启动第二个 → 弹出多实例对话框 → UIA 点"否(N)" → 第二个实例退出码 **0**、事件日志 **0** 条新增崩溃；随后第一个实例正常关闭。#5 无需再改代码。
 
 **6. 单文件导出时点"取消导出"→ `await null` 抛 NRE（已修复并验证）**
 `ViewModels/MainWindowViewModel.Export.cs` 的 `HandleIsExportingFiles`：`await _cancellationTokenSource?.CancelAsync()!;`
