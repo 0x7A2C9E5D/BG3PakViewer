@@ -78,15 +78,16 @@ internal sealed class VirtualTextureWriter
     ///     Writes one band of tiles, leaving the columns without a tile transparent.
     /// </summary>
     /// <param name="tiles">The tiles of the band, in column order; a missing tile is written as empty.</param>
-    public void WriteRow(ReadOnlySpan<GTSFlatTileInfo?> tiles)
+    /// <returns>A task that completes when the band has been written.</returns>
+    public async Task WriteRow(Memory<GTSFlatTileInfo?> tiles)
     {
         // The strip is reused by every band, so a column without a tile is cleared instead of keeping the
         // pixels of the band above it.
         Array.Clear(_strip.Data);
         for (var col = 0; col < tiles.Length; col++)
         {
-            if (tiles[col] is not { } cell) continue;
-            _unpacker.Decompress(cell).CopyTileTo(_strip, _content, _tileBorder, col);
+            if (tiles.Span[col] is not { } cell) continue;
+            (await _unpacker.Decompress(cell)).CopyTileTo(_strip, _content, _tileBorder, col);
         }
 
         _writer.Write(_strip.Data, 0, _strip.Data.Length);

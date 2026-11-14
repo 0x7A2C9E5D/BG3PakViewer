@@ -53,7 +53,8 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         {
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
             var tileProgress = CreateProgress(progress);
-            return await Task.Run(() => TranscodeLayer(entry, layer, tileProgress, cancellationToken), cancellationToken)
+            return await Task.Run(() => TranscodeLayer(entry, layer, tileProgress, cancellationToken),
+                    cancellationToken)
                 .ConfigureAwait(false);
         }
         finally

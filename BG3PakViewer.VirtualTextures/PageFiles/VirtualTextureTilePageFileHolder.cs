@@ -10,17 +10,18 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// </remarks>
 /// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
-internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, Task<Stream>> pageStreamProvider) : IDisposable
+internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, Task<Stream>> pageStreamProvider)
+    : IAsyncDisposable
 {
+    private bool _disposed;
     private int _openPageFileIndex = -1;
     private VirtualTextureTilePageFile? _pageFile;
 
-    /// <summary>
-    ///     Closes the page file that is still open.
-    /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        ClosePageFile();
+        if (_disposed) return;
+        await ReleasePage().ConfigureAwait(false);
+        _disposed = true;
     }
 
     /// <summary>
@@ -29,11 +30,11 @@ internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, T
     /// </summary>
     /// <param name="pageFileIndex">The index of the page file in the tile set's page file list.</param>
     /// <returns>The page file, ready to read chunks from.</returns>
-    public VirtualTextureTilePageFile GetPageFile(int pageFileIndex)
+    public async Task<VirtualTextureTilePageFile> GetPageFile(int pageFileIndex)
     {
         if (_pageFile != null && _openPageFileIndex == pageFileIndex) return _pageFile;
 
-        ClosePageFile();
+        await ReleasePage().ConfigureAwait(false);
 
         // The provider opens the package stream asynchronously, while page files are read synchronously.
         var stream = pageStreamProvider(pageFileIndex).GetAwaiter().GetResult();
@@ -45,9 +46,10 @@ internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, T
     /// <summary>
     ///     Closes the page file that is open, if any.
     /// </summary>
-    private void ClosePageFile()
+    private async ValueTask ReleasePage()
     {
-        _pageFile?.Dispose();
+        if (_pageFile is null) return;
+        await _pageFile.DisposeAsync().ConfigureAwait(false);
         _pageFile = null;
         _openPageFileIndex = -1;
     }

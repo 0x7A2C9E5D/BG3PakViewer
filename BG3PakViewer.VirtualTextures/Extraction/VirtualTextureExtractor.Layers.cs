@@ -53,7 +53,7 @@ public sealed partial class VirtualTextureExtractor
             {
                 ct.ThrowIfCancellationRequested();
                 FillRows(mip, layer, new Point(min.X, min.Y + row), rowTiles);
-                writer.WriteRow(rowTiles);
+                await writer.WriteRow(rowTiles);
                 progress?.Report((row + 1, size.Height));
             }
 

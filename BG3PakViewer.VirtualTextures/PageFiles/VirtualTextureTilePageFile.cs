@@ -15,7 +15,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     truncated page file therefore fails with an <see cref="InvalidDataException" /> at the first read
 ///     instead of allocating from, or reading past, whatever the corrupt data claims.
 /// </remarks>
-internal sealed class VirtualTextureTilePageFile : IDisposable
+internal sealed class VirtualTextureTilePageFile : IAsyncDisposable
 {
     /// <summary>
     ///     The largest page size accepted from the tile set that owns the page files. It is a sanity bound,
@@ -42,6 +42,8 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
     private readonly List<uint[]> _chunkOffsets;
     private readonly int _pageSize;
     private readonly BinaryReader _reader;
+
+    private bool _disposed;
 
     /// <summary>
     ///     Opens a page file and reads the chunk offset table of every one of its pages, so chunks can be
@@ -75,12 +77,13 @@ internal sealed class VirtualTextureTilePageFile : IDisposable
         }
     }
 
-    /// <summary>
-    ///     Closes the reader, which closes the page file stream as well.
-    /// </summary>
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        if (_disposed)
+            return ValueTask.CompletedTask;
         _reader.Dispose();
+        _disposed = true;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>

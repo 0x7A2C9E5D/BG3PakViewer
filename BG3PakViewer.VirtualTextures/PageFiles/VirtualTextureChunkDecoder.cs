@@ -19,7 +19,8 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// <param name="compressor">The decompressor the chunks are unpacked with.</param>
 internal sealed class VirtualTextureChunkDecoder(
     IReadOnlyDictionary<uint, object> parameterBlocks,
-    Size size, TileCompressor compressor)
+    Size size,
+    TileCompressor compressor)
 {
     private readonly BcEncoder _encoder = new(CompressionFormat.Bc3);
 
