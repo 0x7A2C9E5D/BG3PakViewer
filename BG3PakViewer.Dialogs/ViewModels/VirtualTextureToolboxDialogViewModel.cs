@@ -244,7 +244,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     private async Task<bool> AnySelectedLayerHasDataAsync(CancellationToken cancellationToken)
     {
         // Grouped by tile set so the cached one is parsed as few times as possible.
-        var textures = _selectedTextures.OrderBy(texture => texture.Entry.GtsPath, StringComparer.Ordinal).ToList();
+        var textures = _selectedTextures.OrderBy(texture => texture.Entry.path, StringComparer.Ordinal).ToList();
         for (var layer = 0; layer < VirtualTextureLayers.Names.Count; layer++)
             if (await AnyTextureHasLayerDataAsync(textures, layer, cancellationToken))
                 return true;
@@ -344,7 +344,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             });
 
             Textures.Clear();
-            result = await _catalog.LoadAsync(progress, cts.Token);
+            result = await _catalog.IndexAsync(progress, cts.Token);
             if (cts.IsCancellationRequested) return;
 
             foreach (var entry in result.Entries)

@@ -18,9 +18,9 @@ public interface IVirtualTextureCatalog
     ///     Indexes every tile set of the loaded package, in package and tile set order.
     /// </summary>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>
-    /// <param name="cancellationToken">Stops indexing.</param>
+    /// <param name="cancellation">Stops indexing.</param>
     /// <returns>Every texture, plus the tile sets that could not be read.</returns>
-    Task<VirtualTextureIndexResult> LoadAsync(
+    Task<VirtualTextureIndexResult> IndexAsync(
         IProgress<VirtualTextureIndexProgress>? progress,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellation = default);
 }

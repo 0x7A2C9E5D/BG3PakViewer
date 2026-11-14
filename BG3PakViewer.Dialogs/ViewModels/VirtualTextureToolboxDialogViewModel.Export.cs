@@ -197,7 +197,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     {
         var files = new List<PreviewExportFile>();
         var skipped = 0;
-        foreach (var group in textures.GroupBy(texture => texture.Entry.GtsPath))
+        foreach (var group in textures.GroupBy(texture => texture.Entry.path))
         {
             var folderName = Path.GetFileNameWithoutExtension(group.Key);
             Directory.CreateDirectory(Path.Combine(folder, folderName));

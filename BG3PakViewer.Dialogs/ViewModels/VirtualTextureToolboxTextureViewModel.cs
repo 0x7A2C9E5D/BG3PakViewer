@@ -29,7 +29,7 @@ public partial class VirtualTextureToolboxTextureViewModel(
     /// <summary>
     ///     The name of the tile set the texture belongs to.
     /// </summary>
-    public string SourceFile => Path.GetFileName(Entry.GtsPath);
+    public string SourceFile => Path.GetFileName(Entry.path);
 
     /// <summary>
     ///     Whether the name has been copied to the clipboard.
