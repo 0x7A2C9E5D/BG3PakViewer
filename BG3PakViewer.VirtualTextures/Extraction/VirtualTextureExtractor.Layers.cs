@@ -38,9 +38,8 @@ public sealed partial class VirtualTextureExtractor
         var stream = new MemoryStream();
         var tile = tileSet.TileSize;
         var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, _compressor);
-        await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize,
-            async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName),
-            decoder);
+        await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize, decoder,
+            async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName));
         var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
         await writer.WriteHeader();
         // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
