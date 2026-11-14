@@ -14,7 +14,7 @@ namespace BG3PakViewer.Services;
 /// <summary>
 ///     Single instance manager
 /// </summary>
-internal sealed class SingleInstanceManager : ISingleInstanceManager
+internal sealed class SingleInstanceManagerService : ISingleInstanceManagerService
 {
     private readonly string _mutexName = DebugHelper.IsDebug ? "BG3PakViewer_Debug" : "BG3PakViewer";
     private bool _disposedValue;
@@ -161,7 +161,7 @@ internal sealed class SingleInstanceManager : ISingleInstanceManager
     /// <summary>
     ///     Finalizer that releases the mutex when <see cref="Dispose()" /> was not called.
     /// </summary>
-    ~SingleInstanceManager()
+    ~SingleInstanceManagerService()
     {
         Dispose(false);
     }

@@ -12,10 +12,10 @@ namespace BG3PakViewer.Services;
 /// </summary>
 /// <param name="appSettings"></param>
 /// <param name="cultureResolver"></param>
-internal class AppDiagnostics(
+internal class AppDiagnosticsService(
     IAppSettings appSettings,
     ICultureResolver cultureResolver)
-    : IAppDiagnostics
+    : IAppDiagnosticsService
 {
     /// <summary>
     ///     Log startup info

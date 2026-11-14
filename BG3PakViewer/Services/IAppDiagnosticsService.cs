@@ -3,7 +3,7 @@
 /// <summary>
 ///     App diagnostics
 /// </summary>
-internal interface IAppDiagnostics
+internal interface IAppDiagnosticsService
 {
     /// <summary>
     ///     Log startup info

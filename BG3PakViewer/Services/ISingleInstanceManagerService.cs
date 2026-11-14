@@ -8,7 +8,7 @@ namespace BG3PakViewer.Services;
 ///     IoC container is a static singleton that is never disposed, so the application releases this
 ///     service explicitly on exit.
 /// </remarks>
-internal interface ISingleInstanceManager : IDisposable
+internal interface ISingleInstanceManagerService : IDisposable
 {
     /// <summary>
     ///     Whether another instance of this application is already running.

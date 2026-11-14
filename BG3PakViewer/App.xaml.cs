@@ -36,7 +36,7 @@ public sealed partial class App : IDisposable
     private bool _disposedValue;
     private bool _initialized;
     private ObserverBase<LogEvent>? _logObserver;
-    private ISingleInstanceManager? _singleInstanceManager;
+    private ISingleInstanceManagerService? _singleInstanceManager;
 
     /// <summary>
     ///     Releases the log observer and the single instance manager.
@@ -64,8 +64,8 @@ public sealed partial class App : IDisposable
             .AddSingleton<IPackageService, PackageService>()
             .AddSingleton<IRecentFilesService>(x => new RecentFilesService(
                 x.GetRequiredService<IAppSettings>().RecentItems))
-            .AddSingleton<IAppDiagnostics, AppDiagnostics>()
-            .AddSingleton<ISingleInstanceManager, SingleInstanceManager>()
+            .AddSingleton<IAppDiagnosticsService, AppDiagnosticsService>()
+            .AddSingleton<ISingleInstanceManagerService, SingleInstanceManagerService>()
             .AddSingleton<IViewLocator, StrongViewLocator>(_ => CreateViewLocator())
             .AddSingleton<IDialogManager, DialogManager>()
             .AddSingleton<IDialogService, DialogService>()
@@ -143,7 +143,7 @@ public sealed partial class App : IDisposable
     /// </summary>
     private static void LogStartupInformation()
     {
-        Ioc.Default.GetRequiredService<IAppDiagnostics>().LogStartupInfo();
+        Ioc.Default.GetRequiredService<IAppDiagnosticsService>().LogStartupInfo();
     }
 
     /// <summary>
@@ -283,7 +283,7 @@ public sealed partial class App : IDisposable
     /// <returns>True when this instance must shut down.</returns>
     private bool TryRedirectToRunningInstance()
     {
-        _singleInstanceManager = Ioc.Default.GetRequiredService<ISingleInstanceManager>();
+        _singleInstanceManager = Ioc.Default.GetRequiredService<ISingleInstanceManagerService>();
         if (!_singleInstanceManager.IsAnotherInstanceRunning()) return false;
 
         Log.Information("Another instance is already running; prompting the user");
