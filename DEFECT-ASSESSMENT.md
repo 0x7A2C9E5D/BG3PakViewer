@@ -457,7 +457,7 @@ int maxX = (num3 + num5) / num7 + (((num3 + num5) % num7 > 0) ? 1 : 0) - 1;
 
   - 旧实现对**任何**显示语言都返回本机安装语言 `zh-Hans`——“显示英文界面却得到中文”正是本项缺陷的镜像；修复后按显示语言匹配，只有模拟目录里没有对应文化目录的语言才回退 `en`。
 - 真实输出目录复核（直接 `LoadFrom` 最终构建产物 `BG3PakViewer\bin\x64\Debug\…\BG3PakViewer.Locales.dll`，把 `AppContext.BaseDirectory` 指到该目录）：`SupportedCultures` = `en, cs, de, es, fr, it, ja, ko, pl, pt-BR, ru, tr, zh-Hans, zh-Hant`；显示语言 `zh-CN → zh-Hans`、`en-US → en`、`zh-TW → zh-Hant`、`it-IT → it` 全部符合预期，即本项修复在真实目录布局下同样生效。
-  - 附带观察（**既有问题，本项未改**）：`cs`/`de`/`es`/`fr`/`ja`/`ko`/`pl`/`pt-BR`/`ru`/`tr` 这些目录是框架/第三方包的语言资源，不是本应用的语言包，但现有目录扫描把它们也算成“受支持”；于是显示语言是 `de` 时解析结果是 `de`（应用没有德语包，界面回退到中性英文）。这属于 `SupportedCultures` 的口径问题（与 #29 同一段扫描代码），要修需另开项。
+  - 附带观察（**预期行为，2026-11-14 作者确认**）：`cs`/`de`/`es`/`fr`/`ja`/`ko`/`pl`/`pt-BR`/`ru`/`tr` 这些目录是框架/第三方包的语言资源，不是本应用自己的语言包，但 `SupportedCultures` 仍会把它们算作“受支持”。这是刻意的：该列表只表示“磁盘上存在哪些文化目录”，应用没有对应语言包时界面自然回退到中性英文（例如显示语言 `de` → 解析到 `de` → 无德语包 → 中性英文）。不属于缺陷，不单独开项。
 - 语义对照（Win32 实测）：`GetUserDefaultUILanguage` = `GetSystemDefaultUILanguage` = `zh-CN`，`CultureInfo.CurrentUICulture` = `CultureInfo.InstalledUICulture` = `zh-CN`。即 .NET 的 `CurrentUICulture` 就是“用户默认 UI 语言”，本机两者相同 ⇒ 无法在这台机器上自然复现“安装语言 ≠ 显示语言”，探针只能直接改 `CurrentUICulture` 来模拟显示语言（代码读取的正是这个值）。
 - 构建：`dotnet build BG3PakViewer.slnx -m:1 -c Debug -p:Platform=x64` 0 错误（警告为既有项）。
 - **未覆盖**：没有在“英文系统 + 中文显示语言”的真实机器上启动 GUI 复看界面语言；探针直接调用 `ResolveSupportedCulture`，而启动路径 `App.InitializeCulture → ResolveConfiguredCulture` 调用的正是同一个方法。另外 `zh-CN` 在 `CultureMatcher` 里靠父文化 `zh` 匹配到 `zh-Hans`，这一步依赖语言包目录的枚举顺序（真实输出目录里 `zh-Hans` 按字母序在 `zh-Hant` 之前，所以稳定取到 `zh-Hans`；但目录枚举顺序不是 API 保证的），属既有的匹配歧义，本项未改。
