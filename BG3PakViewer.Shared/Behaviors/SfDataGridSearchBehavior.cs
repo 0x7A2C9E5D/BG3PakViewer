@@ -12,14 +12,25 @@ namespace BG3PakViewer.Shared.Behaviors;
 ///     <see cref="ValueChangedMessage{T}" /> broadcasts: non-empty text performs a filtered search,
 ///     empty text clears it so the full content is restored.
 /// </summary>
-public class SfDataGridSearchBehavior : Behavior<SfDataGrid>
+public class SfDataGridSearchBehavior : Behavior<SfDataGrid>, IRecipient<ValueChangedMessage<string?>>
 {
+    private bool _disposed;
+
+    /// <summary>
+    ///     Applies a search text broadcast to the grid.
+    /// </summary>
+    /// <param name="message"></param>
+    public void Receive(ValueChangedMessage<string?> message)
+    {
+        OnSearchMessage(message);
+    }
+
     protected override void OnAttached()
     {
         AssociatedObject.Unloaded += AssociatedObject_Unloaded;
         AssociatedObject.SearchHelper.CanHighlightSearchText = false;
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(
-            this, MessageTokens.SearchQueryChanged, (_, message) => OnSearchMessage(message));
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string?>, string>(this,
+            MessageTokens.SearchQueryChanged);
     }
 
     protected override void OnDetaching()
@@ -48,12 +59,19 @@ public class SfDataGridSearchBehavior : Behavior<SfDataGrid>
     }
 
     /// <summary>
-    ///     Dispose search helper
+    ///     Releases the search helper
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
     private void AssociatedObject_Unloaded(object sender, RoutedEventArgs e)
     {
+        // Unloading does not detach the behavior, so without this the broadcast would keep reaching a
+        // disposed grid. Unloaded can also fire more than once, so the disposal must be idempotent.
+        AssociatedObject.Unloaded -= AssociatedObject_Unloaded;
+        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string?>, string>(this,
+            MessageTokens.SearchQueryChanged);
+        if (_disposed) return;
+        _disposed = true;
         AssociatedObject.SearchHelper.Dispose();
         AssociatedObject.Dispose();
     }
