@@ -97,6 +97,9 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     public void Dispose()
     {
         _cachedExtractor?.Dispose();
+        // The cache must never hand out the extractor that was just released.
+        _cachedExtractor = null;
+        _cachedExtractorPath = null;
     }
 
     /// <summary>
@@ -109,7 +112,12 @@ public sealed class VirtualTextureExtractor(IPackageService packageService) : IV
     {
         if (_cachedExtractor is not null && _cachedExtractorPath == gtsPath) return _cachedExtractor;
 
+        // Forget the cached tile set before the new one is parsed. If parsing throws, an empty cache
+        // lets the next call try again; keeping the extractor that was just disposed would make every
+        // later call for the old path hand out a released object for the rest of the session.
         _cachedExtractor?.Dispose();
+        _cachedExtractor = null;
+        _cachedExtractorPath = null;
         var file = await Task.Run(() => new VirtualTextureTileSetFile(OpenPackageFile(gtsPath)), CancellationToken.None)
             .ConfigureAwait(false);
         _cachedExtractor = new VirtualTextureLayerExtractor(file,

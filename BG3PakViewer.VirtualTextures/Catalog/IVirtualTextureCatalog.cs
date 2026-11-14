@@ -25,6 +25,15 @@ public interface IVirtualTextureCatalog : IAsyncDisposable
     IReadOnlyList<VirtualTextureEntry> Entries { get; }
 
     /// <summary>
+    ///     The tile sets that could not be indexed, in package order; empty when every tile set was read.
+    /// </summary>
+    /// <remarks>
+    ///     A tile set that fails to parse is not the same as one that holds no textures: without this the
+    ///     two look identical, because both contribute no entries.
+    /// </remarks>
+    IReadOnlyList<VirtualTextureTileSetFailure> FailedTileSets { get; }
+
+    /// <summary>
     ///     Indexes the tile sets of the loaded package.
     /// </summary>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>

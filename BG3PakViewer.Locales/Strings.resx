@@ -342,4 +342,10 @@
     <data name="StartupFailedMessage" xml:space="preserve">
         <value>The application failed to start: {0}. See the log for details.</value>
     </data>
+    <data name="VirtualTextureIndexFailedCaption" xml:space="preserve">
+        <value>Virtual Texture Indexing</value>
+    </data>
+    <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
+        <value>Failed to read {0} tile set(s); the textures stored in them are missing from the list:</value>
+    </data>
 </root>

@@ -1,5 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Locales;
+using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.VirtualTextures.Catalog;
 using BG3PakViewer.VirtualTextures.Extraction;
@@ -352,6 +356,31 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
             if (!cts.IsCancellationRequested) IsIndexing = false;
             if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
         }
+
+        // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
+        // while indexing must not pop a message for a window that is no longer there.
+        if (!cts.IsCancellationRequested)
+            await ReportIndexFailuresAsync(_catalog.FailedTileSets);
+    }
+
+    /// <summary>
+    ///     Tells the user which tile sets the index had to skip, so that a tile set which no longer parses
+    ///     is not mistaken for one that holds no textures.
+    /// </summary>
+    /// <param name="failures">The tile sets that could not be read.</param>
+    private async Task ReportIndexFailuresAsync(IReadOnlyList<VirtualTextureTileSetFailure> failures)
+    {
+        if (failures.Count == 0) return;
+
+        var message = new StringBuilder();
+        message.AppendLine(string.Format(CultureInfo.CurrentCulture, Strings.VirtualTextureIndexFailedMessage,
+            failures.Count));
+        message.AppendLine();
+        foreach (var failure in failures)
+            message.AppendLine(CultureInfo.CurrentCulture, $"{failure.GtsPath}: {failure.Reason}");
+
+        await _dialogService.ShowMessageBoxNotifyAsync(this, message.ToString().TrimEnd(),
+            Strings.VirtualTextureIndexFailedCaption, MessageBoxIcon.Warning);
     }
 
     /// <summary>

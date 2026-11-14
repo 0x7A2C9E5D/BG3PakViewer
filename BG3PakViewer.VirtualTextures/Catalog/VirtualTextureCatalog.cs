@@ -22,6 +22,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
 {
     private bool _disposed;
     private List<VirtualTextureEntry> _entries = [];
+    private List<VirtualTextureTileSetFailure> _failedTileSets = [];
     private CancellationTokenSource? _loadCancellation;
     private Task? _loadTask;
 
@@ -34,6 +35,11 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     The indexed textures, in package order; empty until <see cref="LoadAsync" /> completes.
     /// </summary>
     public IReadOnlyList<VirtualTextureEntry> Entries => _entries;
+
+    /// <summary>
+    ///     The tile sets that could not be indexed, in package order; empty when every tile set was read.
+    /// </summary>
+    public IReadOnlyList<VirtualTextureTileSetFailure> FailedTileSets => _failedTileSets;
 
     /// <summary>
     ///     Indexes the tile sets of the loaded package.
@@ -67,6 +73,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
 
         // Clearing cannot be canceled: the package is about to be replaced either way.
         _entries = [];
+        _failedTileSets = [];
         IsLoaded = false;
         _loadCancellation?.Dispose();
         _loadCancellation = null;
@@ -119,8 +126,14 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         var stopwatch = Stopwatch.StartNew();
         var results = ReadTileSetsInParallel(paths, progress, cancellationToken);
         var entries = CollectEntries(results);
+        _failedTileSets = results.Select(result => result.Failure).OfType<VirtualTextureTileSetFailure>().ToList();
         Log.Information("Indexed {TextureCount} virtual textures from {TileSetCount} tile set(s) in {Elapsed} ms",
             entries.Count, paths.Count, stopwatch.ElapsedMilliseconds);
+        // Kept next to the totals so that a tile set which stopped parsing shows up in the log even
+        // when nobody opens the toolbox and sees the warning there.
+        if (_failedTileSets.Count != 0)
+            Log.Warning("Failed to index {FailureCount} of {TileSetCount} virtual texture tile set(s)",
+                _failedTileSets.Count, paths.Count);
         return entries;
     }
 
@@ -142,12 +155,12 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <param name="paths">The package paths of the tile sets.</param>
     /// <param name="progress">Reports how many tile sets have been indexed.</param>
     /// <param name="cancellationToken">Cancels the indexing.</param>
-    /// <returns>The entries of each tile set, at the index of the tile set they came from.</returns>
-    private List<VirtualTextureEntry>?[] ReadTileSetsInParallel(List<string> paths,
-        IProgress<VirtualTextureIndexProgress>? progress, CancellationToken cancellationToken)
+    /// <returns>The result of each tile set, at the index of the tile set it came from.</returns>
+    private (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)[] ReadTileSetsInParallel(
+        List<string> paths, IProgress<VirtualTextureIndexProgress>? progress, CancellationToken cancellationToken)
     {
         var indexed = 0;
-        var results = new List<VirtualTextureEntry>?[paths.Count];
+        var results = new (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)[paths.Count];
         // The tile sets are independent, so their metadata is read in parallel; the entries keep the
         // package order because each result is stored at the index of the tile set it came from.
         Parallel.For(0, paths.Count, new ParallelOptions { CancellationToken = cancellationToken },
@@ -162,32 +175,35 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Reads one tile set, turning a failure into an empty result.
+    ///     Reads one tile set, reporting a failure instead of losing the textures of all the others.
     /// </summary>
     /// <param name="gtsPath">The package path of the tile set.</param>
-    /// <returns>The textures of the tile set, or no entries when it cannot be read.</returns>
-    private List<VirtualTextureEntry> ReadTileSetOrEmpty(string gtsPath)
+    /// <returns>The textures of the tile set, or why it could not be read.</returns>
+    private (List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure) ReadTileSetOrEmpty(
+        string gtsPath)
     {
         try
         {
-            return ReadTileSet(gtsPath);
+            return (ReadTileSet(gtsPath), null);
         }
         catch (Exception ex)
         {
-            // A single unreadable tile set must not cost the textures of all the others.
+            // A single unreadable tile set must not cost the textures of all the others, but it must
+            // not be indistinguishable from a tile set that simply holds no textures either.
             Log.Warning(ex, "Failed to index virtual texture tile set: {Path}", gtsPath);
-            return [];
+            return (null, new VirtualTextureTileSetFailure(gtsPath, ex.Message));
         }
     }
 
     /// <summary>
     ///     Concatenates the entries of the tile sets, keeping their order.
     /// </summary>
-    /// <param name="results">The entries of each tile set, by tile set index.</param>
+    /// <param name="results">The result of each tile set, by tile set index.</param>
     /// <returns>The entries of every tile set, in package order.</returns>
-    private static List<VirtualTextureEntry> CollectEntries(IEnumerable<List<VirtualTextureEntry>?> results)
+    private static List<VirtualTextureEntry> CollectEntries(
+        IEnumerable<(List<VirtualTextureEntry>? Entries, VirtualTextureTileSetFailure? Failure)> results)
     {
-        return results.SelectMany(result => result ?? []).ToList();
+        return results.SelectMany(result => result.Entries ?? []).ToList();
     }
 
     /// <summary>

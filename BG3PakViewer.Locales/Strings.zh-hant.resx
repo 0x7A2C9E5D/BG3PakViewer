@@ -333,4 +333,10 @@
     <data name="StartupFailedMessage" xml:space="preserve">
         <value>應用程式啟動失敗：{0}。詳見日誌。</value>
     </data>
+    <data name="VirtualTextureIndexFailedCaption" xml:space="preserve">
+        <value>虛擬紋理索引</value>
+    </data>
+    <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
+        <value>有 {0} 個 tile set 讀取失敗，其中的紋理不會出現在清單裡：</value>
+    </data>
 </root>

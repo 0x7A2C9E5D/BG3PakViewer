@@ -1012,5 +1012,23 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("Zoom", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///     Looks up a localized string similar to Virtual Texture Indexing.
+        /// </summary>
+        public static string VirtualTextureIndexFailedCaption {
+            get {
+                return ResourceManager.GetString("VirtualTextureIndexFailedCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///     Looks up a localized string similar to Failed to read {0} tile set(s); the textures stored in them are missing from the list:.
+        /// </summary>
+        public static string VirtualTextureIndexFailedMessage {
+            get {
+                return ResourceManager.GetString("VirtualTextureIndexFailedMessage", resourceCulture);
+            }
+        }
     }
 }

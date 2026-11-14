@@ -333,4 +333,10 @@
     <data name="StartupFailedMessage" xml:space="preserve">
         <value>应用启动失败：{0}。详见日志。</value>
     </data>
+    <data name="VirtualTextureIndexFailedCaption" xml:space="preserve">
+        <value>虚拟纹理索引</value>
+    </data>
+    <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
+        <value>有 {0} 个 tile set 读取失败，其中的纹理不会出现在列表里：</value>
+    </data>
 </root>
