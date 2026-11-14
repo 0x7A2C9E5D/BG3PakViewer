@@ -162,7 +162,7 @@ public sealed partial class App : IDisposable
     /// </summary>
     private void InitializeLogging()
     {
-        _logObserver = new AnonymousObserver<LogEvent>(Ioc.Default.GetRequiredService<ILogAccessService>().Logs.Add);
+        _logObserver = new AnonymousObserver<LogEvent>(Ioc.Default.GetRequiredService<ILogAccessService>().Add);
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.File(

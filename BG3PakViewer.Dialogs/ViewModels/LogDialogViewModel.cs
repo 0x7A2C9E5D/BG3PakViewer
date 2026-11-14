@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Windows;
-using System.Windows.Data;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Dialogs.Models;
 using BG3PakViewer.Miscellaneous;
@@ -18,9 +16,9 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 public sealed partial class LogDialogViewModel
     : DisposableViewModel, IModalDialogViewModel
 {
-    private readonly object _logEventsLock = new();
+    private readonly Action<LogEvent> _logAddedHandler;
+    private readonly ILogAccessService _logAccessService;
     private readonly IShellOpenService _shellOpenService;
-    private readonly ObservableCollection<LogEvent> _sourceLogEvents;
 
     /// <summary>
     ///     initialize
@@ -29,37 +27,22 @@ public sealed partial class LogDialogViewModel
     /// <param name="shellOpenService"></param>
     public LogDialogViewModel(ILogAccessService logAccessService, IShellOpenService shellOpenService)
     {
+        _logAccessService = logAccessService;
         _shellOpenService = shellOpenService;
-        _sourceLogEvents = logAccessService.Logs;
-        BindingOperations.EnableCollectionSynchronization(LogEvents, _logEventsLock);
-        LogEvents.CollectionChanged += OnLogEventsCollectionChanged;
-        _sourceLogEvents.CollectionChanged += OnSourceLogsCollectionChanged;
-        InitializeExistingLogs();
+        _logAddedHandler = OnLogAdded;
+        var entries = logAccessService.Subscribe(_logAddedHandler);
+        LogEvents = [.. entries.Select(x => new LogEventItemModel(x))];
     }
 
     /// <summary>
     ///     Log events.
     /// </summary>
-    public ObservableCollection<LogEventItemModel> LogEvents { get; } = [];
+    public ObservableCollection<LogEventItemModel> LogEvents { get; }
 
     /// <summary>
     ///     Dialog result.
     /// </summary>
     public bool? DialogResult => true;
-
-    /// <summary>
-    ///     Initialize existing logs.
-    /// </summary>
-    private void InitializeExistingLogs()
-    {
-        lock (_logEventsLock)
-        {
-            var models = _sourceLogEvents
-                .Select(x => new LogEventItemModel(x)).ToList();
-            foreach (var model in models)
-                LogEvents.Add(model);
-        }
-    }
 
     /// <summary>
     ///     Open log folder.
@@ -71,50 +54,24 @@ public sealed partial class LogDialogViewModel
     }
 
     /// <summary>
-    ///     On source logs collection changed.
+    ///     Appends an entry written after the dialog opened.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void OnSourceLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    /// <param name="logEvent"></param>
+    private void OnLogAdded(LogEvent logEvent)
     {
-        if (e is not { Action: NotifyCollectionChangedAction.Add, NewItems: not null }) return;
-        foreach (LogEvent item in e.NewItems)
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                lock (_logEventsLock)
-                {
-                    LogEvents.Add(new LogEventItemModel(item));
-                }
-            });
+        // Called on the logging thread while the service lock is held, so only queue the work for the UI
+        // thread: the collection itself is never touched from two threads.
+        Application.Current.Dispatcher.BeginInvoke(() => LogEvents.Add(new LogEventItemModel(logEvent)));
     }
 
     /// <summary>
-    ///     On log events collection changed.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void OnLogEventsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (e is not { Action: NotifyCollectionChangedAction.Remove, OldItems: not null }) return;
-        foreach (LogEventItemModel item in e.OldItems)
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                lock (_logEventsLock)
-                {
-                    _sourceLogEvents.Remove(item.EventEntry);
-                }
-            });
-    }
-
-    /// <summary>
-    ///     Unsubscribes from the log collections.
+    ///     Unsubscribes from the log service.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
         if (!disposing) return;
-        LogEvents.CollectionChanged -= OnLogEventsCollectionChanged;
-        _sourceLogEvents.CollectionChanged -= OnSourceLogsCollectionChanged;
+        _logAccessService.Unsubscribe(_logAddedHandler);
     }
 }
