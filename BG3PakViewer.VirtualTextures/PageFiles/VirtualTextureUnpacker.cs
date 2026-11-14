@@ -20,7 +20,7 @@ internal sealed class VirtualTextureUnpacker(
     Func<int, Task<Stream>> pageStreamProvider)
     : IAsyncDisposable
 {
-    private readonly VirtualTextureTilePageFileHolder _tilePageFiles = new(pageSize, pageStreamProvider);
+    private readonly VirtualTextureTilePageFileCache _tilePageFiles = new(pageSize, pageStreamProvider);
     private bool _disposed;
 
     /// <summary>

@@ -10,7 +10,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// </remarks>
 /// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
-internal sealed class VirtualTextureTilePageFileHolder(int pageSize, Func<int, Task<Stream>> pageStreamProvider)
+internal sealed class VirtualTextureTilePageFileCache(int pageSize, Func<int, Task<Stream>> pageStreamProvider)
     : IAsyncDisposable
 {
     private bool _disposed;
