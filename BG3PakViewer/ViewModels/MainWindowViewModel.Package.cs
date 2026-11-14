@@ -7,6 +7,7 @@ using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
 using HanumanInstitute.MvvmDialogs.FrameworkDialogs;
@@ -177,18 +178,18 @@ internal partial class MainWindowViewModel
     /// </summary>
     private void RegisterFileMessageHandlers()
     {
-        WeakReferenceMessenger.Default.Register<MainWindowViewModel, AsyncRequestMessage<string, bool>, string>(
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<string>, string>(
             this,
             MessageTokens.RecentFileOpened,
             async void (_, m) =>
             {
                 try
                 {
-                    await ValidateAndOpenPackageAsync(m.Request);
+                    await ValidateAndOpenPackageAsync(m.Value);
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Error opening file: {FileName}", m.Request);
+                    Log.Error(e, "Error opening file: {FileName}", m.Value);
                 }
             });
     }

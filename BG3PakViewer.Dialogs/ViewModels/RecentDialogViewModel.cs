@@ -7,6 +7,7 @@ using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using HanumanInstitute.MvvmDialogs;
 using Serilog;
 
@@ -55,7 +56,7 @@ public partial class RecentDialogViewModel(IRecentFilesService recentFilesServic
     private void HandleExistingFile(IRecentFileEntry recentFileEntry)
     {
         RequestClose?.Invoke(this, EventArgs.Empty);
-        _ = WeakReferenceMessenger.Default.Send(new AsyncRequestMessage<string, bool>(recentFileEntry.FilePath),
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(recentFileEntry.FilePath),
             MessageTokens.RecentFileOpened);
     }
 
