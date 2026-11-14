@@ -1,8 +1,10 @@
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.Extensions;
+using BG3PakViewer.Shared.Models;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using HanumanInstitute.MvvmDialogs;
@@ -99,15 +101,18 @@ internal partial class MainWindowViewModel
             await _virtualTextureCatalog.ClearAsync();
             await _virtualTextureExtractor.ClearAsync();
 
-            var success = await Task.Run(async () =>
+            // The tree is bound to the view, so it may only be replaced from the UI thread: the
+            // background work builds the new one and the continuation below publishes it.
+            PackageTree = null;
+            var tree = await Task.Run(async () =>
             {
-                PackageTree = null;
                 await _packageService.CleanupAsync();
                 return await LoadAndBuildTreeAsync(path);
             }, CancellationToken.None);
 
-            if (success)
+            if (tree is not null)
             {
+                PackageTree = tree;
                 _recentFilesService.AddOrUpdateRecentFile(path);
                 IsVirtualTexturePackage = DetectVirtualTexturePackage();
             }
@@ -128,16 +133,14 @@ internal partial class MainWindowViewModel
     }
 
     /// <summary>
-    ///     Load and build tree async
+    ///     Loads the package and builds its tree
     /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    private async Task<bool> LoadAndBuildTreeAsync(string path)
+    /// <param name="path">The package to load</param>
+    /// <returns>The built tree, or null when the package could not be loaded</returns>
+    private async Task<ObservableCollection<PackageEntry>?> LoadAndBuildTreeAsync(string path)
     {
         var success = await _packageService.LoadPackageAsync(path);
-        if (!success) return false;
-        PackageTree = _packageService.BuildTree();
-        return true;
+        return success ? _packageService.BuildTree() : null;
     }
 
     /// <summary>
