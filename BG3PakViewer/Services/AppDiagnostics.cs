@@ -57,9 +57,10 @@ internal class AppDiagnostics(
         var supportedCultures = cultureResolver.SupportedCultures;
         Log.Information("Installed Language Packs: {Languages}",
             string.Join(", ", supportedCultures.Select(x => x.Name)));
-        // Recorded together with the resolved language so that an unexpected English UI can be
-        // traced back to a system culture that has no matching language pack.
-        Log.Information("System UI Culture: {Culture}", CultureInfo.InstalledUICulture.Name);
+        // This is the display language ResolveSupportedCulture matches against, not the language the
+        // OS was installed in. Recorded together with the resolved language so that an unexpected
+        // English UI can be traced back to a display language with no matching language pack.
+        Log.Information("System UI Culture: {Culture}", CultureInfo.CurrentUICulture.Name);
         Log.Information("Current Language: {Language}", appSettings.Language);
     }
 }

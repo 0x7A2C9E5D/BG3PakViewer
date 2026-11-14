@@ -55,14 +55,17 @@ public class CultureResolver : ICultureResolver
 
     /// <summary>
     ///     Resolves the most appropriate supported culture for the current system
-    ///     Tries to match the installed UI culture, and falls back through parent cultures
+    ///     Tries to match the display language of the user, and falls back through parent cultures
     ///     If no match is found, defaults to English ("en")
     /// </summary>
     /// <returns>The best matching supported culture, or English as fallback</returns>
     public CultureInfo ResolveSupportedCulture()
     {
-        // Get the installed UI culture of the system as the starting point
-        var cultureInfo = CultureInfo.InstalledUICulture;
+        // The display language (Windows "Language preferences") is what the user actually reads the
+        // UI in, and it can differ from the language the OS was installed in. InstalledUICulture
+        // must not be used here: an English installation with a Chinese display language would
+        // always fall back to English and never reach the Chinese language pack.
+        var cultureInfo = CultureInfo.CurrentUICulture;
         // Check if the exact culture is supported, if so return it immediately
         var matches = _matcher.Matches(cultureInfo, SupportedCultures).ToList();
         return matches.Count != 0 ? matches[0] : CultureInfo.GetCultureInfo("en");
