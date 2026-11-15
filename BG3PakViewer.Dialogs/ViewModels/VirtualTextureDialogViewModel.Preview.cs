@@ -1,8 +1,10 @@
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using BG3PakViewer.VirtualTextures.Extraction;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
-using Image = SixLabors.ImageSharp.Image;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 
@@ -87,7 +89,12 @@ public partial class VirtualTextureDialogViewModel
             }
 
             // Ownership of the image is transferred to Preview; it is disposed when replaced or disposed.
-            var image = await Task.Run(() => ImageLoader.LoadAsync(stream, ".dds"), cts.Token);
+            var image = await Task.Run(async () =>
+            {
+                var decoded = await ImageLoader.LoadAsync(stream, ".dds");
+                if (decoded is not null) await ApplyGamePreviewSemanticsAsync(decoded, row, layer, cts.Token);
+                return decoded;
+            }, cts.Token);
             if (cts.IsCancellationRequested)
             {
                 image?.Dispose();
@@ -143,6 +150,136 @@ public partial class VirtualTextureDialogViewModel
         PreviewStatusKey = string.Empty;
         IsPreviewing = false;
         PreviewProgress = 0;
+    }
+
+    /// <summary>
+    ///     Aligns the decoded preview with the way the game reads the layer, so it looks like the texture
+    ///     does in the game. The exported DDS is written straight from the extractor and keeps the exact
+    ///     bytes the upstream LSLib convention produces; only the preview image is touched.
+    /// </summary>
+    /// <remarks>
+    ///     The tiles are standard BC3 blocks, but how their channels are read depends on the data type
+    ///     the tile set declares for the layer. Color layers keep their alpha: where the source texture
+    ///     has real transparency the game blends it, so the preview shows it too, while a fully
+    ///     transparent color layer carries no transparency at all (the game renders it opaques). Data
+    ///     layers (normals, packed material parameters) use their fourth channel as a shader input
+    ///     rather than as transparency, so they are always shown opaque.
+    /// </remarks>
+    /// <param name="image">The decoded preview image, adjusted in place.</param>
+    /// <param name="row">The row the preview shows.</param>
+    /// <param name="layer">The layer the preview shows.</param>
+    /// <param name="cancellationToken">Cancels the adjustment.</param>
+    private async Task ApplyGamePreviewSemanticsAsync(Image image, VirtualTextureItemViewModel row, int layer,
+        CancellationToken cancellationToken)
+    {
+        VirtualTextureLayerKind kind;
+        try
+        {
+            kind = await _extractor.GetLayerKindAsync(row.Entry, layer, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // An unreadable tile set must not break the preview; the image is shown as decoded instead.
+            Log.Warning(ex, "Failed to read the preview semantics of {TileSet}", row.Source);
+            return;
+        }
+
+        if (kind == VirtualTextureLayerKind.Data)
+            MakeOpaques(image);
+        else
+            MakeVisibleIfFullyTransparent(image);
+    }
+
+    /// <summary>
+    ///     Makes the image opaque when every pixel is fully transparent, keeping the RGB bytes. Images
+    ///     with any real alpha are left untouched, and formats without an alpha channel need nothing.
+    /// </summary>
+    /// <param name="image">The image to adjust in place.</param>
+    private static void MakeVisibleIfFullyTransparent(Image image)
+    {
+        switch (image)
+        {
+            case Image<Bgra32> bgra32:
+                MakeVisibleIfFullyTransparent(bgra32);
+                break;
+            case Image<Bgra4444> bgra4444:
+                MakeVisibleIfFullyTransparent(bgra4444);
+                break;
+            case Image<Bgra5551> bgra5551:
+                MakeVisibleIfFullyTransparent(bgra5551);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Sets the alpha of every pixel to opaque, but only when no pixel of the image has any alpha.
+    /// </summary>
+    /// <typeparam name="TPixel">The pixel format of the image.</typeparam>
+    /// <param name="image">The image to adjust in place.</param>
+    private static void MakeVisibleIfFullyTransparent<TPixel>(Image<TPixel> image)
+        where TPixel : unmanaged, IPixel<TPixel>
+    {
+        var hasVisibleAlpha = false;
+        image.ProcessPixelRows(accessor =>
+        {
+            for (var y = 0; y < accessor.Height && !hasVisibleAlpha; y++)
+            {
+                var rowSpan = accessor.GetRowSpan(y);
+                foreach (var pixel in rowSpan)
+                    if (pixel.ToRgba32().A != 0)
+                    {
+                        hasVisibleAlpha = true;
+                        break;
+                    }
+            }
+        });
+        if (hasVisibleAlpha) return;
+
+        MakeOpaques(image);
+    }
+
+    /// <summary>
+    ///     Makes the image opaque, keeping the RGB bytes. Formats without an alpha channel are left
+    ///     unchanged.
+    /// </summary>
+    /// <param name="image">The image to adjust in place.</param>
+    private static void MakeOpaques(Image image)
+    {
+        switch (image)
+        {
+            case Image<Bgra32> bgra32:
+                MakeOpaques(bgra32);
+                break;
+            case Image<Bgra4444> bgra4444:
+                MakeOpaques(bgra4444);
+                break;
+            case Image<Bgra5551> bgra5551:
+                MakeOpaques(bgra5551);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Sets the alpha of every pixel to opaque.
+    /// </summary>
+    /// <typeparam name="TPixel">The pixel format of the image.</typeparam>
+    /// <param name="image">The image to adjust in place.</param>
+    private static void MakeOpaques<TPixel>(Image<TPixel> image)
+        where TPixel : unmanaged, IPixel<TPixel>
+    {
+        image.ProcessPixelRows(accessor =>
+        {
+            for (var y = 0; y < accessor.Height; y++)
+            {
+                var rowSpan = accessor.GetRowSpan(y);
+                for (var x = 0; x < rowSpan.Length; x++)
+                {
+                    var rgba = rowSpan[x].ToRgba32();
+                    rgba.A = byte.MaxValue;
+                    rowSpan[x] = TPixel.FromRgba32(rgba);
+                }
+            }
+        });
     }
 
     /// <summary>

@@ -34,4 +34,15 @@ public interface IVirtualTextureExtractor : IAsyncDisposable
     /// <param name="cancellationToken">Cancels the check.</param>
     /// <returns><see langword="true" /> when the layer holds data.</returns>
     Task<bool> HasLayerAsync(VirtualTextureEntry entry, int layer, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Tells how a layer of a texture is meant to be shown in a preview, from the data type the tile
+    ///     set declares for the layer.
+    /// </summary>
+    /// <param name="entry">The texture whose tile set declares the layer.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns>The preview kind of the layer.</returns>
+    Task<VirtualTextureLayerKind> GetLayerKindAsync(VirtualTextureEntry entry, int layer,
+        CancellationToken cancellationToken);
 }

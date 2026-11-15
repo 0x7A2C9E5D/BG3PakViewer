@@ -1,6 +1,7 @@
 using BG3PakViewer.Contracts;
 using BG3PakViewer.VirtualTextures.Models;
 using BG3PakViewer.VirtualTextures.TileSets;
+using LSLib.VirtualTextures;
 
 namespace BG3PakViewer.VirtualTextures.Extraction;
 
@@ -81,6 +82,37 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
             return await Task.Run(() => FindLevel(layer, _tileSet!.Textures[entry.index]) is not null,
                 cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>
+    ///     Tells how a layer of a texture is meant to be shown in a preview, from the data type the tile
+    ///     set declares for the layer.
+    /// </summary>
+    /// <param name="entry">The texture whose tile set declares the layer.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="cancellationToken">Cancels the check.</param>
+    /// <returns>The preview kind of the layer.</returns>
+    public async Task<VirtualTextureLayerKind> GetLayerKindAsync(VirtualTextureEntry entry, int layer,
+        CancellationToken cancellationToken)
+    {
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
+            var layers = _tileSet!.TileSet.TileSetLayers;
+            if (layer < 0 || layer >= layers.Length) return VirtualTextureLayerKind.Color;
+            return layers[layer].DataType switch
+            {
+                GTSDataType.R8G8B8_SRGB or GTSDataType.R8G8B8A8_SRGB
+                    or GTSDataType.R8G8B8_LINEAR or GTSDataType.R8G8B8A8_LINEAR
+                    => VirtualTextureLayerKind.Color,
+                _ => VirtualTextureLayerKind.Data
+            };
         }
         finally
         {
