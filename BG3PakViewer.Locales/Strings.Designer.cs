@@ -1030,5 +1030,14 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("VirtualTextureIndexFailedMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///     Looks up a localized string similar to Exporting: {0}%.
+        /// </summary>
+        public static string VirtualTextureExportingProgress {
+            get {
+                return ResourceManager.GetString("VirtualTextureExportingProgress", resourceCulture);
+            }
+        }
     }
 }

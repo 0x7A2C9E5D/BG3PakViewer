@@ -30,7 +30,7 @@ public partial class VirtualTextureDialogViewModel
     ///     Whether the preview of the selected texture is being loaded.
     /// </summary>
     [ObservableProperty]
-    private partial bool IsPreviewing { get; set; }
+    public partial bool IsPreviewing { get; private set; }
 
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnIsPreviewingChanged(bool value)
@@ -76,7 +76,12 @@ public partial class VirtualTextureDialogViewModel
         try
         {
             await using var stream = await _extractor.ExtractLayerAsync(row.Entry, layer,
-                new Progress<double>(value => Progress = value), cts.Token);
+                new Progress<double>(value =>
+                {
+                    // A replaced load can still report progress after cancellation; ignore it so the
+                    // current preview keeps its own value.
+                    if (!cts.IsCancellationRequested) PreviewProgress = value;
+                }), cts.Token);
             if (cts.IsCancellationRequested) return;
 
             if (stream is null)
@@ -127,7 +132,7 @@ public partial class VirtualTextureDialogViewModel
         _previewCancellation = cts;
         IsPreviewing = true;
         PreviewStatusKey = LangKeys.TitleExtracting;
-        Progress = 0;
+        PreviewProgress = 0;
         return cts;
     }
 
@@ -142,7 +147,7 @@ public partial class VirtualTextureDialogViewModel
         Preview = null;
         PreviewStatusKey = string.Empty;
         IsPreviewing = false;
-        Progress = 0;
+        PreviewProgress = 0;
     }
 
     /// <summary>

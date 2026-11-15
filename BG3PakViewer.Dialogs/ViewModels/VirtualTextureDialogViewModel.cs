@@ -74,10 +74,18 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
     public partial int SelectedLayerIndex { get; set; }
 
     /// <summary>
-    ///     The progress of the current operation, from 0 to 100.
+    ///     The progress of the selected texture's layer extraction, from 0 to 100. Kept separate from
+    ///     <see cref="ExportProgress" />: selecting another row during an export must not overwrite
+    ///     the export's progress, and vice versa.
     /// </summary>
     [ObservableProperty]
-    public partial double Progress { get; set; }
+    public partial double PreviewProgress { get; private set; }
+
+    /// <summary>
+    ///     The progress of the running export, from 0 to 100.
+    /// </summary>
+    [ObservableProperty]
+    public partial double ExportProgress { get; private set; }
 
     /// <summary>
     ///     Whether indexing, previewing or exporting is in progress.

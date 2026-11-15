@@ -348,4 +348,7 @@
     <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
         <value>Failed to read {0} tile set(s); the textures stored in them are missing from the list:</value>
     </data>
+    <data name="VirtualTextureExportingProgress" xml:space="preserve">
+        <value>Exporting: {0}%</value>
+    </data>
 </root>

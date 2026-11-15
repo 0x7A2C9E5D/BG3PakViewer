@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Globalization;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Locales;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
@@ -27,6 +29,15 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     public bool CanClose => !IsExporting;
 
+    /// <summary>
+    ///     The export button label: the localized "Export selected" text normally, and the localized
+    ///     "Exporting: 45%" text while a run is in progress.
+    /// </summary>
+    public string ExportButtonText => IsExporting
+        ? string.Format(CultureInfo.CurrentCulture, Strings.VirtualTextureExportingProgress,
+            (int)Math.Round(ExportProgress))
+        : Strings.ExportSelectedTextures;
+
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnIsExportingChanged(bool value)
     {
@@ -34,6 +45,17 @@ public partial class VirtualTextureDialogViewModel
         CancelExportCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(IsBusy));
         OnPropertyChanged(nameof(CanClose));
+        OnPropertyChanged(nameof(ExportButtonText));
+    }
+
+    /// <summary>
+    ///     Refreshes the percentage shown on the export button as files are written.
+    /// </summary>
+    /// <param name="value">The new export progress.</param>
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnExportProgressChanged(double value)
+    {
+        OnPropertyChanged(nameof(ExportButtonText));
     }
 
     /// <summary>
@@ -90,7 +112,7 @@ public partial class VirtualTextureDialogViewModel
         _exportCancellation?.Dispose();
         _exportCancellation = new CancellationTokenSource();
         IsExporting = true;
-        Progress = 0;
+        ExportProgress = 0;
 
         try
         {
@@ -99,7 +121,7 @@ public partial class VirtualTextureDialogViewModel
         finally
         {
             IsExporting = false;
-            Progress = 0;
+            ExportProgress = 0;
             _exportCancellation?.Dispose();
             _exportCancellation = null;
         }
@@ -150,7 +172,7 @@ public partial class VirtualTextureDialogViewModel
         {
             exported++;
             if (!result.Success) failures.Add(result);
-            Progress = exported * 100.0 / files.Count;
+            ExportProgress = exported * 100.0 / files.Count;
         }
 
         return (exported, failures);

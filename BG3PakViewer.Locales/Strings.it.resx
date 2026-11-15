@@ -447,4 +447,7 @@
     <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
     <value>Impossibile leggere {0} tile set: le texture in essi contenute non compaiono nell'elenco:</value>
   </data>
+    <data name="VirtualTextureExportingProgress" xml:space="preserve">
+        <value>Esportazione: {0}%</value>
+    </data>
 </root>

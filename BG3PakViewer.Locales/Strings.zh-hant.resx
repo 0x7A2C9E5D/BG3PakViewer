@@ -339,4 +339,7 @@
     <data name="VirtualTextureIndexFailedMessage" xml:space="preserve">
         <value>有 {0} 個 tile set 讀取失敗，其中的紋理不會出現在清單裡：</value>
     </data>
+    <data name="VirtualTextureExportingProgress" xml:space="preserve">
+        <value>正在匯出：{0}%</value>
+    </data>
 </root>

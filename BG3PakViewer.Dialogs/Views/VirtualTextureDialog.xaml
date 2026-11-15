@@ -262,7 +262,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
@@ -284,8 +283,11 @@
                             -->
                             <TextBlock Text="{I18N {Binding PreviewStatusKey}}" VerticalAlignment="Center"
                                        Margin="16,0,0,0" Foreground="Gray" />
+                            <TextBlock Text="{Binding PreviewProgress, Mode=OneWay, StringFormat={}{0:0}%}"
+                                       VerticalAlignment="Center" Margin="8,0,0,0" Foreground="Gray"
+                                       Visibility="{Binding IsPreviewing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </StackPanel>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Margin="8,0,0,0" Padding="10,4"
                                     Visibility="{Binding IsExporting, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Command="{Binding CancelExportCommand}">
@@ -296,10 +298,10 @@
                                     Command="{Binding ExportSelectedCommand}"
                                     AutomationProperties.Name="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}"
                                     ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" FontSize="14" />
                                     <TextBlock Margin="6,0,0,0" VerticalAlignment="Center"
-                                               Text="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}" />
+                                               Text="{Binding ExportButtonText, Mode=OneWay}" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -312,9 +314,6 @@
                                 RenderOptions.BitmapScalingMode="HighQuality" />
                         </Viewbox>
                     </Border>
-                    <!-- ReSharper disable once Xaml.StaticResourceNotResolved -->
-                    <ProgressBar Grid.Row="2" Height="4" Value="{Binding Progress}"
-                                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </Grid>
             </Border>
         </Grid>
