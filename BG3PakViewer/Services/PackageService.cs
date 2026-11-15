@@ -10,8 +10,8 @@ namespace BG3PakViewer.Services;
 /// </summary>
 internal sealed class PackageService : IPackageService
 {
-    private bool _disposedValue;
     private Package? _currentPackage;
+    private bool _disposedValue;
     private long _packageVersion;
 
     private Package? CurrentPackage => Volatile.Read(ref _currentPackage);
@@ -27,18 +27,6 @@ internal sealed class PackageService : IPackageService
     ///     from to tell whether they are stale.
     /// </summary>
     public long PackageVersion => Interlocked.Read(ref _packageVersion);
-
-    /// <summary>
-    ///     Replaces the current package and invalidates the caches built from the previous one. The
-    ///     version is bumped after the package becomes visible, so a reader that sees the new version
-    ///     can never still read the old package.
-    /// </summary>
-    /// <param name="package">The package now loaded, or <see langword="null" /> when none is.</param>
-    private void SetCurrentPackage(Package? package)
-    {
-        Volatile.Write(ref _currentPackage, package);
-        Interlocked.Increment(ref _packageVersion);
-    }
 
     /// <summary>
     ///     Loads a package, releasing the one that is currently open. Every outcome advances
@@ -114,6 +102,18 @@ internal sealed class PackageService : IPackageService
         if (_disposedValue) return;
         await CleanupAsync().ConfigureAwait(false);
         _disposedValue = true;
+    }
+
+    /// <summary>
+    ///     Replaces the current package and invalidates the caches built from the previous one. The
+    ///     version is bumped after the package becomes visible, so a reader that sees the new version
+    ///     can never still read the old package.
+    /// </summary>
+    /// <param name="package">The package now loaded, or <see langword="null" /> when none is.</param>
+    private void SetCurrentPackage(Package? package)
+    {
+        Volatile.Write(ref _currentPackage, package);
+        Interlocked.Increment(ref _packageVersion);
     }
 
     /// <summary>

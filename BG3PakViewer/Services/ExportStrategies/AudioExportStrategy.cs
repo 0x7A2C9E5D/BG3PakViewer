@@ -46,7 +46,8 @@ internal class AudioExportStrategy(IPackageService packageService) : IExportStra
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))
+            ?.CreateContentReader();
         if (stream is null) return false;
         return GetOperation(node.FileExtension, Path.GetExtension(path)) switch
         {

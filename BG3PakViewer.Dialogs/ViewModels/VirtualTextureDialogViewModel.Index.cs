@@ -128,10 +128,11 @@ public partial class VirtualTextureDialogViewModel
     /// <param name="result">The index whose texture items are published.</param>
     private void PublishIndex(VirtualTextureIndexResult result)
     {
-        var textureItems  = new List<VirtualTextureItemViewModel>(result.entries.Count);
-        textureItems .AddRange(result.entries.Select(entry => new VirtualTextureItemViewModel(entry, _clipboardService)));
+        var textureItems = new List<VirtualTextureItemViewModel>(result.entries.Count);
+        textureItems.AddRange(result.entries.Select(entry =>
+            new VirtualTextureItemViewModel(entry, _clipboardService)));
 
-        Textures = [.. textureItems ];
+        Textures = [.. textureItems];
         ApplyInitialSearch();
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
     }

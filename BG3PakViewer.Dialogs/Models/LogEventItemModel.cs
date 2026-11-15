@@ -12,6 +12,7 @@ public record LogEventItemModel(LogEvent LogEvent)
     /// <summary>
     ///     Log event.
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public LogEvent EventEntry => LogEvent;
 
     /// <summary>

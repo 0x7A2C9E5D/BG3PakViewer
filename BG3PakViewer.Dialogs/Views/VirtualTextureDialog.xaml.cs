@@ -33,15 +33,13 @@ public partial class VirtualTextureDialog
     /// <param name="e"></param>
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.NewValue is VirtualTextureDialogViewModel viewModel)
-        {
-            SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
+        if (e.NewValue is not VirtualTextureDialogViewModel viewModel) return;
+        SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
 
-            // MenuFlyout items live in a separate visual tree, so give them the view model explicitly
-            // instead of relying on DataContext inheritance.
-            ExportSearchResultsMenuItem.DataContext = viewModel;
-            ExportAllMenuItem.DataContext = viewModel;
-        }
+        // MenuFlyout items live in a separate visual tree, so give them the view model explicitly
+        // instead of relying on DataContext inheritance.
+        ExportSearchResultsMenuItem.DataContext = viewModel;
+        ExportAllMenuItem.DataContext = viewModel;
     }
 
     /// <summary>

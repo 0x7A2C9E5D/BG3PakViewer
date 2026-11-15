@@ -31,7 +31,8 @@ internal class Model3DPreviewHandler(IPackageService packageService) : IPreviewH
     /// <returns></returns>
     public async Task<object?> CreatePreviewViewModelAsync(PackageEntry node)
     {
-        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))
+            ?.CreateContentReader();
         if (stream is null) return null;
 
         var root = await Model3DLoader.LoadAsync(stream);

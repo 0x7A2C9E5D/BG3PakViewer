@@ -26,7 +26,7 @@ public static class FileOperations
                 await file.FlushAsync().ConfigureAwait(false);
             }
 
-            File.Move(tempPath, path, overwrite: true);
+            File.Move(tempPath, path, true);
             return true;
         }
         catch (Exception ex)

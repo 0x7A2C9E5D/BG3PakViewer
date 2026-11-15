@@ -343,10 +343,7 @@ public sealed partial class App : IDisposable
     private void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing)
-        {
-            _logObserver?.Dispose();
-        }
+        if (disposing) _logObserver?.Dispose();
 
         _disposedValue = true;
     }

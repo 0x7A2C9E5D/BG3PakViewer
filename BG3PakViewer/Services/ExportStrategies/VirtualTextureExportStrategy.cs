@@ -31,7 +31,8 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))
+            ?.CreateContentReader();
         if (stream is null) return false;
         if (!await FileOperations.SaveStreamToFileAsync(stream, path).ConfigureAwait(false))
             return false;
@@ -54,7 +55,7 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
         await Parallel.ForEachAsync(pageFileNames, parallelOptions, (pageFileName, _)
-            => ExportVirtualTexturePageAsync(pageFileName, sourceFolderPath, targetFolderPath))
+                => ExportVirtualTexturePageAsync(pageFileName, sourceFolderPath, targetFolderPath))
             .ConfigureAwait(false);
         Log.Information("Exported {Count} virtual texture page file(s) next to {TargetPath}",
             pageFileNames.Count, targetPath);

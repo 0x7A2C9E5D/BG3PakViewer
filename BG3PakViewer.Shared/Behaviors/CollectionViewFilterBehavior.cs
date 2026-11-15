@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +19,6 @@ namespace BG3PakViewer.Shared.Behaviors;
 /// </summary>
 public class CollectionViewFilterBehavior : Behavior<ItemsControl>
 {
-    private DependencyPropertyDescriptor? _itemsSourceDescriptor;
-
     public static readonly DependencyProperty FilterProperty = DependencyProperty.Register(
         nameof(Filter), typeof(Predicate<object>), typeof(CollectionViewFilterBehavior),
         new PropertyMetadata(OnFilterChanged));
@@ -29,6 +26,8 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
     public static readonly DependencyProperty AutoSelectFirstItemProperty = DependencyProperty.Register(
         nameof(AutoSelectFirstItem), typeof(bool), typeof(CollectionViewFilterBehavior),
         new PropertyMetadata(false));
+
+    private DependencyPropertyDescriptor? _itemsSourceDescriptor;
 
     /// <summary>
     ///     The filter to apply to the collection view.
@@ -70,7 +69,10 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
         view.Refresh();
     }
 
-    private void OnItemsSourceChanged(object? sender, EventArgs e) => ApplyFilter();
+    private void OnItemsSourceChanged(object? sender, EventArgs e)
+    {
+        ApplyFilter();
+    }
 
     /// <summary>
     ///     Applies the filter to the collection view.
@@ -116,9 +118,10 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
         if (!AutoSelectFirstItem || AssociatedObject is not Selector selector) return;
         if (selector.SelectedItem is { } current && (Filter is null || Filter(current)))
         {
-            if (selector is ListBox { } list) list.ScrollIntoView(current);
+            if (selector is ListBox list) list.ScrollIntoView(current);
             return;
         }
+
         if (selector.Items.Count == 0) return;
 
         selector.SelectedIndex = 0;

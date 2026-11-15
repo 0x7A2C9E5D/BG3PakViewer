@@ -19,6 +19,7 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
+    // ReSharper disable once MemberCanBeMadeStatic.Local
     private partial int SelectedCount { get; set; }
 
     /// <summary>

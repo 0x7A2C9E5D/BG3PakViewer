@@ -49,7 +49,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     ///     The story to preview.
     /// </summary>
     [ObservableProperty]
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
+    // ReSharper disable once UnusedMember.Global
     public partial Story? Story { get; set; }
 
     /// <summary>

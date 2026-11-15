@@ -122,7 +122,6 @@ public static class IconAtlasSlicer
         var bottom = -1;
 
         for (var row = area.Top; row < area.Bottom; row += SampleStride)
-        {
             for (var column = area.Left; column < area.Right; column += SampleStride)
             {
                 if (!IsVisibleContentPixel(atlas[column, row])) continue;
@@ -132,7 +131,6 @@ public static class IconAtlasSlicer
                 right = Math.Max(right, column);
                 bottom = Math.Max(bottom, row);
             }
-        }
 
         return right < 0 ? null : new Rectangle(left, top, right - left + 1, bottom - top + 1);
     }

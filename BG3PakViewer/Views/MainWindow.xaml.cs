@@ -39,6 +39,7 @@ public partial class MainWindow
     ///     ending with the window.
     /// </remarks>
     /// <param name="e">The event data.</param>
+    // ReSharper disable once AsyncVoidEventHandlerMethod
     protected override async void OnClosed(EventArgs e)
     {
         base.OnClosed(e);

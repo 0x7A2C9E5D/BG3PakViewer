@@ -71,7 +71,7 @@ internal partial class ExportService
         // Compare whole path segments, so a sibling folder that merely starts with this name
         // (Public/SharedDev next to Public/Shared) is not exported as well.
         var folderPrefix = folderNode.FullPath + "/";
-        return files.Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase)).ToList();
+        return [.. files.Where(x => x.Name.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))];
     }
 
     /// <summary>

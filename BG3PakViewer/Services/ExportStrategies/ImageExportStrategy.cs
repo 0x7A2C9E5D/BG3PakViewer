@@ -51,7 +51,8 @@ internal class ImageExportStrategy(IPackageService packageService) : IExportStra
     /// <returns></returns>
     public async Task<bool> ExportAsync(PackageEntry node, string path)
     {
-        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
+        await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))
+            ?.CreateContentReader();
         if (stream is null) return false;
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (GetOperation(node.Name, node.FileExtension, Path.GetExtension(path)))
