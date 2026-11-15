@@ -157,6 +157,15 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("CancelExportOperationMessage", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///     Looks up a localized string similar to The export has been cancelled..
+        /// </summary>
+        public static string ExportCancelledMessage {
+            get {
+                return ResourceManager.GetString("ExportCancelledMessage", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///     Looks up a localized string similar to Clear selection.

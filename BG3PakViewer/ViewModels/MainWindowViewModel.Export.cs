@@ -195,6 +195,10 @@ internal partial class MainWindowViewModel
 
         Log.Information("Export cancellation requested from the export button");
         await CancelAndWaitForExportAsync();
+        // Tell the user the run actually stopped: cancellation only takes effect between files, so
+        // without this notice it would look like the button did nothing.
+        await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportCancelledMessage,
+            Strings.CancelExportOperationCaption, MessageBoxIcon.Information);
     }
 
     /// <summary>

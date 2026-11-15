@@ -186,6 +186,9 @@
     <data name="CancelExportOperationCaption" xml:space="preserve">
         <value>Cancel Export</value>
     </data>
+    <data name="ExportCancelledMessage" xml:space="preserve">
+        <value>The export has been cancelled.</value>
+    </data>
     <data name="UpdateAvailable" xml:space="preserve">
         <value>UpdateAvailable</value>
     </data>

@@ -45,6 +45,9 @@
     <data name="CancelExportOperationMessage" xml:space="preserve">
         <value>是否確認取消當前匯出任務？</value>
     </data>
+    <data name="ExportCancelledMessage" xml:space="preserve">
+        <value>已取消當前匯出任務。</value>
+    </data>
     <data name="DDSImage" xml:space="preserve">
         <value>DDS圖像</value>
     </data>

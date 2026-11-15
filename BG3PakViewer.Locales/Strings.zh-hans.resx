@@ -177,6 +177,9 @@
     <data name="CancelExportOperationCaption" xml:space="preserve">
         <value>取消导出</value>
     </data>
+    <data name="ExportCancelledMessage" xml:space="preserve">
+        <value>已取消当前导出任务。</value>
+    </data>
     <data name="UpdateAvailable" xml:space="preserve">
         <value>检测到新版本</value>
     </data>
