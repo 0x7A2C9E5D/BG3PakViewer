@@ -9,10 +9,12 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 /// <remarks>
 ///     Indexing reads tile set metadata only, so it stays cheap: it does not open any GTP page file. The
 ///     layers of the indexed textures are produced by <see cref="IVirtualTextureExtractor" />. Tile sets
-///     are parsed one at a time on a worker and the complete, ordered index is returned when the read
-///     ends. The catalog caches that read-only index for the loaded package and rebuilds it when the
-///     package changes; calls made while an index is being built wait for it instead of reading the
-///     tile sets twice. A cache hit does not touch the package at all.
+///     are parsed one at a time on a worker, a transient read failure is retried once, and the ordered
+///     index is returned when the read ends. The catalog caches a complete read-only index for the
+///     loaded package and rebuilds it when the package changes; an index that still has unreadable tile
+///     sets is not cached, so the next call retries them instead of returning the same missing textures.
+///     Calls made while an index is being built wait for it instead of reading the tile sets twice.
+///     A cache hit does not touch the package at all.
 /// </remarks>
 public interface IVirtualTextureCatalog
 {

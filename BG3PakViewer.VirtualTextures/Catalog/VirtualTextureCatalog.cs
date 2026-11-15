@@ -15,13 +15,16 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     compared with extracting a texture layer. Tile sets are parsed one at a time on a worker, so
 ///     at most one is materialized while the index is built, and the complete
 ///     <see cref="VirtualTextureIndexResult" /> is returned once the read ends. A tile set that cannot
-///     be parsed contributes a <see cref="VirtualTextureIndexFailure" /> instead of aborting the index,
-///     and progress is reported once per tile set. Cancelling the token throws rather than returning a
-///     partial index. At the end of a build the mutable lists are wrapped in read-only views, so the
-///     result is cached as-is with the <see cref="IPackageService.PackageVersion" /> it was built from
-///     and shared by every caller until the loaded package changes; an index built while the package
-///     is replaced is discarded instead of cached, because the old package's streams are already
-///     released. The catalog holds metadata and a gate only, so it needs no disposal.
+///     be parsed is retried once before it contributes a <see cref="VirtualTextureIndexFailure" />
+///     instead of aborting the index, and progress is reported once per tile set. Cancelling the token
+///     throws rather than returning a partial index. At the end of a build the mutable lists are
+///     wrapped in read-only views. Only a complete index is cached with the
+///     <see cref="IPackageService.PackageVersion" /> it was built from and shared by every caller
+///     until the loaded package changes: a cached failure would keep its missing textures and its
+///     warning alive for every later caller, so an incomplete result is returned without being cached
+///     and the next caller rebuilds it. An index built while the package is replaced is discarded
+///     instead of cached, because the old package's streams are already released. The catalog holds
+///     metadata and a gate only, so it needs no disposal.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
@@ -97,8 +100,12 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
                 throw new OperationCanceledException("The package changed while the index was built.");
 
             // IndexFilesAsync already returned read-only views, so the cache can hand this very
-            // result to every later caller: no extra copy or freeze is needed.
-            _cache = new CachedIndex(version, result, total);
+            // result to every later caller: no extra copy or freeze is needed. A result with
+            // failures is deliberately not cached: a cache hit never touches the package again, so
+            // caching it would keep the missing textures and the warning for the rest of the session
+            // instead of letting the next caller rebuild the index and recover them.
+            if (result.failures.Count == 0)
+                _cache = new CachedIndex(version, result, total);
             return result;
         }
         finally
@@ -178,31 +185,57 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     }
 
     /// <summary>
-    ///     Indexes one tile set on a worker, returning either its textures or the reason it could not
-    ///     be read. A canceled read is rethrown so indexing stops.
+    ///     Indexes one tile set on a worker, retrying a transient read failure once before giving up,
+    ///     and returning either its textures or the reason it could not be read. A canceled read is
+    ///     rethrown so indexing stops.
     /// </summary>
+    /// <remarks>
+    ///     LSLib's struct reader occasionally fails on an otherwise valid tile set with a generic-type
+    ///     or GCHandle error, while reading the same file again succeeds. Retrying here keeps that
+    ///     hiccup out of the index and out of the warning the toolbox shows. Every attempt opens a
+    ///     fresh stream, so a retry never reuses the state that failed.
+    /// </remarks>
     /// <param name="file">The tile set's entry in the package.</param>
-    /// <param name="cancellation">Cancels the read.</param>
+    /// <param name="cancellation">Cancels the read and the retry delay.</param>
     /// <returns>The tile set's textures, or a single failure when it could not be parsed.</returns>
     private static async Task<VirtualTextureIndexResult> IndexFileAsync(PackagedFileInfo file,
         CancellationToken cancellation)
     {
-        try
+        const int maxAttempts = 2;
+        var attempt = 0;
+        while (true)
         {
-            // Only this one tile set is materialized, and it is released once its entries have been
-            // copied into the index.
-            var entries = await ParseEntriesAsync(file, cancellation).ConfigureAwait(false);
-            return new VirtualTextureIndexResult(entries, []);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            // One unreadable tile set must not cost the textures of all the others.
-            Log.Warning(ex, "Failed to index virtual texture tile set: {Path}", file.Name);
-            return new VirtualTextureIndexResult([], [new VirtualTextureIndexFailure(file.Name, ex.Message)]);
+            attempt++;
+            try
+            {
+                // Only this one tile set is materialized, and it is released once its entries have
+                // been copied into the index.
+                var entries = await ParseEntriesAsync(file, cancellation).ConfigureAwait(false);
+                if (attempt > 1)
+                    Log.Information("Indexed virtual texture tile set {Path} after {Attempt} attempts",
+                        file.Name, attempt);
+                return new VirtualTextureIndexResult(entries, []);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                if (attempt >= maxAttempts)
+                {
+                    // One unreadable tile set must not cost the textures of all the others.
+                    Log.Warning(ex, "Failed to index virtual texture tile set: {Path}", file.Name);
+                    return new VirtualTextureIndexResult([],
+                        [new VirtualTextureIndexFailure(file.Name, ex.Message)]);
+                }
+
+                Log.Warning(ex,
+                    "Transient failure indexing virtual texture tile set {Path}; retrying ({Attempt}/{MaxAttempts})",
+                    file.Name, attempt, maxAttempts);
+                // Let an overlapping read that tripped LSLib's shared state finish before retrying.
+                await Task.Delay(50, cancellation).ConfigureAwait(false);
+            }
         }
     }
 
