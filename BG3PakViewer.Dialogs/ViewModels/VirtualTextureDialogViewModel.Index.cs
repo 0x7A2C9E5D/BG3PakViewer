@@ -16,6 +16,8 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// </summary>
 public partial class VirtualTextureDialogViewModel
 {
+    private const int IndexBatchSize = 64;
+
     private CancellationTokenSource? _indexCancellation;
 
     /// <summary>
@@ -41,51 +43,53 @@ public partial class VirtualTextureDialogViewModel
     public partial int IndexTotal { get; private set; }
 
     /// <summary>
-    ///     Indexes the package's tile sets, then fills the texture list in batches.
+    ///     Indexes the package's tile sets, publishes the rows in batches and, once the overlay is gone,
+    ///     reports the tile sets the index had to skip.
     /// </summary>
     private async Task IndexAsync()
     {
-        const int batchSize = 64;
+        var cts = BeginIndex();
+        VirtualTextureIndexResult? result;
+        try
+        {
+            result = await TryIndexAsync(cts);
+        }
+        finally
+        {
+            EndIndex(cts);
+        }
+
+        // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
+        // while indexing must not pop a message for a window that is no longer there.
+        if (!cts.IsCancellationRequested && result is not null)
+            await ReportIndexFailuresAsync(result.failures);
+    }
+
+    /// <summary>
+    ///     Starts an indexing run and exposes its cancellation source so closing the dialog can stop it.
+    /// </summary>
+    /// <returns>The cancellation source of the new run.</returns>
+    private CancellationTokenSource BeginIndex()
+    {
         var cts = new CancellationTokenSource();
         _indexCancellation = cts;
         IsIndexing = true;
-        VirtualTextureIndexResult? result = null;
-        var batch = new List<VirtualTextureItemViewModel>(batchSize);
+        return cts;
+    }
 
+    /// <summary>
+    ///     Builds and publishes the index, keeping the result even when publishing fails afterward so
+    ///     the skipped tile sets are still reported.
+    /// </summary>
+    /// <param name="cts">Cancels the run when the dialog is closed.</param>
+    /// <returns>The index, or <see langword="null" /> when the catalog did not finish.</returns>
+    private async Task<VirtualTextureIndexResult?> TryIndexAsync(CancellationTokenSource cts)
+    {
+        VirtualTextureIndexResult? result = null;
         try
         {
-            var progress = new Progress<VirtualTextureIndexProgress>(value =>
-            {
-                if (cts.IsCancellationRequested) return;
-                IndexedCount = value.indexed;
-                IndexTotal = value.total;
-            });
-
-            Textures.Clear();
-            result = await _catalog.IndexAsync(progress, cts.Token);
-            if (cts.IsCancellationRequested) return;
-
-            foreach (var entry in result.entries)
-            {
-                if (cts.IsCancellationRequested) break;
-                batch.Add(new VirtualTextureItemViewModel(entry, _clipboardService));
-                if (batch.Count < batchSize) continue;
-                PublishBatch(batch);
-                // Publishing a full batch without awaiting can monopolize the dispatcher: give it a
-                // turn so the rows render and the dialog stays responsive.
-                await Task.Yield();
-            }
-
-            // The dialog may have been closed while the index was built: publishing the rows then
-            // would touch a disposed view model and start a preview for it.
-            if (cts.IsCancellationRequested) return;
-            PublishBatch(batch);
-
-            if (!string.IsNullOrWhiteSpace(InitialSearch))
-                SearchText = InitialSearch;
-            SelectedRow ??= Textures.FirstOrDefault(texture =>
-                string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
-            Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
+            result = await LoadIndexAsync(cts);
+            if (!cts.IsCancellationRequested) await PublishIndexAsync(result, cts);
         }
         catch (OperationCanceledException)
         {
@@ -96,16 +100,89 @@ public partial class VirtualTextureDialogViewModel
         {
             Log.Error(ex, "Failed to index virtual textures for the toolbox");
         }
-        finally
+
+        return result;
+    }
+
+    /// <summary>
+    ///     Asks the catalog for the index, reporting how many tile sets have been read so far.
+    /// </summary>
+    /// <param name="cts">Cancels the run when the dialog is closed.</param>
+    /// <returns>The indexed textures and the tile sets that could not be read.</returns>
+    private Task<VirtualTextureIndexResult> LoadIndexAsync(CancellationTokenSource cts)
+    {
+        var progress = new Progress<VirtualTextureIndexProgress>(value =>
         {
-            if (!cts.IsCancellationRequested) IsIndexing = false;
-            if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
+            if (cts.IsCancellationRequested) return;
+            IndexedCount = value.indexed;
+            IndexTotal = value.total;
+        });
+
+        Textures.Clear();
+        return _catalog.IndexAsync(progress, cts.Token);
+    }
+
+    /// <summary>
+    ///     Publishes the full batches and then the last one, applies the initial search and logs the
+    ///     number of loaded textures.
+    /// </summary>
+    /// <param name="result">The index to publish.</param>
+    /// <param name="cts">Cancels the run when the dialog is closed.</param>
+    private async Task PublishIndexAsync(VirtualTextureIndexResult result, CancellationTokenSource cts)
+    {
+        var batch = await PublishFullBatchesAsync(result.entries, cts);
+
+        // The dialog may have been closed while the index was built: publishing the rows then
+        // would touch a disposed view model and start a preview for it.
+        if (cts.IsCancellationRequested) return;
+        PublishBatch(batch);
+        ApplyInitialSearch();
+        Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
+    }
+
+    /// <summary>
+    ///     Publishes every full batch, giving the dispatcher a turn between them so the dialog stays
+    ///     responsive while a large index is being added to the list.
+    /// </summary>
+    /// <param name="entries">The indexed textures, in package and tile set order.</param>
+    /// <param name="cts">Cancels the run when the dialog is closed.</param>
+    /// <returns>The rows of the last, not yet published batch.</returns>
+    private async Task<List<VirtualTextureItemViewModel>> PublishFullBatchesAsync(
+        IReadOnlyList<VirtualTextureEntry> entries, CancellationTokenSource cts)
+    {
+        var batch = new List<VirtualTextureItemViewModel>(IndexBatchSize);
+        foreach (var entry in entries)
+        {
+            if (cts.IsCancellationRequested) break;
+            batch.Add(new VirtualTextureItemViewModel(entry, _clipboardService));
+            if (batch.Count < IndexBatchSize) continue;
+            PublishBatch(batch);
+            // Publishing a full batch without awaiting can monopolize the dispatcher: give it a
+            // turn so the rows render and the dialog stays responsive.
+            await Task.Yield();
         }
 
-        // Shown once the overlay is gone, and only for a run that published its index: a dialog closed
-        // while indexing must not pop a message for a window that is no longer there.
-        if (!cts.IsCancellationRequested && result is not null)
-            await ReportIndexFailuresAsync(result.failures);
+        return batch;
+    }
+
+    /// <summary>
+    ///     Applies the query the toolbox was opened with and selects its first matching row.
+    /// </summary>
+    private void ApplyInitialSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(InitialSearch)) SearchText = InitialSearch;
+        SelectedRow ??= Textures.FirstOrDefault(texture =>
+            string.IsNullOrWhiteSpace(InitialSearch) || Matches(texture, InitialSearch));
+    }
+
+    /// <summary>
+    ///     Clears the busy state of a completed run, unless the dialog was closed while it ran.
+    /// </summary>
+    /// <param name="cts">The cancellation source of the run that ended.</param>
+    private void EndIndex(CancellationTokenSource cts)
+    {
+        if (!cts.IsCancellationRequested) IsIndexing = false;
+        if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
     }
 
     /// <summary>
