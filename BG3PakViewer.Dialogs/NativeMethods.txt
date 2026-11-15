@@ -1,0 +1,3 @@
+GetSystemMenu
+EnableMenuItem
+SC_CLOSE
