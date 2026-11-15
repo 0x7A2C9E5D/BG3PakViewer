@@ -20,12 +20,20 @@ public partial class VirtualTextureDialogViewModel
     [ObservableProperty]
     public partial bool IsExporting { get; private set; }
 
+    /// <summary>
+    ///     Whether the toolbox window may be closed. The window's <c>WindowCloseGuardBehavior</c> binds
+    ///     this through its CanClose attached property, so a running export cannot be orphaned by
+    ///     closing the window.
+    /// </summary>
+    public bool CanClose => !IsExporting;
+
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnIsExportingChanged(bool value)
     {
         ExportSelectedCommand.NotifyCanExecuteChanged();
         CancelExportCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(IsBusy));
+        OnPropertyChanged(nameof(CanClose));
     }
 
     /// <summary>

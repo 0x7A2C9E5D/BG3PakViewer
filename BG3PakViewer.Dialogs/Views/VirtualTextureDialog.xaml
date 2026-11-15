@@ -9,16 +9,21 @@
         xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
         xmlns:c="clr-namespace:BG3PakViewer.Shared.Converters;assembly=BG3PakViewer.Shared"
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
+        xmlns:db="clr-namespace:BG3PakViewer.Dialogs.Behaviors"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         WindowChrome.IsHitTestVisibleInChrome="True"
+        db:WindowCloseGuardBehavior.CanClose="{Binding CanClose}"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:VirtualTextureDialogViewModel}"
         Height="800" Width="1200" MinHeight="600" MinWidth="900"
         ShowInTaskbar="False"
         Title="{I18N {x:Static l:LangKeys.VirtualTextureToolbox}}"
         WindowStartupLocation="CenterOwner">
+    <i:Interaction.Behaviors>
+        <db:WindowCloseGuardBehavior />
+    </i:Interaction.Behaviors>
     <Window.Resources>
         <c:ImageToBitmapSourceConverter x:Key="ImageToBitmapSourceConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
