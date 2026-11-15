@@ -113,7 +113,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <param name="file">The tile set's entry in the package.</param>
     /// <param name="cancellation">Cancels the read.</param>
     /// <returns>The tile set's textures, or a single failure when it could not be parsed.</returns>
-    private async Task<VirtualTextureIndexResult> IndexFileAsync(PackagedFileInfo file,
+    private static async Task<VirtualTextureIndexResult> IndexFileAsync(PackagedFileInfo file,
         CancellationToken cancellation)
     {
         try
