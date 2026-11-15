@@ -22,7 +22,18 @@ internal partial class MainWindowViewModel
     ///     stay clickable while a run is in progress.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     public partial bool IsExporting { get; private set; }
+
+    /// <summary>
+    ///     The export command runs with something selected, or without a selection while an export is
+    ///     running: in that case the button cancels the export instead of starting one.
+    /// </summary>
+    /// <returns>Whether the command may run.</returns>
+    private bool CanExport()
+    {
+        return IsExporting || SelectedItem is not null;
+    }
 
     /// <summary>
     ///     Export async. While an export is running, the same command cancels it instead of starting
@@ -31,7 +42,7 @@ internal partial class MainWindowViewModel
     ///     command staying clickable while <see cref="IsExporting" /> is true.
     /// </summary>
     /// <param name="toSave"></param>
-    [RelayCommand(AllowConcurrentExecutions = true)]
+    [RelayCommand(AllowConcurrentExecutions = true, CanExecute = nameof(CanExport))]
     private async Task ExportAsync(object toSave)
     {
         if (IsExporting)
@@ -44,13 +55,13 @@ internal partial class MainWindowViewModel
             return;
         // Opening another package waits on this before releasing the one the export is reading from.
         _exportCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        IsExporting = true;
         try
         {
             if (node.IsFolder)
                 await ExportFolderAsync(node);
             else
                 await ExportFileAsync(node);
-
         }
         finally
         {
@@ -81,6 +92,7 @@ internal partial class MainWindowViewModel
             Log.Information("Export file selection was cancelled");
             return;
         }
+
         IsExporting = true;
         var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
         await HandleExportResultAsync(success);
@@ -199,7 +211,7 @@ internal partial class MainWindowViewModel
         // Tell the user the run actually stopped: cancellation only takes effect between files, so
         // without this notice it would look like the button did nothing.
         await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportCancelledMessage,
-            Strings.CancelExportOperationCaption, MessageBoxIcon.Information);
+            Strings.CancelExportOperationCaption);
     }
 
     /// <summary>

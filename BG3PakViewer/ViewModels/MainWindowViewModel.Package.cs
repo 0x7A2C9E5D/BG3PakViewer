@@ -5,6 +5,7 @@ using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
@@ -22,6 +23,14 @@ namespace BG3PakViewer.ViewModels;
 /// </summary>
 internal partial class MainWindowViewModel
 {
+    /// <summary>
+    ///     The currently selected tree item, tracked on the view model so commands gated on the
+    ///     selection re-evaluate through its own change notification.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
+    private partial PackageEntry? SelectedItem { get; set; }
+
     /// <summary>
     ///     Drop
     /// </summary>
@@ -50,6 +59,16 @@ internal partial class MainWindowViewModel
     void IDropTarget.DragOver(IDropInfo dropInfo)
     {
         dropInfo.Effects = DragDropEffects.Copy;
+    }
+
+    /// <summary>
+    ///     Tracks the tree selection.
+    /// </summary>
+    /// <param name="item">The newly selected tree item, or null when the selection was cleared.</param>
+    [RelayCommand]
+    private void SelectItem(object? item)
+    {
+        SelectedItem = item as PackageEntry;
     }
 
     /// <summary>
