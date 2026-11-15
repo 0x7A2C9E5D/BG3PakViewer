@@ -67,13 +67,14 @@ public partial class VirtualTextureDialogViewModel
     }
 
     /// <summary>
-    ///     Whether the current search matches at least one texture that can be exported.
+    ///     Whether a submitted search matches at least one texture to export. With no search, the
+    ///     whole list is exported through the export-all command instead.
     /// </summary>
     private bool CanExportSearchResults()
     {
         if (IsIndexing || IsExporting || Textures.Count == 0) return false;
         var filter = ItemFilter;
-        return filter is null || Textures.Any(texture => filter(texture));
+        return filter is not null && Textures.Any(texture => filter(texture));
     }
 
     /// <summary>
