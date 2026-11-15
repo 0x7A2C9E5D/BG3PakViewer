@@ -85,6 +85,8 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
     ///     The progress of the running export, from 0 to 100.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExportButtonText))]
+    // ReSharper disable once MemberCanBeMadeStatic.Local
     private partial double ExportProgress { get; set; }
 
     /// <summary>

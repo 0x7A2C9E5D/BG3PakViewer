@@ -58,16 +58,6 @@ public partial class VirtualTextureDialogViewModel
     }
 
     /// <summary>
-    ///     Refreshes the percentage shown on the export button as files are written.
-    /// </summary>
-    /// <param name="value">The new export progress.</param>
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnExportProgressChanged(double value)
-    {
-        OnPropertyChanged(nameof(ExportButtonText));
-    }
-
-    /// <summary>
     ///     Whether there is a selected texture to export, and at least one layer of it holds data.
     /// </summary>
     /// <returns></returns>
