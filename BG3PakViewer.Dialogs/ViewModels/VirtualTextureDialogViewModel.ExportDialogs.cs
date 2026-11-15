@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -16,18 +17,6 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// </summary>
 public partial class VirtualTextureDialogViewModel
 {
-    /// <summary>
-    ///     The completion message template, parsed once per dialog instead of per export.
-    /// </summary>
-    private readonly CompositeFormat _completedMessageFormat =
-        CompositeFormat.Parse(Strings.PreviewExportCompletedMessage);
-
-    /// <summary>
-    ///     The partial completion message template, parsed once per dialog instead of per export.
-    /// </summary>
-    private readonly CompositeFormat _partialMessageFormat =
-        CompositeFormat.Parse(Strings.PreviewExportPartialMessage);
-
     /// <summary>
     ///     Asks the user where the files should be written.
     /// </summary>
@@ -49,12 +38,14 @@ public partial class VirtualTextureDialogViewModel
     /// <param name="exported">How many files were written.</param>
     /// <param name="total">How many files the export attempted.</param>
     /// <param name="failures">The files that could not be written.</param>
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     private async Task ReportExportResultAsync(int exported, int total, List<PreviewExportResult> failures)
     {
         if (failures.Count == 0)
         {
             await _dialogService.ShowMessageBoxNotifyAsync(this,
-                string.Format(CultureInfo.CurrentCulture, _completedMessageFormat, exported),
+                string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportCompletedMessage, exported),
                 Strings.ExportCompleted, MessageBoxIcon.Success);
             return;
         }
@@ -62,7 +53,7 @@ public partial class VirtualTextureDialogViewModel
         var message = new StringBuilder();
         message.AppendLine(exported == 0
             ? Strings.PreviewExportNothingMessage
-            : string.Format(CultureInfo.CurrentCulture, _partialMessageFormat, exported, total));
+            : string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportPartialMessage, exported, total));
         message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
         foreach (var failure in failures)
             message.AppendLine(CultureInfo.CurrentCulture, $"{failure.Name}: {failure.Reason}");

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -17,18 +18,6 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 public partial class StoryScriptsPreviewViewModel
 {
-    /// <summary>
-    ///     The completion message template, parsed once per preview instead of per export.
-    /// </summary>
-    private readonly CompositeFormat _completedMessageFormat =
-        CompositeFormat.Parse(Strings.PreviewExportCompletedMessage);
-
-    /// <summary>
-    ///     The partial completion message template, parsed once per preview instead of per export.
-    /// </summary>
-    private readonly CompositeFormat _partialMessageFormat =
-        CompositeFormat.Parse(Strings.PreviewExportPartialMessage);
-
     /// <summary>
     ///     Asks the user where the files should be written.
     /// </summary>
@@ -65,11 +54,13 @@ public partial class StoryScriptsPreviewViewModel
     /// </summary>
     /// <param name="exported">How many files were written.</param>
     /// <param name="folder">The folder the files were written to.</param>
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     private async Task ReportSuccessAsync(int exported, string folder)
     {
         Log.Information("Exported {Exported} preview files to: {Folder}", exported, folder);
         await _dialogService.ShowMessageBoxNotifyAsync(this,
-            string.Format(CultureInfo.CurrentCulture, _completedMessageFormat, exported),
+            string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportCompletedMessage, exported),
             Strings.ExportCompleted, MessageBoxIcon.Success);
     }
 
@@ -80,6 +71,8 @@ public partial class StoryScriptsPreviewViewModel
     /// <param name="total">How many files the export attempted.</param>
     /// <param name="failures">The files that could not be written.</param>
     /// <param name="folder">The folder the files were written to.</param>
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     private async Task ReportFailuresAsync(int exported, int total, IReadOnlyList<PreviewExportResult> failures,
         string folder)
     {
@@ -88,7 +81,7 @@ public partial class StoryScriptsPreviewViewModel
         var message = new StringBuilder();
         message.AppendLine(exported == 0
             ? Strings.PreviewExportNothingMessage
-            : string.Format(CultureInfo.CurrentCulture, _partialMessageFormat, exported, total));
+            : string.Format(CultureInfo.CurrentCulture, Strings.PreviewExportPartialMessage, exported, total));
         message.AppendLine().AppendLine(Strings.PreviewExportFailedFilesHeader);
         foreach (var failure in failures)
             message.AppendLine(CultureInfo.CurrentCulture, $"{failure.Name}: {failure.Reason}");

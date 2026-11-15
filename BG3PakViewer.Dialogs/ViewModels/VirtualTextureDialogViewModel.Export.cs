@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
@@ -41,6 +42,8 @@ public partial class VirtualTextureDialogViewModel
     ///     The export button label: the localized "Export selected" text normally, and the localized
     ///     "Exporting: 45%" text while a run is in progress.
     /// </summary>
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     public string ExportButtonText => IsExporting
         ? string.Format(CultureInfo.CurrentCulture, Strings.VirtualTextureExportingProgress,
             (int)Math.Round(ExportProgress))

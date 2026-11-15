@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using BG3PakViewer.Locales;
@@ -162,6 +163,8 @@ public partial class VirtualTextureDialogViewModel
     ///     is not mistaken for one that holds no textures.
     /// </summary>
     /// <param name="failures">The tile sets that could not be read.</param>
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     private async Task ReportIndexFailuresAsync(IReadOnlyList<VirtualTextureIndexFailure> failures)
     {
         if (failures.Count == 0) return;
