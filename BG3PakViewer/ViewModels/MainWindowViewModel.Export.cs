@@ -55,7 +55,6 @@ internal partial class MainWindowViewModel
             return;
         // Opening another package waits on this before releasing the one the export is reading from.
         _exportCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        IsExporting = true;
         try
         {
             if (node.IsFolder)
