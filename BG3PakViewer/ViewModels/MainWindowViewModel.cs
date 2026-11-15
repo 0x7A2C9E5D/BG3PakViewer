@@ -132,8 +132,8 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
 
     /// <summary>
     ///     Releases the cancellation source and the preview view model; the extractor and the package
-    ///     service are released by <see cref="DisposeAsync" />. The catalog holds no resources and needs
-    ///     no disposal.
+    ///     service are released by <see cref="DisposeAsync" />. The catalog only holds a read-only
+    ///     index and a gate, so it needs no disposal.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     protected override void Dispose(bool disposing)

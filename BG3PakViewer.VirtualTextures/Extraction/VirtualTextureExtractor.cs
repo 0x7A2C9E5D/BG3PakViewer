@@ -13,13 +13,15 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     Only the most recently used tile set is parsed, and a failed parse leaves the cache empty so the
 ///     next call can retry. GTP page files are never cached: an extraction opens the one a band is reading
 ///     and closes it before returning. The returned DDS stream belongs to the caller, which must dispose
-///     it. The cached tile set survives closing the toolbox and is released when another tile set is
-///     needed or when <see cref="DisposeAsync" /> runs at shutdown.
+///     it. The cached tile set survives closing the toolbox and is released when another tile set or
+///     another package is loaded, or when <see cref="DisposeAsync" /> runs at shutdown. The package
+///     version is part of the cache key: two packages may hold a tile set at the same path.
 /// </remarks>
 public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly IPackageService _packageService;
+    private long _cachedPackageVersion = -1;
     private bool _disposed;
     private VirtualTextureTileSetSlot? _tileSet;
     private string? _tileSetPath;
@@ -106,27 +108,31 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     }
 
     /// <summary>
-    ///     Parses the tile set at <paramref name="path" /> when the cache holds a different one. The
-    ///     caller must hold <see cref="_gate" />; on return <see cref="_tileSet" /> and
-    ///     <see cref="_tileSetPath" /> both describe that tile set.
+    ///     Parses the tile set at <paramref name="path" /> when the cache holds a different one, or
+    ///     when the loaded package has changed. The caller must hold <see cref="_gate" />; on return
+    ///     <see cref="_tileSet" /> and <see cref="_tileSetPath" /> both describe that tile set.
     /// </summary>
     /// <param name="path">The package path of the tile set.</param>
     private async Task EnsureCachedTileSetAsync(string path)
     {
-        if (_tileSet is not null && _tileSetPath == path) return;
+        var version = _packageService.PackageVersion;
+        if (_tileSet is not null && _tileSetPath == path && _cachedPackageVersion == version) return;
 
         // Forget the cached tile set before the new one is parsed. If parsing throws, an empty cache
         // lets the next call try again; keeping the tile set that was just disposed would make every
-        // later call for the old path hand out a released object for the rest of the session.
+        // later call for the old path hand out a released object for the rest of the session. A
+        // different package is treated like a different tile set even when the path is the same.
         await ReleaseCachedTileSetAsync().ConfigureAwait(false);
         var stream = await OpenPackageFileAsync(path).ConfigureAwait(false);
         _tileSet = await Task.Run(() => new VirtualTextureTileSetSlot(stream), CancellationToken.None)
             .ConfigureAwait(false);
         _tileSetPath = path;
+        _cachedPackageVersion = version;
     }
 
     /// <summary>
-    ///     Releases the cached tile set. The caller must hold <see cref="_gate" />.
+    ///     Releases the cached tile set and clears its path and package version. The caller must
+    ///     hold <see cref="_gate" />.
     /// </summary>
     /// <returns>A task that completes when the tile set is released.</returns>
     private async Task ReleaseCachedTileSetAsync()
@@ -135,6 +141,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
             await _tileSet.DisposeAsync().ConfigureAwait(false);
         _tileSet = null;
         _tileSetPath = null;
+        _cachedPackageVersion = -1;
     }
 
     /// <summary>

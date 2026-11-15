@@ -17,33 +17,94 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     <see cref="VirtualTextureIndexResult" /> is returned once the read ends. A tile set that cannot
 ///     be parsed contributes a <see cref="VirtualTextureIndexFailure" /> instead of aborting the index,
 ///     and progress is reported once per tile set. Cancelling the token throws rather than returning a
-///     partial index. Nothing is cached between calls, so every call reads the tile sets again and the
-///     package has to stay loaded until it finishes; the catalog holds no resources of its own and
-///     needs no disposal.
+///     partial index. At the end of a build the mutable lists are wrapped in read-only views, so the
+///     result is cached as-is with the <see cref="IPackageService.PackageVersion" /> it was built from
+///     and shared by every caller until the loaded package changes; an index built while the package
+///     is replaced is discarded instead of cached, because the old package's streams are already
+///     released. The catalog holds metadata and a gate only, so it needs no disposal.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
 public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
     /// <summary>
-    ///     Indexes every virtual texture tile set of the loaded package.
+    ///     Serializes indexing and cache reads. Closing the toolbox cancels its index without waiting
+    ///     for it, so reopening the toolbox can start a second run while the first is still reading a
+    ///     tile set; the package is not safe for concurrent reads. The gate also publishes the cache
+    ///     written on a worker to the next caller, so no volatile reads or double checks are needed.
+    ///     Only metadata is held: the gate never allocates a wait handle, so the catalog needs no
+    ///     disposal.
+    /// </summary>
+    private readonly SemaphoreSlim _gate = new(1, 1);
+
+    /// <summary>
+    ///     The index of the package version recorded in <see cref="CachedIndex" />, or
+    ///     <see langword="null" /> when no valid index has been built yet. Read and written only
+    ///     while holding <see cref="_gate" />.
+    /// </summary>
+    private CachedIndex? _cache;
+
+    /// <summary>
+    ///     Returns the package's virtual texture index, building it only when it is missing or stale.
     /// </summary>
     /// <remarks>
-    ///     A package with no active files produces an empty index instead of throwing. Cancellation
-    ///     throws <see cref="OperationCanceledException" /> rather than returning a partial index, and
-    ///     a tile set that cannot be parsed is reported in the result instead of failing the call. The
-    ///     package has to stay loaded until the returned task completes.
+    ///     A package with no active files produces an empty index instead of throwing; that empty
+    ///     index is not cached. Cancellation throws <see cref="OperationCanceledException" /> rather
+    ///     than returning a partial index, both while building and on a cache hit, so closing the
+    ///     toolbox behaves the same either way. A tile set that cannot be parsed is reported in the
+    ///     result instead of failing the call. When the package changes while the index is built, the
+    ///     run is abandoned rather than cached or returned. A cache hit returns the shared read-only
+    ///     result without touching the package.
     /// </remarks>
-    /// <param name="progress">Receives the number of tile sets indexed so far; may be <see langword="null" />.</param>
-    /// <param name="cancellation">Stops indexing.</param>
-    /// <returns>Every texture of the package, plus the tile sets that could not be read.</returns>
+    /// <param name="progress">
+    ///     Receives the number of tile sets indexed so far; may be <see langword="null" />. A cache hit
+    ///     reports the final tile set count once.
+    /// </param>
+    /// <param name="cancellation">Stops indexing, and also cancels an otherwise immediate cache hit.</param>
+    /// <returns>
+    ///     Every texture in package and tile set order, plus the tile sets that could not be read, as
+    ///     read-only collections shared with every other caller.
+    /// </returns>
     public async Task<VirtualTextureIndexResult> IndexAsync(
         IProgress<VirtualTextureIndexProgress>? progress,
         CancellationToken cancellation = default)
     {
-        var files = await packageService.Search().ConfigureAwait(false);
-        if (files is null) return new VirtualTextureIndexResult([], []);
+        cancellation.ThrowIfCancellationRequested();
+        await _gate.WaitAsync(cancellation).ConfigureAwait(false);
+        try
+        {
+            var version = packageService.PackageVersion;
+            if (_cache is { } cached && cached.Version == version)
+            {
+                progress?.Report(new VirtualTextureIndexProgress(cached.TileSetTotal, cached.TileSetTotal));
+                return cached.Result;
+            }
 
-        return await IndexFilesAsync(files, progress, cancellation).ConfigureAwait(false);
+            // A stale cache belongs to a package that may already be released; drop the reference as
+            // soon as it stops being usable instead of holding two indexes alive until the next one
+            // is finished.
+            _cache = null;
+
+            var files = await packageService.Search().ConfigureAwait(false);
+            if (files is null) return new VirtualTextureIndexResult([], []);
+
+            var total = CountIndexable(files);
+            var result = await IndexFilesAsync(files, total, version, progress, cancellation)
+                .ConfigureAwait(false);
+
+            // The old package is disposed as soon as another one is loaded. Its streams would have
+            // produced a partial index, which must not be published or cached under the new version.
+            if (packageService.PackageVersion != version)
+                throw new OperationCanceledException("The package changed while the index was built.");
+
+            // IndexFilesAsync already returned read-only views, so the cache can hand this very
+            // result to every later caller: no extra copy or freeze is needed.
+            _cache = new CachedIndex(version, result, total);
+            return result;
+        }
+        finally
+        {
+            _gate.Release();
+        }
     }
 
     /// <summary>
@@ -53,19 +114,27 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     /// <remarks>
     ///     A tile set that fails to parse is recorded and skipped, so one unreadable file does not
     ///     hide the textures of all the others. Progress counts handled tile sets, including the ones
-    ///     that failed.
+    ///     that failed. A package replaced during the read ends the run: its streams are released, so
+    ///     carrying on would turn disposed reads into bogus failure entries. Entries and failures stay
+    ///     in package and tile set order; the two mutable lists used while building are wrapped in
+    ///     read-only views only once, when the result is returned.
     /// </remarks>
     /// <param name="files">The package's active files, including entries that are not tile sets.</param>
+    /// <param name="total">The number of tile sets in <paramref name="files" />.</param>
+    /// <param name="version">The package version the files came from.</param>
     /// <param name="progress">Receives the number of tile sets handled so far; may be <see langword="null" />.</param>
     /// <param name="cancellation">Stops at the next tile set by throwing <see cref="OperationCanceledException" />.</param>
-    /// <returns>Every texture, plus the tile sets that could not be read.</returns>
+    /// <returns>
+    ///     Every texture and every failed tile set, in package and tile set order, as read-only views.
+    /// </returns>
     private async Task<VirtualTextureIndexResult> IndexFilesAsync(
         IReadOnlyList<PackagedFileInfo> files,
+        int total,
+        long version,
         IProgress<VirtualTextureIndexProgress>? progress,
         CancellationToken cancellation)
     {
         var indexed = 0;
-        var total = CountIndexable(files);
         progress?.Report(new VirtualTextureIndexProgress(0, total));
         var entries = new List<VirtualTextureEntry>();
         var failures = new List<VirtualTextureIndexFailure>();
@@ -73,6 +142,8 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         {
             if (!IsIndexable(file)) continue;
             cancellation.ThrowIfCancellationRequested();
+            if (packageService.PackageVersion != version)
+                throw new OperationCanceledException("The package changed while the index was built.");
 
             var result = await IndexFileAsync(file, cancellation).ConfigureAwait(false);
             entries.AddRange(result.entries);
@@ -82,7 +153,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
         }
 
         LogSummary(entries.Count, total, failures.Count);
-        return new VirtualTextureIndexResult(entries, failures);
+        return new VirtualTextureIndexResult(entries.AsReadOnly(), failures.AsReadOnly());
     }
 
     /// <summary>
@@ -154,7 +225,7 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
 
     /// <summary>
     ///     Parses one tile set's metadata into texture entries on a worker; the caller copies them
-    ///     into the index and then releases the list.
+    ///     into the index, so only this one tile set is materialized at a time.
     /// </summary>
     /// <param name="file">The tile set's entry in the package.</param>
     /// <param name="cancellationToken">Cancels the synchronous read.</param>
@@ -175,4 +246,10 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
                 new VirtualTextureEntry(file.Name, Path.GetFileName(t.Name), layerCount, i))
         ];
     }
+
+    /// <summary>
+    ///     An index, the package version it was built from, and the tile set count used for progress
+    ///     reporting on a cache hit.
+    /// </summary>
+    private sealed record CachedIndex(long Version, VirtualTextureIndexResult Result, int TileSetTotal);
 }

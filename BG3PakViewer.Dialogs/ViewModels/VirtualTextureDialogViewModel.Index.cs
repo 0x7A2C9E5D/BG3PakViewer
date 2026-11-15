@@ -9,8 +9,10 @@ using Serilog;
 namespace BG3PakViewer.Dialogs.ViewModels;
 
 /// <summary>
-///     Indexing the package's tile sets, filling the texture list in batches and reporting the tile
-///     sets that could not be read. Its cancellation source also stops a run when the dialog is closed.
+///     Loading the package's virtual texture index, filling the texture list in batches and reporting
+///     the tile sets that could not be read. The catalog answers from its cache when the package has
+///     not changed, so no tile set is read on that path. Its cancellation source also stops a run
+///     when the dialog is closed.
 /// </summary>
 public partial class VirtualTextureDialogViewModel
 {
@@ -90,7 +92,8 @@ public partial class VirtualTextureDialogViewModel
         }
         catch (OperationCanceledException)
         {
-            // The dialog was closed before the index finished; the canceled read is discarded.
+            // The dialog was closed before the index finished, or the package was replaced mid-run;
+            // either way the discarded index must not be published to this view model.
         }
         catch (Exception ex)
         {

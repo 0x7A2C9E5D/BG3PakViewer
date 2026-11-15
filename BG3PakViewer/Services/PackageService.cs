@@ -11,8 +11,10 @@ namespace BG3PakViewer.Services;
 internal sealed class PackageService : IPackageService
 {
     private bool _disposedValue;
+    private Package? _currentPackage;
+    private long _packageVersion;
 
-    private Package? CurrentPackage { get; set; }
+    private Package? CurrentPackage => Volatile.Read(ref _currentPackage);
 
     /// <summary>
     ///     Is package loaded
@@ -20,7 +22,28 @@ internal sealed class PackageService : IPackageService
     public bool IsLoaded => CurrentPackage != null;
 
     /// <summary>
-    ///     Loads a package, releasing the one that is currently open.
+    ///     Changes whenever the loaded package is replaced or released, including a failed load.
+    ///     Caches that hold data read from the package compare this with the version they were built
+    ///     from to tell whether they are stale.
+    /// </summary>
+    public long PackageVersion => Interlocked.Read(ref _packageVersion);
+
+    /// <summary>
+    ///     Replaces the current package and invalidates the caches built from the previous one. The
+    ///     version is bumped after the package becomes visible, so a reader that sees the new version
+    ///     can never still read the old package.
+    /// </summary>
+    /// <param name="package">The package now loaded, or <see langword="null" /> when none is.</param>
+    private void SetCurrentPackage(Package? package)
+    {
+        Volatile.Write(ref _currentPackage, package);
+        Interlocked.Increment(ref _packageVersion);
+    }
+
+    /// <summary>
+    ///     Loads a package, releasing the one that is currently open. Every outcome advances
+    ///     <see cref="PackageVersion" />, so caches built from the previous package go stale even
+    ///     when the load fails.
     /// </summary>
     /// <param name="path">The package file to load.</param>
     /// <returns><see langword="true" /> when the package was loaded.</returns>
@@ -32,7 +55,7 @@ internal sealed class PackageService : IPackageService
         {
             Log.Information("Loading package: {Path}", path);
             if (CurrentPackage != null) await CleanupAsync();
-            CurrentPackage = await PackageLoader.LoadAsync(path);
+            SetCurrentPackage(await PackageLoader.LoadAsync(path));
             if (CurrentPackage == null)
             {
                 Log.Warning("Failed to load package: {Path}", path);
@@ -46,7 +69,7 @@ internal sealed class PackageService : IPackageService
         catch (Exception ex)
         {
             Log.Error(ex, "Error loading package: {Path}", path);
-            CurrentPackage = null;
+            SetCurrentPackage(null);
             return false;
         }
     }
@@ -94,13 +117,14 @@ internal sealed class PackageService : IPackageService
     }
 
     /// <summary>
-    ///     Releases the current package so another one can be loaded.
+    ///     Releases the current package so another one can be loaded, advancing
+    ///     <see cref="PackageVersion" /> before the old package is disposed on a worker.
     /// </summary>
     private Task CleanupAsync()
     {
         var package = CurrentPackage;
         if (package is null) return Task.CompletedTask;
-        CurrentPackage = null;
+        SetCurrentPackage(null);
         Log.Debug("Cleaning up current package");
         return Task.Run(package.Dispose);
     }

@@ -35,7 +35,7 @@ internal sealed class PreviewExportService : IPreviewExportService
             yield return result;
         }
 
-        Log.Information("Exported {Exported} of {total} files to: {Folder}", exported, files.Count, folder);
+        Log.Information("Exported {Exported} of {Total} files to: {Folder}", exported, files.Count, folder);
     }
 
     /// <summary>
