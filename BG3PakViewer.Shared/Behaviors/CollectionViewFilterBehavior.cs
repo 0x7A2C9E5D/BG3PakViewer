@@ -14,8 +14,9 @@ namespace BG3PakViewer.Shared.Behaviors;
 ///     plain <see cref="Predicate{T}" /> and stay testable without a WPF context, while the view still
 ///     gets the native filtering behavior (no collection rebuild, virtualization and the current
 ///     selection are preserved). With <see cref="AutoSelectFirstItem" />, a selection that the
-///     filter consumed is replaced by the first remaining item. The filter is reapplied when the
-///     items source is replaced too, since that gives the control a new collection view.
+///     filter consumed is replaced by the first remaining item, and a selection that survived is
+///     brought back into view after the refresh. The filter is reapplied when the items source is
+///     replaced too, since that gives the control a new collection view.
 /// </summary>
 public class CollectionViewFilterBehavior : Behavior<ItemsControl>
 {
@@ -106,14 +107,18 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
     }
 
     /// <summary>
-    ///     Selects the first visible item when the refresh dropped the previous selection, matching
-    ///     the selection the control makes when it is first opened. The predicate decides whether
-    ///     the selection survived, so a selection the filter filtered out is always replaced.
+    ///     Keeps the control's selection in step with the filter: a surviving selection is scrolled
+    ///     back into view because the refresh recycled its container, while a selection the filter
+    ///     consumed is replaced by the first remaining item.
     /// </summary>
     private void SelectFirstVisibleItem()
     {
         if (!AutoSelectFirstItem || AssociatedObject is not Selector selector) return;
-        if (selector.SelectedItem is { } current && (Filter is null || Filter(current))) return;
+        if (selector.SelectedItem is { } current && (Filter is null || Filter(current)))
+        {
+            if (selector is ListBox { } list) list.ScrollIntoView(current);
+            return;
+        }
         if (selector.Items.Count == 0) return;
 
         selector.SelectedIndex = 0;
