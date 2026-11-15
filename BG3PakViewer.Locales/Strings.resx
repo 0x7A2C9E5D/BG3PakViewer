@@ -177,12 +177,6 @@
     <data name="LanguageHelpText" xml:space="preserve">
         <value>Language</value>
     </data>
-    <data name="MultipleInstanceMessage" xml:space="preserve">
-        <value>Multiple instances may cause data to be overwritten incorrectly. Only single-instance operation is supported. Do you want to bring up the already open window?</value>
-    </data>
-    <data name="MultipleInstanceCaption" xml:space="preserve">
-        <value>Software is already running</value>
-    </data>
     <data name="IsExporting" xml:space="preserve">
         <value>Is Exporting</value>
     </data>

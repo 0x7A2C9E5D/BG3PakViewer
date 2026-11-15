@@ -276,12 +276,6 @@
     <data name="LanguageHelpText" xml:space="preserve">
     <value>Lingua</value>
   </data>
-    <data name="MultipleInstanceMessage" xml:space="preserve">
-    <value>Più istanze possono causare la sovrascrittura errata dei dati. È supportata solo un’istanza. Vuoi portare in primo piano la finestra già aperta?</value>
-  </data>
-    <data name="MultipleInstanceCaption" xml:space="preserve">
-    <value>Il software è già in esecuzione</value>
-  </data>
     <data name="IsExporting" xml:space="preserve">
     <value>Esportazione in corso</value>
   </data>

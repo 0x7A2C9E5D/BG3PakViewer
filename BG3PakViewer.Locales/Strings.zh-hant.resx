@@ -171,12 +171,6 @@
     <data name="ModelMissingMeshes" xml:space="preserve">
         <value>不支援預覽缺失網格的模型</value>
     </data>
-    <data name="MultipleInstanceCaption" xml:space="preserve">
-        <value>軟體已執行</value>
-    </data>
-    <data name="MultipleInstanceMessage" xml:space="preserve">
-        <value>多執行個體可能導致資料被錯誤覆蓋，僅支援單執行個體執行。是否喚醒已開啟視窗？</value>
-    </data>
     <data name="Open" xml:space="preserve">
         <value>開啟</value>
     </data>

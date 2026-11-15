@@ -36,10 +36,9 @@ public sealed partial class App : IDisposable
     private bool _disposedValue;
     private bool _initialized;
     private ObserverBase<LogEvent>? _logObserver;
-    private ISingleInstanceManagerService? _singleInstanceManager;
 
     /// <summary>
-    ///     Releases the log observer and the single instance manager.
+    ///     Releases the log observer.
     /// </summary>
     public void Dispose()
     {
@@ -65,7 +64,6 @@ public sealed partial class App : IDisposable
             .AddSingleton<IRecentFilesService>(x => new RecentFilesService(
                 x.GetRequiredService<IAppSettings>().RecentItems))
             .AddSingleton<IAppDiagnosticsService, AppDiagnosticsService>()
-            .AddSingleton<ISingleInstanceManagerService, SingleInstanceManagerService>()
             .AddSingleton<IViewLocator, StrongViewLocator>(_ => CreateViewLocator())
             .AddSingleton<IDialogManager, DialogManager>()
             .AddSingleton<IDialogService, DialogService>()
@@ -242,7 +240,7 @@ public sealed partial class App : IDisposable
     }
 
     /// <summary>
-    ///     Checks whether another instance is already running, then initializes the application.
+    ///     Initializes the application.
     /// </summary>
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -250,9 +248,8 @@ public sealed partial class App : IDisposable
         // depends on the service container, so failures before that point would otherwise be lost.
         InitializeEarlyLogging();
 
-        // The single instance gate is resolved from the container, so registration has to happen
-        // first. Registering constructs no other singleton and loads no settings: those factories
-        // are lazy. Keep the startup-failure report this call had inside StartApplication's guard.
+        // Registering constructs no other singleton and loads no settings: those factories are lazy.
+        // Keep the startup-failure report this call had inside StartApplication's guard.
         try
         {
             ConfigureServices();
@@ -263,35 +260,11 @@ public sealed partial class App : IDisposable
             return;
         }
 
-        if (TryRedirectToRunningInstance())
-        {
-            Shutdown();
-            return;
-        }
-
         // The main window releases its view model after it has closed, because stopping the virtual
         // texture index is asynchronous, so the shutdown waits for that instead of ending with the
         // last window (see MainWindow.OnClosed).
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
         StartApplication();
-    }
-
-    /// <summary>
-    ///     Prompts the user when another instance is already running and activates the existing one
-    ///     on request.
-    /// </summary>
-    /// <returns>True when this instance must shut down.</returns>
-    private bool TryRedirectToRunningInstance()
-    {
-        _singleInstanceManager = Ioc.Default.GetRequiredService<ISingleInstanceManagerService>();
-        if (!_singleInstanceManager.IsAnotherInstanceRunning()) return false;
-
-        Log.Information("Another instance is already running; prompting the user");
-        if (MessageBox.Show(Strings.MultipleInstanceMessage, Strings.MultipleInstanceCaption,
-                MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
-            _singleInstanceManager.ActivateExistingInstance();
-        Log.Information("Shutting down this instance");
-        return true;
     }
 
     /// <summary>
@@ -345,10 +318,7 @@ public sealed partial class App : IDisposable
     }
 
     /// <summary>
-    ///     Saves the settings and releases the resources the application owns, but only when this
-    ///     instance initialized the services. A second instance that shut itself down because another
-    ///     one was already running never loaded the settings, and saving them would overwrite the state
-    ///     of the instance that keeps running.
+    ///     Saves the settings and releases the resources the application owns.
     /// </summary>
     protected override void OnExit(ExitEventArgs e)
     {
@@ -358,20 +328,15 @@ public sealed partial class App : IDisposable
                 .Save(Ioc.Default.GetRequiredService<IAppSettings>());
             Dispose();
         }
-        else
-        {
-            _singleInstanceManager?.Dispose();
-        }
 
-        // Both paths logged something (a second instance reports why it is leaving), and the file
-        // sink keeps its handle open until it is closed: flush it here so nothing is lost and the
-        // file is released before the process ends.
+        // The file sink keeps its handle open until it is closed: flush it here so nothing is lost
+        // and the file is released before the process ends.
         Log.CloseAndFlush();
         base.OnExit(e);
     }
 
     /// <summary>
-    ///     Releases the log observer and the single instance manager; the main window view model is
+    ///     Releases the log observer; the main window view model is
     ///     released by the window itself, which can await the virtual texture index.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
@@ -381,7 +346,6 @@ public sealed partial class App : IDisposable
         if (disposing)
         {
             _logObserver?.Dispose();
-            _singleInstanceManager?.Dispose();
         }
 
         _disposedValue = true;

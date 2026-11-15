@@ -168,12 +168,6 @@
     <data name="LanguageHelpText" xml:space="preserve">
         <value>语言</value>
     </data>
-    <data name="MultipleInstanceMessage" xml:space="preserve">
-        <value>多实例可能导致数据被错误覆盖，仅支持单实例运行。是否唤醒已打开窗口？</value>
-    </data>
-    <data name="MultipleInstanceCaption" xml:space="preserve">
-        <value>软件已运行</value>
-    </data>
     <data name="IsExporting" xml:space="preserve">
         <value>正在导出</value>
     </data>

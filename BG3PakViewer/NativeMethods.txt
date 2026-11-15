@@ -1,3 +1,0 @@
-﻿ShowWindow
-SetForegroundWindow
-GetWindowPlacement

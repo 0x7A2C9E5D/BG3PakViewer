@@ -600,24 +600,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///     Looks up a localized string similar to Software is already running.
-        /// </summary>
-        public static string MultipleInstanceCaption {
-            get {
-                return ResourceManager.GetString("MultipleInstanceCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///     Looks up a localized string similar to Multiple instances may cause data to be overwritten incorrectly. Only single-instance operation is supported. Do you want to bring up the already open window?.
-        /// </summary>
-        public static string MultipleInstanceMessage {
-            get {
-                return ResourceManager.GetString("MultipleInstanceMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///     Looks up a localized string similar to Open.
         /// </summary>
         public static string Open {
