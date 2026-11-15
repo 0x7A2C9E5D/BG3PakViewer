@@ -342,4 +342,7 @@
     <data name="VirtualTextureExportingProgress" xml:space="preserve">
         <value>正在匯出：{0}%</value>
     </data>
+    <data name="ExportAll" xml:space="preserve">
+        <value>匯出全部</value>
+    </data>
 </root>

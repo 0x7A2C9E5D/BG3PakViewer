@@ -18,13 +18,8 @@ public partial class VirtualTextureDialogViewModel
     ///     The number of textures selected in the list.
     /// </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
     private partial int SelectedCount { get; set; }
-
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnSelectedCountChanged(int value)
-    {
-        ExportSelectedCommand.NotifyCanExecuteChanged();
-    }
 
     /// <summary>
     ///     Updates the textures the export writes from the list selection.

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using BG3PakViewer.Contracts;
@@ -20,6 +21,13 @@ public partial class VirtualTextureDialogViewModel
     ///     Whether the selected textures are being exported.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyPropertyChangedFor(nameof(CanClose))]
+    [NotifyPropertyChangedFor(nameof(ExportButtonText))]
+    [NotifyCanExecuteChangedFor(nameof(ExportAllCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelExportCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportSearchResultsCommand))]
     public partial bool IsExporting { get; private set; }
 
     /// <summary>
@@ -38,14 +46,15 @@ public partial class VirtualTextureDialogViewModel
             (int)Math.Round(ExportProgress))
         : Strings.ExportSelectedTextures;
 
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnIsExportingChanged(bool value)
+    /// <summary>
+    ///     Keeps the search-results export command in sync with the textures the current search matches.
+    /// </summary>
+    /// <param name="e">The property that changed.</param>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
-        ExportSelectedCommand.NotifyCanExecuteChanged();
-        CancelExportCommand.NotifyCanExecuteChanged();
-        OnPropertyChanged(nameof(IsBusy));
-        OnPropertyChanged(nameof(CanClose));
-        OnPropertyChanged(nameof(ExportButtonText));
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(ItemFilter))
+            ExportSearchResultsCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -68,6 +77,24 @@ public partial class VirtualTextureDialogViewModel
     }
 
     /// <summary>
+    ///     Whether the current search matches at least one texture that can be exported.
+    /// </summary>
+    private bool CanExportSearchResults()
+    {
+        if (IsIndexing || IsExporting || Textures.Count == 0) return false;
+        var filter = ItemFilter;
+        return filter is null || Textures.Any(texture => filter(texture));
+    }
+
+    /// <summary>
+    ///     Whether there is at least one indexed texture to export.
+    /// </summary>
+    private bool CanExportAll()
+    {
+        return !IsIndexing && !IsExporting && Textures.Count > 0;
+    }
+
+    /// <summary>
     ///     Whether an export is running and can be canceled.
     /// </summary>
     /// <returns></returns>
@@ -83,6 +110,25 @@ public partial class VirtualTextureDialogViewModel
     private Task ExportSelectedAsync()
     {
         return ExportAsync([.. _selectedTextures]);
+    }
+
+    /// <summary>
+    ///     Exports every texture the current search matches.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanExportSearchResults))]
+    private Task ExportSearchResultsAsync()
+    {
+        var filter = ItemFilter;
+        return ExportAsync([.. Textures.Where(texture => filter is null || filter(texture))]);
+    }
+
+    /// <summary>
+    ///     Exports every indexed texture.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanExportAll))]
+    private Task ExportAllAsync()
+    {
+        return ExportAsync([.. Textures]);
     }
 
     /// <summary>

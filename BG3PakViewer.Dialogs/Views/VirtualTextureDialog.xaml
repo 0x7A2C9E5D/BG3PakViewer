@@ -1,5 +1,5 @@
 <Window x:Class="BG3PakViewer.Dialogs.Views.VirtualTextureDialog"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -288,21 +288,38 @@
                                        Visibility="{Binding IsPreviewing, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <!--
+                              SplitButton: the main button keeps the "export selected" action (and its
+                              progress label) while the chevron opens the library's MenuFlyout with the
+                              two other scopes.
+                            -->
+                            <ui:SplitButton Margin="8,0,0,0" Padding="10,4"
+                                            Command="{Binding ExportSelectedCommand}"
+                                            AutomationProperties.Name="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}"
+                                            ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}">
+                                <ui:SplitButton.Content>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" FontSize="14" />
+                                        <TextBlock Margin="6,0,0,0" VerticalAlignment="Center"
+                                                   Text="{Binding ExportButtonText, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ui:SplitButton.Content>
+                                <ui:SplitButton.Flyout>
+                                    <!-- Fixed downward placement; Standard keeps Auto from repositioning it. -->
+                                    <ui:MenuFlyout x:Name="ExportFlyout" Placement="Bottom" ShowMode="Standard">
+                                        <MenuItem x:Name="ExportSearchResultsMenuItem"
+                                                  Header="{I18N {x:Static l:LangKeys.ExportSearchResults}}"
+                                                  Command="{Binding ExportSearchResultsCommand}" />
+                                        <MenuItem x:Name="ExportAllMenuItem"
+                                                  Header="{I18N {x:Static l:LangKeys.ExportAll}}"
+                                                  Command="{Binding ExportAllCommand}" />
+                                    </ui:MenuFlyout>
+                                </ui:SplitButton.Flyout>
+                            </ui:SplitButton>
                             <Button Margin="8,0,0,0" Padding="10,4"
                                     Visibility="{Binding IsExporting, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Command="{Binding CancelExportCommand}">
                                 <TextBlock Text="{I18N {x:Static l:LangKeys.Cancel}}" />
-                            </Button>
-                            <Button Margin="8,0,0,0" Padding="10,4"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Command="{Binding ExportSelectedCommand}"
-                                    AutomationProperties.Name="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}"
-                                    ToolTipService.ToolTip="{I18N {x:Static l:LangKeys.ExportSelectedTextures}}">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" FontSize="14" />
-                                    <TextBlock Margin="6,0,0,0" VerticalAlignment="Center"
-                                               Text="{Binding ExportButtonText, Mode=OneWay}" />
-                                </StackPanel>
                             </Button>
                         </StackPanel>
                     </Grid>

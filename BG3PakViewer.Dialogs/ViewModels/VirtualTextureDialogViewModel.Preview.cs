@@ -30,13 +30,8 @@ public partial class VirtualTextureDialogViewModel
     ///     Whether the preview of the selected texture is being loaded.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBusy))]
     public partial bool IsPreviewing { get; private set; }
-
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnIsPreviewingChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsBusy));
-    }
 
     /// <summary>
     ///     Loads the preview when the selection changes.

@@ -1039,5 +1039,14 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("VirtualTextureExportingProgress", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///     Looks up a localized string similar to Export all.
+        /// </summary>
+        public static string ExportAll {
+            get {
+                return ResourceManager.GetString("ExportAll", resourceCulture);
+            }
+        }
     }
 }

@@ -22,6 +22,10 @@ public partial class VirtualTextureDialogViewModel
     ///     Whether the package's virtual textures are being indexed.
     /// </summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBusy))]
+    [NotifyCanExecuteChangedFor(nameof(ExportAllCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportSearchResultsCommand))]
     public partial bool IsIndexing { get; private set; }
 
     /// <summary>
@@ -35,13 +39,6 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     [ObservableProperty]
     public partial int IndexTotal { get; private set; }
-
-    // ReSharper disable once UnusedParameterInPartialMethod
-    partial void OnIsIndexingChanged(bool value)
-    {
-        ExportSelectedCommand.NotifyCanExecuteChanged();
-        OnPropertyChanged(nameof(IsBusy));
-    }
 
     /// <summary>
     ///     Indexes the package's tile sets, then fills the texture list in batches.

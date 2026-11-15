@@ -351,4 +351,7 @@
     <data name="VirtualTextureExportingProgress" xml:space="preserve">
         <value>Exporting: {0}%</value>
     </data>
+    <data name="ExportAll" xml:space="preserve">
+        <value>Export all</value>
+    </data>
 </root>

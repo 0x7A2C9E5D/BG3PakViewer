@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using BG3PakViewer.Dialogs.ViewModels;
+using iNKORE.UI.WPF.Modern.Controls.Primitives;
 
 namespace BG3PakViewer.Dialogs.Views;
 
@@ -19,6 +20,9 @@ public partial class VirtualTextureDialog
     public VirtualTextureDialog()
     {
         InitializeComponent();
+        // Fix the direction after the XAML is loaded, in case assigning the Flyout to the SplitButton
+        // resets it: the menu must always open downwards.
+        ExportFlyout.Placement = FlyoutPlacementMode.Bottom;
         DataContextChanged += OnDataContextChanged;
     }
 
@@ -30,7 +34,14 @@ public partial class VirtualTextureDialog
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is VirtualTextureDialogViewModel viewModel)
+        {
             SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
+
+            // MenuFlyout items live in a separate visual tree, so give them the view model explicitly
+            // instead of relying on DataContext inheritance.
+            ExportSearchResultsMenuItem.DataContext = viewModel;
+            ExportAllMenuItem.DataContext = viewModel;
+        }
     }
 
     /// <summary>

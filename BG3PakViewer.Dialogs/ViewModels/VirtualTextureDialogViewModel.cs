@@ -85,7 +85,7 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
     ///     The progress of the running export, from 0 to 100.
     /// </summary>
     [ObservableProperty]
-    public partial double ExportProgress { get; private set; }
+    private partial double ExportProgress { get; set; }
 
     /// <summary>
     ///     Whether indexing, previewing or exporting is in progress.
