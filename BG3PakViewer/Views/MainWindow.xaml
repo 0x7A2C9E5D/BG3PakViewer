@@ -130,6 +130,13 @@
                                              Value="{x:Null}">
                                     <Setter Property="IsEnabled" Value="False" />
                                 </DataTrigger>
+                                <!--  While an export runs the button stays clickable, and its label
+                                     switches to the cancel text: it cancels the export.  -->
+                                <DataTrigger Binding="{Binding IsExporting}" Value="True">
+                                    <Setter Property="IsEnabled" Value="True" />
+                                    <Setter Property="Label"
+                                            Value="{I18N {x:Static l:LangKeys.CancelExportBtnLabel}}" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </ui:AppBarButton.Style>

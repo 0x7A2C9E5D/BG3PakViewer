@@ -132,6 +132,9 @@
     <data name="ExportPakBtnLabel" xml:space="preserve">
     <value>Esporta risorse</value>
   </data>
+    <data name="CancelExportBtnLabel" xml:space="preserve">
+    <value>Annulla esportazione</value>
+  </data>
     <data name="Recent" xml:space="preserve">
     <value>Recenti</value>
   </data>

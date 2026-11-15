@@ -24,6 +24,9 @@
     <data name="ExportPakBtnLabel" xml:space="preserve">
         <value>导出资源</value>
     </data>
+    <data name="CancelExportBtnLabel" xml:space="preserve">
+        <value>取消导出</value>
+    </data>
     <data name="About" xml:space="preserve">
         <value>关于</value>
     </data>

@@ -2,6 +2,7 @@ using System.IO;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
@@ -17,17 +18,28 @@ namespace BG3PakViewer.ViewModels;
 internal partial class MainWindowViewModel
 {
     /// <summary>
-    ///     Is exporting
+    ///     Is exporting. Observable so the export button can switch its label to the cancel text and
+    ///     stay clickable while a run is in progress.
     /// </summary>
-    public bool IsExporting { get; private set; }
+    [ObservableProperty]
+    public partial bool IsExporting { get; private set; }
 
     /// <summary>
-    ///     Export async
+    ///     Export async. While an export is running, the same command cancels it instead of starting
+    ///     another one. Concurrent execution is allowed on purpose: the default AsyncRelayCommand
+    ///     would disable the button for the whole export, and the cancel path below relies on the
+    ///     command staying clickable while <see cref="IsExporting" /> is true.
     /// </summary>
     /// <param name="toSave"></param>
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ExportAsync(object toSave)
     {
+        if (IsExporting)
+        {
+            await CancelExportFromButtonAsync();
+            return;
+        }
+
         if (toSave is not PackageEntry node || !_packageService.IsLoaded)
             return;
         // Opening another package waits on this before releasing the one the export is reading from.
@@ -164,6 +176,25 @@ internal partial class MainWindowViewModel
         // The export may have finished while the dialog was open.
         await CancelAndWaitForExportAsync();
         return true;
+    }
+
+    /// <summary>
+    ///     Handles a click on the export button while an export is running: cancels a running folder
+    ///     export directly, or tells the user a single file export cannot be canceled.
+    /// </summary>
+    private async Task CancelExportFromButtonAsync()
+    {
+        // Only a folder export has a cancellation source. A single file export cannot be canceled,
+        // so the button cannot promise a cancellation the export cannot perform.
+        if (_cancellationTokenSource is null)
+        {
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportNotCancellableMessage,
+                Strings.CancelExportOperationCaption, MessageBoxIcon.Warning);
+            return;
+        }
+
+        Log.Information("Export cancellation requested from the export button");
+        await CancelAndWaitForExportAsync();
     }
 
     /// <summary>

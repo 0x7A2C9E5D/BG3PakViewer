@@ -310,6 +310,15 @@ namespace BG3PakViewer.Locales {
                 return ResourceManager.GetString("ExportPakBtnLabel", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///     Looks up a localized string similar to Cancel Export.
+        /// </summary>
+        public static string CancelExportBtnLabel {
+            get {
+                return ResourceManager.GetString("CancelExportBtnLabel", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///     Looks up a localized string similar to Export search results.

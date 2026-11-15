@@ -96,6 +96,9 @@
     <data name="ExportPakBtnLabel" xml:space="preserve">
         <value>匯出資源</value>
     </data>
+    <data name="CancelExportBtnLabel" xml:space="preserve">
+        <value>取消匯出</value>
+    </data>
     <data name="FileLoadingDuplicateCaption" xml:space="preserve">
         <value>正在載入</value>
     </data>
