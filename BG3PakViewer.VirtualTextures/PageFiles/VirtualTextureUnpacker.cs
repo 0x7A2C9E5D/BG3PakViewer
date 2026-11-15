@@ -45,7 +45,7 @@ internal sealed class VirtualTextureUnpacker(
     /// <returns>The decompressed tile, trimmed to the tile size without its border.</returns>
     public async Task<BC5Image> Decompress(GTSFlatTileInfo tile)
     {
-        var pageFile = await _tilePageFiles.GetPageFile(tile.PageFileIndex);
+        var pageFile = await _tilePageFiles.GetPageFile(tile.PageFileIndex).ConfigureAwait(false);
         return decoder.Decode(pageFile, tile.PageIndex, tile.ChunkIndex);
     }
 }

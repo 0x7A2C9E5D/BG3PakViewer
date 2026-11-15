@@ -33,9 +33,9 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
     {
         await using var stream = (await packageService.GetFileByPath(node.FullPath).ConfigureAwait(false))?.CreateContentReader();
         if (stream is null) return false;
-        if (!await FileOperations.SaveStreamToFileAsync(stream, path))
+        if (!await FileOperations.SaveStreamToFileAsync(stream, path).ConfigureAwait(false))
             return false;
-        await ExportVirtualTexturePagesAsync(node.FullPath, path);
+        await ExportVirtualTexturePagesAsync(node.FullPath, path).ConfigureAwait(false);
         return true;
     }
 
@@ -54,7 +54,8 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
             MaxDegreeOfParallelism = Environment.ProcessorCount
         };
         await Parallel.ForEachAsync(pageFileNames, parallelOptions, (pageFileName, _)
-            => ExportVirtualTexturePageAsync(pageFileName, sourceFolderPath, targetFolderPath));
+            => ExportVirtualTexturePageAsync(pageFileName, sourceFolderPath, targetFolderPath))
+            .ConfigureAwait(false);
         Log.Information("Exported {Count} virtual texture page file(s) next to {TargetPath}",
             pageFileNames.Count, targetPath);
     }
@@ -92,7 +93,7 @@ internal class VirtualTextureExportStrategy(IPackageService packageService) : IE
             // The page file name comes from the tile set, so it may try to escape the target folder.
             var targetFilePath = FileOperations.ResolveInside(targetFolderPath, pageFileName);
             await using var pageStream = pageFile.CreateContentReader();
-            await FileOperations.SaveStreamToFileAsync(pageStream, targetFilePath);
+            await FileOperations.SaveStreamToFileAsync(pageStream, targetFilePath).ConfigureAwait(false);
         }
         catch (Exception e)
         {

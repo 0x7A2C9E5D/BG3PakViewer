@@ -28,7 +28,7 @@ internal sealed class PreviewExportService : IPreviewExportService
             // where it would be reported as a failure instead of as the user's decision.
             if (cancellationToken.IsCancellationRequested) yield break;
 
-            var result = await ExportFileAsync(folder, file, cancellationToken);
+            var result = await ExportFileAsync(folder, file, cancellationToken).ConfigureAwait(false);
             if (result is null) yield break;
 
             if (result.Success) exported++;
@@ -63,7 +63,7 @@ internal sealed class PreviewExportService : IPreviewExportService
             return new PreviewExportResult(file.FileName, false, ex.Message);
         }
 
-        return await WriteFileAsync(path, file, cancellationToken);
+        return await WriteFileAsync(path, file, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -82,9 +82,9 @@ internal sealed class PreviewExportService : IPreviewExportService
     {
         try
         {
-            await using var source = await file.OpenAsync();
+            await using var source = await file.OpenAsync().ConfigureAwait(false);
             await using var target = File.Create(path);
-            await source.CopyToAsync(target, cancellationToken);
+            await source.CopyToAsync(target, cancellationToken).ConfigureAwait(false);
             return new PreviewExportResult(file.FileName, true, null);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

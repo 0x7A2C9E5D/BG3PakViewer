@@ -88,7 +88,8 @@ internal sealed class VirtualTextureWriter
         for (var col = 0; col < tiles.Length; col++)
         {
             if (tiles.Span[col] is not { } cell) continue;
-            (await _unpacker.Decompress(cell)).CopyTileTo(_strip, _content, _tileBorder, col);
+            (await _unpacker.Decompress(cell).ConfigureAwait(false))
+                .CopyTileTo(_strip, _content, _tileBorder, col);
         }
 
         _writer.Write(_strip.Data, 0, _strip.Data.Length);

@@ -54,8 +54,8 @@ internal sealed class PackageService : IPackageService
         try
         {
             Log.Information("Loading package: {Path}", path);
-            if (CurrentPackage != null) await CleanupAsync();
-            SetCurrentPackage(await PackageLoader.LoadAsync(path));
+            if (CurrentPackage != null) await CleanupAsync().ConfigureAwait(false);
+            SetCurrentPackage(await PackageLoader.LoadAsync(path).ConfigureAwait(false));
             if (CurrentPackage == null)
             {
                 Log.Warning("Failed to load package: {Path}", path);

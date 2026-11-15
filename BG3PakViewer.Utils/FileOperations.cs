@@ -22,8 +22,8 @@ public static class FileOperations
         {
             await using (var file = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
-                await stream.CopyToAsync(file);
-                await file.FlushAsync();
+                await stream.CopyToAsync(file).ConfigureAwait(false);
+                await file.FlushAsync().ConfigureAwait(false);
             }
 
             File.Move(tempPath, path, overwrite: true);
