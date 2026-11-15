@@ -157,7 +157,8 @@ internal partial class MainWindowViewModel
     }
 
     /// <summary>
-    ///     Handle reopen file
+    ///     Handle reopen file. A package may be reopened directly without confirmation; only a run
+    ///     that is still loading is rejected.
     /// </summary>
     /// <returns></returns>
     private async Task<bool> HandleReOpenFile()
@@ -169,9 +170,7 @@ internal partial class MainWindowViewModel
             return false;
         }
 
-        if (PackageTree is null) return true;
-        return await _dialogService.ShowMessageBoxConfirmAsync(this, Strings.ReOpenFileMessage,
-            Strings.ReOpenFileCaption);
+        return true;
     }
 
     /// <summary>

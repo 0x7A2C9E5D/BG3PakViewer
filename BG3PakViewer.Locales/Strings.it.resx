@@ -252,12 +252,6 @@
     <data name="ExportCompleted" xml:space="preserve">
     <value>Esportazione completata</value>
   </data>
-    <data name="ReOpenFileCaption" xml:space="preserve">
-    <value>Apri nuovo file</value>
-  </data>
-    <data name="ReOpenFileMessage" xml:space="preserve">
-    <value>Stai attualmente esplorando il file pak. Confermi di chiudere quello corrente e aprirne uno nuovo?</value>
-  </data>
     <data name="FileOpenedNoFoundMessage" xml:space="preserve">
     <value>Il file aperto non esiste. Vuoi eliminare il record associato?</value>
   </data>

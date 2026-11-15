@@ -207,12 +207,6 @@
     <data name="Recent" xml:space="preserve">
         <value>最近開啟檔案</value>
     </data>
-    <data name="ReOpenFileCaption" xml:space="preserve">
-        <value>開啟新檔案</value>
-    </data>
-    <data name="ReOpenFileMessage" xml:space="preserve">
-        <value>目前正在瀏覽資源封存，是否關閉現有檔案並開啟新檔案？</value>
-    </data>
     <data name="SaveFile" xml:space="preserve">
         <value>儲存檔案</value>
     </data>

@@ -153,12 +153,6 @@
     <data name="ExportCompleted" xml:space="preserve">
         <value>Export Completed</value>
     </data>
-    <data name="ReOpenFileCaption" xml:space="preserve">
-        <value>Open New File</value>
-    </data>
-    <data name="ReOpenFileMessage" xml:space="preserve">
-        <value>You are currently browsing the pak file. Confirm to close the current one and open a new file?</value>
-    </data>
     <data name="FileOpenedNoFoundMessage" xml:space="preserve">
         <value>The opened file does not exist. Do you want to delete the associated record?</value>
     </data>

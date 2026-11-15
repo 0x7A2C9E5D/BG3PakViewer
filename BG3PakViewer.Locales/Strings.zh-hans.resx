@@ -144,12 +144,6 @@
     <data name="ExportCompleted" xml:space="preserve">
         <value>导出完成</value>
     </data>
-    <data name="ReOpenFileCaption" xml:space="preserve">
-        <value>打开新文件</value>
-    </data>
-    <data name="ReOpenFileMessage" xml:space="preserve">
-        <value>当前正在浏览资源归档，是否关闭现有文件并打开新文件？</value>
-    </data>
     <data name="FileOpenedNoFoundMessage" xml:space="preserve">
         <value>打开的文件不存在，是否删除记录？</value>
     </data>

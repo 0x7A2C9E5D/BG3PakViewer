@@ -753,24 +753,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///     Looks up a localized string similar to Open New File.
-        /// </summary>
-        public static string ReOpenFileCaption {
-            get {
-                return ResourceManager.GetString("ReOpenFileCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///     Looks up a localized string similar to You are currently browsing the pak file. Confirm to close the current one and open a new file?.
-        /// </summary>
-        public static string ReOpenFileMessage {
-            get {
-                return ResourceManager.GetString("ReOpenFileMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///     Looks up a localized string similar to Save file.
         /// </summary>
         public static string SaveFile {
