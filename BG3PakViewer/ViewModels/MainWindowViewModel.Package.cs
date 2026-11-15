@@ -74,12 +74,39 @@ internal partial class MainWindowViewModel
     /// <summary>
     ///     Validate and open package async
     /// </summary>
+    /// <remarks>
+    ///     All callers (open button, drag-drop, recent-file message) run on the UI thread, so the
+    ///     load-state check and the pending field need no synchronization. A request that arrives
+    ///     while a load is still running is deferred: only the newest one is kept, and it starts as
+    ///     soon as the current load finishes.
+    /// </remarks>
     /// <param name="path"></param>
     private async Task ValidateAndOpenPackageAsync(string path)
     {
-        if (!(await HandleIsExportingFiles()
-              && await HandleReOpenFile())) return;
+        if (!await HandleIsExportingFiles()) return;
+        if (_currentLoadTask is { IsCompleted: false })
+        {
+            _pendingOpenPath = path;
+            Log.Information("Opening {Path} deferred until the current load finishes", path);
+            return;
+        }
+
+        _currentLoadTask = OpenAndDrainDeferredAsync(path);
+        await _currentLoadTask;
+    }
+
+    /// <summary>
+    ///     Opens the given package, then the newest request that arrived while it was loading.
+    /// </summary>
+    /// <param name="path">The package file to open.</param>
+    private async Task OpenAndDrainDeferredAsync(string path)
+    {
         await OpenPackageAsync(path);
+        while (_pendingOpenPath is { } next)
+        {
+            _pendingOpenPath = null;
+            await OpenPackageAsync(next);
+        }
     }
 
     /// <summary>
@@ -91,40 +118,29 @@ internal partial class MainWindowViewModel
     /// <param name="path">The package file to open.</param>
     private async Task OpenPackageAsync(string path)
     {
-        _isLoading = true;
         Log.Information("Opening PAK file: {Path}", path);
-        try
+        // The preview view model notifies the UI (its export command raises CanExecuteChanged),
+        // so it is released here on the UI thread instead of inside the background work below.
+        await DisposePreviewVmAsync();
+
+        IsVirtualTexturePackage = false;
+
+        // The tree is bound to the view, so it may only be replaced from the UI thread: the
+        // background work builds the new one and the continuation below publishes it.
+        PackageTree = null;
+        var tree = await Task.Run(() => LoadAndBuildTreeAsync(path), CancellationToken.None);
+
+        if (tree is not null)
         {
-            // The preview view model notifies the UI (its export command raises CanExecuteChanged),
-            // so it is released here on the UI thread instead of inside the background work below.
-            await DisposePreviewVmAsync();
-
-            IsVirtualTexturePackage = false;
-
-            // The tree is bound to the view, so it may only be replaced from the UI thread: the
-            // background work builds the new one and the continuation below publishes it.
-            PackageTree = null;
-            var tree = await Task.Run(() => LoadAndBuildTreeAsync(path), CancellationToken.None);
-
-            if (tree is not null)
-            {
-                PackageTree = tree;
-                _recentFilesService.AddOrUpdateRecentFile(path);
-                IsVirtualTexturePackage = await DetectVirtualTexturePackageAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
-                    Strings.OpenFileFailedCaption,
-                    MessageBoxIcon.Error);
-            }
+            PackageTree = tree;
+            _recentFilesService.AddOrUpdateRecentFile(path);
+            IsVirtualTexturePackage = await DetectVirtualTexturePackageAsync().ConfigureAwait(false);
         }
-        finally
+        else
         {
-            // A failed open must not leave the flag set: HandleReOpenFile would otherwise answer
-            // every later attempt with "file loading, please do not repeat the operation" for the
-            // rest of the session.
-            _isLoading = false;
+            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
+                Strings.OpenFileFailedCaption,
+                MessageBoxIcon.Error);
         }
     }
 
@@ -154,23 +170,6 @@ internal partial class MainWindowViewModel
         if (files is null) return null;
         var paths = files.Select(f => f.Name);
         return PackageEntry.BuildTree(paths);
-    }
-
-    /// <summary>
-    ///     Handle reopen file. A package may be reopened directly without confirmation; only a run
-    ///     that is still loading is rejected.
-    /// </summary>
-    /// <returns></returns>
-    private async Task<bool> HandleReOpenFile()
-    {
-        if (_isLoading)
-        {
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.FileLoadingDuplicateMessage,
-                Strings.FileLoadingDuplicateCaption, MessageBoxIcon.Warning);
-            return false;
-        }
-
-        return true;
     }
 
     /// <summary>

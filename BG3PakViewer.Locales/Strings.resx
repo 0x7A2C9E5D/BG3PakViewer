@@ -252,12 +252,6 @@
     <data name="LoadResourceFailed" xml:space="preserve">
         <value>Failed to load resource</value>
     </data>
-    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
-        <value>File loading, please do not repeat the operation</value>
-    </data>
-    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
-        <value>Loading</value>
-    </data>
     <data name="TGAImage" xml:space="preserve">
         <value>TGA Image</value>
     </data>

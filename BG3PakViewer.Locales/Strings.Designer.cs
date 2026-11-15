@@ -357,24 +357,6 @@ namespace BG3PakViewer.Locales {
         }
         
         /// <summary>
-        ///     Looks up a localized string similar to Loading.
-        /// </summary>
-        public static string FileLoadingDuplicateCaption {
-            get {
-                return ResourceManager.GetString("FileLoadingDuplicateCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///     Looks up a localized string similar to File loading, please do not repeat the operation.
-        /// </summary>
-        public static string FileLoadingDuplicateMessage {
-            get {
-                return ResourceManager.GetString("FileLoadingDuplicateMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///     Looks up a localized string similar to File is Not Supported To Preview..
         /// </summary>
         public static string FileNotSupportedPreviewMessage {

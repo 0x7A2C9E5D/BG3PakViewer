@@ -351,12 +351,6 @@
     <data name="LoadResourceFailed" xml:space="preserve">
       <value>Caricamento risorsa non riuscito</value>
     </data>
-    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
-      <value>Caricamento file in corso, non ripetere l'operazione</value>
-    </data>
-    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
-      <value>Caricamento</value>
-    </data>
     <data name="TGAImage" xml:space="preserve">
       <value>Immagine TGA</value>
     </data>

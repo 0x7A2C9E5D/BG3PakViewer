@@ -99,12 +99,6 @@
     <data name="CancelExportBtnLabel" xml:space="preserve">
         <value>取消匯出</value>
     </data>
-    <data name="FileLoadingDuplicateCaption" xml:space="preserve">
-        <value>正在載入</value>
-    </data>
-    <data name="FileLoadingDuplicateMessage" xml:space="preserve">
-        <value>檔案載入中，請勿重複操作</value>
-    </data>
     <data name="FileNotSupportedPreviewMessage" xml:space="preserve">
         <value>檔案不支援預覽。</value>
     </data>
