@@ -37,7 +37,7 @@ internal sealed class VirtualTextureTilePageSlot(int pageSize, Func<int, Task<St
         await ReleasePage().ConfigureAwait(false);
 
         // The provider opens the package stream asynchronously, while page files are read synchronously.
-        var stream = pageStreamProvider(pageFileIndex).GetAwaiter().GetResult();
+        var stream = await pageStreamProvider(pageFileIndex);
         _pageFile = new VirtualTextureTilePage(pageSize, stream);
         _openPageFileIndex = pageFileIndex;
         return _pageFile;
