@@ -1,4 +1,4 @@
-﻿<Window x:Class="BG3PakViewer.Views.MainWindow"
+<Window x:Class="BG3PakViewer.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -117,8 +117,9 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
-                <ui:AppBarButton Label="{I18N {x:Static l:LangKeys.ExportPakBtnLabel}}"
-                                 Command="{Binding ExportCommand}"
+                <!--  The label lives in the style: a local value would outrank the trigger setters
+                     and the cancel label would never show.  -->
+                <ui:AppBarButton Command="{Binding ExportCommand}"
                                  CommandParameter="{Binding ElementName=TreeView,Path=SelectedItem}">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Export}" />
@@ -130,12 +131,11 @@
                                              Value="{x:Null}">
                                     <Setter Property="IsEnabled" Value="False" />
                                 </DataTrigger>
-                                <!--  While an export runs the button stays clickable, and its label
-                                     switches to the cancel text: it cancels the export.  -->
                                 <DataTrigger Binding="{Binding IsExporting}" Value="True">
-                                    <Setter Property="IsEnabled" Value="True" />
-                                    <Setter Property="Label"
-                                            Value="{I18N {x:Static l:LangKeys.CancelExportBtnLabel}}" />
+                                    <Setter Property="Label" Value="{I18N {x:Static l:LangKeys.CancelExportBtnLabel}}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsExporting}" Value="False">
+                                    <Setter Property="Label" Value="{I18N {x:Static l:LangKeys.ExportPakBtnLabel}}" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

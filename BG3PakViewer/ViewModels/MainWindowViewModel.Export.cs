@@ -44,13 +44,13 @@ internal partial class MainWindowViewModel
             return;
         // Opening another package waits on this before releasing the one the export is reading from.
         _exportCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        IsExporting = true;
         try
         {
             if (node.IsFolder)
                 await ExportFolderAsync(node);
             else
                 await ExportFileAsync(node);
+
         }
         finally
         {
@@ -81,7 +81,7 @@ internal partial class MainWindowViewModel
             Log.Information("Export file selection was cancelled");
             return;
         }
-
+        IsExporting = true;
         var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
         await HandleExportResultAsync(success);
     }
@@ -107,6 +107,7 @@ internal partial class MainWindowViewModel
         _cancellationTokenSource = new CancellationTokenSource();
         try
         {
+            IsExporting = true;
             var success =
                 await _exportService.ExportFolderAsync(node, storageFolder.LocalPath, _cancellationTokenSource.Token);
             if (_cancellationTokenSource.IsCancellationRequested)
