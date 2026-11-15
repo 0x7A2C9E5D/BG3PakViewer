@@ -6,6 +6,7 @@ using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.VirtualTextures.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
@@ -15,7 +16,8 @@ using Serilog;
 namespace BG3PakViewer.Dialogs.ViewModels;
 
 /// <summary>
-///     Exporting the selected textures, one folder per tile set, and telling the user what was written.
+///     Exporting the selected textures, one folder per tile set, including its progress state and
+///     telling the user what was written.
 /// </summary>
 public partial class VirtualTextureToolboxDialogViewModel
 {
@@ -32,6 +34,20 @@ public partial class VirtualTextureToolboxDialogViewModel
         CompositeFormat.Parse(Strings.PreviewExportPartialMessage);
 
     private CancellationTokenSource? _exportCancellation;
+
+    /// <summary>
+    ///     Whether the selected textures are being exported.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsExporting { get; private set; }
+
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnIsExportingChanged(bool value)
+    {
+        ExportSelectedCommand.NotifyCanExecuteChanged();
+        CancelExportCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(IsBusy));
+    }
 
     /// <summary>
     ///     Whether there is a selected texture to export, and at least one layer of it holds data.
@@ -120,13 +136,13 @@ public partial class VirtualTextureToolboxDialogViewModel
         if (cancellationToken.IsCancellationRequested)
         {
             Log.Information(
-                "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{total} files in {Elapsed} ms",
+                "Virtual texture toolbox export cancelled: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
                 textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
             return;
         }
 
         Log.Information(
-            "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{total} files in {Elapsed} ms",
+            "Virtual texture toolbox export finished: {TextureCount} texture(s), {Files}/{Total} files in {Elapsed} ms",
             textures.Count, exported, files.Count, stopwatch.ElapsedMilliseconds);
         await ReportExportResultAsync(exported, files.Count, failures);
     }

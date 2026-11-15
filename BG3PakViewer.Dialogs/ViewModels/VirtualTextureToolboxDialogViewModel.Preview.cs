@@ -1,17 +1,42 @@
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 
 /// <summary>
-///     Extracting and decoding the selected layer of the selected texture, including the cancellation
-///     of the load that a new selection or layer replaces.
+///     Extracting and decoding the selected layer of the selected texture, including the state it
+///     publishes and the cancellation of the load that a new selection or layer replaces.
 /// </summary>
 public partial class VirtualTextureToolboxDialogViewModel
 {
     private CancellationTokenSource? _previewCancellation;
+
+    /// <summary>
+    ///     The decoded preview of the selected texture, platform-agnostic; the view converts it.
+    /// </summary>
+    [ObservableProperty]
+    public partial Image? Preview { get; private set; }
+
+    /// <summary>
+    ///     The resource key, or the untranslated image dimensions, the preview status line shows.
+    /// </summary>
+    [ObservableProperty]
+    public partial string PreviewStatusKey { get; private set; } = string.Empty;
+
+    /// <summary>
+    ///     Whether the preview of the selected texture is being loaded.
+    /// </summary>
+    [ObservableProperty]
+    private partial bool IsPreviewing { get; set; }
+
+    // ReSharper disable once UnusedParameterInPartialMethod
+    partial void OnIsPreviewingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsBusy));
+    }
 
     /// <summary>
     ///     Loads the preview when the selection changes.
@@ -82,7 +107,7 @@ public partial class VirtualTextureToolboxDialogViewModel
         {
             Preview = null;
             PreviewStatusKey = LangKeys.TitlePreviewFailed;
-            Log.Error(ex, "Failed to preview virtual texture: {name}", row.DisplayName);
+            Log.Error(ex, "Failed to preview virtual texture: {Name}", row.DisplayName);
         }
         finally
         {
