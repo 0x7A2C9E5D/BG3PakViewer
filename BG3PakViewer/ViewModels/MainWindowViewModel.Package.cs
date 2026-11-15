@@ -29,6 +29,7 @@ internal partial class MainWindowViewModel
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
+    // ReSharper disable once MemberCanBeMadeStatic.Local
     private partial PackageEntry? SelectedItem { get; set; }
 
     /// <summary>
@@ -94,7 +95,7 @@ internal partial class MainWindowViewModel
     ///     Validate and open package async
     /// </summary>
     /// <remarks>
-    ///     All callers (open button, drag-drop, recent-file message) run on the UI thread, so the
+    ///     All callers (open button, drag-and-drop, recent-file message) run on the UI thread, so the
     ///     load-state check and the pending field need no synchronization. A request that arrives
     ///     while a load is still running is deferred: only the newest one is kept, and it starts as
     ///     soon as the current load finishes.
