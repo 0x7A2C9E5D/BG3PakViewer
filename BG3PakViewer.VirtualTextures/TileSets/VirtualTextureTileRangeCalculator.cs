@@ -131,9 +131,9 @@ internal static class VirtualTextureTileRangeCalculator
     {
         GTSFlatTileInfo tile = default;
         for (var y = min.Y; y <= max.Y; y++)
-        for (var x = min.X; x <= max.X; x++)
-            if (!tileSet.GetTileInfo(level, layer, x, y, ref tile))
-                return false;
+            for (var x = min.X; x <= max.X; x++)
+                if (!tileSet.GetTileInfo(level, layer, x, y, ref tile))
+                    return false;
         return true;
     }
 }
