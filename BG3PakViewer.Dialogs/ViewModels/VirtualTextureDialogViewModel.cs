@@ -19,7 +19,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     <c>Export</c> runs the export, <c>ExportFiles</c> builds the files it writes and
 ///     <c>ExportDialogs</c> picks the folder and reports the result.
 /// </remarks>
-public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewModel, IModalDialogViewModel
+public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IModalDialogViewModel
 {
     private readonly IAppSettings _appSettings;
     private readonly IVirtualTextureCatalog _catalog;
@@ -29,7 +29,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     private readonly IVirtualTextureExtractor _extractor;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialogViewModel" /> class.
+    ///     Initializes a new instance of the <see cref="VirtualTextureDialogViewModel" /> class.
     /// </summary>
     /// <param name="catalog">The index of the package's virtual textures.</param>
     /// <param name="extractor">The service that extracts the selected texture layers.</param>
@@ -41,7 +41,7 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     ///     The texture name or tile set file name to search and select after indexing, or
     ///     <see langword="null" /> to show the whole list.
     /// </param>
-    public VirtualTextureToolboxDialogViewModel(IVirtualTextureCatalog catalog, IVirtualTextureExtractor extractor,
+    public VirtualTextureDialogViewModel(IVirtualTextureCatalog catalog, IVirtualTextureExtractor extractor,
         IPreviewExportService exportService, IAppSettings appSettings, IDialogService dialogService,
         IClipboardService clipboardService, string? initialSearch = null)
     {
@@ -59,13 +59,13 @@ public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewMode
     ///     The textures of the package, in index order; the list view filters them through
     ///     <see cref="SearchFilterViewModel.ItemFilter" />.
     /// </summary>
-    public ObservableCollection<VirtualTextureToolboxTextureViewModel> Textures { get; } = [];
+    public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
 
     /// <summary>
     ///     The texture whose preview is shown.
     /// </summary>
     [ObservableProperty]
-    public partial VirtualTextureToolboxTextureViewModel? SelectedRow { get; set; }
+    public partial VirtualTextureItemViewModel? SelectedRow { get; set; }
 
     /// <summary>
     ///     The index of the layer the preview shows.

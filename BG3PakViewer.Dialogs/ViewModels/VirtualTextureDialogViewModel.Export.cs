@@ -10,7 +10,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     The export commands and the run they start: the target folder is picked in <c>ExportDialogs</c>,
 ///     the files are built in <c>ExportFiles</c>, then written and reported on.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
     private CancellationTokenSource? _exportCancellation;
 
@@ -68,7 +68,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     ///     Asks the user for a target folder and exports the given textures there.
     /// </summary>
     /// <param name="textures">The textures to export, each of their layers as one DDS file.</param>
-    private async Task ExportAsync(IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures)
+    private async Task ExportAsync(IReadOnlyList<VirtualTextureItemViewModel> textures)
     {
         if (textures.Count == 0) return;
 
@@ -103,7 +103,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <param name="folder">The folder the files are written to.</param>
     /// <param name="textures">The textures to export.</param>
     /// <param name="cancellationToken">Cancels the export.</param>
-    private async Task WriteAndReportAsync(string folder, IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures,
+    private async Task WriteAndReportAsync(string folder, IReadOnlyList<VirtualTextureItemViewModel> textures,
         CancellationToken cancellationToken)
     {
         var stopwatch = Stopwatch.StartNew();

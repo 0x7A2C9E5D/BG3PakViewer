@@ -12,7 +12,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     Indexing the package's tile sets, filling the texture list in batches and reporting the tile
 ///     sets that could not be read. Its cancellation source also stops a run when the dialog is closed.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
     private CancellationTokenSource? _indexCancellation;
 
@@ -51,7 +51,7 @@ public partial class VirtualTextureToolboxDialogViewModel
         _indexCancellation = cts;
         IsIndexing = true;
         VirtualTextureIndexResult? result = null;
-        var batch = new List<VirtualTextureToolboxTextureViewModel>(batchSize);
+        var batch = new List<VirtualTextureItemViewModel>(batchSize);
 
         try
         {
@@ -69,7 +69,7 @@ public partial class VirtualTextureToolboxDialogViewModel
             foreach (var entry in result.entries)
             {
                 if (cts.IsCancellationRequested) break;
-                batch.Add(new VirtualTextureToolboxTextureViewModel(entry, _clipboardService));
+                batch.Add(new VirtualTextureItemViewModel(entry, _clipboardService));
                 if (batch.Count < batchSize) continue;
                 PublishBatch(batch);
                 // Publishing a full batch without awaiting can monopolize the dispatcher: give it a
@@ -112,7 +112,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     ///     Publishes one batch of indexed rows to the list and empties it for the next batch.
     /// </summary>
     /// <param name="batch">The rows to publish; cleared once they have been added.</param>
-    private void PublishBatch(List<VirtualTextureToolboxTextureViewModel> batch)
+    private void PublishBatch(List<VirtualTextureItemViewModel> batch)
     {
         // ObservableCollection must be touched on the UI thread and has no AddRange: rows are added
         // in batches so a large tile set cannot monopolize the dispatcher.

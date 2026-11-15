@@ -11,7 +11,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     Turning the selected textures into the DDS files the export writes, one sub folder per tile
 ///     set, with the layers that hold no data skipped before they can fail.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
     /// <summary>
     ///     Builds the files to write.
@@ -24,7 +24,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     ///     checked or when no selected layer holds data; the reason is logged and, for the latter, shown.
     /// </returns>
     private async Task<List<PreviewExportFile>?> TryBuildFilesAsync(string folder,
-        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, CancellationToken cancellationToken)
+        IReadOnlyList<VirtualTextureItemViewModel> textures, CancellationToken cancellationToken)
     {
         List<PreviewExportFile> files;
         try
@@ -53,7 +53,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <param name="cancellationToken">Cancels the export.</param>
     /// <returns>The files to write, grouped by tile set.</returns>
     private async Task<List<PreviewExportFile>> BuildFilesAsync(string folder,
-        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, CancellationToken cancellationToken)
+        IReadOnlyList<VirtualTextureItemViewModel> textures, CancellationToken cancellationToken)
     {
         var files = new List<PreviewExportFile>();
         var skipped = 0;

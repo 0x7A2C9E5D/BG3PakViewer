@@ -105,7 +105,7 @@ public sealed partial class App : IDisposable
         viewLocator.Register<AboutDialogViewModel, AboutDialog>();
         viewLocator.Register<RecentDialogViewModel, RecentDialog>();
         viewLocator.Register<SettingsDialogViewModel, SettingsDialog>();
-        viewLocator.Register<VirtualTextureToolboxDialogViewModel, VirtualTextureToolboxDialog>();
+        viewLocator.Register<VirtualTextureDialogViewModel, VirtualTextureDialog>();
         return viewLocator;
     }
 

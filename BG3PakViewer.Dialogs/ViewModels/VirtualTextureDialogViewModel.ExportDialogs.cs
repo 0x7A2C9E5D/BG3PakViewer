@@ -14,7 +14,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     The dialogs of an export run: choosing the target folder and telling the user what was written,
 ///     including the files that failed and the reason.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
     /// <summary>
     ///     The completion message template, parsed once per dialog instead of per export.

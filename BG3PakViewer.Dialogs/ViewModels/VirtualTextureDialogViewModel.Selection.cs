@@ -8,9 +8,9 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     Tracking the rows the list has selected, and checking asynchronously whether they hold any
 ///     layer to export so that an empty selection cannot be offered to the export command.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
-    private List<VirtualTextureToolboxTextureViewModel> _selectedTextures = [];
+    private List<VirtualTextureItemViewModel> _selectedTextures = [];
     private CancellationTokenSource? _selectionCheckCancellation;
     private bool _selectionHasData;
 
@@ -30,7 +30,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     ///     Updates the textures the export writes from the list selection.
     /// </summary>
     /// <param name="selected">The textures selected in the list.</param>
-    public void UpdateSelection(IEnumerable<VirtualTextureToolboxTextureViewModel> selected)
+    public void UpdateSelection(IEnumerable<VirtualTextureItemViewModel> selected)
     {
         _selectedTextures = [.. selected];
         SelectedCount = _selectedTextures.Count;
@@ -135,7 +135,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <param name="cancellationToken">Cancels the check.</param>
     /// <returns><see langword="true" /> when one texture holds data in that layer.</returns>
     private async Task<bool> AnyTextureHasLayerDataAsync(
-        IReadOnlyList<VirtualTextureToolboxTextureViewModel> textures, int layer, CancellationToken cancellationToken)
+        IReadOnlyList<VirtualTextureItemViewModel> textures, int layer, CancellationToken cancellationToken)
     {
         foreach (var texture in textures.Where(texture =>
                      layer < Math.Min(texture.Entry.layerCount, VirtualTextureLayers.Names.Count)))

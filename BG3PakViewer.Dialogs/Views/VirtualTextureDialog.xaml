@@ -1,4 +1,4 @@
-<Window x:Class="BG3PakViewer.Dialogs.Views.VirtualTextureToolboxDialog"
+<Window x:Class="BG3PakViewer.Dialogs.Views.VirtualTextureDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,7 +14,7 @@
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         WindowChrome.IsHitTestVisibleInChrome="True"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type=vm:VirtualTextureToolboxDialogViewModel}"
+        d:DataContext="{d:DesignInstance Type=vm:VirtualTextureDialogViewModel}"
         Height="800" Width="1200" MinHeight="600" MinWidth="900"
         ShowInTaskbar="False"
         Title="{I18N {x:Static l:LangKeys.VirtualTextureToolbox}}"
@@ -114,7 +114,7 @@
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
-                        <DataTemplate DataType="{x:Type vm:VirtualTextureToolboxTextureViewModel}">
+                        <DataTemplate DataType="{x:Type vm:VirtualTextureItemViewModel}">
                             <Grid Margin="2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />

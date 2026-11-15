@@ -7,12 +7,12 @@ namespace BG3PakViewer.Dialogs.Views;
 /// <summary>
 ///     The cross-file virtual texture toolbox dialog.
 /// </summary>
-public partial class VirtualTextureToolboxDialog
+public partial class VirtualTextureDialog
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="VirtualTextureToolboxDialog" /> class.
+    ///     Initializes a new instance of the <see cref="VirtualTextureDialog" /> class.
     /// </summary>
-    public VirtualTextureToolboxDialog()
+    public VirtualTextureDialog()
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
@@ -25,7 +25,7 @@ public partial class VirtualTextureToolboxDialog
     /// <param name="e"></param>
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (e.NewValue is VirtualTextureToolboxDialogViewModel viewModel)
+        if (e.NewValue is VirtualTextureDialogViewModel viewModel)
             SearchBox.Text = viewModel.InitialSearch ?? string.Empty;
     }
 
@@ -36,7 +36,7 @@ public partial class VirtualTextureToolboxDialog
     /// <param name="e"></param>
     private void TextureList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is VirtualTextureToolboxDialogViewModel viewModel)
-            viewModel.UpdateSelection(TextureList.SelectedItems.OfType<VirtualTextureToolboxTextureViewModel>());
+        if (DataContext is VirtualTextureDialogViewModel viewModel)
+            viewModel.UpdateSelection(TextureList.SelectedItems.OfType<VirtualTextureItemViewModel>());
     }
 }

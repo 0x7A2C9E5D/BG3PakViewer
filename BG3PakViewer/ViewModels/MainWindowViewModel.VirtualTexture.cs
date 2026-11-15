@@ -31,10 +31,10 @@ internal partial class MainWindowViewModel
     {
         if (!IsVirtualTexturePackage) return;
 
-        VirtualTextureToolboxDialogViewModel? viewModel = null;
+        VirtualTextureDialogViewModel? viewModel = null;
         try
         {
-            viewModel = new VirtualTextureToolboxDialogViewModel(_virtualTextureCatalog, _virtualTextureExtractor,
+            viewModel = new VirtualTextureDialogViewModel(_virtualTextureCatalog, _virtualTextureExtractor,
                 _previewExportService, AppSettings, _dialogService, _clipboardService, initialSearch);
             await _dialogService.ShowDialogAsync(this, viewModel);
         }

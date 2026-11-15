@@ -6,7 +6,7 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 ///     Filtering the indexed list by texture name or tile set file, and the search box commands that
 ///     submit or clear the query.
 /// </summary>
-public partial class VirtualTextureToolboxDialogViewModel
+public partial class VirtualTextureDialogViewModel
 {
     /// <summary>
     ///     The texture name or tile set file name the list was opened with, if any.
@@ -23,7 +23,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     {
         return string.IsNullOrWhiteSpace(searchText)
             ? null
-            : item => item is VirtualTextureToolboxTextureViewModel texture && Matches(texture, searchText);
+            : item => item is VirtualTextureItemViewModel texture && Matches(texture, searchText);
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <param name="texture">The texture to test.</param>
     /// <param name="searchText">The submitted search text.</param>
     /// <returns><see langword="true" /> when the texture matches.</returns>
-    private static bool Matches(VirtualTextureToolboxTextureViewModel texture, string searchText)
+    private static bool Matches(VirtualTextureItemViewModel texture, string searchText)
     {
         return texture.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                texture.Source.Contains(searchText, StringComparison.OrdinalIgnoreCase);
