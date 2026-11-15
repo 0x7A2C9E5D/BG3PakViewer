@@ -15,7 +15,7 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     includes the border every tile carries; the border is trimmed here, so every consumer of a tile
 ///     size uses the same convention.
 /// </remarks>
-internal sealed class VirtualTextureWriter
+internal sealed class VirtualTextureWriter : IAsyncDisposable
 {
     private readonly Size _content;
     private readonly Size _grid;
@@ -23,6 +23,7 @@ internal sealed class VirtualTextureWriter
     private readonly int _tileBorder;
     private readonly VirtualTextureUnpacker _unpacker;
     private readonly BinaryWriter _writer;
+    private bool _disposed;
 
     /// <summary>
     ///     Creates the strip buffer a band is stitched into and the writer the bands are emitted through;
@@ -48,6 +49,14 @@ internal sealed class VirtualTextureWriter
     ///     The number of bytes one band occupies in the DDS; the bands follow each other in the stream.
     /// </summary>
     public int RowByteCount => _strip.Data.Length;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        await _unpacker.DisposeAsync().ConfigureAwait(false);
+        await _writer.DisposeAsync().ConfigureAwait(false);
+        _disposed = true;
+    }
 
     /// <summary>
     ///     Writes the DDS header of the image the bands form, which the bands follow in the stream.
