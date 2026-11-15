@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reactive;
 using System.Reflection;
@@ -290,6 +291,11 @@ public sealed partial class App : IDisposable
     ///     Reports a startup failure and shuts the application down with a failing exit code.
     /// </summary>
     /// <param name="exception">The exception that stopped the startup.</param>
+    // CA1863 suggests caching the format template as a CompositeFormat, but the template is
+    // localized and the UI culture can change at runtime: a cache would pin it to one language.
+    // This is a cold path (startup failure only), so the repeated parse cost is irrelevant.
+    [SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'",
+        Justification = "The format template is localized; caching would pin it to one language.")]
     private void ReportStartupFailure(Exception exception)
     {
         Log.Error(exception, "Application failed to start");
