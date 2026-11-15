@@ -127,10 +127,6 @@
                     <ui:AppBarButton.Style>
                         <Style TargetType="ui:AppBarButton">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedItem, ElementName=TreeView, Mode=OneWay}"
-                                             Value="{x:Null}">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
                                 <DataTrigger Binding="{Binding IsExporting}" Value="True">
                                     <Setter Property="Label" Value="{I18N {x:Static l:LangKeys.CancelExportBtnLabel}}" />
                                 </DataTrigger>
