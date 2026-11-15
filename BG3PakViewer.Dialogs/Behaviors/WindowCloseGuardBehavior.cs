@@ -3,10 +3,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Microsoft.Xaml.Behaviors;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
+using Microsoft.Xaml.Behaviors;
 
 namespace BG3PakViewer.Dialogs.Behaviors;
 
@@ -24,6 +24,8 @@ namespace BG3PakViewer.Dialogs.Behaviors;
 /// </remarks>
 public sealed class WindowCloseGuardBehavior : Behavior<Window>
 {
+    private const int WmSysCommand = 0x0112;
+
     /// <summary>
     ///     Whether the window may be closed. A view model binds to this attached property on the
     ///     window; the behavior attached to that same window applies every guard when it changes.
@@ -32,26 +34,31 @@ public sealed class WindowCloseGuardBehavior : Behavior<Window>
         "CanClose", typeof(bool), typeof(WindowCloseGuardBehavior),
         new PropertyMetadata(true, OnCanCloseChanged));
 
-    private const int WmSysCommand = 0x0112;
-
-    private HwndSource? _hwndSource;
+    private bool _canClose = true;
     private FrameworkElement? _closeButton;
     private CommandBinding? _closeCommandBinding;
-    private bool _canClose = true;
+
+    private HwndSource? _hwndSource;
 
     /// <summary>
     ///     Reads whether the window may be closed.
     /// </summary>
     /// <param name="window">The guarded window.</param>
     /// <returns><see langword="true" /> when closing is allowed.</returns>
-    public static bool GetCanClose(Window window) => (bool)window.GetValue(CanCloseProperty);
+    public static bool GetCanClose(Window window)
+    {
+        return (bool)window.GetValue(CanCloseProperty);
+    }
 
     /// <summary>
     ///     Sets whether the window may be closed.
     /// </summary>
     /// <param name="window">The guarded window.</param>
     /// <param name="value"><see langword="true" /> when closing is allowed.</param>
-    public static void SetCanClose(Window window, bool value) => window.SetValue(CanCloseProperty, value);
+    public static void SetCanClose(Window window, bool value)
+    {
+        window.SetValue(CanCloseProperty, value);
+    }
 
     /// <summary>
     ///     Subscribes to every close path and applies the state the attached property already holds.
@@ -204,7 +211,7 @@ public sealed class WindowCloseGuardBehavior : Behavior<Window>
 
         if (_closeButton is not null)
         {
-            // Only force a local value while blocking; clearing it afterwards lets the theme's own
+            // Only force a local value while blocking; clearing it afterward lets the theme's own
             // Availability binding decide again instead of leaving a stale IsEnabled behind.
             if (canClose)
                 _closeButton.ClearValue(UIElement.IsEnabledProperty);
