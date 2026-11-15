@@ -9,15 +9,13 @@ using Serilog;
 namespace BG3PakViewer.Dialogs.ViewModels;
 
 /// <summary>
-///     Loading the package's virtual texture index, filling the texture list in batches and reporting
+///     Loading the package's virtual texture index, installing the rows in one refresh and reporting
 ///     the tile sets that could not be read. The catalog answers from its cache when the package has
 ///     not changed, so no tile set is read on that path. Its cancellation source also stops a run
 ///     when the dialog is closed.
 /// </summary>
 public partial class VirtualTextureDialogViewModel
 {
-    private const int IndexBatchSize = 64;
-
     private CancellationTokenSource? _indexCancellation;
 
     /// <summary>
@@ -43,8 +41,8 @@ public partial class VirtualTextureDialogViewModel
     public partial int IndexTotal { get; private set; }
 
     /// <summary>
-    ///     Indexes the package's tile sets, publishes the rows in batches and, once the overlay is gone,
-    ///     reports the tile sets the index had to skip.
+    ///     Indexes the package's tile sets, installs the rows in one refresh and, once the overlay is
+    ///     gone, reports the tile sets the index had to skip.
     /// </summary>
     private async Task IndexAsync()
     {
@@ -89,7 +87,9 @@ public partial class VirtualTextureDialogViewModel
         try
         {
             result = await LoadIndexAsync(cts);
-            if (!cts.IsCancellationRequested) await PublishIndexAsync(result, cts);
+            // The dialog may have been closed while the index was built: publishing the rows then
+            // would touch a disposed view model and start a preview for it.
+            if (!cts.IsCancellationRequested) PublishIndex(result);
         }
         catch (OperationCanceledException)
         {
@@ -118,51 +118,22 @@ public partial class VirtualTextureDialogViewModel
             IndexTotal = value.total;
         });
 
-        Textures.Clear();
         return _catalog.IndexAsync(progress, cts.Token);
     }
 
     /// <summary>
-    ///     Publishes the full batches and then the last one, applies the initial search and logs the
-    ///     number of loaded textures.
+    ///     Builds the texture items in a plain list and installs them in one refresh, so the list view is
+    ///     notified once instead of once per texture, then applies the initial search.
     /// </summary>
-    /// <param name="result">The index to publish.</param>
-    /// <param name="cts">Cancels the run when the dialog is closed.</param>
-    private async Task PublishIndexAsync(VirtualTextureIndexResult result, CancellationTokenSource cts)
+    /// <param name="result">The index whose texture items are published.</param>
+    private void PublishIndex(VirtualTextureIndexResult result)
     {
-        var batch = await PublishFullBatchesAsync(result.entries, cts);
+        var textureItems  = new List<VirtualTextureItemViewModel>(result.entries.Count);
+        textureItems .AddRange(result.entries.Select(entry => new VirtualTextureItemViewModel(entry, _clipboardService)));
 
-        // The dialog may have been closed while the index was built: publishing the rows then
-        // would touch a disposed view model and start a preview for it.
-        if (cts.IsCancellationRequested) return;
-        PublishBatch(batch);
+        Textures = [.. textureItems ];
         ApplyInitialSearch();
         Log.Information("Virtual texture toolbox loaded {TextureCount} textures", Textures.Count);
-    }
-
-    /// <summary>
-    ///     Publishes every full batch, giving the dispatcher a turn between them so the dialog stays
-    ///     responsive while a large index is being added to the list.
-    /// </summary>
-    /// <param name="entries">The indexed textures, in package and tile set order.</param>
-    /// <param name="cts">Cancels the run when the dialog is closed.</param>
-    /// <returns>The rows of the last, not yet published batch.</returns>
-    private async Task<List<VirtualTextureItemViewModel>> PublishFullBatchesAsync(
-        IReadOnlyList<VirtualTextureEntry> entries, CancellationTokenSource cts)
-    {
-        var batch = new List<VirtualTextureItemViewModel>(IndexBatchSize);
-        foreach (var entry in entries)
-        {
-            if (cts.IsCancellationRequested) break;
-            batch.Add(new VirtualTextureItemViewModel(entry, _clipboardService));
-            if (batch.Count < IndexBatchSize) continue;
-            PublishBatch(batch);
-            // Publishing a full batch without awaiting can monopolize the dispatcher: give it a
-            // turn so the rows render and the dialog stays responsive.
-            await Task.Yield();
-        }
-
-        return batch;
     }
 
     /// <summary>
@@ -183,18 +154,6 @@ public partial class VirtualTextureDialogViewModel
     {
         if (!cts.IsCancellationRequested) IsIndexing = false;
         if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
-    }
-
-    /// <summary>
-    ///     Publishes one batch of indexed rows to the list and empties it for the next batch.
-    /// </summary>
-    /// <param name="batch">The rows to publish; cleared once they have been added.</param>
-    private void PublishBatch(List<VirtualTextureItemViewModel> batch)
-    {
-        // ObservableCollection must be touched on the UI thread and has no AddRange: rows are added
-        // in batches so a large tile set cannot monopolize the dispatcher.
-        foreach (var texture in batch) Textures.Add(texture);
-        batch.Clear();
     }
 
     /// <summary>

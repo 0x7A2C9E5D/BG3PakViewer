@@ -57,9 +57,11 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
 
     /// <summary>
     ///     The textures of the package, in index order; the list view filters them through
-    ///     <see cref="SearchFilterViewModel.ItemFilter" />.
+    ///     <see cref="SearchFilterViewModel.ItemFilter" />. The whole list is replaced once indexing
+    ///     finishes, so the view is notified once instead of once per texture.
     /// </summary>
-    public ObservableCollection<VirtualTextureItemViewModel> Textures { get; } = [];
+    [ObservableProperty]
+    public partial ObservableCollection<VirtualTextureItemViewModel> Textures { get; private set; } = [];
 
     /// <summary>
     ///     The texture whose preview is shown.

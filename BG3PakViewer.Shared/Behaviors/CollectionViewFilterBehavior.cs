@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,10 +14,13 @@ namespace BG3PakViewer.Shared.Behaviors;
 ///     plain <see cref="Predicate{T}" /> and stay testable without a WPF context, while the view still
 ///     gets the native filtering behavior (no collection rebuild, virtualization and the current
 ///     selection are preserved). With <see cref="AutoSelectFirstItem" />, a selection that the
-///     filter consumed is replaced by the first remaining item.
+///     filter consumed is replaced by the first remaining item. The filter is reapplied when the
+///     items source is replaced too, since that gives the control a new collection view.
 /// </summary>
 public class CollectionViewFilterBehavior : Behavior<ItemsControl>
 {
+    private DependencyPropertyDescriptor? _itemsSourceDescriptor;
+
     public static readonly DependencyProperty FilterProperty = DependencyProperty.Register(
         nameof(Filter), typeof(Predicate<object>), typeof(CollectionViewFilterBehavior),
         new PropertyMetadata(OnFilterChanged));
@@ -47,6 +51,9 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
 
     protected override void OnAttached()
     {
+        _itemsSourceDescriptor = DependencyPropertyDescriptor.FromProperty(
+            ItemsControl.ItemsSourceProperty, typeof(ItemsControl));
+        _itemsSourceDescriptor?.AddValueChanged(AssociatedObject, OnItemsSourceChanged);
         if (AssociatedObject.IsLoaded)
             ApplyFilter();
         else
@@ -56,10 +63,13 @@ public class CollectionViewFilterBehavior : Behavior<ItemsControl>
     protected override void OnDetaching()
     {
         AssociatedObject.Loaded -= OnAssociatedObjectLoaded;
+        _itemsSourceDescriptor?.RemoveValueChanged(AssociatedObject, OnItemsSourceChanged);
         if (GetView() is not { } view) return;
         view.Filter = null;
         view.Refresh();
     }
+
+    private void OnItemsSourceChanged(object? sender, EventArgs e) => ApplyFilter();
 
     /// <summary>
     ///     Applies the filter to the collection view.
