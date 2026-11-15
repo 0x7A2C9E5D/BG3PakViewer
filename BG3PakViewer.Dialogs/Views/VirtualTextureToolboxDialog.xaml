@@ -124,9 +124,9 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold"
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"
                                            TextTrimming="CharacterEllipsis" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding SourceFile}"
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Source}"
                                            Foreground="Gray" FontSize="11"
                                            TextTrimming="CharacterEllipsis" />
 

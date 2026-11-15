@@ -74,7 +74,7 @@ public partial class VirtualTextureToolboxDialogViewModel
                     }
 
                     var fileName = Path.Combine(folderName,
-                        $"{texture.DisplayName}_{VirtualTextureLayers.Names[layerIndex]}.dds");
+                        $"{texture.Name}_{VirtualTextureLayers.Names[layerIndex]}.dds");
                     files.Add(new PreviewExportFile(fileName,
                         () => OpenLayerAsync(texture.Entry, layerIndex, cancellationToken)));
                 }

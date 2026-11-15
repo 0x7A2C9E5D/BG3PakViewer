@@ -35,8 +35,8 @@ public partial class VirtualTextureToolboxDialogViewModel
     /// <returns><see langword="true" /> when the texture matches.</returns>
     private static bool Matches(VirtualTextureToolboxTextureViewModel texture, string searchText)
     {
-        return texture.DisplayName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-               texture.SourceFile.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+        return texture.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+               texture.Source.Contains(searchText, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

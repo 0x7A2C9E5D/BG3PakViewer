@@ -24,12 +24,12 @@ public partial class VirtualTextureToolboxTextureViewModel(
     /// <summary>
     ///     The name of the texture.
     /// </summary>
-    public string DisplayName => Entry.name;
+    public string Name => Entry.name;
 
     /// <summary>
     ///     The name of the tile set the texture belongs to.
     /// </summary>
-    public string SourceFile => Path.GetFileName(Entry.path);
+    public string Source => Path.GetFileName(Entry.path);
 
     /// <summary>
     ///     Whether the name has been copied to the clipboard.
@@ -43,7 +43,7 @@ public partial class VirtualTextureToolboxTextureViewModel(
     [RelayCommand]
     private async Task CopyNameAsync()
     {
-        if (!clipboardService.TrySetText(DisplayName)) return;
+        if (!clipboardService.TrySetText(Name)) return;
 
         IsCopied = true;
         await Task.Delay(1500);
