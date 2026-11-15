@@ -114,7 +114,7 @@
                                            PropertyName="Version" />
                     </sf:SfDataGrid.SortComparers>
                     <sf:SfDataGrid.Columns>
-                        <sf:GridTextColumn HeaderText="{I18N {x:Static l:LangKeys.Dependencies}}" MappingName="name" />
+                        <sf:GridTextColumn HeaderText="{I18N {x:Static l:LangKeys.Dependencies}}" MappingName="Name" />
                         <sf:GridTextColumn HeaderText="{I18N {x:Static l:LangKeys.Version}}" MappingName="Version"
                                            Width="200" />
                     </sf:SfDataGrid.Columns>
