@@ -15,26 +15,26 @@ public class CultureResolver : ICultureResolver
     private readonly ICultureMatcher _matcher;
 
     /// <summary>
-    ///     Initializes a new instance of the CultureResolver class
-    ///     Scans the application directory for culture-specific resource folders
-    ///     and builds a list of supported cultures
+    ///     Initializes a new instance of the CultureResolver class.
+    ///     Scans the application directory for culture-specific folders holding the satellite
+    ///     assembly and builds a list of supported cultures. Analyzer folders without it are ignored.
     /// </summary>
     public CultureResolver(ICultureMatcher cultureMatcher)
     {
         _matcher = cultureMatcher; // Inject the ICultureMatcher instance 
         // Initialize the list of supported cultures with English as the default culture
         var supportedCultures = new List<CultureInfo> { new("en") };
-        // Scan directories in the application's location to find additional supported cultures
-        // Each directory name is treated as a culture name (e.g., "zh-CN", "ru-RU", etc.)
+        // Scan the application's directories for satellite resource folders. Analyzers also create
+        // culture-named folders, but only the ones holding the localized assembly are real packs.
         foreach (var directory in Directory.GetDirectories(
                      Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!))
             try
             {
-                // Create a DirectoryInfo object to get the directory name
                 var directoryInfo = new DirectoryInfo(directory);
+                if (!File.Exists(Path.Combine(directoryInfo.FullName, "BG3PakViewer.Locales.resources.dll")))
+                    continue;
 
-                // Try to create a CultureInfo object from the directory name and add it to the list
-                // If the directory name is not a valid culture name, an exception will be thrown
+                // An invalid culture name throws and is ignored like any other non-resource folder.
                 supportedCultures.Add(new CultureInfo(directoryInfo.Name));
             }
             catch (Exception)
