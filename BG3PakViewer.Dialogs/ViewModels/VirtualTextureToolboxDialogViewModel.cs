@@ -15,8 +15,9 @@ namespace BG3PakViewer.Dialogs.ViewModels;
 /// <remarks>
 ///     The class is split by responsibility: this file holds the shared state, the constructor and
 ///     the disposal of the running operations; <c>Index</c> builds the list, <c>Search</c> filters it,
-///     <c>Selection</c> tracks the rows to export, <c>Preview</c> loads the selected layer and
-///     <c>Export</c> writes the files.
+///     <c>Selection</c> tracks the rows to export, <c>Preview</c> loads the selected layer,
+///     <c>Export</c> runs the export, <c>ExportFiles</c> builds the files it writes and
+///     <c>ExportDialogs</c> picks the folder and reports the result.
 /// </remarks>
 public partial class VirtualTextureToolboxDialogViewModel : SearchFilterViewModel, IModalDialogViewModel
 {
