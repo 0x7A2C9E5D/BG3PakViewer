@@ -8,6 +8,17 @@ using Serilog;
 namespace BG3PakViewer.Services;
 
 /// <summary>
+///     App diagnostics
+/// </summary>
+internal interface IAppDiagnosticsService
+{
+    /// <summary>
+    ///     Log startup info
+    /// </summary>
+    void LogStartupInfo();
+}
+
+/// <summary>
 ///     Application diagnostics
 /// </summary>
 /// <param name="appSettings"></param>

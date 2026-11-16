@@ -80,7 +80,8 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         try
         {
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
-            return await Task.Run(() => FindLevel(layer, _tileSet!.Textures[entry.index],cancellationToken) is not null,
+            return await Task.Run(
+                () => FindLevel(layer, _tileSet!.Textures[entry.index], cancellationToken) is not null,
                 cancellationToken).ConfigureAwait(false);
         }
         finally

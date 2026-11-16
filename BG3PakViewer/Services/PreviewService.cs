@@ -12,6 +12,19 @@ namespace BG3PakViewer.Services;
 /// <summary>
 ///     Preview service
 /// </summary>
+internal interface IPreviewService
+{
+    /// <summary>
+    ///     Create preview view model async
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    Task<object?> CreatePreviewViewModelAsync(PackageEntry node);
+}
+
+/// <summary>
+///     Preview service
+/// </summary>
 /// <param name="packageService"></param>
 /// <param name="previewHandlers"></param>
 internal class PreviewService(
