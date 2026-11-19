@@ -93,12 +93,10 @@ internal static class VirtualTextureTileRangeCalculator
     /// <returns>The tile range covering the span at that level, both ends inclusive.</returns>
     private static (Point Min, Point Max) ToLevelRange(Point origin, Size span, int level)
     {
-        // A tile of the coarser level covers lv tiles of level 0, so the span covers the coarser tiles that
-        // contain its first and last level-0 tiles. Rounding the start-up instead would drop the first
-        // column and row whenever the texture does not start on a tile boundary of that level.
         var lv = 1 << level;
-        return (new Point(origin.X / lv, origin.Y / lv),
-            new Point((origin.X + span.Width - 1) / lv, (origin.Y + span.Height - 1) / lv));
+        return (new Point(DivideCeiling(origin.X, lv), DivideCeiling(origin.Y, lv)),
+            new Point(DivideCeiling(origin.X + span.Width, lv) - 1,
+                DivideCeiling(origin.Y + span.Height, lv) - 1));
     }
 
     /// <summary>
