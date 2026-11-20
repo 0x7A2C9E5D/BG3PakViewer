@@ -57,6 +57,7 @@ public partial class Model3DPreviewViewModel : ObservableObject
     {
         ResetPreviewState();
         LoadMeshes(value);
+        PreviewCommand.Execute(null);
     }
 
     /// <summary>
