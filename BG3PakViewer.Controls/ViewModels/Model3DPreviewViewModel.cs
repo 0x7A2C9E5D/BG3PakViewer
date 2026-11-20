@@ -143,8 +143,9 @@ public partial class Model3DPreviewViewModel : ObservableObject
     ///     Zooms to the model's extents.
     /// </summary>
     [RelayCommand]
-    private static void Zoom()
+    private void Zoom()
     {
-        WeakReferenceMessenger.Default.Send(string.Empty, MessageTokens.ZoomExtents);
+        if (isPreviewing)
+            WeakReferenceMessenger.Default.Send(string.Empty, MessageTokens.ZoomExtents);
     }
 }
