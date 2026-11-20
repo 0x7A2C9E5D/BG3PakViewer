@@ -1,7 +1,7 @@
 using HelixToolkit;
 using LSLib.Granny.Model;
 
-namespace BG3PakViewer.Shared.Extensions;
+namespace BG3PakViewer.Controls.Extensions;
 
 /// <summary>
 ///     TriTopologyExtensions

@@ -2,12 +2,12 @@ using HelixToolkit.Maths;
 using HelixToolkit.SharpDX;
 using LSLib.Granny.Model;
 
-namespace BG3PakViewer.Shared.Extensions;
+namespace BG3PakViewer.Controls.Extensions;
 
 /// <summary>
 ///     MeshGeometryExtensions
 /// </summary>
-public static class MeshGeometryExtensions
+internal static class MeshGeometryExtensions
 {
     /// <summary>
     ///     Convert root to geometry 3d.

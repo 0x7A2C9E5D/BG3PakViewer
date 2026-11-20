@@ -2,12 +2,12 @@ using HelixToolkit.Maths;
 using HelixToolkit.SharpDX;
 using HelixToolkit.Wpf.SharpDX;
 
-namespace BG3PakViewer.Shared.Extensions;
+namespace BG3PakViewer.Controls.Extensions;
 
 /// <summary>
 ///     GeometryModel3DExtensions
 /// </summary>
-public static class GeometryModel3DExtensions
+internal static class GeometryModel3DExtensions
 {
     /// <summary>
     ///     Convert geometry to geometry model 3d.

@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace BG3PakViewer.Shared.Extensions;
+namespace BG3PakViewer.Controls.Extensions;
 
 /// <summary>
 ///     VectorConversionExtensions
