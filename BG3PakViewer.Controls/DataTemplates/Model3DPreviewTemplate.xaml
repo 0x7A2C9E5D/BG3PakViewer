@@ -12,6 +12,7 @@
     <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:Model3DPreviewViewModel}">
         <DataTemplate.Resources>
             <conv:MeshNameConverter x:Key="MeshNameConverter" />
+            <conv:Element3DToCollectionConverter x:Key="Element3DToCollectionConverter" />
         </DataTemplate.Resources>
         <Grid>
             <Grid.RowDefinitions>
@@ -54,7 +55,8 @@
                     <dx:DefaultEffectsManager />
                 </hx:Viewport3DX.EffectsManager>
                 <hx:DirectionalLight3D Color="White" />
-                <hx:ItemsModel3D ItemsSource="{Binding Models}">
+                <hx:ItemsModel3D
+                    ItemsSource="{Binding SelectedMeshGeometry, Converter={StaticResource Element3DToCollectionConverter}}">
                     <i:Interaction.Behaviors>
                         <b:ItemsModel3DBehavior />
                     </i:Interaction.Behaviors>
