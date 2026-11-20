@@ -91,6 +91,8 @@ internal partial class MainWindowViewModel
     /// <returns></returns>
     private static Dictionary<string, object?> BuildAboutData()
     {
+        // Plain DLL references (LSLib and its bundled dependencies) are recorded as "reference" in
+        // deps.json, so they need to be included alongside NuGet packages.
         return new Dictionary<string, object?>
         {
             { "Version", ThisAssembly.AssemblyInformationalVersion },
@@ -99,7 +101,7 @@ internal partial class MainWindowViewModel
             { "Runtime", RuntimeInformation.FrameworkDescription },
             {
                 "Package", DependencyContext.Default?
-                    .RuntimeLibraries.Where(x => x.Type == "package")
+                    .RuntimeLibraries.Where(x => x.Type is "package" or "reference")
                     .OrderBy(x => x.Name, StringComparer.InvariantCulture)
             }
         };
