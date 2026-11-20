@@ -1,9 +1,7 @@
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Shared.ViewModels;
 using HanumanInstitute.MvvmDialogs;
-using Syncfusion.Data.Extensions;
 
 namespace BG3PakViewer.Controls.ViewModels;
 
@@ -44,7 +42,7 @@ public partial class IconAtlasPreviewViewModel : DisposableViewModel
         _dialogService = dialogService;
         _appSettings = appSettings;
         _atlasName = atlasName;
-        Items = items.ToObservableCollection();
+        Items = items;
 
         // The selection is changed on the cells, so it has to be watched to keep the command state in
         // sync with the icons the user has picked.
@@ -55,7 +53,7 @@ public partial class IconAtlasPreviewViewModel : DisposableViewModel
     /// <summary>
     ///     The icons of the atlas that hold something visible, in the order of the atlas.
     /// </summary>
-    public ObservableCollection<IconAtlasCellViewModel> Items { get; }
+    public IEnumerable<IconAtlasCellViewModel> Items { get; }
 
     /// <summary>
     ///     Whether at least one icon is selected, which is what the export command handles.
