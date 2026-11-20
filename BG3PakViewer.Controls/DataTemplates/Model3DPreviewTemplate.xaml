@@ -7,8 +7,12 @@
                     xmlns:dx="clr-namespace:HelixToolkit.SharpDX;assembly=HelixToolkit.SharpDX"
                     xmlns:iwk="http://schemas.inkore.net/lib/ui/wpf"
                     xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
-                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared">
+                    xmlns:b="clr-namespace:BG3PakViewer.Shared.Behaviors;assembly=BG3PakViewer.Shared"
+                    xmlns:conv="clr-namespace:BG3PakViewer.Controls.Converters">
     <DataTemplate x:Key="ModelPreviewDataTemplateTemplate" DataType="{x:Type vm:Model3DPreviewViewModel}">
+        <DataTemplate.Resources>
+            <conv:MeshNameConverter x:Key="MeshNameConverter" />
+        </DataTemplate.Resources>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -19,7 +23,13 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <ComboBox ui:ControlHelper.Header="{I18N {x:Static l:LangKeys.Meshes}}" ItemsSource="{Binding Meshes}"
-                      SelectedIndex="{Binding SelectedModelIndex}" />
+                      SelectedItem="{Binding SelectedMesh}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource MeshNameConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <iwk:SimpleStackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
                                   VerticalAlignment="Bottom"
                                   Spacing="10">

@@ -21,19 +21,19 @@ public partial class Model3DPreviewViewModel : ObservableObject
     public partial Root? Model { get; set; }
 
     /// <summary>
-    ///     The list of meshes in the model.
+    ///     The list of meshes in the model, sorted by name for display.
     /// </summary>
     // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty]
-    public partial string[]? Meshes { get; private set; }
+    public partial Mesh[]? Meshes { get; private set; }
 
     /// <summary>
-    ///     The index of the currently selected mesh.
+    ///     The currently selected mesh.
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PreviewCommand))]
     // ReSharper disable once MemberCanBeMadeStatic.Global
-    public partial int SelectedModelIndex { get; set; } = -1;
+    public partial Mesh? SelectedMesh { get; set; }
 
     /// <summary>
     ///     The 3D models to display in the viewport.
@@ -49,21 +49,22 @@ public partial class Model3DPreviewViewModel : ObservableObject
     {
         if (value?.Meshes == null)
         {
-            SelectedModelIndex = -1;
+            Meshes = null;
+            SelectedMesh = null;
             return;
         }
 
-        Meshes = [.. value.Meshes.Select(x => x.Name)];
-        SelectedModelIndex = Meshes.Any() ? 0 : -1;
+        Meshes = [.. value.Meshes.OrderBy(x => x.Name, StringComparer.InvariantCulture)];
+        SelectedMesh = Meshes.FirstOrDefault();
     }
 
     /// <summary>
-    ///     Can preview if a model is selected.
+    ///     Can preview if a mesh is selected.
     /// </summary>
     /// <returns></returns>
     private bool CanPreview()
     {
-        return SelectedModelIndex != -1;
+        return SelectedMesh != null;
     }
 
     /// <summary>
@@ -72,8 +73,10 @@ public partial class Model3DPreviewViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanPreview))]
     private void Preview()
     {
+        var root = Model!;
+        var index = root.Meshes!.IndexOf(SelectedMesh!);
         Models.Clear();
-        Models.Add(Model!.ToGeometry3D(SelectedModelIndex).ToGeometryModel3D());
+        Models.Add(root.ToGeometry3D(index).ToGeometryModel3D());
     }
 
     /// <summary>
