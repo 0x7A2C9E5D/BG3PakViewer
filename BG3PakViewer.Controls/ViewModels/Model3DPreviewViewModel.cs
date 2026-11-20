@@ -1,5 +1,6 @@
 using BG3PakViewer.Controls.Extensions;
 using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -12,21 +13,27 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// <summary>
 ///     View model for previewing 3D models.
 /// </summary>
-public partial class Model3DPreviewViewModel : ObservableObject
+public partial class Model3DPreviewViewModel : DisposableViewModel
 {
     /// <summary>
     ///     Geometry cache for the loaded model's sub-meshes, keyed by mesh.
     /// </summary>
     private readonly Dictionary<Mesh, MeshGeometry3D> GeometryCache = [];
 
-    private bool isPreviewing;
+    public Model3DPreviewViewModel(Root modelRoot)
+    {
+        ModelRoot = modelRoot;
+        LoadMeshes(modelRoot);
+        UpdateSelectedMeshGeometry();
+    }
 
     /// <summary>
     ///     The root of the loaded model to preview.
     /// </summary>
     [ObservableProperty]
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    public partial Root? ModelRoot { get; set; }
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Local
+    // ReSharper disable once MemberCanBeMadeStatic.Local
+    private partial Root ModelRoot { get; set; }
 
     /// <summary>
     ///     The list of meshes in the model, sorted by name for display.
@@ -49,25 +56,12 @@ public partial class Model3DPreviewViewModel : ObservableObject
     public partial MeshGeometryModel3D? SelectedMeshGeometry { get; set; }
 
     /// <summary>
-    ///     Resets the view model when the model root is changed.
-    /// </summary>
-    /// <param name="value"></param>
-    partial void OnModelRootChanged(Root? value)
-    {
-        ResetPreviewState();
-        LoadMeshes(value);
-        if (SelectedMesh is null || value is null) return;
-        isPreviewing = true;
-        UpdateSelectedMeshGeometry();
-    }
-
-    /// <summary>
     ///     Loads the model root's meshes and selects the first one.
     /// </summary>
     /// <param name="value"></param>
-    private void LoadMeshes(Root? value)
+    private void LoadMeshes(Root value)
     {
-        if (value?.Meshes == null)
+        if (value.Meshes == null)
         {
             Meshes = null;
             SelectedMesh = null;
@@ -79,23 +73,13 @@ public partial class Model3DPreviewViewModel : ObservableObject
     }
 
     /// <summary>
-    ///     Clears cached geometry and resets the preview state.
-    /// </summary>
-    private void ResetPreviewState()
-    {
-        isPreviewing = false;
-        GeometryCache.Clear();
-        SelectedMeshGeometry = null;
-    }
-
-    /// <summary>
-    ///     Updates the selected sub-mesh model when the selected mesh changes after preview started.
+    ///     Updates the selected sub-mesh model when the selected mesh changes.
     /// </summary>
     /// <param name="value"></param>
     // ReSharper disable once UnusedParameterInPartialMethod
     partial void OnSelectedMeshChanged(Mesh? value)
     {
-        if (isPreviewing) UpdateSelectedMeshGeometry();
+        UpdateSelectedMeshGeometry();
     }
 
     /// <summary>
@@ -105,7 +89,7 @@ public partial class Model3DPreviewViewModel : ObservableObject
     {
         if (GeometryCache.TryGetValue(mesh, out var geometry))
             return geometry.ToGeometryModel3D();
-        var root = ModelRoot!;
+        var root = ModelRoot;
         var index = root.Meshes!.IndexOf(mesh);
         geometry = root.ToGeometry3D(index);
         GeometryCache[mesh] = geometry;
@@ -126,9 +110,23 @@ public partial class Model3DPreviewViewModel : ObservableObject
     ///     Zooms to the model's extents.
     /// </summary>
     [RelayCommand]
-    private void Zoom()
+    private static void Zoom()
     {
-        if (isPreviewing)
-            WeakReferenceMessenger.Default.Send(string.Empty, MessageTokens.ZoomExtents);
+        WeakReferenceMessenger.Default.Send(string.Empty, MessageTokens.ZoomExtents);
+    }
+
+    /// <summary>
+    ///     Detaches the viewport model before it is released with the view model.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (!disposing) return;
+
+        var geometry = SelectedMeshGeometry;
+        SelectedMeshGeometry = null;
+        geometry?.Dispose();
+        GeometryCache.Clear();
     }
 }
