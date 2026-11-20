@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;
 
-namespace BG3PakViewer.Shared.Behaviors;
+namespace BG3PakViewer.Controls.Behaviors;
 
 /// <summary>
 ///     Viewport3DX behavior

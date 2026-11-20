@@ -2,7 +2,7 @@
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;
 
-namespace BG3PakViewer.Shared.Behaviors;
+namespace BG3PakViewer.Controls.Behaviors;
 
 /// <summary>
 ///     ItemsModel3D behavior
