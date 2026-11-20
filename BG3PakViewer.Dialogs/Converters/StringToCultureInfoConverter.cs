@@ -2,12 +2,12 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace BG3PakViewer.Shared.Converters;
+namespace BG3PakViewer.Dialogs.Converters;
 
 /// <summary>
 ///     Converter for string to culture info.
 /// </summary>
-public class StringToCultureInfoConverter : IValueConverter
+internal class StringToCultureInfoConverter : IValueConverter
 {
     /// <summary>
     ///     Convert string to culture info.

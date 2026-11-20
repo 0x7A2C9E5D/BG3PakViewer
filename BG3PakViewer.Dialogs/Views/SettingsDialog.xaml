@@ -8,7 +8,7 @@
         xmlns:l="clr-namespace:BG3PakViewer.Locales;assembly=BG3PakViewer.Locales"
         xmlns:vm="clr-namespace:BG3PakViewer.Dialogs.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:c="clr-namespace:BG3PakViewer.Shared.Converters;assembly=BG3PakViewer.Shared"
+        xmlns:c="clr-namespace:BG3PakViewer.Dialogs.Converters"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
