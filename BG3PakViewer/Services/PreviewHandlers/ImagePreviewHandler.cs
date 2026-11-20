@@ -34,7 +34,7 @@ internal class ImagePreviewHandler(
         var image = await ImageLoader.LoadAsync(stream, node.FileExtension);
         if (image is null) return null;
         if (!IconAtlasDetector.IsIconAtlas(node.FullPath))
-            return new ImagePreviewViewModel { Preview = image };
+            return new ImagePreviewViewModel(image);
         var name = Path.GetFileNameWithoutExtension(node.Name);
         var cells = await Task.Run(() => SliceAtlas(image));
         var viewModel = new IconAtlasPreviewViewModel(name, cells, exportService, dialogService, appSettings);
