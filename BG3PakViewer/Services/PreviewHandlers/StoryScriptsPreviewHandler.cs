@@ -45,6 +45,6 @@ public class StoryScriptsPreviewHandler(
         // Only the parse runs off the UI thread: the view model is built by the thread that awaits
         // this call, because it fills the bound goal list and starts the first decompile.
         var story = await Task.Run(() => new StoryReader().Read(stream));
-        return new StoryScriptsPreviewViewModel(appSettings, exportService, dialogService) { Story = story };
+        return new StoryScriptsPreviewViewModel(story, appSettings, exportService, dialogService);
     }
 }

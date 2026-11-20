@@ -25,7 +25,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     private readonly IPreviewExportService _exportService;
 
     /// <summary>
-    ///     Identifies to decompile that owns <see cref="Scripts" />: a decompile that was started for
+    ///     Identifies to decompile that owns <see cref="Scripts" />: a decompiled that was started for
     ///     an earlier selection compares against it and drops its own result.
     /// </summary>
     private int _scriptsVersion;
@@ -33,16 +33,23 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     /// <summary>
     ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel" /> class.
     /// </summary>
+    /// <param name="story">The story to preview.</param>
     /// <param name="appSettings">The settings holding the default export directory.</param>
     /// <param name="exportService">The service the export commands hand the decompiled scripts to.</param>
     /// <param name="dialogService">The service used to ask for the target folder and report the result.</param>
-    public StoryScriptsPreviewViewModel(IAppSettings appSettings,
+    public StoryScriptsPreviewViewModel(Story story,
+        IAppSettings appSettings,
         IPreviewExportService exportService,
         IDialogService dialogService)
     {
         _appSettings = appSettings;
         _exportService = exportService;
         _dialogService = dialogService;
+        Story = story;
+
+        foreach (var goal in story.Goals.Values)
+            Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
+        SelectedGoal = Goals.FirstOrDefault();
     }
 
     /// <summary>
@@ -50,7 +57,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     /// </summary>
     [ObservableProperty]
     // ReSharper disable once UnusedMember.Global
-    public partial Story? Story { get; set; }
+    public partial Story Story { get; private set; }
 
     /// <summary>
     ///     The currently selected goal.
@@ -80,19 +87,6 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
         base.OnPropertyChanged(e);
         if (e.PropertyName == nameof(ItemFilter))
             ExportSearchResultsCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
-    ///     Resets the view model when the story is changed.
-    /// </summary>
-    /// <param name="value"></param>
-    partial void OnStoryChanged(Story? value)
-    {
-        Goals.Clear();
-        if (value is not null)
-            foreach (var goal in value.Goals.Values)
-                Goals.Add(new StoryScriptsGoalItemViewModel { Goal = goal });
-        SelectedGoal = Goals.FirstOrDefault();
     }
 
     /// <summary>
