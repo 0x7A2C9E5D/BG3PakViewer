@@ -25,7 +25,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     private readonly IPreviewExportService _exportService;
 
     /// <summary>
-    ///     Identifies the decompile that owns <see cref="Scripts" />: a decompile that was started for
+    ///     Identifies to decompile that owns <see cref="Scripts" />: a decompile that was started for
     ///     an earlier selection compares against it and drops its own result.
     /// </summary>
     private int _scriptsVersion;
