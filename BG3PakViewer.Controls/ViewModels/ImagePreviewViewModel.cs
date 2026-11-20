@@ -20,7 +20,8 @@ public partial class ImagePreviewViewModel : DisposableViewModel
     ///     display; this view model owns it and releases it when disposed.
     /// </summary>
     [ObservableProperty]
-    public partial Image? Preview { get; private set; }
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Local
+    public partial Image Preview { get; private set; }
 
     /// <summary>
     ///     Detaches the image from the view before it is released.
@@ -30,10 +31,6 @@ public partial class ImagePreviewViewModel : DisposableViewModel
     {
         base.Dispose(disposing);
         if (!disposing) return;
-
-        // Detach the view from the image before releasing it.
-        var image = Preview;
-        Preview = null;
-        image?.Dispose();
+        Preview.Dispose();
     }
 }
