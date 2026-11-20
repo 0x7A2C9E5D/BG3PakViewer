@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Miscellaneous;
 using BG3PakViewer.Models;
+using BG3PakViewer.Shared.Miscellaneous;
 using Serilog;
 
 namespace BG3PakViewer.Services;

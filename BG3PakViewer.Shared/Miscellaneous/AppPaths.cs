@@ -1,4 +1,6 @@
-﻿namespace BG3PakViewer.Miscellaneous;
+﻿using System.IO;
+
+namespace BG3PakViewer.Shared.Miscellaneous;
 
 /// <summary>
 ///     AppPaths

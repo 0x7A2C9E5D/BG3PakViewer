@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
-using BG3PakViewer.Miscellaneous;
+using BG3PakViewer.Shared.Miscellaneous;
 using Serilog;
 
 namespace BG3PakViewer.Services;

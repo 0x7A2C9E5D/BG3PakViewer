@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Dialogs.Models;
-using BG3PakViewer.Miscellaneous;
+using BG3PakViewer.Shared.Miscellaneous;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;

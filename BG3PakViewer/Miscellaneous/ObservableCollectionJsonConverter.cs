@@ -8,7 +8,7 @@ namespace BG3PakViewer.Miscellaneous;
 ///     ObservableCollectionJsonConverter
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class ObservableCollectionJsonConverter<T> : JsonConverter<ObservableCollection<T>>
+internal class ObservableCollectionJsonConverter<T> : JsonConverter<ObservableCollection<T>>
 {
     /// <summary>
     ///     Reads the JSON data.

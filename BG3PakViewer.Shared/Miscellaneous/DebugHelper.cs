@@ -1,4 +1,4 @@
-﻿namespace BG3PakViewer.Miscellaneous;
+﻿namespace BG3PakViewer.Shared.Miscellaneous;
 
 /// <summary>
 ///     DebugHelper
