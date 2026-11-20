@@ -8,6 +8,15 @@ namespace BG3PakViewer.Controls.ViewModels;
 public partial class NotSupportedPreviewViewModel : ObservableObject
 {
     /// <summary>
+    ///     Initializes a new instance of the <see cref="NotSupportedPreviewViewModel" /> class.
+    /// </summary>
+    /// <param name="helpTextKey">The resource key of the help text to display.</param>
+    public NotSupportedPreviewViewModel(string helpTextKey)
+    {
+        HelpTextKey = helpTextKey;
+    }
+
+    /// <summary>
     ///     The resource key of the help text to display.
     /// </summary>
     /// <remarks>
@@ -15,6 +24,5 @@ public partial class NotSupportedPreviewViewModel : ObservableObject
     ///     follows a language change while the preview stays open.
     /// </remarks>
     [ObservableProperty]
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
-    public partial string? HelpTextKey { get; set; }
+    public partial string HelpTextKey { get; private set; }
 }

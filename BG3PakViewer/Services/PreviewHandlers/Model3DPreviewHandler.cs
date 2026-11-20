@@ -42,9 +42,6 @@ internal class Model3DPreviewHandler(IPackageService packageService) : IPreviewH
         if (root.Meshes != null && root.Meshes.Count != 0)
             return new Model3DPreviewViewModel(root);
         Log.Warning("Model has no meshes");
-        return new NotSupportedPreviewViewModel
-        {
-            HelpTextKey = LangKeys.ModelMissingMeshes
-        };
+        return new NotSupportedPreviewViewModel(LangKeys.ModelMissingMeshes);
     }
 }

@@ -8,8 +8,17 @@ namespace BG3PakViewer.Controls.ViewModels;
 public partial class PlainTextPreviewViewModel : ObservableObject
 {
     /// <summary>
+    ///     Initializes a new instance of the <see cref="PlainTextPreviewViewModel" /> class.
+    /// </summary>
+    /// <param name="text">The text to display.</param>
+    public PlainTextPreviewViewModel(string text)
+    {
+        Text = text;
+    }
+
+    /// <summary>
     ///     The text to display.
     /// </summary>
     [ObservableProperty]
-    public partial string? Text { get; set; }
+    public partial string Text { get; private set; }
 }

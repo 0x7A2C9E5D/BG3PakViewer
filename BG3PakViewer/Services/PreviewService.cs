@@ -117,6 +117,6 @@ internal class PreviewService(
     /// <returns></returns>
     private static NotSupportedPreviewViewModel CreateNotSupportedViewModel(string helpTextKey)
     {
-        return new NotSupportedPreviewViewModel { HelpTextKey = helpTextKey };
+        return new NotSupportedPreviewViewModel(helpTextKey);
     }
 }
