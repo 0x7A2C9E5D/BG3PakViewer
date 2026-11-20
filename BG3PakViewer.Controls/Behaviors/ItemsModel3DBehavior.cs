@@ -7,7 +7,7 @@ namespace BG3PakViewer.Controls.Behaviors;
 /// <summary>
 ///     ItemsModel3D behavior
 /// </summary>
-public class ItemsModel3DBehavior : Behavior<ItemsModel3D>
+internal class ItemsModel3DBehavior : Behavior<ItemsModel3D>
 {
     protected override void OnAttached()
     {

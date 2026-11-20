@@ -9,7 +9,7 @@ namespace BG3PakViewer.Controls.Behaviors;
 /// <summary>
 ///     Viewport3DX behavior
 /// </summary>
-public class Viewport3DxBehavior : Behavior<Viewport3DX>, IRecipient<string>
+internal class Viewport3DxBehavior : Behavior<Viewport3DX>, IRecipient<string>
 {
     private bool _disposed;
 
