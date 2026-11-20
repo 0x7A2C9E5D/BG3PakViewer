@@ -39,7 +39,6 @@ public partial class Model3DPreviewViewModel : ObservableObject
     ///     The currently selected mesh.
     /// </summary>
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PreviewCommand))]
     // ReSharper disable once MemberCanBeMadeStatic.Global
     public partial Mesh? SelectedMesh { get; set; }
 
@@ -57,7 +56,9 @@ public partial class Model3DPreviewViewModel : ObservableObject
     {
         ResetPreviewState();
         LoadMeshes(value);
-        PreviewCommand.Execute(null);
+        if (SelectedMesh is null || value is null) return;
+        isPreviewing = true;
+        UpdateSelectedMeshGeometry();
     }
 
     /// <summary>
@@ -95,25 +96,6 @@ public partial class Model3DPreviewViewModel : ObservableObject
     partial void OnSelectedMeshChanged(Mesh? value)
     {
         if (isPreviewing) UpdateSelectedMeshGeometry();
-    }
-
-    /// <summary>
-    ///     Can preview if a mesh is selected and a model root is loaded.
-    /// </summary>
-    /// <returns></returns>
-    private bool CanPreview()
-    {
-        return SelectedMesh != null && ModelRoot != null;
-    }
-
-    /// <summary>
-    ///     Starts previewing the selected mesh, building its geometry on first use.
-    /// </summary>
-    [RelayCommand(CanExecute = nameof(CanPreview))]
-    private void Preview()
-    {
-        isPreviewing = true;
-        UpdateSelectedMeshGeometry();
     }
 
     /// <summary>
