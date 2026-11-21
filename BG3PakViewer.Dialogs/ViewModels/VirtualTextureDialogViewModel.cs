@@ -27,6 +27,7 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
     private readonly IVirtualTextureExtractor _extractor;
+    private readonly VirtualTextureDialogState _state;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="VirtualTextureDialogViewModel" /> class.
@@ -51,6 +52,7 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
         _appSettings = appSettings;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
+        _state = new VirtualTextureDialogState(OnStateChanged);
         InitialSearch = initialSearch;
         _ = IndexAsync();
     }
@@ -94,7 +96,7 @@ public partial class VirtualTextureDialogViewModel : SearchFilterViewModel, IMod
     /// <summary>
     ///     Whether indexing, previewing or exporting is in progress.
     /// </summary>
-    public bool IsBusy => IsIndexing || IsExporting || IsPreviewing;
+    public bool IsBusy => _state.IsBusy;
 
     /// <summary>
     ///     The dialog result; the dialog is closed with the close button.

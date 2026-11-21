@@ -22,12 +22,7 @@ public partial class VirtualTextureDialogViewModel
     /// <summary>
     ///     Whether the package's virtual textures are being indexed.
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBusy))]
-    [NotifyCanExecuteChangedFor(nameof(ExportAllCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ExportSearchResultsCommand))]
-    public partial bool IsIndexing { get; private set; }
+    public bool IsIndexing => _state.IsIndexing;
 
     /// <summary>
     ///     The number of tile sets indexed so far.
@@ -72,7 +67,7 @@ public partial class VirtualTextureDialogViewModel
     {
         var cts = new CancellationTokenSource();
         _indexCancellation = cts;
-        IsIndexing = true;
+        _state.BeginIndex();
         return cts;
     }
 
@@ -154,7 +149,7 @@ public partial class VirtualTextureDialogViewModel
     /// <param name="cts">The cancellation source of the run that ended.</param>
     private void EndIndex(CancellationTokenSource cts)
     {
-        if (!cts.IsCancellationRequested) IsIndexing = false;
+        _state.EndIndex(cts.IsCancellationRequested);
         if (ReferenceEquals(_indexCancellation, cts)) _indexCancellation = null;
     }
 

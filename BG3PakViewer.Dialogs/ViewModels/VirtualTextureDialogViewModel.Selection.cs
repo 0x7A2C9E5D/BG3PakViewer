@@ -12,7 +12,6 @@ public partial class VirtualTextureDialogViewModel
 {
     private List<VirtualTextureItemViewModel> _selectedTextures = [];
     private CancellationTokenSource? _selectionCheckCancellation;
-    private bool _selectionHasData;
 
     /// <summary>
     ///     The number of textures selected in the list.
@@ -39,15 +38,16 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     private async Task CheckSelectionAsync()
     {
-        var cts = await BeginSelectionCheckAsync();
+        var (cts, run) = await BeginSelectionCheckAsync();
+        var hasData = false;
 
         try
         {
-            _selectionHasData = await TryAnySelectedLayerHasDataAsync(cts.Token);
+            hasData = await TryAnySelectedLayerHasDataAsync(cts.Token);
         }
         finally
         {
-            EndSelectionCheck(cts);
+            _state.EndSelectionCheck(run, hasData);
         }
     }
 
@@ -80,31 +80,16 @@ public partial class VirtualTextureDialogViewModel
     ///     Starts a new selection check, cancelling the one it replaces, and keeps the export disabled
     ///     until the check proves the selection holds data.
     /// </summary>
-    /// <returns>The cancellation source of the new check.</returns>
-    private async Task<CancellationTokenSource> BeginSelectionCheckAsync()
+    /// <returns>The cancellation source and the generation of the new check.</returns>
+    private async Task<(CancellationTokenSource Cts, int Run)> BeginSelectionCheckAsync()
     {
         if (_selectionCheckCancellation is not null) await _selectionCheckCancellation.CancelAsync();
 
         var cts = new CancellationTokenSource();
         _selectionCheckCancellation = cts;
-        // Off until the check proves otherwise: the command must not offer an export that has
-        // nothing to write.
-        _selectionHasData = false;
-        ExportSelectedCommand.NotifyCanExecuteChanged();
-
-        return cts;
-    }
-
-    /// <summary>
-    ///     Re-enables the export for the check that finished, unless a newer check replaced it already.
-    /// </summary>
-    /// <param name="cts">The cancellation source of the check that finished.</param>
-    private void EndSelectionCheck(CancellationTokenSource cts)
-    {
-        if (!ReferenceEquals(_selectionCheckCancellation, cts)) return;
-
-        ExportSelectedCommand.NotifyCanExecuteChanged();
-        _selectionCheckCancellation = null;
+        // Checking keeps the export off until the check proves the selection has data.
+        var run = _state.BeginSelectionCheck();
+        return (cts, run);
     }
 
     /// <summary>

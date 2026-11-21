@@ -31,9 +31,7 @@ public partial class VirtualTextureDialogViewModel
     /// <summary>
     ///     Whether the preview of the selected texture is being loaded.
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBusy))]
-    public partial bool IsPreviewing { get; private set; }
+    public bool IsPreviewing => _state.IsPreviewing;
 
     /// <summary>
     ///     Loads the preview when the selection changes.
@@ -68,7 +66,8 @@ public partial class VirtualTextureDialogViewModel
         }
 
         var layer = SelectedLayerIndex;
-        var cts = await BeginPreviewAsync();
+        var (cts, run) = await BeginPreviewAsync();
+        var phase = VirtualTextureDialogState.PreviewPhase.Empty;
 
         try
         {
@@ -85,6 +84,7 @@ public partial class VirtualTextureDialogViewModel
             {
                 Preview = null;
                 PreviewStatusKey = LangKeys.TitleNoData;
+                phase = VirtualTextureDialogState.PreviewPhase.Empty;
                 return;
             }
 
@@ -102,6 +102,9 @@ public partial class VirtualTextureDialogViewModel
             }
 
             Preview = image;
+            phase = image is null
+                ? VirtualTextureDialogState.PreviewPhase.Failed
+                : VirtualTextureDialogState.PreviewPhase.Loaded;
             PreviewStatusKey = image is null
                 ? LangKeys.TitleDecodeFailed
                 : $"{image.Width} × {image.Height}";
@@ -114,28 +117,29 @@ public partial class VirtualTextureDialogViewModel
         {
             Preview = null;
             PreviewStatusKey = LangKeys.TitlePreviewFailed;
+            phase = VirtualTextureDialogState.PreviewPhase.Failed;
             Log.Error(ex, "Failed to preview virtual texture: {Name}", row.Name);
         }
         finally
         {
-            if (!cts.IsCancellationRequested) IsPreviewing = false;
+            _state.EndPreview(run, phase);
         }
     }
 
     /// <summary>
     ///     Cancels the running load, if any, and starts a new one.
     /// </summary>
-    /// <returns>The cancellation source of the new load.</returns>
-    private async Task<CancellationTokenSource> BeginPreviewAsync()
+    /// <returns>The cancellation source and the generation of the new load.</returns>
+    private async Task<(CancellationTokenSource Cts, int Run)> BeginPreviewAsync()
     {
         if (_previewCancellation is not null)
             await _previewCancellation.CancelAsync();
         var cts = new CancellationTokenSource();
         _previewCancellation = cts;
-        IsPreviewing = true;
+        var run = _state.BeginPreview();
         PreviewStatusKey = LangKeys.TitleExtracting;
         PreviewProgress = 0;
-        return cts;
+        return (cts, run);
     }
 
     /// <summary>
@@ -148,7 +152,7 @@ public partial class VirtualTextureDialogViewModel
         _previewCancellation = null;
         Preview = null;
         PreviewStatusKey = string.Empty;
-        IsPreviewing = false;
+        _state.ClearPreview();
         PreviewProgress = 0;
     }
 

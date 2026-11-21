@@ -1,10 +1,8 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 
@@ -21,22 +19,14 @@ public partial class VirtualTextureDialogViewModel
     /// <summary>
     ///     Whether the selected textures are being exported.
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsBusy))]
-    [NotifyPropertyChangedFor(nameof(CanClose))]
-    [NotifyPropertyChangedFor(nameof(ExportButtonText))]
-    [NotifyCanExecuteChangedFor(nameof(ExportAllCommand))]
-    [NotifyCanExecuteChangedFor(nameof(CancelExportCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
-    [NotifyCanExecuteChangedFor(nameof(ExportSearchResultsCommand))]
-    public partial bool IsExporting { get; private set; }
+    public bool IsExporting => _state.IsExporting;
 
     /// <summary>
     ///     Whether the toolbox window may be closed. The window's <c>WindowCloseGuardBehavior</c> binds
     ///     this through its CanClose attached property, so a running export cannot be orphaned by
     ///     closing the window.
     /// </summary>
-    public bool CanClose => !IsExporting;
+    public bool CanClose => _state.CanClose;
 
     /// <summary>
     ///     The export button label: the localized "Export selected" text normally, and the localized
@@ -50,23 +40,15 @@ public partial class VirtualTextureDialogViewModel
         : Strings.ExportSelectedTextures;
 
     /// <summary>
-    ///     Keeps the search-results export command in sync with the textures the current search matches.
-    /// </summary>
-    /// <param name="e">The property that changed.</param>
-    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-        if (e.PropertyName == nameof(ItemFilter))
-            ExportSearchResultsCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
     ///     Whether there is a selected texture to export, and at least one layer of it holds data.
     /// </summary>
     /// <returns></returns>
     private bool CanExportSelected()
     {
-        return !IsIndexing && !IsExporting && SelectedCount > 0 && _selectionHasData;
+        return !IsIndexing && !IsExporting &&
+               _state.Export != VirtualTextureDialogState.ExportPhase.PickingFolder &&
+               SelectedCount > 0 &&
+               _state.Selection == VirtualTextureDialogState.SelectionPhase.HasData;
     }
 
     /// <summary>
@@ -75,7 +57,10 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     private bool CanExportSearchResults()
     {
-        if (IsIndexing || IsExporting || Textures.Count == 0) return false;
+        if (IsIndexing || IsExporting ||
+            _state.Export == VirtualTextureDialogState.ExportPhase.PickingFolder ||
+            _state.Search != VirtualTextureDialogState.SearchPhase.Filtered ||
+            Textures.Count == 0) return false;
         var filter = ItemFilter;
         return filter is not null && Textures.Any(texture => filter(texture));
     }
@@ -85,7 +70,9 @@ public partial class VirtualTextureDialogViewModel
     /// </summary>
     private bool CanExportAll()
     {
-        return !IsIndexing && !IsExporting && Textures.Count > 0;
+        return !IsIndexing && !IsExporting &&
+               _state.Export != VirtualTextureDialogState.ExportPhase.PickingFolder &&
+               Textures.Count > 0;
     }
 
     /// <summary>
@@ -142,7 +129,17 @@ public partial class VirtualTextureDialogViewModel
     {
         if (textures.Count == 0) return;
 
-        var folder = await PickFolderAsync();
+        _state.BeginFolderPick();
+        string? folder = null;
+        try
+        {
+            folder = await PickFolderAsync();
+        }
+        finally
+        {
+            if (folder is null) _state.CancelFolderPick();
+        }
+
         if (folder is null)
         {
             Log.Information("Virtual texture toolbox export folder selection was cancelled");
@@ -150,20 +147,21 @@ public partial class VirtualTextureDialogViewModel
         }
 
         _exportCancellation?.Dispose();
-        _exportCancellation = new CancellationTokenSource();
-        IsExporting = true;
+        var cts = new CancellationTokenSource();
+        _exportCancellation = cts;
+        _state.BeginExport();
         ExportProgress = 0;
 
         try
         {
-            await WriteAndReportAsync(folder, textures, _exportCancellation.Token);
+            await WriteAndReportAsync(folder, textures, cts.Token);
         }
         finally
         {
-            IsExporting = false;
+            _state.EndExport();
             ExportProgress = 0;
-            _exportCancellation?.Dispose();
-            _exportCancellation = null;
+            cts.Dispose();
+            if (ReferenceEquals(_exportCancellation, cts)) _exportCancellation = null;
         }
     }
 
