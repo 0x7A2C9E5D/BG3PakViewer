@@ -27,7 +27,7 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     metadata and a gate only, so it needs no disposal.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
-public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog, IAsyncDisposable
+public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
 {
     /// <summary>
     ///     Serializes indexing and cache reads. Closing the toolbox cancels its index without waiting
@@ -45,16 +45,6 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     while holding <see cref="_gate" />.
     /// </summary>
     private CachedIndex? _cache;
-
-    private bool _disposed;
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_disposed) return;
-        _gate.Dispose();
-        await packageService.DisposeAsync().ConfigureAwait(false);
-        _disposed = true;
-    }
 
     /// <summary>
     ///     Returns the package's virtual texture index, building it only when it is missing or stale.

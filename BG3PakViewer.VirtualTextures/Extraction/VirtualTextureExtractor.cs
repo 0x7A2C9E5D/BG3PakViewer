@@ -18,14 +18,15 @@ namespace BG3PakViewer.VirtualTextures.Extraction;
 ///     another package is loaded, or when <see cref="DisposeAsync" /> runs at shutdown. The package
 ///     version is part of the cache key: two packages may hold a tile set at the same path.
 /// </remarks>
-public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
+public sealed class VirtualTextureExtractor : IVirtualTextureExtractor
 {
+    private readonly TileCompressor _compressor = new();
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly IPackageService _packageService;
     private long _cachedPackageVersion = -1;
     private bool _disposed;
-    private VirtualTextureTileSetSlot? _tileSet;
     private string? _tileSetPath;
+    private VirtualTextureTileSetSlot? _tileSetSlot;
 
     /// <summary>
     ///     Creates the extractor for the loaded package.
@@ -55,8 +56,13 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         try
         {
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
-            var tileProgress = CreateProgress(progress);
-            return await Task.Run(() => TranscodeLayer(entry, layer, tileProgress, cancellationToken),
+            var cached = _tileSetSlot!;
+            var tileSet = cached.TileSet;
+            var texture = cached.Textures[entry.index];
+            var pageFiles = new VirtualTexturePageFileSource(_packageService, tileSet, entry.path);
+            var transcoder = new VirtualTextureLayerTranscoder(tileSet, _compressor, pageFiles.OpenAsync);
+            return await Task.Run(
+                    () => transcoder.TranscodeAsync(texture, layer, progress, cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -80,8 +86,11 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         try
         {
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
+            var cached = _tileSetSlot!;
+            var texture = cached.Textures[entry.index];
             return await Task.Run(
-                () => FindLevel(layer, _tileSet!.Textures[entry.index], cancellationToken) is not null,
+                () => VirtualTextureTileRangeCalculator.FindLevel(cached.TileSet, layer, texture,
+                    cancellationToken) is not null,
                 cancellationToken).ConfigureAwait(false);
         }
         finally
@@ -105,7 +114,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         try
         {
             await EnsureCachedTileSetAsync(entry.path).ConfigureAwait(false);
-            var layers = _tileSet!.TileSet.TileSetLayers;
+            var layers = _tileSetSlot!.TileSet.TileSetLayers;
             if (layer < 0 || layer >= layers.Length) return VirtualTextureLayerKind.Color;
             return layers[layer].DataType switch
             {
@@ -143,13 +152,13 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     /// <summary>
     ///     Parses the tile set at <paramref name="path" /> when the cache holds a different one, or
     ///     when the loaded package has changed. The caller must hold <see cref="_gate" />; on return
-    ///     <see cref="_tileSet" /> and <see cref="_tileSetPath" /> both describe that tile set.
+    ///     <see cref="_tileSetSlot" /> and <see cref="_tileSetPath" /> both describe that tile set.
     /// </summary>
     /// <param name="path">The package path of the tile set.</param>
     private async Task EnsureCachedTileSetAsync(string path)
     {
         var version = _packageService.PackageVersion;
-        if (_tileSet is not null && _tileSetPath == path && _cachedPackageVersion == version) return;
+        if (_tileSetSlot is not null && _tileSetPath == path && _cachedPackageVersion == version) return;
 
         // Forget the cached tile set before the new one is parsed. If parsing throws, an empty cache
         // lets the next call try again; keeping the tile set that was just disposed would make every
@@ -157,7 +166,7 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
         // different package is treated like a different tile set even when the path is the same.
         await ReleaseCachedTileSetAsync().ConfigureAwait(false);
         var stream = await OpenPackageFileAsync(path).ConfigureAwait(false);
-        _tileSet = await Task.Run(() => new VirtualTextureTileSetSlot(stream), CancellationToken.None)
+        _tileSetSlot = await Task.Run(() => new VirtualTextureTileSetSlot(stream), CancellationToken.None)
             .ConfigureAwait(false);
         _tileSetPath = path;
         _cachedPackageVersion = version;
@@ -170,23 +179,11 @@ public sealed partial class VirtualTextureExtractor : IVirtualTextureExtractor
     /// <returns>A task that completes when the tile set is released.</returns>
     private async Task ReleaseCachedTileSetAsync()
     {
-        if (_tileSet is not null)
-            await _tileSet.DisposeAsync().ConfigureAwait(false);
-        _tileSet = null;
+        if (_tileSetSlot is not null)
+            await _tileSetSlot.DisposeAsync().ConfigureAwait(false);
+        _tileSetSlot = null;
         _tileSetPath = null;
         _cachedPackageVersion = -1;
-    }
-
-    /// <summary>
-    ///     Opens the GTP page file with the given name, which sits next to the cached tile set.
-    /// </summary>
-    /// <param name="fileName">The name of the page file, as the tile set records it.</param>
-    /// <returns>The content of the page file.</returns>
-    private Task<Stream> OpenPageFileAsync(string fileName)
-    {
-        var directory = Path.GetDirectoryName(_tileSetPath)?.Replace('\\', '/');
-        var path = string.IsNullOrEmpty(directory) ? fileName : $"{directory}/{fileName}";
-        return OpenPackageFileAsync(path);
     }
 
     /// <summary>

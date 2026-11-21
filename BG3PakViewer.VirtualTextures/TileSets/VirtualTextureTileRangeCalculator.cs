@@ -114,6 +114,30 @@ internal static class VirtualTextureTileRangeCalculator
     }
 
     /// <summary>
+    ///     Finds the first mip level whose tile region exists in a layer.
+    /// </summary>
+    /// <param name="tileSet">The tile set the texture belongs to.</param>
+    /// <param name="layer">The layer index.</param>
+    /// <param name="tex">The texture to look up.</param>
+    /// <param name="ct">Cancels the search.</param>
+    /// <returns>The level and its region, or <see langword="null" /> when no level holds the layer.</returns>
+    public static (int Level, Point Min, Point Max)? FindLevel(VirtualTileSet tileSet, int layer,
+        FourCCTextureMeta tex, CancellationToken ct = default)
+    {
+        for (var level = 0; level < tileSet.TileSetLevels.Length; level++)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (GetTileRange(tileSet, level, tex) is not { } range) continue;
+            var (min, max) = range;
+            if (!RegionExists(tileSet, level, layer, min, max)) continue;
+
+            return (level, min, max);
+        }
+
+        return null;
+    }
+
+    /// <summary>
     ///     Checks if a region exists in a given layer.
     /// </summary>
     /// <param name="tileSet">The tile set the region is looked up in.</param>
