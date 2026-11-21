@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using BG3PakViewer.VirtualTextures.PageFiles;
 using BG3PakViewer.VirtualTextures.TileSets;
@@ -124,6 +125,8 @@ internal sealed class VirtualTextureLayerTranscoder(
     ///     A reporter that turns the written tile rows into percent, or <see langword="null" /> when the
     ///     caller does not want progress.
     /// </returns>
+    [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance",
+        Justification = "'Progress<T>' implements 'IProgress<T>.Report' explicitly, so the caller needs the interface.")]
     private static IProgress<(int Done, int Total)>? CreateProgress(IProgress<double>? progress)
     {
         if (progress is null) return null;
