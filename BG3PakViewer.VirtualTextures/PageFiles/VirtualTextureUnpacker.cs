@@ -15,9 +15,9 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
 /// <param name="decoder">The decoder the chunks are decompressed with; the caller owns it.</param>
 internal sealed class VirtualTextureUnpacker(
-    int pageSize,
     VirtualTextureChunkDecoder decoder,
-    Func<int, Task<Stream>> pageStreamProvider)
+    Func<int, Task<Stream>> pageStreamProvider,
+    int pageSize)
     : IAsyncDisposable
 {
     private readonly VirtualTextureTilePageSlot _tilePageFiles = new(pageSize, pageStreamProvider);

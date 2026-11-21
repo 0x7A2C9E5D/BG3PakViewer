@@ -43,8 +43,8 @@ internal sealed class VirtualTextureLayerTranscoder(
         var size = VirtualTextureTileRangeCalculator.GetTileRangeSize(min, max);
         var stream = new MemoryStream();
         var tile = tileSet.TileSize;
-        var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, compressor);
-        await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize, decoder, pageFileProvider);
+        var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, compressor, tile);
+        await using var unpacker = new VirtualTextureUnpacker(decoder, pageFileProvider, tileSet.PageSize);
         await using var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, stream);
         await writer.WriteHeader().ConfigureAwait(false);
         // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
