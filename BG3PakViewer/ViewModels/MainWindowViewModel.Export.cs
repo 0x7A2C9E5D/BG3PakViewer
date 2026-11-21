@@ -2,7 +2,6 @@ using System.IO;
 using BG3PakViewer.Locales;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HanumanInstitute.MvvmDialogs;
 using HanumanInstitute.MvvmDialogs.FileSystem;
@@ -18,21 +17,19 @@ namespace BG3PakViewer.ViewModels;
 internal partial class MainWindowViewModel
 {
     /// <summary>
-    ///     Is exporting. Observable so the export button can switch its label to the cancel text and
-    ///     stay clickable while a run is in progress.
+    ///     Whether a file or folder export is writing files. Observable so the export button can
+    ///     switch its label to the cancel text and stay clickable while a run is in progress.
     /// </summary>
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
-    public partial bool IsExporting { get; private set; }
+    public bool IsExporting => _state.IsExporting;
 
     /// <summary>
-    ///     The export command runs with something selected, or without a selection while an export is
-    ///     running: in that case the button cancels the export instead of starting one.
+    ///     The export command runs with something selected, or while an export is running: in that
+    ///     case the button cancels the export instead of starting one.
     /// </summary>
     /// <returns>Whether the command may run.</returns>
     private bool CanExport()
     {
-        return IsExporting || SelectedItem is not null;
+        return _state.CanRunExportCommand;
     }
 
     /// <summary>
@@ -45,7 +42,7 @@ internal partial class MainWindowViewModel
     [RelayCommand(AllowConcurrentExecutions = true, CanExecute = nameof(CanExport))]
     private async Task ExportAsync(object toSave)
     {
-        if (IsExporting)
+        if (_state.IsExporting)
         {
             await CancelExportFromButtonAsync();
             return;
@@ -57,25 +54,56 @@ internal partial class MainWindowViewModel
         _exportCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         try
         {
+            _state.BeginTargetPick();
+            string? target = null;
+            try
+            {
+                target = await PickTargetAsync(node);
+            }
+            finally
+            {
+                if (target is null) _state.CancelTargetPick();
+            }
+
+            if (target is null) return;
+
             if (node.IsFolder)
-                await ExportFolderAsync(node);
+            {
+                _state.BeginFolderExport();
+                await ExportFolderAsync(node, target);
+            }
             else
-                await ExportFileAsync(node);
+            {
+                _state.BeginFileExport();
+                await ExportFileAsync(node, target);
+            }
         }
         finally
         {
-            IsExporting = false;
+            if (_state.IsExporting) _state.EndExport();
             _exportCompletion?.TrySetResult();
             _exportCompletion = null;
         }
     }
 
     /// <summary>
-    ///     Export file async
+    ///     Asks the user where the selected file or folder should be written.
     /// </summary>
-    /// <param name="node"></param>
-    private async Task ExportFileAsync(PackageEntry node)
+    /// <param name="node">The node to export.</param>
+    /// <returns>The chosen path, or <see langword="null" /> when the user cancels.</returns>
+    private async Task<string?> PickTargetAsync(PackageEntry node)
     {
+        if (node.IsFolder)
+        {
+            var storageFolder = await _dialogService.ShowOpenFolderDialogAsync(this, new OpenFolderDialogSettings
+            {
+                SuggestedStartLocation = GetDefaultExportLocation()
+            });
+            if (storageFolder != null) return storageFolder.LocalPath;
+            Log.Information("Export folder selection was cancelled");
+            return null;
+        }
+
         var filters = _exportService.GetExportFilters(node.Name, node.FileExtension);
         var storageFile = await _dialogService.ShowSaveFileDialogAsync(this, new SaveFileDialogSettings
         {
@@ -86,41 +114,36 @@ internal partial class MainWindowViewModel
                 : Path.GetFileName(node.Name),
             SuggestedStartLocation = GetDefaultExportLocation()
         });
-        if (storageFile == null)
-        {
-            Log.Information("Export file selection was cancelled");
-            return;
-        }
+        if (storageFile != null) return storageFile.LocalPath;
+        Log.Information("Export file selection was cancelled");
+        return null;
+    }
 
-        IsExporting = true;
-        var success = await _exportService.ExportFileAsync(node, storageFile.LocalPath);
+    /// <summary>
+    ///     Export file async
+    /// </summary>
+    /// <param name="node">The file to export.</param>
+    /// <param name="target">Where the file is written.</param>
+    private async Task ExportFileAsync(PackageEntry node, string target)
+    {
+        var success = await _exportService.ExportFileAsync(node, target);
         await HandleExportResultAsync(success);
     }
 
     /// <summary>
     ///     Export folder async
     /// </summary>
-    /// <param name="node"></param>
-    private async Task ExportFolderAsync(PackageEntry node)
+    /// <param name="node">The folder to export.</param>
+    /// <param name="target">Where the folder is written.</param>
+    private async Task ExportFolderAsync(PackageEntry node, string target)
     {
-        var storageFolder = await _dialogService.ShowOpenFolderDialogAsync(this, new OpenFolderDialogSettings
-        {
-            SuggestedStartLocation = GetDefaultExportLocation()
-        });
-        if (storageFolder == null)
-        {
-            Log.Information("Export folder selection was cancelled");
-            return;
-        }
-
         // The source belongs to this export only. Clearing it in the finally keeps the "a cancellable
         // export is running" check honest for the next attempt to open a package.
         _cancellationTokenSource = new CancellationTokenSource();
         try
         {
-            IsExporting = true;
             var success =
-                await _exportService.ExportFolderAsync(node, storageFolder.LocalPath, _cancellationTokenSource.Token);
+                await _exportService.ExportFolderAsync(node, target, _cancellationTokenSource.Token);
             if (_cancellationTokenSource.IsCancellationRequested)
                 Log.Information("Folder export was cancelled");
             else
@@ -172,11 +195,11 @@ internal partial class MainWindowViewModel
     /// <returns></returns>
     private async Task<bool> HandleIsExportingFiles()
     {
-        if (!IsExporting) return true;
+        if (!_state.IsExporting) return true;
 
         // Only a folder export has a cancellation source. A single file export cannot be canceled,
         // so offering to cancel it would promise something the export cannot do.
-        if (_cancellationTokenSource is null)
+        if (!_state.CanCancelExport)
         {
             await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportNotCancellableMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning);
@@ -198,7 +221,7 @@ internal partial class MainWindowViewModel
     {
         // Only a folder export has a cancellation source. A single file export cannot be canceled,
         // so the button cannot promise a cancellation the export cannot perform.
-        if (_cancellationTokenSource is null)
+        if (!_state.CanCancelExport)
         {
             await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.ExportNotCancellableMessage,
                 Strings.CancelExportOperationCaption, MessageBoxIcon.Warning);

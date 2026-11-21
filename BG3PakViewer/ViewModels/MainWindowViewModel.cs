@@ -19,7 +19,8 @@ namespace BG3PakViewer.ViewModels;
 ///     <c>.Package</c> (archive lifetime and file opening), <c>.Search</c> (search commands),
 ///     <c>.Export</c> (file and folder export), <c>.Preview</c> (preview pane),
 ///     <c>.VirtualTexture</c> (the virtual texture toolbox), <c>.Dialogs</c> (modal dialogs and about
-///     data) and <c>.Window</c> (load and external links).
+///     data), <c>.Window</c> (load and external links) and <c>.State</c> (the state machine and the
+///     notifications it raises).
 /// </remarks>
 internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, IAsyncDisposable
 {
@@ -33,10 +34,10 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     private readonly IRecentFilesService _recentFilesService;
     private readonly ISettingsManagerService _settingsManagerService;
     private readonly IShellOpenService _shellOpenService;
+    private readonly MainWindowState _state;
     private readonly IVirtualTextureCatalog _virtualTextureCatalog;
     private readonly IVirtualTextureExtractor _virtualTextureExtractor;
     private CancellationTokenSource? _cancellationTokenSource;
-    private Task? _currentLoadTask;
     private bool _disposeStarted;
     private bool _disposed;
     private TaskCompletionSource? _exportCompletion;
@@ -83,6 +84,7 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
         _virtualTextureExtractor = virtualTextureExtractor;
         _previewExportService = previewExportService;
         _clipboardService = clipboardService;
+        _state = new MainWindowState(OnStateChanged);
         RegisterFileMessageHandlers();
     }
 

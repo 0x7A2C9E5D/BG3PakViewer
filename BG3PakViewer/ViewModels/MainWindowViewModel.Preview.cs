@@ -9,7 +9,6 @@ namespace BG3PakViewer.ViewModels;
 /// </summary>
 internal partial class MainWindowViewModel
 {
-    private bool _isPreviewing;
     private PackageEntry? _pendingPreviewNode;
 
     /// <summary>
@@ -27,16 +26,16 @@ internal partial class MainWindowViewModel
             return;
 
         _pendingPreviewNode = node;
-        if (_isPreviewing) return;
+        if (_state.IsBuildingPreview) return;
 
-        _isPreviewing = true;
+        _state.BeginPreview();
         try
         {
             await ShowPendingPreviewAsync();
         }
         finally
         {
-            _isPreviewing = false;
+            _state.EndPreview(PreviewVm is not null);
         }
     }
 
@@ -89,6 +88,7 @@ internal partial class MainWindowViewModel
     {
         await DisposePreviewAsync(PreviewVm);
         PreviewVm = null;
+        _state.ClearPreview();
     }
 
     /// <summary>

@@ -28,8 +28,8 @@ internal partial class MainWindowViewModel
     ///     selection re-evaluate through its own change notification.
     /// </summary>
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     // ReSharper disable once MemberCanBeMadeStatic.Local
+    // ReSharper disable once UnusedMember.Local
     private partial PackageEntry? SelectedItem { get; set; }
 
     /// <summary>
@@ -104,29 +104,40 @@ internal partial class MainWindowViewModel
     private async Task ValidateAndOpenPackageAsync(string path)
     {
         if (!await HandleIsExportingFiles()) return;
-        if (_currentLoadTask is { IsCompleted: false })
+        if (_state.IsLoading)
         {
             _pendingOpenPath = path;
             Log.Information("Opening {Path} deferred until the current load finishes", path);
             return;
         }
 
-        _currentLoadTask = OpenAndDrainDeferredAsync(path);
-        await _currentLoadTask;
+        _state.BeginLoad();
+        var success = false;
+        try
+        {
+            success = await OpenAndDrainDeferredAsync(path);
+        }
+        finally
+        {
+            _state.EndLoad(success);
+        }
     }
 
     /// <summary>
     ///     Opens the given package, then the newest request that arrived while it was loading.
     /// </summary>
     /// <param name="path">The package file to open.</param>
-    private async Task OpenAndDrainDeferredAsync(string path)
+    /// <returns>Whether the last package of the drain loaded successfully.</returns>
+    private async Task<bool> OpenAndDrainDeferredAsync(string path)
     {
-        await OpenPackageAsync(path);
+        var success = await OpenPackageAsync(path);
         while (_pendingOpenPath is { } next)
         {
             _pendingOpenPath = null;
-            await OpenPackageAsync(next);
+            success = await OpenPackageAsync(next);
         }
+
+        return success;
     }
 
     /// <summary>
@@ -136,7 +147,8 @@ internal partial class MainWindowViewModel
     ///     Only the tree is published from the UI thread; loading and building it happen on a worker.
     /// </remarks>
     /// <param name="path">The package file to open.</param>
-    private async Task OpenPackageAsync(string path)
+    /// <returns>Whether the package loaded and its tree was published.</returns>
+    private async Task<bool> OpenPackageAsync(string path)
     {
         Log.Information("Opening PAK file: {Path}", path);
         // The preview view model notifies the UI (its export command raises CanExecuteChanged),
@@ -155,13 +167,13 @@ internal partial class MainWindowViewModel
             PackageTree = tree;
             _recentFilesService.AddOrUpdateRecentFile(path);
             IsVirtualTexturePackage = await DetectVirtualTexturePackageAsync().ConfigureAwait(false);
+            return true;
         }
-        else
-        {
-            await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
-                Strings.OpenFileFailedCaption,
-                MessageBoxIcon.Error);
-        }
+
+        await _dialogService.ShowMessageBoxNotifyAsync(this, Strings.OpenFileFailedMessage,
+            Strings.OpenFileFailedCaption,
+            MessageBoxIcon.Error);
+        return false;
     }
 
     /// <summary>
