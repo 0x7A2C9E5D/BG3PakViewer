@@ -38,7 +38,7 @@ internal static class VirtualTextureTileRangeCalculator
     ///     The first and last tile column and row covering the texture at that level, both ends inclusive
     ///     and clipped to the tile grid of the level; <see langword="null" /> when no tile remains.
     /// </returns>
-    public static (Point Min, Point Max)? GetTileRange(VirtualTileSet tileSet, int level,
+    private static (Point Min, Point Max)? GetTileRange(VirtualTileSet tileSet, int level,
         FourCCTextureMeta tex)
     {
         var (origin, span) = GetTextureTileSpan(tileSet, tex);
@@ -149,7 +149,7 @@ internal static class VirtualTextureTileRangeCalculator
     ///     <see langword="true" /> when every tile of the region exists in that layer; otherwise
     ///     <see langword="false" />, meaning the layer leaves part of the region empty.
     /// </returns>
-    public static bool RegionExists(VirtualTileSet tileSet, int level, int layer, Point min, Point max)
+    private static bool RegionExists(VirtualTileSet tileSet, int level, int layer, Point min, Point max)
     {
         GTSFlatTileInfo tile = default;
         for (var y = min.Y; y <= max.Y; y++)
