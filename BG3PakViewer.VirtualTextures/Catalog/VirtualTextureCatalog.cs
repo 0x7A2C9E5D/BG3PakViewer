@@ -23,19 +23,18 @@ namespace BG3PakViewer.VirtualTextures.Catalog;
 ///     until the loaded package changes: a cached failure would keep its missing textures and its
 ///     warning alive for every later caller, so an incomplete result is returned without being cached
 ///     and the next caller rebuilds it. An index built while the package is replaced is discarded
-///     instead of cached, because the old package's streams are already released. The catalog holds
-///     metadata and a gate only, so it needs no disposal.
+///     instead of cached, because the old package's streams are already released. The catalog owns only
+///     its gate: it is released by <see cref="Dispose" /> when the application shuts down, while the
+///     loaded package belongs to the composition root.
 /// </remarks>
 /// <param name="packageService">The loaded package the tile sets are read from.</param>
-public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog
+public sealed class VirtualTextureCatalog(IPackageService packageService) : IVirtualTextureCatalog, IDisposable
 {
     /// <summary>
     ///     Serializes indexing and cache reads. Closing the toolbox cancels its index without waiting
     ///     for it, so reopening the toolbox can start a second run while the first is still reading a
     ///     tile set; the package is not safe for concurrent reads. The gate also publishes the cache
     ///     written on a worker to the next caller, so no volatile reads or double checks are needed.
-    ///     Only metadata is held: the gate never allocates a wait handle, so the catalog needs no
-    ///     disposal.
     /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
 
@@ -45,6 +44,23 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     ///     while holding <see cref="_gate" />.
     /// </summary>
     private CachedIndex? _cache;
+
+    private bool _disposed;
+
+    /// <summary>
+    ///     Waits for a running index to release the gate, then releases the gate itself. The loaded
+    ///     package is not owned by the catalog, so it is not released here.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        // Acquire and release the gate first: an index that is still finishing must release this same
+        // semaphore before it is disposed, otherwise its Release hits a disposed object.
+        _gate.Wait();
+        _gate.Release();
+        _gate.Dispose();
+    }
 
     /// <summary>
     ///     Returns the package's virtual texture index, building it only when it is missing or stale.

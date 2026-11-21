@@ -136,16 +136,16 @@ public sealed class VirtualTextureExtractor : IVirtualTextureExtractor
     /// </summary>
     public async ValueTask DisposeAsync()
     {
+        if (_disposed) return;
+        await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (_disposed) return;
-            await _gate.WaitAsync().ConfigureAwait(false);
             await ReleaseCachedTileSetAsync().ConfigureAwait(false);
+            _disposed = true;
         }
         finally
         {
             _gate.Release();
-            _disposed = true;
         }
     }
 

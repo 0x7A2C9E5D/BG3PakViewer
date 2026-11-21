@@ -37,6 +37,7 @@ public sealed partial class App : IDisposable
     private bool _disposedValue;
     private bool _initialized;
     private ObserverBase<LogEvent>? _logObserver;
+    private ServiceProvider? _services;
 
     /// <summary>
     ///     Releases the log observer.
@@ -49,9 +50,9 @@ public sealed partial class App : IDisposable
     /// <summary>
     ///     Configure services
     /// </summary>
-    private static void ConfigureServices()
+    private void ConfigureServices()
     {
-        Ioc.Default.ConfigureServices(new ServiceCollection()
+        _services = new ServiceCollection()
             .AddSingleton<ICultureMatcher, CultureMatcher>()
             .AddSingleton<ICultureResolver, CultureResolver>()
             .AddSingleton<ILogAccessService, LogAccessService>()
@@ -90,7 +91,8 @@ public sealed partial class App : IDisposable
             .AddSingleton<IVirtualTextureExtractor, VirtualTextureExtractor>()
             .AddSingleton<IMessenger, WeakReferenceMessenger>()
             .AddSingleton<MainWindowViewModel>()
-            .BuildServiceProvider());
+            .BuildServiceProvider();
+        Ioc.Default.ConfigureServices(_services);
     }
 
     /// <summary>
@@ -342,14 +344,18 @@ public sealed partial class App : IDisposable
     }
 
     /// <summary>
-    ///     Releases the log observer; the main window view model is
-    ///     released by the window itself, which can await the virtual texture index.
+    ///     Releases the container and the log observer; the main window view model is released by the
+    ///     window itself, which can await the virtual texture index.
     /// </summary>
     /// <param name="disposing">Whether managed resources are released.</param>
     private void Dispose(bool disposing)
     {
         if (_disposedValue) return;
-        if (disposing) _logObserver?.Dispose();
+        if (disposing)
+        {
+            _services?.Dispose();
+            _logObserver?.Dispose();
+        }
 
         _disposedValue = true;
     }
