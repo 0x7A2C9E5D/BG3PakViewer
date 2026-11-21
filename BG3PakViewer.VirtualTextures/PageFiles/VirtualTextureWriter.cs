@@ -12,8 +12,10 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 /// <remarks>
 ///     The writer owns neither the output stream nor the tiles it stitches: the caller supplies the
 ///     stream and reads each tile through a callback, so the writer only turns a band of tile images into
-///     DDS bytes. The tile size it is given includes the border every tile carries; the border is trimmed
-///     here, so every consumer of a tile size uses the same convention.
+///     DDS bytes. The only resource it owns is the <see cref="BinaryWriter" /> it wraps, which is released
+///     with <see cref="DisposeAsync" /> while the caller's stream stays open. The tile size it is given
+///     includes the border every tile carries; the border is trimmed here, so every consumer of a tile
+///     size uses the same convention.
 /// </remarks>
 internal sealed class VirtualTextureWriter : IAsyncDisposable
 {
@@ -46,6 +48,11 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     /// </summary>
     public int RowByteCount => _strip.Data.Length;
 
+    /// <summary>
+    ///     Releases the writer it wraps. The output stream was handed over with <c>leaveOpen</c>, so it
+    ///     stays open for the caller.
+    /// </summary>
+    /// <returns>A task that completes when the writer is released.</returns>
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
