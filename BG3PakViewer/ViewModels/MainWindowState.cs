@@ -41,6 +41,7 @@ internal sealed class MainWindowState
     /// </summary>
     public enum LoadPhase
     {
+        Empty,
         Loading,
         Loaded,
         Failed
