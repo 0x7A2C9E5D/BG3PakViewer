@@ -19,7 +19,7 @@ public partial class StoryScriptsPreviewViewModel
     /// <returns></returns>
     private bool CanExportSelected()
     {
-        return SelectedGoal is not null;
+        return _state is { CanExport: true, HasSelection: true };
     }
 
     /// <summary>
@@ -29,7 +29,18 @@ public partial class StoryScriptsPreviewViewModel
     /// <returns></returns>
     private bool CanExportSearchResults()
     {
-        return ItemFilter is { } filter && Goals.Any(item => filter(item));
+        if (!_state.CanExport || _state.Search != StoryScriptsPreviewState.SearchPhase.Filtered) return false;
+        var filter = ItemFilter;
+        return filter is not null && Goals.Any(item => filter(item));
+    }
+
+    /// <summary>
+    ///     Whether an export may start; the story always has goals to export.
+    /// </summary>
+    /// <returns></returns>
+    private bool CanExportAll()
+    {
+        return _state.CanExport;
     }
 
     /// <summary>
@@ -57,7 +68,7 @@ public partial class StoryScriptsPreviewViewModel
     /// <summary>
     ///     Exports the decompiled script of every goal of the story.
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExportAll))]
     private Task ExportAllAsync()
     {
         return ExportAsync([.. Goals.Select(ToExportFile)]);
@@ -69,12 +80,29 @@ public partial class StoryScriptsPreviewViewModel
     /// <param name="files">The files to export.</param>
     private async Task ExportAsync(IReadOnlyList<PreviewExportFile> files)
     {
-        var folder = await PickFolderAsync();
-        if (folder is not null)
+        _state.BeginFolderPick();
+        string? folder = null;
+        try
+        {
+            folder = await PickFolderAsync();
+        }
+        finally
+        {
+            if (folder is null) _state.CancelFolderPick();
+        }
+
+        if (folder is null)
+        {
+            Log.Information("Preview export folder selection was cancelled");
+            return;
+        }
+
+        _state.BeginExport();
+        try
         {
             var exported = 0;
             var failures = new List<PreviewExportResult>();
-            await foreach (var result in _exportService.ExportAsync(folder, files))
+            await foreach (var result in _exportService.ExportAsync(folder, files, CancellationToken.None))
                 if (result.Success)
                     exported++;
                 else
@@ -82,9 +110,9 @@ public partial class StoryScriptsPreviewViewModel
 
             await ReportExportResultAsync(exported, files.Count, failures, folder);
         }
-        else
+        finally
         {
-            Log.Information("Preview export folder selection was cancelled");
+            _state.EndExport();
         }
     }
 

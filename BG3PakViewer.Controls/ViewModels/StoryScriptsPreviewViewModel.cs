@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Shared.ViewModels;
@@ -16,19 +15,20 @@ namespace BG3PakViewer.Controls.ViewModels;
 /// </summary>
 /// <remarks>
 ///     The class is split by responsibility: this file holds the goals and the decompiled script
-///     of the selected one, the sibling files export the scripts and talk to the user.
+///     of the selected one; <c>State</c> tracks the phases of the tool and translates their changes
+///     into notifications, the sibling files export the scripts and talk to the user.
 /// </remarks>
 public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
 {
     private readonly IAppSettings _appSettings;
     private readonly IDialogService _dialogService;
     private readonly IPreviewExportService _exportService;
+    private readonly StoryScriptsPreviewState _state;
 
     /// <summary>
-    ///     Identifies to decompile that owns <see cref="Scripts" />: a decompiled that was started for
-    ///     an earlier selection compares against it and drops its own result.
+    ///     Cancels to decompile of a goal that a newer selection replaced.
     /// </summary>
-    private int _scriptsVersion;
+    private CancellationTokenSource? _scriptsCancellation;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StoryScriptsPreviewViewModel" /> class.
@@ -45,6 +45,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
         _appSettings = appSettings;
         _exportService = exportService;
         _dialogService = dialogService;
+        _state = new StoryScriptsPreviewState(OnStateChanged);
         Story = story;
 
         foreach (var goal in story.Goals.Values)
@@ -63,7 +64,6 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     ///     The currently selected goal.
     /// </summary>
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ExportSelectedCommand))]
     public partial StoryScriptsGoalItemViewModel? SelectedGoal { get; set; }
 
     /// <summary>
@@ -79,15 +79,10 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     public partial string? Scripts { get; private set; }
 
     /// <summary>
-    ///     Keeps the search-results export command in sync with the goals the current search matches.
+    ///     Whether the script of the selected goal is being decompiled.
     /// </summary>
-    /// <param name="e"></param>
-    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-    {
-        base.OnPropertyChanged(e);
-        if (e.PropertyName == nameof(ItemFilter))
-            ExportSearchResultsCommand.NotifyCanExecuteChanged();
-    }
+    // ReSharper disable once UnusedMember.Global
+    public bool IsPreviewing => _state.IsPreviewing;
 
     /// <summary>
     ///     Builds the goal filter for the given search text.
@@ -108,6 +103,7 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     /// <param name="value"></param>
     partial void OnSelectedGoalChanged(StoryScriptsGoalItemViewModel? value)
     {
+        _state.SetSelection(value is not null);
         _ = ShowScriptsAsync(value);
     }
 
@@ -120,28 +116,63 @@ public partial class StoryScriptsPreviewViewModel : SearchFilterViewModel
     ///     This runs from a property change, i.e. on the UI thread, and it awaits without
     ///     <c>ConfigureAwait(false)</c>, so <see cref="Scripts" /> is written back on the UI thread the
     ///     preview is bound to. Decompiling a goal takes long enough for a later selection to overtake
-    ///     it, so a result is only shown while no newer decompile was requested.
+    ///     it, so the previous decompile is canceled and the state drops its result.
     /// </remarks>
     private async Task ShowScriptsAsync(StoryScriptsGoalItemViewModel? goal)
     {
-        var version = ++_scriptsVersion;
+        var previous = _scriptsCancellation;
+        _scriptsCancellation = null;
+
         if (goal?.Goal is not { } target)
         {
+            _state.ClearPreview();
             Scripts = null;
+            if (previous is not null) await previous.CancelAsync();
             return;
         }
 
+        var cts = new CancellationTokenSource();
+        _scriptsCancellation = cts;
+        var run = _state.BeginPreview();
         var maxLines = _appSettings.MaxPreviewLines;
+
+        if (previous is not null) await previous.CancelAsync();
+
+        var phase = StoryScriptsPreviewState.PreviewPhase.Empty;
         try
         {
-            var scripts = await Task.Run(() => DecompileScript(target, maxLines));
-            if (version == _scriptsVersion) Scripts = scripts;
+            var scripts = await Task.Run(() => DecompileScript(target, maxLines), cts.Token);
+            if (cts.IsCancellationRequested) return;
+
+            Scripts = scripts;
+            phase = StoryScriptsPreviewState.PreviewPhase.Loaded;
+        }
+        catch (OperationCanceledException)
+        {
+            // A newer selection replaced this decompile; the state drops the result.
         }
         catch (Exception ex)
         {
+            if (cts.IsCancellationRequested) return;
             Log.Error(ex, "Failed to decompile the script of goal: {Goal}", target.Name);
-            if (version == _scriptsVersion) Scripts = null;
+            Scripts = null;
+            phase = StoryScriptsPreviewState.PreviewPhase.Failed;
         }
+        finally
+        {
+            _state.EndPreview(run, phase);
+        }
+    }
+
+    /// <summary>
+    ///     Cancels the running decompile when the preview is released.
+    /// </summary>
+    /// <param name="disposing">Whether managed resources are released.</param>
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (!disposing) return;
+        _ = _scriptsCancellation?.CancelAsync();
     }
 
     /// <summary>
