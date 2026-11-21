@@ -53,16 +53,6 @@ internal partial class MainWindowViewModel
     }
 
     /// <summary>
-    ///     Tracks the tree selection.
-    /// </summary>
-    /// <param name="item">The newly selected tree item, or null when the selection was cleared.</param>
-    [RelayCommand]
-    private void SelectItem(object? item)
-    {
-        _state.SetSelection(item is PackageEntry);
-    }
-
-    /// <summary>
     ///     Open pak async
     /// </summary>
     [RelayCommand]

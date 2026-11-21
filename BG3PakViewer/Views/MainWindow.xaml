@@ -222,8 +222,6 @@
                 </TreeView.ItemTemplate>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectedItemChanged">
-                        <i:InvokeCommandAction Command="{Binding SelectItemCommand, Mode=OneWay}"
-                                               CommandParameter="{Binding SelectedItem, ElementName=TreeView, Mode=OneWay}" />
                         <i:InvokeCommandAction Command="{Binding PreviewCommand, Mode=OneWay}"
                                                CommandParameter="{Binding SelectedItem, ElementName=TreeView, Mode=OneWay}" />
                     </i:EventTrigger>
