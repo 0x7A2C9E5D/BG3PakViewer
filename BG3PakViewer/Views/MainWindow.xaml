@@ -128,9 +128,11 @@
                         <Style TargetType="ui:AppBarButton">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsExporting}" Value="True">
+                                    <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
                                     <Setter Property="Label" Value="{I18N {x:Static l:LangKeys.CancelExportBtnLabel}}" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsExporting}" Value="False">
+                                    <!-- ReSharper disable once Xaml.DependencyPropertyResolveError -->
                                     <Setter Property="Label" Value="{I18N {x:Static l:LangKeys.ExportPakBtnLabel}}" />
                                 </DataTrigger>
                             </Style.Triggers>
