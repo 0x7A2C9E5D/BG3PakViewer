@@ -56,9 +56,9 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     {
         if (_disposed) return;
         // Acquire without waiting: a gate that is still held must not be disposed under the index that
-        // will release it. Taking it atomically also closes the check-then-dispose race.
+        // will release it. Taking it atomically also closes the check-then-dispose race, and the gate is
+        // disposed while it is already ours, so no release is needed.
         if (!_gate.Wait(0)) return;
-        _gate.Release();
         _gate.Dispose();
         _disposed = true;
     }
