@@ -10,10 +10,10 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     reusable strip buffer per row and writes its blocks.
 /// </summary>
 /// <remarks>
-///     The writer owns neither the output stream nor the unpacker it was created with: the caller
-///     supplies both and keeps them open for as long as this writer is used. The tile size it is given
-///     includes the border every tile carries; the border is trimmed here, so every consumer of a tile
-///     size uses the same convention.
+///     The writer owns neither the output stream nor the tiles it stitches: the caller supplies the
+///     stream and reads each tile through a callback, so the writer only turns a band of tile images into
+///     DDS bytes. The tile size it is given includes the border every tile carries; the border is trimmed
+///     here, so every consumer of a tile size uses the same convention.
 /// </remarks>
 internal sealed class VirtualTextureWriter : IAsyncDisposable
 {
@@ -21,7 +21,6 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     private readonly Size _grid;
     private readonly BC5Image _strip;
     private readonly int _tileBorder;
-    private readonly VirtualTextureUnpacker _unpacker;
     private readonly BinaryWriter _writer;
     private bool _disposed;
 
@@ -32,16 +31,13 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     /// <param name="grid">How many tiles each band holds: the number of columns and rows.</param>
     /// <param name="tile">The pixel size of one tile, including its border.</param>
     /// <param name="tileBorder">The border, in pixels, that every tile carries on each side.</param>
-    /// <param name="unpacker">The unpacker the tiles of a band are read through.</param>
     /// <param name="stream">The stream the DDS is written to; the caller keeps it opens.</param>
-    public VirtualTextureWriter(Size grid, Size tile, int tileBorder, VirtualTextureUnpacker unpacker,
-        Stream stream)
+    public VirtualTextureWriter(Size grid, Size tile, int tileBorder, Stream stream)
     {
         _grid = grid;
         _content = new Size(tile.Width - tileBorder * 2, tile.Height - tileBorder * 2);
         _strip = new BC5Image(grid.Width * _content.Width, _content.Height);
         _tileBorder = tileBorder;
-        _unpacker = unpacker;
         _writer = new BinaryWriter(stream, Encoding.UTF8, true);
     }
 
@@ -53,7 +49,6 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
-        await _unpacker.DisposeAsync().ConfigureAwait(false);
         await _writer.DisposeAsync().ConfigureAwait(false);
         _disposed = true;
     }
@@ -87,18 +82,21 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     /// <summary>
     ///     Writes one band of tiles, leaving the columns without a tile transparent.
     /// </summary>
-    /// <param name="tiles">The tiles of the band, in column order; a missing tile is written as empty.</param>
+    /// <param name="tileCount">How many tile columns the band holds.</param>
+    /// <param name="readTile">
+    ///     Reads the tile at the given column, or returns <see langword="null" /> when the column holds no
+    ///     tile. It is called lazily so a shared tile image is copied before the next one is read.
+    /// </param>
     /// <returns>A task that completes when the band has been written.</returns>
-    public async Task WriteRow(Memory<GTSFlatTileInfo?> tiles)
+    public async Task WriteRow(int tileCount, Func<int, Task<BC5Image?>> readTile)
     {
         // The strip is reused by every band, so a column without a tile is cleared instead of keeping the
         // pixels of the band above it.
         Array.Clear(_strip.Data);
-        for (var col = 0; col < tiles.Length; col++)
+        for (var col = 0; col < tileCount; col++)
         {
-            if (tiles.Span[col] is not { } cell) continue;
-            (await _unpacker.Decompress(cell).ConfigureAwait(false))
-                .CopyTileTo(_strip, _content, _tileBorder, col);
+            if (await readTile(col).ConfigureAwait(false) is not { } image) continue;
+            image.CopyTileTo(_strip, _content, _tileBorder, col);
         }
 
         _writer.Write(_strip.Data, 0, _strip.Data.Length);

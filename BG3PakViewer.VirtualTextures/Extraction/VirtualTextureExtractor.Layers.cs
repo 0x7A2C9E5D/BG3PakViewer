@@ -40,22 +40,57 @@ public sealed partial class VirtualTextureExtractor
         var decoder = new VirtualTextureChunkDecoder(tileSet.ParameterBlocks, tile, _compressor);
         await using var unpacker = new VirtualTextureUnpacker(tileSet.PageSize, decoder,
             async pageFileIndex => await OpenPageFileAsync(tileSet.PageFileInfos[pageFileIndex].FileName));
-        var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, unpacker, stream);
+        var writer = new VirtualTextureWriter(size, tile, tileSet.TileBorder, stream);
         await writer.WriteHeader().ConfigureAwait(false);
         // The DDS has a fixed size, so the buffer is grown once instead of doubling while the bands are
         // written.
         stream.Capacity = (int)(stream.Length + writer.RowByteCount * size.Height);
         var rowTiles = new GTSFlatTileInfo?[size.Width];
+        // One reader for every band: the callback reads the band buffer, which FillRows rewrites before
+        // each call, so the tiles stay lazy and a shared uniform image is copied before the next one.
+        var readTile = CreateRowReader(unpacker, rowTiles, ct);
         for (var row = 0; row < size.Height; row++)
         {
             ct.ThrowIfCancellationRequested();
             FillRows(mip, layer, min with { Y = min.Y + row }, rowTiles);
-            await writer.WriteRow(rowTiles).ConfigureAwait(false);
+            await writer.WriteRow(rowTiles.Length, readTile).ConfigureAwait(false);
             progress?.Report((row + 1, size.Height));
         }
 
         stream.Position = 0;
         return stream;
+    }
+
+    /// <summary>
+    ///     Creates the lazy reader the writer pulls one band's tiles through.
+    /// </summary>
+    /// <remarks>
+    ///     The unpacker is a parameter here instead of the caller's <c>await using</c> local, so the
+    ///     returned reader does not capture a disposable declared in the caller's scope.
+    /// </remarks>
+    /// <param name="unpacker">The unpacker the tiles are read through.</param>
+    /// <param name="rowTiles">The band buffer, rewritten by <c>FillRows</c> before every band.</param>
+    /// <param name="ct">Cancels the decompression.</param>
+    /// <returns>A reader that decompresses the tile at a column, or returns null for an empty column.</returns>
+    private static Func<int, Task<BC5Image?>> CreateRowReader(VirtualTextureUnpacker unpacker,
+        GTSFlatTileInfo?[] rowTiles, CancellationToken ct)
+    {
+        return column => DecodeTileAsync(unpacker, rowTiles[column], ct);
+    }
+
+    /// <summary>
+    ///     Decompresses one tile of a band, or returns <see langword="null" /> when the column holds no tile.
+    /// </summary>
+    /// <param name="unpacker">The unpacker the tile is read through.</param>
+    /// <param name="tile">The tile to decompress, or <see langword="null" /> for an empty column.</param>
+    /// <param name="ct">Cancels the decompression.</param>
+    /// <returns>The decompressed tile, or <see langword="null" /> for an empty column.</returns>
+    private static async Task<BC5Image?> DecodeTileAsync(VirtualTextureUnpacker unpacker, GTSFlatTileInfo? tile,
+        CancellationToken ct)
+    {
+        if (tile is not { } cell) return null;
+        ct.ThrowIfCancellationRequested();
+        return await unpacker.Decompress(cell).ConfigureAwait(false);
     }
 
     /// <summary>
