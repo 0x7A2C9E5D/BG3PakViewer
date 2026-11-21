@@ -84,6 +84,7 @@ internal sealed class VirtualTextureDialogState
     /// </summary>
     public enum SelectionPhase
     {
+        // ReSharper disable once UnusedMember.Global
         Unknown,
         Checking,
         HasData,

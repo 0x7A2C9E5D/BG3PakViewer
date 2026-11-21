@@ -41,6 +41,7 @@ internal sealed class MainWindowState
     /// </summary>
     public enum LoadPhase
     {
+        // ReSharper disable once UnusedMember.Global
         Empty,
         Loading,
         Loaded,
