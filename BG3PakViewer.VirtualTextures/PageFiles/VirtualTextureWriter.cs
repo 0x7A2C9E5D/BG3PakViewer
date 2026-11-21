@@ -52,12 +52,17 @@ internal sealed class VirtualTextureWriter : IAsyncDisposable
     ///     Releases the writer it wraps. The output stream was handed over with <c>leaveOpen</c>, so it
     ///     stays open for the caller.
     /// </summary>
-    /// <returns>A task that completes when the writer is released.</returns>
-    public async ValueTask DisposeAsync()
+    /// <remarks>
+    ///     <see cref="BinaryWriter" /> only exposes the synchronous <see cref="IDisposable.Dispose" />, and
+    ///     that is enough here: it does not own the stream and its disposal does no I/O.
+    /// </remarks>
+    /// <returns>A completed task.</returns>
+    public ValueTask DisposeAsync()
     {
-        if (_disposed) return;
-        await _writer.DisposeAsync().ConfigureAwait(false);
+        if (_disposed) return ValueTask.CompletedTask;
+        _writer.Dispose();
         _disposed = true;
+        return ValueTask.CompletedTask;
     }
 
     /// <summary>
