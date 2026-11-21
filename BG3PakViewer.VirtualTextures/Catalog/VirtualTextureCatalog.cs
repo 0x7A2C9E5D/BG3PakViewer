@@ -48,17 +48,19 @@ public sealed class VirtualTextureCatalog(IPackageService packageService) : IVir
     private bool _disposed;
 
     /// <summary>
-    ///     Releases the indexing gate without waiting for a running index. The loaded package is not
-    ///     owned by the catalog, so it is not released here.
+    ///     Releases the indexing gate when it is idle. An index still running keeps it and the gate is
+    ///     left to the garbage collector: it never allocates a wait handle, so nothing leaks and this
+    ///     never blocks the thread that is shutting the application down.
     /// </summary>
     public void Dispose()
     {
         if (_disposed) return;
+        // Acquire without waiting: a gate that is still held must not be disposed under the index that
+        // will release it. Taking it atomically also closes the check-then-dispose race.
+        if (!_gate.Wait(0)) return;
+        _gate.Release();
+        _gate.Dispose();
         _disposed = true;
-        // A running index releases the gate in its own finally: disposing the semaphore under it would
-        // make that release throw. The gate never allocates a wait handle, so leaving it to the garbage
-        // collector while it is in use is harmless, and this never blocks the shutting-down thread.
-        if (_gate.CurrentCount > 0) _gate.Dispose();
     }
 
     /// <summary>
