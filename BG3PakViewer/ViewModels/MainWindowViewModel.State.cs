@@ -1,5 +1,3 @@
-using BG3PakViewer.Shared.Models;
-
 namespace BG3PakViewer.ViewModels;
 
 /// <summary>
@@ -15,14 +13,5 @@ internal partial class MainWindowViewModel
         if ((change & MainWindowStateChange.Export) == 0) return;
         OnPropertyChanged(nameof(IsExporting));
         ExportCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
-    ///     Keeps the selection region in sync with the tree selection.
-    /// </summary>
-    /// <param name="value">The newly selected tree item.</param>
-    partial void OnSelectedItemChanged(PackageEntry? value)
-    {
-        _state.SetSelection(value is not null);
     }
 }

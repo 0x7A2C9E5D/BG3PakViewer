@@ -5,7 +5,6 @@ using BG3PakViewer.Locales;
 using BG3PakViewer.Messaging;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
@@ -23,15 +22,6 @@ namespace BG3PakViewer.ViewModels;
 /// </summary>
 internal partial class MainWindowViewModel
 {
-    /// <summary>
-    ///     The currently selected tree item, tracked on the view model so commands gated on the
-    ///     selection re-evaluate through its own change notification.
-    /// </summary>
-    [ObservableProperty]
-    // ReSharper disable once MemberCanBeMadeStatic.Local
-    // ReSharper disable once UnusedMember.Local
-    private partial PackageEntry? SelectedItem { get; set; }
-
     /// <summary>
     ///     Drop
     /// </summary>
@@ -69,7 +59,7 @@ internal partial class MainWindowViewModel
     [RelayCommand]
     private void SelectItem(object? item)
     {
-        SelectedItem = item as PackageEntry;
+        _state.SetSelection(item is PackageEntry);
     }
 
     /// <summary>

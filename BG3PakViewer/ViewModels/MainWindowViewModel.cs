@@ -93,21 +93,22 @@ internal partial class MainWindowViewModel : DisposableViewModel, IDropTarget, I
     /// <summary>
     ///     Package tree
     /// </summary>
-    // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty]
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public partial ObservableCollection<PackageEntry>? PackageTree { get; private set; }
 
     /// <summary>
     ///     Preview view model
     /// </summary>
     [ObservableProperty]
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public partial object? PreviewVm { get; private set; }
 
     /// <summary>
     ///     Is update available
     /// </summary>
-    // ReSharper disable once MemberCanBeMadeStatic.Global
     [ObservableProperty]
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public partial bool IsUpdateAvailable { get; private set; }
 
     /// <summary>
