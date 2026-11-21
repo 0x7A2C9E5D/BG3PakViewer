@@ -11,9 +11,9 @@ namespace BG3PakViewer.VirtualTextures.PageFiles;
 ///     the decoder the caller hands over, so this class only moves from a tile to the chunk data of a page
 ///     file.
 /// </remarks>
-/// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
-/// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
 /// <param name="decoder">The decoder the chunks are decompressed with; the caller owns it.</param>
+/// <param name="pageStreamProvider">Opens the page file at the given index, e.g. from inside a PAK.</param>
+/// <param name="pageSize">The aligned size of one page in the page files, in bytes.</param>
 internal sealed class VirtualTextureUnpacker(
     VirtualTextureChunkDecoder decoder,
     Func<int, Task<Stream>> pageStreamProvider,
