@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using BG3PakViewer.VirtualTextures.PageFiles;
 using BG3PakViewer.VirtualTextures.TileSets;

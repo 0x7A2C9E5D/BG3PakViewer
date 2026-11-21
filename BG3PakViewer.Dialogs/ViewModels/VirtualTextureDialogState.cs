@@ -84,7 +84,6 @@ internal sealed class VirtualTextureDialogState
     /// </summary>
     public enum SelectionPhase
     {
-        Unknown,
         Checking,
         HasData,
         NoData
