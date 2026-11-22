@@ -32,7 +32,7 @@ namespace BG3PakViewer;
 /// <summary>
 ///     Interaction logic for App.xaml
 /// </summary>
-public sealed partial class App : IDisposable
+public sealed partial class App : IAsyncDisposable
 {
     private bool _disposedValue;
     private bool _initialized;
@@ -40,11 +40,49 @@ public sealed partial class App : IDisposable
     private ServiceProvider? _services;
 
     /// <summary>
-    ///     Releases the log observer.
+    ///     Saves the settings, then releases the container and the log observer.
     /// </summary>
-    public void Dispose()
+    /// <remarks>
+    ///     The container owns async-only singletons (the virtual texture extractor, the package service
+    ///     and the main window view model), so it has to be released asynchronously. It is awaited from
+    ///     <see cref="OnMainWindowClosed" /> before the application shuts down.
+    /// </remarks>
+    /// <returns>A task that completes when the settings are saved and the resources are released.</returns>
+    public async ValueTask DisposeAsync()
     {
-        Dispose(true);
+        if (_disposedValue) return;
+        SaveSettings();
+        await ReleaseServicesAsync();
+        ReleaseLogObserver();
+        _disposedValue = true;
+    }
+
+    /// <summary>
+    ///     Saves the settings the application loaded.
+    /// </summary>
+    private void SaveSettings()
+    {
+        if (_initialized)
+            Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
+                .Save(Ioc.Default.GetRequiredService<IAppSettings>());
+    }
+
+    /// <summary>
+    ///     Releases the service container, which owns the async-only singletons.
+    /// </summary>
+    private async ValueTask ReleaseServicesAsync()
+    {
+        if (_services is null) return;
+        await _services.DisposeAsync();
+        _services = null;
+    }
+
+    /// <summary>
+    ///     Releases the observer that feeds the in-app log view.
+    /// </summary>
+    private void ReleaseLogObserver()
+    {
+        _logObserver?.Dispose();
     }
 
     /// <summary>
@@ -113,13 +151,35 @@ public sealed partial class App : IDisposable
     /// <summary>
     ///     Initialize main window
     /// </summary>
-    private static void InitializeMainWindow()
+    private void InitializeMainWindow()
     {
         var mainWindow = new MainWindow
         {
             DataContext = Ioc.Default.GetRequiredService<MainWindowViewModel>()
         };
+        // The window closes before the application does, so this is the one place the release can be
+        // awaited: OnExit is synchronous, and waiting there for work that needs the UI thread would
+        // deadlock. The application waits here and shuts down once everything is released.
+        mainWindow.Closed += OnMainWindowClosed;
         mainWindow.Show();
+    }
+
+    /// <summary>
+    ///     Releases the application once the main window has closed, then shuts the application down.
+    /// </summary>
+    /// <param name="sender">The closed window.</param>
+    /// <param name="e">The event data.</param>
+    // ReSharper disable once AsyncVoidEventHandlerMethod
+    private async void OnMainWindowClosed(object? sender, EventArgs e)
+    {
+        try
+        {
+            await DisposeAsync();
+        }
+        finally
+        {
+            Shutdown();
+        }
     }
 
     /// <summary>
@@ -134,7 +194,7 @@ public sealed partial class App : IDisposable
         InitializeSettingsManager();
         LogStartupInformation();
         InitializeMainWindow();
-        // Set last: a failure before this point leaves the instance uninitialized, so OnExit must
+        // Set last: a failure before this point leaves the instance uninitialized, so the release must
         // not save the settings it never loaded.
         _initialized = true;
     }
@@ -263,6 +323,10 @@ public sealed partial class App : IDisposable
             return;
         }
 
+        // The main window releases the application after it has closed, because stopping the virtual
+        // texture index is asynchronous: the application waits for that instead of ending with the
+        // last window (see OnMainWindowClosed).
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
         StartApplication();
     }
 
@@ -322,41 +386,14 @@ public sealed partial class App : IDisposable
     }
 
     /// <summary>
-    ///     Saves the settings and releases the resources the application owns.
+    ///     Flushes the log; the application itself is released by <see cref="OnMainWindowClosed" />
+    ///     before the shutdown.
     /// </summary>
     protected override void OnExit(ExitEventArgs e)
     {
-        if (_initialized)
-        {
-            Ioc.Default.GetRequiredService<ISettingsPersistenceService>()
-                .Save(Ioc.Default.GetRequiredService<IAppSettings>());
-            Dispose();
-        }
-
         // The file sink keeps its handle open until it is closed: flush it here so nothing is lost
         // and the file is released before the process ends.
         Log.CloseAndFlush();
         base.OnExit(e);
-    }
-
-    /// <summary>
-    ///     Releases the container and the log observer; the main window view model is released by the
-    ///     window itself, which can await the virtual texture index.
-    /// </summary>
-    /// <param name="disposing">Whether managed resources are released.</param>
-    private void Dispose(bool disposing)
-    {
-        if (_disposedValue) return;
-        if (disposing)
-        {
-            // The container owns async-only singletons (the virtual texture extractor and the package
-            // service), so it has to be released asynchronously. The window already released its view
-            // model, so those disposals complete synchronously and this last wait does not block.
-            _services?.DisposeAsync().AsTask().GetAwaiter().GetResult();
-            _services = null;
-            _logObserver?.Dispose();
-        }
-
-        _disposedValue = true;
     }
 }
