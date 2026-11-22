@@ -263,10 +263,6 @@ public sealed partial class App : IDisposable
             return;
         }
 
-        // The main window releases its view model after it has closed, because stopping the virtual
-        // texture index is asynchronous, so the shutdown waits for that instead of ending with the
-        // last window (see MainWindow.OnClosed).
-        ShutdownMode = ShutdownMode.OnExplicitShutdown;
         StartApplication();
     }
 
