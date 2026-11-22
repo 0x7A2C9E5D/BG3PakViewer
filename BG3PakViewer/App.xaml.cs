@@ -353,7 +353,11 @@ public sealed partial class App : IDisposable
         if (_disposedValue) return;
         if (disposing)
         {
-            _services?.Dispose();
+            // The container owns async-only singletons (the virtual texture extractor and the package
+            // service), so it has to be released asynchronously. The window already released its view
+            // model, so those disposals complete synchronously and this last wait does not block.
+            _services?.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            _services = null;
             _logObserver?.Dispose();
         }
 
