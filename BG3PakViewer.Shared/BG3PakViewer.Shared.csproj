@@ -24,10 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BG3PakViewer.Messaging\BG3PakViewer.Messaging.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <Reference Include="LSLib">
             <HintPath>D:\Tools\Packed\LSLib.dll</HintPath>
         </Reference>

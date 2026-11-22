@@ -1,4 +1,4 @@
-﻿namespace BG3PakViewer.Messaging;
+﻿namespace BG3PakViewer.Shared.Messaging;
 
 /// <summary>
 ///     MessageTokens

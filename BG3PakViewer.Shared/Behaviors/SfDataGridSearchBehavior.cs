@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Messaging;
 using BG3PakViewer.Shared.Extensions;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;

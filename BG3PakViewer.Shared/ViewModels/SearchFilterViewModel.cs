@@ -1,4 +1,4 @@
-using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Messaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;

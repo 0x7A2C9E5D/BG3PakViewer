@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Messaging;
 using CommunityToolkit.Mvvm.Messaging;
 using HelixToolkit.Wpf.SharpDX;
 using Microsoft.Xaml.Behaviors;

@@ -2,7 +2,7 @@
 using System.IO;
 using BG3PakViewer.Contracts;
 using BG3PakViewer.Locales;
-using BG3PakViewer.Messaging;
+using BG3PakViewer.Shared.Messaging;
 using BG3PakViewer.Shared.Extensions;
 using BG3PakViewer.Shared.ViewModels;
 using CommunityToolkit.Mvvm.Input;
