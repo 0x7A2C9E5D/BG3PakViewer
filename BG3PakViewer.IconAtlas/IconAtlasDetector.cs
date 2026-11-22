@@ -3,9 +3,8 @@ using BG3PakViewer.Utils;
 using OpenCvSharp;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Image = SixLabors.ImageSharp.Image;
 
-namespace BG3PakViewer.Icons;
+namespace BG3PakViewer.IconAtlas;
 
 /// <summary>
 ///     The grid of an icon atlas: the spacing between two neighboring grid lines on each axis.

@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Platforms>x64</Platforms>
-        <RootNamespace>BG3PakViewer.Icons</RootNamespace>
+        <RootNamespace>BG3PakViewer.IconAtlas</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

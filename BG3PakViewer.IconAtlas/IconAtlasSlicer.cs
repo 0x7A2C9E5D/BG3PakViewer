@@ -1,9 +1,8 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Image = SixLabors.ImageSharp.Image;
 
-namespace BG3PakViewer.Icons;
+namespace BG3PakViewer.IconAtlas;
 
 /// <summary>
 ///     An icon cut out of an atlas, together with the rectangle of the atlas it was cut from.
