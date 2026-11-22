@@ -52,8 +52,8 @@ public sealed partial class App : IAsyncDisposable
     {
         if (_disposedValue) return;
         SaveSettings();
-        await ReleaseServicesAsync();
-        ReleaseLogObserver();
+        await DisposeServicesAsync();
+        DisposeLogObserver();
         _disposedValue = true;
     }
 
@@ -70,17 +70,16 @@ public sealed partial class App : IAsyncDisposable
     /// <summary>
     ///     Releases the service container, which owns the async-only singletons.
     /// </summary>
-    private async ValueTask ReleaseServicesAsync()
+    private async ValueTask DisposeServicesAsync()
     {
         if (_services is null) return;
         await _services.DisposeAsync();
-        _services = null;
     }
 
     /// <summary>
     ///     Releases the observer that feeds the in-app log view.
     /// </summary>
-    private void ReleaseLogObserver()
+    private void DisposeLogObserver()
     {
         _logObserver?.Dispose();
     }
