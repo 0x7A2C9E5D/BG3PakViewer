@@ -4,6 +4,12 @@ A Windows desktop tool for browsing, previewing, and exporting assets from Baldu
 
 Built with WPF and .NET 10, it opens a package, shows its full file tree, previews files by type, and exports a single file, a folder, or a specific resource kind (icon atlases, virtual textures, localized text, and more) to disk.
 
+## Download
+
+Prebuilt releases are available on Nexus Mods: [BG3 Pak Viewer](https://www.nexusmods.com/baldursgate3/mods/22713).
+
+The rest of this document describes building the application from source.
+
 ## Features
 
 - Open and browse `.pak` packages, including drag-and-drop and recent files
