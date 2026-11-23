@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Controls.ViewModels.States;
 using BG3PakViewer.Shared.ViewModels;
 using BG3PakViewer.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;

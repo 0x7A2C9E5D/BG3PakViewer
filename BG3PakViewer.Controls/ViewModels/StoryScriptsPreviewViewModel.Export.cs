@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Controls.ViewModels.States;
 using CommunityToolkit.Mvvm.Input;
 using LSLib.LS.Story;
 using Serilog;
