@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using BG3PakViewer.Dialogs.ViewModels.States;
 
 namespace BG3PakViewer.Dialogs.ViewModels;
 

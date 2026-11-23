@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using BG3PakViewer.Contracts;
+using BG3PakViewer.Dialogs.ViewModels.States;
 using BG3PakViewer.Locales;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
@@ -46,9 +47,9 @@ public partial class VirtualTextureDialogViewModel
     private bool CanExportSelected()
     {
         return !IsIndexing && !IsExporting &&
-               _state.Export != VirtualTextureDialogState.ExportPhase.PickingFolder &&
+               _state.Export != VirtualTextureExportState.PickingFolder &&
                SelectedCount > 0 &&
-               _state.Selection == VirtualTextureDialogState.SelectionPhase.HasData;
+               _state.Selection == VirtualTextureSelectionState.HasData;
     }
 
     /// <summary>
@@ -58,8 +59,8 @@ public partial class VirtualTextureDialogViewModel
     private bool CanExportSearchResults()
     {
         if (IsIndexing || IsExporting ||
-            _state.Export == VirtualTextureDialogState.ExportPhase.PickingFolder ||
-            _state.Search != VirtualTextureDialogState.SearchPhase.Filtered ||
+            _state.Export == VirtualTextureExportState.PickingFolder ||
+            _state.Search != VirtualTextureSearchState.Filtered ||
             Textures.Count == 0) return false;
         var filter = ItemFilter;
         return filter is not null && Textures.Any(texture => filter(texture));
@@ -71,7 +72,7 @@ public partial class VirtualTextureDialogViewModel
     private bool CanExportAll()
     {
         return !IsIndexing && !IsExporting &&
-               _state.Export != VirtualTextureDialogState.ExportPhase.PickingFolder &&
+               _state.Export != VirtualTextureExportState.PickingFolder &&
                Textures.Count > 0;
     }
 

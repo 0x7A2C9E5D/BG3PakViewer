@@ -1,3 +1,5 @@
+using BG3PakViewer.ViewModels.States;
+
 namespace BG3PakViewer.ViewModels;
 
 /// <summary>

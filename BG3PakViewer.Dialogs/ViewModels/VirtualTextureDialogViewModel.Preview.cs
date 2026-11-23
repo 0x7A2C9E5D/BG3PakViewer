@@ -1,3 +1,4 @@
+using BG3PakViewer.Dialogs.ViewModels.States;
 using BG3PakViewer.Loader;
 using BG3PakViewer.Locales;
 using BG3PakViewer.VirtualTextures.Extraction;
@@ -67,7 +68,7 @@ public partial class VirtualTextureDialogViewModel
 
         var layer = SelectedLayerIndex;
         var (cts, run) = await BeginPreviewAsync();
-        var phase = VirtualTextureDialogState.PreviewPhase.Empty;
+        var phase = VirtualTexturePreviewState.Empty;
 
         try
         {
@@ -84,7 +85,7 @@ public partial class VirtualTextureDialogViewModel
             {
                 Preview = null;
                 PreviewStatusKey = LangKeys.TitleNoData;
-                phase = VirtualTextureDialogState.PreviewPhase.Empty;
+                phase = VirtualTexturePreviewState.Empty;
                 return;
             }
 
@@ -103,8 +104,8 @@ public partial class VirtualTextureDialogViewModel
 
             Preview = image;
             phase = image is null
-                ? VirtualTextureDialogState.PreviewPhase.Failed
-                : VirtualTextureDialogState.PreviewPhase.Loaded;
+                ? VirtualTexturePreviewState.Failed
+                : VirtualTexturePreviewState.Loaded;
             PreviewStatusKey = image is null
                 ? LangKeys.TitleDecodeFailed
                 : $"{image.Width} × {image.Height}";
@@ -117,7 +118,7 @@ public partial class VirtualTextureDialogViewModel
         {
             Preview = null;
             PreviewStatusKey = LangKeys.TitlePreviewFailed;
-            phase = VirtualTextureDialogState.PreviewPhase.Failed;
+            phase = VirtualTexturePreviewState.Failed;
             Log.Error(ex, "Failed to preview virtual texture: {Name}", row.Name);
         }
         finally

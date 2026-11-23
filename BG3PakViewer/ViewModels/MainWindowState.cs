@@ -1,22 +1,6 @@
+using BG3PakViewer.ViewModels.States;
+
 namespace BG3PakViewer.ViewModels;
-
-/// <summary>
-///     The region of the main window whose state changed. Only the regions with a bound property or
-///     command notify; the load and preview phases are read directly by the view model.
-/// </summary>
-[Flags]
-internal enum MainWindowStateChange
-{
-    /// <summary>
-    ///     The tree selection changed.
-    /// </summary>
-    Selection = 1 << 0,
-
-    /// <summary>
-    ///     The export region changed.
-    /// </summary>
-    Export = 1 << 1
-}
 
 /// <summary>
 ///     The lifecycle states of the main window: the loaded package, the preview pane, the tree
@@ -24,40 +8,6 @@ internal enum MainWindowStateChange
 /// </summary>
 internal sealed class MainWindowState
 {
-    /// <summary>
-    ///     The states of the export region. Picking the target is part of the run so a second export
-    ///     command cannot open a second dialog while the first one is up.
-    /// </summary>
-    public enum ExportPhase
-    {
-        Idle,
-        PickingTarget,
-        FileExporting,
-        FolderExporting
-    }
-
-    /// <summary>
-    ///     The states of the package load region.
-    /// </summary>
-    public enum LoadPhase
-    {
-        // ReSharper disable once UnusedMember.Global
-        Empty,
-        Loading,
-        Loaded,
-        Failed
-    }
-
-    /// <summary>
-    ///     The states of the preview region.
-    /// </summary>
-    public enum PreviewPhase
-    {
-        Empty,
-        Building,
-        Showing
-    }
-
     private readonly Action<MainWindowStateChange> _onChanged;
 
     /// <summary>
@@ -69,27 +19,27 @@ internal sealed class MainWindowState
         _onChanged = onChanged;
     }
 
-    public LoadPhase Load { get; private set; }
+    private MainWindowLoadState Load { get; set; }
 
-    public PreviewPhase Preview { get; private set; }
+    private MainWindowPreviewState Preview { get; set; }
 
-    public bool HasSelection { get; private set; }
+    private bool HasSelection { get; set; }
 
-    public ExportPhase Export { get; private set; }
+    private MainWindowExportState Export { get; set; }
 
-    public bool IsLoading => Load == LoadPhase.Loading;
+    public bool IsLoading => Load == MainWindowLoadState.Loading;
 
-    public bool IsBuildingPreview => Preview == PreviewPhase.Building;
+    public bool IsBuildingPreview => Preview == MainWindowPreviewState.Building;
 
     /// <summary>
     ///     Whether a file or folder export is writing files.
     /// </summary>
-    public bool IsExporting => Export is ExportPhase.FileExporting or ExportPhase.FolderExporting;
+    public bool IsExporting => Export is MainWindowExportState.FileExporting or MainWindowExportState.FolderExporting;
 
     /// <summary>
     ///     Whether the running export can be canceled; only a folder export has a cancellation source.
     /// </summary>
-    public bool CanCancelExport => Export == ExportPhase.FolderExporting;
+    public bool CanCancelExport => Export == MainWindowExportState.FolderExporting;
 
     /// <summary>
     ///     Whether the export command may run: start one with a selection, or cancel a running one.
@@ -97,8 +47,8 @@ internal sealed class MainWindowState
     /// </summary>
     public bool CanRunExportCommand => Export switch
     {
-        ExportPhase.Idle => HasSelection,
-        ExportPhase.FileExporting or ExportPhase.FolderExporting => true,
+        MainWindowExportState.Idle => HasSelection,
+        MainWindowExportState.FileExporting or MainWindowExportState.FolderExporting => true,
         _ => false
     };
 
@@ -107,9 +57,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void BeginLoad()
     {
-        if (Load == LoadPhase.Loading)
+        if (Load == MainWindowLoadState.Loading)
             throw new InvalidOperationException("Cannot start loading while a load is running.");
-        Load = LoadPhase.Loading;
+        Load = MainWindowLoadState.Loading;
     }
 
     /// <summary>
@@ -118,9 +68,9 @@ internal sealed class MainWindowState
     /// <param name="success">Whether the last load published a tree.</param>
     public void EndLoad(bool success)
     {
-        if (Load != LoadPhase.Loading)
+        if (Load != MainWindowLoadState.Loading)
             throw new InvalidOperationException($"Cannot end loading from {Load}.");
-        Load = success ? LoadPhase.Loaded : LoadPhase.Failed;
+        Load = success ? MainWindowLoadState.Loaded : MainWindowLoadState.Failed;
     }
 
     /// <summary>
@@ -128,9 +78,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void BeginPreview()
     {
-        if (Preview == PreviewPhase.Building)
+        if (Preview == MainWindowPreviewState.Building)
             throw new InvalidOperationException("Cannot start building a preview while one is building.");
-        Preview = PreviewPhase.Building;
+        Preview = MainWindowPreviewState.Building;
     }
 
     /// <summary>
@@ -139,9 +89,9 @@ internal sealed class MainWindowState
     /// <param name="shown">Whether a preview view model is published.</param>
     public void EndPreview(bool shown)
     {
-        if (Preview != PreviewPhase.Building)
+        if (Preview != MainWindowPreviewState.Building)
             throw new InvalidOperationException($"Cannot end a preview build from {Preview}.");
-        Preview = shown ? PreviewPhase.Showing : PreviewPhase.Empty;
+        Preview = shown ? MainWindowPreviewState.Showing : MainWindowPreviewState.Empty;
     }
 
     /// <summary>
@@ -150,8 +100,8 @@ internal sealed class MainWindowState
     /// </summary>
     public void ClearPreview()
     {
-        if (Preview == PreviewPhase.Building) return;
-        Preview = PreviewPhase.Empty;
+        if (Preview == MainWindowPreviewState.Building) return;
+        Preview = MainWindowPreviewState.Empty;
     }
 
     /// <summary>
@@ -170,9 +120,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void BeginTargetPick()
     {
-        if (Export != ExportPhase.Idle)
+        if (Export != MainWindowExportState.Idle)
             throw new InvalidOperationException($"Cannot pick an export target from {Export}.");
-        Export = ExportPhase.PickingTarget;
+        Export = MainWindowExportState.PickingTarget;
         _onChanged(MainWindowStateChange.Export);
     }
 
@@ -181,9 +131,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void CancelTargetPick()
     {
-        if (Export != ExportPhase.PickingTarget)
+        if (Export != MainWindowExportState.PickingTarget)
             throw new InvalidOperationException($"Cannot cancel a target pick from {Export}.");
-        Export = ExportPhase.Idle;
+        Export = MainWindowExportState.Idle;
         _onChanged(MainWindowStateChange.Export);
     }
 
@@ -192,9 +142,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void BeginFileExport()
     {
-        if (Export != ExportPhase.PickingTarget)
+        if (Export != MainWindowExportState.PickingTarget)
             throw new InvalidOperationException($"Cannot start a file export from {Export}.");
-        Export = ExportPhase.FileExporting;
+        Export = MainWindowExportState.FileExporting;
         _onChanged(MainWindowStateChange.Export);
     }
 
@@ -203,9 +153,9 @@ internal sealed class MainWindowState
     /// </summary>
     public void BeginFolderExport()
     {
-        if (Export != ExportPhase.PickingTarget)
+        if (Export != MainWindowExportState.PickingTarget)
             throw new InvalidOperationException($"Cannot start a folder export from {Export}.");
-        Export = ExportPhase.FolderExporting;
+        Export = MainWindowExportState.FolderExporting;
         _onChanged(MainWindowStateChange.Export);
     }
 
@@ -216,7 +166,7 @@ internal sealed class MainWindowState
     {
         if (!IsExporting)
             throw new InvalidOperationException($"Cannot end an export from {Export}.");
-        Export = ExportPhase.Idle;
+        Export = MainWindowExportState.Idle;
         _onChanged(MainWindowStateChange.Export);
     }
 }
