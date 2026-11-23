@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System.Windows;
+﻿using System.Windows;
 using iNKORE.UI.WPF.Modern;
 
 namespace BG3PakViewer.Views;
